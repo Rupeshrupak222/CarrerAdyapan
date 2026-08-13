@@ -32,15 +32,13 @@ const AdyapanOfferDocument = ({ data = {}, printMode = false }) => {
     hrManagerName = 'HR MANAGER',
   } = data;
 
-  // Header SVG Emblem Logo matching Adyapan branding
+  // Header Logo matching Adyapan branding
   const AdyapanLogo = () => (
-    <div 
-      className="w-16 h-16 rounded-full flex flex-col items-center justify-center p-1 border-2 border-amber-300 shrink-0 shadow-sm"
-      style={{ background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%)' }}
-    >
-      <span className="font-extrabold text-xl leading-none tracking-tighter text-slate-950">ady.</span>
-      <span className="text-[7px] font-bold tracking-[0.2em] uppercase mt-0.5 text-slate-900 opacity-90">ADYAPAN</span>
-    </div>
+    <img
+      src="/adyapan-logo.jpeg"
+      alt="Adyapan Edutech Logo"
+      className="w-16 h-16 rounded-xl object-contain shrink-0 shadow-sm border border-amber-300 bg-white"
+    />
   );
 
   // Background Watermark emblem matching exact PDF watermark styling
