@@ -13,10 +13,10 @@ const StatCard = ({ title, value, icon, color = 'amber', change }) => {
       className={`rounded-3xl shadow-sm border p-5 transition-all duration-200 relative overflow-hidden group ${
         theme === 'dark'
           ? 'bg-slate-900 border-slate-800 text-white'
-          : 'bg-white border-orange-200/80 text-slate-900'
+          : 'bg-white border-amber-200/80 text-slate-900'
       }`}
     >
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500 opacity-80 group-hover:opacity-100 transition-opacity" />
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 opacity-80 group-hover:opacity-100 transition-opacity" />
 
       <div className="flex items-center justify-between pt-1">
         <div>
@@ -30,13 +30,13 @@ const StatCard = ({ title, value, icon, color = 'amber', change }) => {
             <p className={`text-xs mt-1.5 font-semibold ${
               change.includes('+') || change.includes('↑') || change.includes('faster') || change.includes('screening') || change.includes('Match') || change.includes('Accepted')
                 ? 'text-emerald-600 dark:text-emerald-400'
-                : 'text-orange-600 dark:text-orange-400'
+                : 'text-amber-600 dark:text-amber-400'
             }`}>
               {change}
             </p>
           )}
         </div>
-        <div className="w-12 h-12 bg-orange-500/15 text-orange-600 dark:text-orange-300 border border-orange-500/30 rounded-2xl flex items-center justify-center text-2xl shadow-inner shrink-0">
+        <div className="w-12 h-12 bg-amber-500/15 text-amber-600 dark:text-amber-300 border border-amber-500/30 rounded-2xl flex items-center justify-center text-2xl shadow-inner shrink-0">
           {icon}
         </div>
       </div>

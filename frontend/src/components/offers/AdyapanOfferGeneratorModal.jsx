@@ -330,13 +330,13 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
         {/* Header (Hidden when printing) */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 print:hidden">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center text-xl font-bold">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl font-bold">
               📄
             </div>
             <div>
               <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 Adyapan Official 4-Page Offer Letter Generator
-                <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300">
+                <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-orange-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
                   Bulk & Single Ready
                 </span>
               </h2>
@@ -349,7 +349,7 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
           <div className="flex items-center gap-3">
             <button
               onClick={handleSaveOnly}
-              className="px-4 py-2 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-xl shadow-sm transition-all flex items-center gap-2"
+              className="px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all flex items-center gap-2"
               title="Save offer letter edits into system"
             >
               <span>💾</span> Save PDF ({selectedCandidates.length})
@@ -387,7 +387,7 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
                 </h3>
                 <button
                   onClick={handleSelectAllCandidates}
-                  className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline"
+                  className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline"
                 >
                   {selectedCandidateIds.length === candidatesList.length ? 'Deselect All' : 'Select All'}
                 </button>
@@ -400,7 +400,7 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
                   return (
                     <label
                       key={cand.id}
-                      className={`flex items-center justify-between p-2 rounded-xl text-xs cursor-pointer transition-colors ${isSelected ? 'bg-orange-50 dark:bg-orange-900/20 text-slate-900 dark:text-white font-medium' : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400'
+                      className={`flex items-center justify-between p-2 rounded-xl text-xs cursor-pointer transition-colors ${isSelected ? 'bg-white dark:bg-amber-900/20 text-slate-900 dark:text-white font-medium' : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400'
                         }`}
                     >
                       <div className="flex items-center gap-2.5">
@@ -408,7 +408,7 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => handleToggleSelectCandidate(cand.id)}
-                          className="w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500"
+                          className="w-4 h-4 text-amber-600 rounded border-slate-300 focus:ring-amber-500"
                         />
                         <div>
                           <div className="font-semibold">{cand.firstName} {cand.lastName}</div>
@@ -423,7 +423,7 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
               {/* Add Custom Candidate Input */}
               <div className="pt-2 border-t border-slate-100 dark:border-slate-700">
                 <details className="text-xs group">
-                  <summary className="font-semibold text-slate-700 dark:text-slate-300 cursor-pointer flex items-center gap-1 text-orange-600 dark:text-orange-400">
+                  <summary className="font-semibold text-slate-700 dark:text-slate-300 cursor-pointer flex items-center gap-1 text-amber-600 dark:text-amber-400">
                     ➕ Add Custom Candidate Names (Bulk Paste)
                   </summary>
                   <div className="mt-2 space-y-2">
@@ -432,11 +432,11 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
                       value={customCandidatesInput}
                       onChange={(e) => setCustomCandidatesInput(e.target.value)}
                       placeholder="Format: Candidate Name, Email, Job Title (One per line)&#10;Example: Aman Sharma, aman@gmail.com, BDA Intern"
-                      className="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 outline-none"
+                      className="w-full p-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500 outline-none"
                     />
                     <button
                       onClick={handleAddCustomCandidates}
-                      className="w-full py-1.5 bg-orange-500 text-slate-950 font-bold rounded-lg text-xs hover:bg-orange-600 transition-colors"
+                      className="w-full py-1.5 bg-amber-500 text-slate-950 font-bold rounded-lg text-xs hover:bg-amber-600 transition-colors"
                     >
                       Add Candidates
                     </button>
@@ -454,8 +454,8 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
               <div className="grid grid-cols-2 gap-3 text-xs">
                 {/* Active Candidate Name & Email Editable Inputs */}
                 {activeCandidate && (
-                  <div className="col-span-2 p-3 bg-orange-50/70 dark:bg-orange-950/30 rounded-xl border border-orange-300 dark:border-orange-900/60 space-y-2.5">
-                    <div className="text-[11px] font-bold text-orange-900 dark:text-orange-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <div className="col-span-2 p-3 bg-white/70 dark:bg-amber-950/30 rounded-xl border border-amber-300 dark:border-amber-900/60 space-y-2.5">
+                    <div className="text-[11px] font-bold text-amber-900 dark:text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
                       <span>👤</span> Candidate Name & Details (Edit Live)
                     </div>
 
@@ -466,7 +466,7 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
                         value={`${activeCandidate.firstName || ''} ${activeCandidate.lastName || ''}`}
                         onChange={(e) => handleCandidateNameChange(activeCandidate.id, e.target.value)}
                         placeholder="e.g. Dinesh Kumar Sharma"
-                        className="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-orange-500 outline-none"
+                        className="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-bold focus:ring-2 focus:ring-amber-500 outline-none"
                       />
                     </div>
 
@@ -477,7 +477,7 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
                         value={activeCandidate.email || ''}
                         onChange={(e) => handleCandidateEmailChange(activeCandidate.id, e.target.value)}
                         placeholder="candidate@example.com"
-                        className="w-full p-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-orange-500 outline-none"
+                        className="w-full p-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-amber-500 outline-none"
                       />
                     </div>
                   </div>
@@ -642,7 +642,7 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
                     key={cand.id}
                     onClick={() => setActivePreviewIndex(idx)}
                     className={`px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all ${activePreviewIndex === idx
-                        ? 'bg-orange-500 text-slate-950 shadow-sm'
+                        ? 'bg-amber-500 text-slate-950 shadow-sm'
                         : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100'
                       }`}
                   >

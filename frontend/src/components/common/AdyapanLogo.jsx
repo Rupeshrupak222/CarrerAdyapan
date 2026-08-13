@@ -20,7 +20,7 @@ const AdyapanLogo = ({ size = 'normal', variant = 'dark' }) => {
       {/* Premium Emblem Badge */}
       <div className={`relative flex items-center justify-center rounded-2xl shadow-lg transition-transform hover:scale-105 shrink-0 ${
         iconSizes[size] || iconSizes.normal
-      } bg-gradient-to-tr from-orange-600 via-orange-500 to-orange-500 border border-orange-400/40 shadow-orange-500/30`}>
+      } bg-gradient-to-tr from-amber-600 via-amber-500 to-amber-500 border border-amber-400/40 shadow-amber-500/30`}>
         <svg
           className="w-5/6 h-5/6"
           viewBox="0 0 24 24"
@@ -59,12 +59,12 @@ const AdyapanLogo = ({ size = 'normal', variant = 'dark' }) => {
           } ${isDark ? 'text-white' : 'text-slate-900'}`}>
             ADYAPAN
           </span>
-          <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-orange-500 text-slate-950 rounded-md shadow-sm">
+          <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-amber-500 text-slate-950 rounded-md shadow-sm">
             EDUTECH
           </span>
         </div>
         <span className={`text-[9px] font-bold tracking-widest uppercase mt-0.5 ${
-          isDark ? 'text-orange-400/90' : 'text-orange-600'
+          isDark ? 'text-amber-400/90' : 'text-amber-600'
         }`}>
           AI Hiring Platform
         </span>

@@ -132,19 +132,19 @@ const AdminProfile = () => {
         {/* Navigation Header */}
         <div className="flex flex-wrap items-center justify-between gap-2">
           <BackButton label="Back to Dashboard" to="/dashboard" />
-          <span className="px-2.5 sm:px-3.5 py-1 text-[10px] sm:text-xs font-extrabold rounded-full bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-500/30">
+          <span className="px-2.5 sm:px-3.5 py-1 text-[10px] sm:text-xs font-extrabold rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
             🔒 Super HR Admin Profile & Security
           </span>
         </div>
 
         {/* Profile Hero Header Card */}
-        <div className={`p-4 sm:p-6 md:p-8 rounded-3xl border shadow-sm space-y-4 sm:space-y-6 relative overflow-hidden ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-900'
+        <div className={`p-4 sm:p-6 md:p-8 rounded-3xl border shadow-sm space-y-4 sm:space-y-6 relative overflow-hidden ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
           }`}>
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500" />
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-500" />
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 pt-1">
             <div className="flex flex-row items-center gap-3 sm:gap-5">
-              <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-orange-600 via-orange-500 to-amber-500 text-white font-black text-2xl sm:text-3xl flex items-center justify-center shrink-0 shadow-lg shadow-orange-500/25">
+              <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-amber-600 via-amber-500 to-amber-500 text-white font-black text-2xl sm:text-3xl flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/25">
                 {profileData.name.charAt(0)}
               </div>
 
@@ -157,7 +157,7 @@ const AdminProfile = () => {
                     ● Active & Synced
                   </span>
                 </div>
-                <p className="text-xs font-bold text-orange-600 dark:text-orange-400">
+                <p className="text-xs font-bold text-amber-600 dark:text-amber-400">
                   {profileData.designation} • {profileData.department}
                 </p>
                 <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
@@ -172,7 +172,7 @@ const AdminProfile = () => {
                   setEditForm({ ...profileData });
                   setShowEditModal(true);
                 }}
-                className="px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-xl shadow-md transition-all flex items-center gap-1.5"
+                className="px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-md transition-all flex items-center gap-1.5"
               >
                 <span>✏️</span> Edit Profile
               </button>
@@ -254,11 +254,11 @@ const AdminProfile = () => {
               </h2>
 
               <div className="space-y-2.5 text-xs font-semibold">
-                <div className="p-3.5 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-800 dark:text-orange-300 flex items-center justify-between">
+                <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 flex items-center justify-between">
                   <span>🔒 Account Security</span>
                   <button
                     onClick={() => setShowPasswordModal(true)}
-                    className="font-bold text-xs text-orange-600 dark:text-orange-400 hover:underline"
+                    className="font-bold text-xs text-amber-600 dark:text-amber-400 hover:underline"
                   >
                     Change Password →
                   </button>
@@ -384,7 +384,7 @@ const AdminProfile = () => {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex-1 py-2.5 sm:py-3 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-xl shadow-md transition-all disabled:opacity-50"
+                  className="flex-1 py-2.5 sm:py-3 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-md transition-all disabled:opacity-50"
                 >
                   {saving ? 'Saving to DB...' : 'Save Profile to Database'}
                 </button>
@@ -457,7 +457,7 @@ const AdminProfile = () => {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex-1 py-2.5 sm:py-3 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-xl shadow-md transition-all disabled:opacity-50"
+                  className="flex-1 py-2.5 sm:py-3 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-md transition-all disabled:opacity-50"
                 >
                   {saving ? 'Updating Password...' : 'Update & Hash Password in DB'}
                 </button>

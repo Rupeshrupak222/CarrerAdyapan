@@ -62,7 +62,7 @@ const Register = () => {
             <button
               onClick={toggleTheme}
               className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 border shadow-sm ${theme === 'dark'
-                  ? 'bg-slate-900 text-orange-300 border-slate-700 hover:bg-slate-800'
+                  ? 'bg-slate-900 text-amber-300 border-slate-700 hover:bg-slate-800'
                   : 'bg-slate-100 text-slate-900 border-slate-300 hover:bg-slate-200'
                 }`}
               title="Click to Switch Light / Dark Mode"
@@ -74,7 +74,7 @@ const Register = () => {
             {/* Already Have Account Button */}
             <Link
               to="/login"
-              className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-black text-white bg-orange-500 hover:bg-orange-600 rounded-xl transition-all shadow-md shadow-orange-400/20 uppercase tracking-wider flex items-center gap-1.5 shrink-0"
+              className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-black text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition-all shadow-md shadow-amber-400/20 uppercase tracking-wider flex items-center gap-1.5 shrink-0"
             >
               <span>🔐</span>
               <span className="hidden sm:inline">Sign In to Dashboard →</span>
@@ -116,7 +116,7 @@ const Register = () => {
                 required
                 placeholder="e.g. Aniket Sharma"
                 className={`w-full px-4 py-3 rounded-xl text-xs font-bold focus:outline-none border transition-all ${theme === 'dark'
-                    ? 'bg-slate-950 border-slate-700 text-white focus:border-orange-400'
+                    ? 'bg-slate-950 border-slate-700 text-white focus:border-amber-400'
                     : 'bg-white border-slate-300 text-slate-900 focus:border-blue-600 shadow-sm'
                   }`}
               />
@@ -134,7 +134,7 @@ const Register = () => {
                 required
                 placeholder="hr@adyapan.com"
                 className={`w-full px-4 py-3 rounded-xl text-xs font-bold focus:outline-none border transition-all ${theme === 'dark'
-                    ? 'bg-slate-950 border-slate-700 text-white focus:border-orange-400'
+                    ? 'bg-slate-950 border-slate-700 text-white focus:border-amber-400'
                     : 'bg-white border-slate-300 text-slate-900 focus:border-blue-600 shadow-sm'
                   }`}
               />
@@ -152,7 +152,7 @@ const Register = () => {
                 required
                 placeholder="Adyapan Edutech Pvt. Ltd."
                 className={`w-full px-4 py-3 rounded-xl text-xs font-bold focus:outline-none border transition-all ${theme === 'dark'
-                    ? 'bg-slate-950 border-slate-700 text-white focus:border-orange-400'
+                    ? 'bg-slate-950 border-slate-700 text-white focus:border-amber-400'
                     : 'bg-white border-slate-300 text-slate-900 focus:border-blue-600 shadow-sm'
                   }`}
               />
@@ -170,7 +170,7 @@ const Register = () => {
                 required
                 placeholder="••••••••"
                 className={`w-full px-4 py-3 rounded-xl text-xs font-bold focus:outline-none border transition-all ${theme === 'dark'
-                    ? 'bg-slate-950 border-slate-700 text-white focus:border-orange-400'
+                    ? 'bg-slate-950 border-slate-700 text-white focus:border-amber-400'
                     : 'bg-white border-slate-300 text-slate-900 focus:border-blue-600 shadow-sm'
                   }`}
               />
@@ -179,7 +179,7 @@ const Register = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 text-xs font-black text-slate-950 bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-300 hover:to-orange-400 rounded-xl transition-all shadow-xl shadow-orange-400/20 uppercase tracking-wider text-center"
+              className="w-full py-4 text-xs font-black text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl transition-all shadow-xl shadow-amber-400/20 uppercase tracking-wider text-center"
             >
               {loading ? 'Creating Account...' : 'Create HR Admin Account →'}
             </button>
@@ -187,7 +187,7 @@ const Register = () => {
 
           <div className="pt-2 border-t border-slate-200 dark:border-slate-800 text-center text-xs font-bold space-y-2">
             <p className="text-slate-700 dark:text-slate-300">
-              Already have an account? <Link to="/login" className="text-blue-600 dark:text-orange-400 hover:underline font-black">Sign In to Dashboard</Link>
+              Already have an account? <Link to="/login" className="text-blue-600 dark:text-amber-400 hover:underline font-black">Sign In to Dashboard</Link>
             </p>
           </div>
         </div>

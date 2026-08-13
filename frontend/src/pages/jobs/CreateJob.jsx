@@ -130,8 +130,8 @@ const CreateJob = () => {
   };
 
   const inputClass = theme === 'dark'
-    ? 'w-full px-4 py-2.5 rounded-xl text-xs font-normal bg-slate-950 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-orange-400'
-    : 'w-full px-4 py-2.5 rounded-xl text-xs font-normal bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20';
+    ? 'w-full px-4 py-2.5 rounded-xl text-xs font-normal bg-slate-950 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400'
+    : 'w-full px-4 py-2.5 rounded-xl text-xs font-normal bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20';
 
   const labelClass = theme === 'dark'
     ? 'text-xs font-semibold text-slate-200 block mb-1'
@@ -144,10 +144,10 @@ const CreateJob = () => {
           <BackButton label="Back to Job Directory" to="/jobs" />
           
           <div className={`p-6 rounded-3xl border transition-all space-y-1 relative overflow-hidden shadow-sm ${
-            theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-900'
+            theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
           }`}>
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500" />
-            <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-500/30">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
+            <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
               ⚡ Adyapan Job Creation Studio
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
@@ -161,10 +161,10 @@ const CreateJob = () => {
 
         {/* 1-Click Quick Templates Bar */}
         <div className={`p-5 rounded-3xl shadow-sm border space-y-3 ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-900'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
         }`}>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-orange-600 dark:text-orange-400">⚡ 1-Click EdTech Role Templates</span>
+            <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">⚡ 1-Click EdTech Role Templates</span>
             <span className="text-[11px] text-slate-500 font-medium">Click to auto-fill form</span>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -175,8 +175,8 @@ const CreateJob = () => {
                 onClick={() => applyTemplate(tpl)}
                 className={`px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all text-left shadow-sm ${
                   theme === 'dark'
-                    ? 'bg-slate-950 text-orange-300 border-slate-800 hover:border-orange-400'
-                    : 'bg-orange-50 text-orange-900 border-orange-200 hover:bg-orange-100'
+                    ? 'bg-slate-950 text-amber-300 border-slate-800 hover:border-amber-400'
+                    : 'bg-white text-amber-900 border-amber-200 hover:bg-orange-100'
                 }`}
               >
                 {tpl.name}
@@ -186,7 +186,7 @@ const CreateJob = () => {
         </div>
 
         <form onSubmit={handleSubmit} className={`rounded-3xl border p-6 md:p-8 space-y-5 shadow-sm ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-900'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
         }`}>
           <div>
             <label className={labelClass}>Job Title *</label>
@@ -315,7 +315,7 @@ const CreateJob = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-xl transition-all shadow-md shadow-orange-400/20 text-center"
+              className="w-full py-3.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition-all shadow-md shadow-amber-400/20 text-center"
             >
               {loading ? 'Publishing Job Opening...' : 'Publish Job & Generate Public Shareable Link →'}
             </button>

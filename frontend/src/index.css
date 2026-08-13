@@ -58,8 +58,8 @@
   }
 
   /* ── Adyapan orange: dark navy text ── */
-  html:not(.dark) .bg-orange-400,
-  html:not(.dark) .bg-orange-400 *,
+  html:not(.dark) .bg-amber-400,
+  html:not(.dark) .bg-amber-400 *,
   html:not(.dark) .btn-amber,
   html:not(.dark) .btn-amber * {
     color: #1a1a2e !important;

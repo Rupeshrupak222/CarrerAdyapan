@@ -35,7 +35,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       <aside
         className={`fixed top-0 left-0 bottom-0 z-50 w-64 flex flex-col justify-between transition-all duration-300 shadow-xl border-r lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
         style={theme === 'dark'
-          ? { background: '#14162a', borderColor: 'rgba(249,115,22,0.2)', color: '#f1f5f9' }
+          ? { background: '#14162a', borderColor: 'rgba(245, 158, 11,0.2)', color: '#f1f5f9' }
           : { background: '#ffffff', borderColor: '#e8e0d8', color: '#1a1a2e' }
         }
       >
@@ -43,7 +43,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           <div
             className="h-16 px-5 flex items-center justify-between border-b"
             style={theme === 'dark'
-              ? { borderColor: 'rgba(249,115,22,0.2)', background: '#0d0d1a' }
+              ? { borderColor: 'rgba(245, 158, 11,0.2)', background: '#0d0d1a' }
               : { borderColor: '#f0e8df', background: '#fdfaf6' }
             }
           >
@@ -70,9 +70,9 @@ const Sidebar = ({ isOpen, onClose }) => {
                   className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all"
                   style={active
                     ? {
-                      background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+                      background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
                       color: '#ffffff',
-                      boxShadow: '0 4px 14px rgba(249,115,22,0.4)',
+                      boxShadow: '0 4px 14px rgba(245, 158, 11,0.4)',
                       fontWeight: 700,
                     }
                     : theme === 'dark'
@@ -81,8 +81,8 @@ const Sidebar = ({ isOpen, onClose }) => {
                   }
                   onMouseEnter={(e) => {
                     if (!active) {
-                      e.currentTarget.style.background = theme === 'dark' ? 'rgba(249,115,22,0.12)' : 'rgba(249,115,22,0.08)';
-                      e.currentTarget.style.color = '#f97316';
+                      e.currentTarget.style.background = theme === 'dark' ? 'rgba(245, 158, 11,0.12)' : 'rgba(245, 158, 11,0.08)';
+                      e.currentTarget.style.color = '#f59e0b';
                     }
                   }}
                   onMouseLeave={(e) => {
@@ -101,7 +101,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                       className="px-2 py-0.5 text-[10px] font-semibold rounded-full"
                       style={active
                         ? { background: 'rgba(255,255,255,0.25)', color: '#ffffff' }
-                        : { background: 'rgba(249,115,22,0.15)', color: '#f97316', border: '1px solid rgba(249,115,22,0.3)' }
+                        : { background: 'rgba(245, 158, 11,0.15)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11,0.3)' }
                       }
                     >
                       {item.badge}
@@ -116,23 +116,23 @@ const Sidebar = ({ isOpen, onClose }) => {
         <div
           className="p-4 border-t"
           style={theme === 'dark'
-            ? { borderColor: 'rgba(249,115,22,0.15)', background: 'rgba(13,13,26,0.6)' }
+            ? { borderColor: 'rgba(245, 158, 11,0.15)', background: 'rgba(13,13,26,0.6)' }
             : { borderColor: '#f0e8df', background: '#fdfaf6' }
           }
         >
           <Link
             to="/profile"
             onClick={onClose}
-            className="flex items-center gap-3 p-2 rounded-xl mb-2 hover:bg-orange-500/10 transition-colors border border-transparent hover:border-orange-500/20 group"
+            className="flex items-center gap-3 p-2 rounded-xl mb-2 hover:bg-amber-500/10 transition-colors border border-transparent hover:border-amber-500/20 group"
           >
             <div
               className="w-8 h-8 rounded-lg font-bold flex items-center justify-center text-xs shadow-sm shrink-0"
-              style={{ background: 'linear-gradient(135deg, #ea580c, #f97316)', color: '#ffffff' }}
+              style={{ background: 'linear-gradient(135deg, #d97706, #f59e0b)', color: '#ffffff' }}
             >
               {user?.name?.charAt(0) || 'A'}
             </div>
             <div className="overflow-hidden flex-1">
-              <p className="text-xs font-semibold truncate group-hover:text-orange-500 transition-colors" style={{ color: theme === 'dark' ? '#f1f5f9' : '#1a1a2e' }}>
+              <p className="text-xs font-semibold truncate group-hover:text-amber-500 transition-colors" style={{ color: theme === 'dark' ? '#f1f5f9' : '#1a1a2e' }}>
                 {user?.name || 'Recruiter Lead'}
               </p>
               <p className="text-[10px] font-medium truncate" style={{ color: theme === 'dark' ? '#64748b' : '#6b7280' }}>
@@ -145,7 +145,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onClick={logout}
             className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium rounded-xl transition-colors border"
             style={theme === 'dark'
-              ? { color: '#94a3b8', borderColor: 'rgba(249,115,22,0.2)' }
+              ? { color: '#94a3b8', borderColor: 'rgba(245, 158, 11,0.2)' }
               : { color: '#6b7280', borderColor: '#e8e0d8' }
             }
             onMouseEnter={(e) => {
@@ -156,7 +156,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'transparent';
               e.currentTarget.style.color = theme === 'dark' ? '#94a3b8' : '#6b7280';
-              e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(249,115,22,0.2)' : '#e8e0d8';
+              e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(245, 158, 11,0.2)' : '#e8e0d8';
             }}
           >
             <span>🚪</span> Sign Out

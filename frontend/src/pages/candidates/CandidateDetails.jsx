@@ -494,20 +494,20 @@ const CandidateDetails = () => {
         </div>
 
         {/* Candidate Header */}
-        <div className={`rounded-3xl border p-6 md:p-8 shadow-sm space-y-6 relative overflow-hidden ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-900'
+        <div className={`rounded-3xl border p-6 md:p-8 shadow-sm space-y-6 relative overflow-hidden ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
           }`}>
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-600 via-orange-500 to-orange-500" />
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-500" />
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pt-1">
             <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-orange-500 text-white font-bold text-xl flex items-center justify-center shrink-0 shadow-md">
+              <div className="w-14 h-14 rounded-2xl bg-amber-500 text-white font-bold text-xl flex items-center justify-center shrink-0 shadow-md">
                 {firstName.charAt(0)}
                 {lastName.charAt(0)}
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-3">
                   <h1 className="text-2xl font-bold">{firstName} {lastName}</h1>
-                  <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-500/30">
+                  <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
                     ● {isStudent ? 'Student / Fresher' : `Working (${currentCompanyTenure})`}
                   </span>
                 </div>
@@ -535,7 +535,7 @@ const CandidateDetails = () => {
               <button
                 onClick={handleRunAIScreening}
                 disabled={aiScoring}
-                className="px-4 py-2 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-xl shadow-md transition-all flex items-center gap-1.5"
+                className="px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-md transition-all flex items-center gap-1.5"
               >
                 <span>🤖</span> {aiScoring ? 'Auditing Resume...' : 'Auto AI ATS Audit'}
               </button>
@@ -580,7 +580,7 @@ const CandidateDetails = () => {
 
         {/* 6-Dimensional ATS Audit Architecture Breakdown */}
         <div className={`p-6 rounded-3xl border shadow-sm space-y-4 ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-900'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
         }`}>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
             <div className="flex items-center gap-2.5">
@@ -588,7 +588,7 @@ const CandidateDetails = () => {
               <div>
                 <h3 className="text-base font-bold tracking-tight">Deterministic ATS Scoring Architecture Breakdown</h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 font-normal">
-                  Evaluated against role criteria: <strong className="text-orange-600 dark:text-orange-400 font-semibold">{currentPosition}</strong>
+                  Evaluated against role criteria: <strong className="text-amber-600 dark:text-amber-400 font-semibold">{currentPosition}</strong>
                 </p>
               </div>
             </div>
@@ -640,10 +640,10 @@ const CandidateDetails = () => {
 
             return (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs font-semibold">
-                <div className="p-3.5 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-slate-900 dark:text-white space-y-1">
+                <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-slate-900 dark:text-white space-y-1">
                   <div className="flex items-center justify-between">
                     <span>🎯 Keyword Matching</span>
-                    <span className="text-orange-700 dark:text-orange-300 font-bold">{kwPts} / 20 Pts</span>
+                    <span className="text-amber-700 dark:text-amber-300 font-bold">{kwPts} / 20 Pts</span>
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 font-normal">Role keywords density & title match</p>
                 </div>
@@ -696,7 +696,7 @@ const CandidateDetails = () => {
             <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-normal text-slate-700 dark:text-slate-300 space-y-1">
               <div className="font-bold text-slate-900 dark:text-white flex items-center justify-between">
                 <span className="flex items-center gap-1.5">🤖 Personalized AI Audit Explanation:</span>
-                <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-orange-500/15 text-orange-800 dark:text-orange-300 border border-orange-500/30">
+                <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30">
                   Recommendation: {candidate.atsBreakdown?.finalRecommendation || candidate.atsBreakdown?.evaluationDetails?.finalRecommendation || (aiScore >= 85 ? 'Strong Match' : (aiScore >= 70 ? 'Good Match' : (aiScore >= 50 ? 'Moderate Match' : 'Weak Match')))}
                 </span>
               </div>
@@ -717,13 +717,13 @@ const CandidateDetails = () => {
             const verdict = evalDetails.hiringVerdict || candidate.hiringVerdict || (aiScore >= 85 ? 'HIGH RETURN / LOW RISK HIRE 🌟' : (aiScore >= 70 ? 'MODERATE RETURN / MANAGEABLE RISK 👍' : 'CONDITIONAL HIRE / REQUIRES UPSKILLING ⚠️'));
 
             return (
-              <div className={`p-5 rounded-3xl border shadow-md space-y-4 transition-all ${theme === 'dark' ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-orange-300/80 text-slate-900'
+              <div className={`p-5 rounded-3xl border shadow-md space-y-4 transition-all ${theme === 'dark' ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-amber-300/80 text-slate-900'
                 }`}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
                   <div className="flex items-center gap-2.5">
                     <span className="text-2xl">📊</span>
                     <div>
-                      <h4 className="text-base font-bold tracking-tight text-orange-600 dark:text-orange-400">
+                      <h4 className="text-base font-bold tracking-tight text-amber-600 dark:text-amber-400">
                         Executive Hiring ROI Analysis (Profit vs Potential Loss Risk)
                       </h4>
                       <p className="text-xs text-slate-600 dark:text-slate-300 font-normal">
@@ -731,7 +731,7 @@ const CandidateDetails = () => {
                       </p>
                     </div>
                   </div>
-                  <span className="px-3.5 py-1 text-xs font-black rounded-full bg-orange-500/20 text-orange-800 dark:text-orange-300 border border-orange-500/40 shrink-0 self-start sm:self-auto">
+                  <span className="px-3.5 py-1 text-xs font-black rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/40 shrink-0 self-start sm:self-auto">
                     {verdict}
                   </span>
                 </div>
@@ -999,14 +999,14 @@ const CandidateDetails = () => {
               </div>
             </div>
 
-            <div className={`p-4 rounded-xl border space-y-2 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-orange-50/50 border-orange-200'
+            <div className={`p-4 rounded-xl border space-y-2 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-white border-amber-200'
               }`}>
-              <span className="text-xs font-bold text-orange-700 dark:text-orange-400 uppercase tracking-wider block">
+              <span className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider block">
                 ⚠️ Skills Gaps / To Probe in Interview:
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {(candidate.aiBreakdown?.missingSkills || ['Institutional B2B Partnerships', 'Enterprise Contract Closing']).map((sk) => (
-                  <span key={sk} className="px-2.5 py-1 text-xs font-semibold bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300 rounded-lg border border-orange-200 dark:border-orange-900">
+                  <span key={sk} className="px-2.5 py-1 text-xs font-semibold bg-orange-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 rounded-lg border border-amber-200 dark:border-amber-900">
                     ! {sk}
                   </span>
                 ))}
@@ -1039,18 +1039,18 @@ const CandidateDetails = () => {
             </div>
 
             {/* ⚠️ Why Not Hire / Potential Risks */}
-            <div className={`p-4 rounded-xl border space-y-2 border-l-4 border-l-orange-500 ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+            <div className={`p-4 rounded-xl border space-y-2 border-l-4 border-l-amber-500 ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
               }`}>
-              <h4 className="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider flex items-center gap-1.5">
+              <h4 className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
                 <span>⚠️ Why Not Hire / Potential Risks (To Probe in Interview)</span>
               </h4>
               <ul className="space-y-1.5 text-xs text-slate-700 dark:text-slate-300 font-medium">
                 <li className="flex items-start gap-1.5">
-                  <span className="text-orange-500 font-bold shrink-0">!</span>
+                  <span className="text-amber-500 font-bold shrink-0">!</span>
                   <span><strong>CTC Premium Expectation:</strong> Candidate expected CTC ({expectedCtc}) represents a salary hike over current CTC ({currentCtc}). Evaluate budget fit.</span>
                 </li>
                 <li className="flex items-start gap-1.5">
-                  <span className="text-orange-500 font-bold shrink-0">!</span>
+                  <span className="text-amber-500 font-bold shrink-0">!</span>
                   <span><strong>Skill Gap Area:</strong> Limited exposure to enterprise B2B institutional partnerships; primary strength lies in B2C student sales.</span>
                 </li>
               </ul>

@@ -190,8 +190,8 @@ const ApplyJob = () => {
   };
 
   const inputClass = theme === 'dark'
-    ? 'w-full px-4 py-3 rounded-2xl text-xs font-bold bg-slate-950 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-500/20'
-    : 'w-full px-4 py-3 rounded-2xl text-xs font-bold bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all';
+    ? 'w-full px-4 py-3 rounded-2xl text-xs font-bold bg-slate-950 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20'
+    : 'w-full px-4 py-3 rounded-2xl text-xs font-bold bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all';
 
   const labelClass = theme === 'dark'
     ? 'text-xs font-extrabold text-slate-100 block mb-1.5'
@@ -199,14 +199,14 @@ const ApplyJob = () => {
 
   const sectionClass = theme === 'dark'
     ? 'space-y-4 p-6 rounded-3xl border bg-slate-950/80 border-slate-800'
-    : 'space-y-4 p-6 rounded-3xl border bg-orange-50/40 border-orange-200/80 shadow-sm';
+    : 'space-y-4 p-6 rounded-3xl border bg-white border-amber-200/80 shadow-sm';
 
   return (
-    <div className={`min-h-screen font-sans antialiased py-4 sm:py-10 px-3.5 sm:px-6 transition-colors ${theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-gradient-to-br from-orange-50/40 via-slate-50 to-orange-50/30 text-slate-900'
+    <div className={`min-h-screen font-sans antialiased py-4 sm:py-10 px-3.5 sm:px-6 transition-colors ${theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-gradient-to-br from-slate-50 via-white to-amber-50/20 text-slate-900'
       }`}>
       <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
         {/* Navigation Bar */}
-        <div className={`flex items-center justify-between border-b pb-3 sm:pb-4 gap-2 ${theme === 'dark' ? 'border-slate-800' : 'border-orange-200/80'
+        <div className={`flex items-center justify-between border-b pb-3 sm:pb-4 gap-2 ${theme === 'dark' ? 'border-slate-800' : 'border-amber-200/80'
           }`}>
           <Link to="/careers" className="shrink-0">
             <AdyapanLogo variant={theme === 'dark' ? 'dark' : 'light'} size="small" />
@@ -216,7 +216,7 @@ const ApplyJob = () => {
             <button
               onClick={toggleTheme}
               className={`px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 border shadow-sm ${theme === 'dark'
-                ? 'bg-slate-900 text-orange-300 border-slate-800 hover:bg-slate-800'
+                ? 'bg-slate-900 text-amber-300 border-slate-800 hover:bg-slate-800'
                 : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-100'
                 }`}
             >
@@ -225,7 +225,7 @@ const ApplyJob = () => {
             </button>
             <Link
               to={`/careers/${slug}`}
-              className="px-2.5 sm:px-3.5 py-1.5 text-xs font-extrabold text-orange-600 dark:text-orange-400 hover:underline shrink-0 rounded-xl border border-orange-500/30 bg-orange-500/10"
+              className="px-2.5 sm:px-3.5 py-1.5 text-xs font-extrabold text-amber-600 dark:text-amber-400 hover:underline shrink-0 rounded-xl border border-amber-500/30 bg-amber-500/10"
             >
               ← <span className="hidden sm:inline">Job Specifications</span><span className="sm:hidden">Role</span>
             </Link>
@@ -233,12 +233,12 @@ const ApplyJob = () => {
         </div>
 
         {/* Main Application Card */}
-        <div className={`p-4 sm:p-8 rounded-3xl space-y-6 sm:space-y-8 shadow-2xl border relative overflow-hidden ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-orange-200/80'
+        <div className={`p-4 sm:p-8 rounded-3xl space-y-6 sm:space-y-8 shadow-2xl border relative overflow-hidden ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-amber-200/80'
           }`}>
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500" />
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
 
           <div className="pt-1">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-500/30 rounded-full text-[11px] font-extrabold uppercase">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 rounded-full text-[11px] font-extrabold uppercase">
               ⚡ OFFICIAL ADYAPAN DIRECT APPLICATION PORTAL
             </div>
             <h1 className="text-2xl md:text-3xl font-black mt-3 text-slate-900 dark:text-white leading-tight">
@@ -253,7 +253,7 @@ const ApplyJob = () => {
 
             {/* Step 1: Candidate Current Status */}
             <div className={sectionClass}>
-              <h2 className="text-xs font-extrabold text-orange-600 dark:text-orange-400 uppercase tracking-wider flex items-center gap-2">
+              <h2 className="text-xs font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider flex items-center gap-2">
                 <span>📌 1. What is your current employment status?</span>
               </h2>
 
@@ -262,10 +262,10 @@ const ApplyJob = () => {
                   type="button"
                   onClick={() => setFormData({ ...formData, employmentStatus: 'EMPLOYED' })}
                   className={`p-3.5 rounded-2xl border text-xs font-extrabold text-center transition-all ${formData.employmentStatus === 'EMPLOYED'
-                    ? 'bg-orange-500 text-slate-950 border-orange-400 shadow-md shadow-orange-500/20 font-black'
+                    ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20 font-black'
                     : theme === 'dark'
-                      ? 'bg-slate-950 text-slate-200 border-slate-800 hover:border-orange-400/50'
-                      : 'bg-white text-slate-800 border-slate-200 hover:border-orange-400 shadow-sm'
+                      ? 'bg-slate-950 text-slate-200 border-slate-800 hover:border-amber-400/50'
+                      : 'bg-white text-slate-800 border-slate-200 hover:border-amber-400 shadow-sm'
                     }`}
                 >
                   💼 Working Professional
@@ -274,10 +274,10 @@ const ApplyJob = () => {
                   type="button"
                   onClick={() => setFormData({ ...formData, employmentStatus: 'STUDENT' })}
                   className={`p-3.5 rounded-2xl border text-xs font-extrabold text-center transition-all ${formData.employmentStatus === 'STUDENT'
-                    ? 'bg-orange-500 text-slate-950 border-orange-400 shadow-md shadow-orange-500/20 font-black'
+                    ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20 font-black'
                     : theme === 'dark'
-                      ? 'bg-slate-950 text-slate-200 border-slate-800 hover:border-orange-400/50'
-                      : 'bg-white text-slate-800 border-slate-200 hover:border-orange-400 shadow-sm'
+                      ? 'bg-slate-950 text-slate-200 border-slate-800 hover:border-amber-400/50'
+                      : 'bg-white text-slate-800 border-slate-200 hover:border-amber-400 shadow-sm'
                     }`}
                 >
                   🎓 Currently Student / Fresher
@@ -286,10 +286,10 @@ const ApplyJob = () => {
                   type="button"
                   onClick={() => setFormData({ ...formData, employmentStatus: 'LOOKING_FOR_JOB' })}
                   className={`p-3.5 rounded-2xl border text-xs font-extrabold text-center transition-all ${formData.employmentStatus === 'LOOKING_FOR_JOB'
-                    ? 'bg-orange-500 text-slate-950 border-orange-400 shadow-md shadow-orange-500/20 font-black'
+                    ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20 font-black'
                     : theme === 'dark'
-                      ? 'bg-slate-950 text-slate-200 border-slate-800 hover:border-orange-400/50'
-                      : 'bg-white text-slate-800 border-slate-200 hover:border-orange-400 shadow-sm'
+                      ? 'bg-slate-950 text-slate-200 border-slate-800 hover:border-amber-400/50'
+                      : 'bg-white text-slate-800 border-slate-200 hover:border-amber-400 shadow-sm'
                     }`}
                 >
                   🔍 Actively Job Hunting
@@ -298,10 +298,10 @@ const ApplyJob = () => {
                   type="button"
                   onClick={() => setFormData({ ...formData, employmentStatus: 'FREELANCER' })}
                   className={`p-3.5 rounded-2xl border text-xs font-extrabold text-center transition-all ${formData.employmentStatus === 'FREELANCER'
-                    ? 'bg-orange-500 text-slate-950 border-orange-400 shadow-md shadow-orange-500/20 font-black'
+                    ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20 font-black'
                     : theme === 'dark'
-                      ? 'bg-slate-950 text-slate-200 border-slate-800 hover:border-orange-400/50'
-                      : 'bg-white text-slate-800 border-slate-200 hover:border-orange-400 shadow-sm'
+                      ? 'bg-slate-950 text-slate-200 border-slate-800 hover:border-amber-400/50'
+                      : 'bg-white text-slate-800 border-slate-200 hover:border-amber-400 shadow-sm'
                     }`}
                 >
                   ⚡ Freelancer
@@ -311,7 +311,7 @@ const ApplyJob = () => {
 
             {/* Step 2: Personal Contact Information */}
             <div className="space-y-4">
-              <h2 className="text-xs font-extrabold text-orange-600 dark:text-orange-400 uppercase tracking-wider">👤 2. Personal Contact Information</h2>
+              <h2 className="text-xs font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider">👤 2. Personal Contact Information</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className={labelClass}>First Name *</label>
@@ -489,7 +489,7 @@ const ApplyJob = () => {
 
             {/* Conditional Step 4: Education & College Details */}
             <div className={sectionClass}>
-              <h2 className="text-xs font-extrabold text-orange-600 dark:text-orange-400 uppercase tracking-wider">🎓 4. Educational Qualifications & College</h2>
+              <h2 className="text-xs font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider">🎓 4. Educational Qualifications & College</h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -555,7 +555,7 @@ const ApplyJob = () => {
 
             {/* Step 5: Skills Tag Selector */}
             <div className="space-y-4">
-              <h2 className="text-xs font-extrabold text-orange-600 dark:text-orange-400 uppercase tracking-wider">🛠️ 5. Key Skills & Domain Expertise</h2>
+              <h2 className="text-xs font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider">🛠️ 5. Key Skills & Domain Expertise</h2>
 
               <div className="flex flex-wrap gap-2">
                 {SUGGESTED_SKILLS.map((skill) => {
@@ -566,7 +566,7 @@ const ApplyJob = () => {
                       type="button"
                       onClick={() => toggleSkill(skill)}
                       className={`px-3.5 py-1.5 text-xs font-extrabold rounded-xl transition-all ${selected
-                        ? 'bg-orange-500 text-slate-950 font-black shadow-md shadow-orange-500/20'
+                        ? 'bg-amber-500 text-slate-950 font-black shadow-md shadow-amber-500/20'
                         : theme === 'dark'
                           ? 'bg-slate-950 text-slate-200 border border-slate-800 hover:bg-slate-800'
                           : 'bg-white text-slate-800 border border-slate-200 hover:bg-slate-100 shadow-sm'
@@ -591,7 +591,7 @@ const ApplyJob = () => {
                 <button
                   type="button"
                   onClick={addCustomSkill}
-                  className="px-5 py-3 text-xs font-extrabold text-white bg-orange-500 hover:bg-orange-600 rounded-2xl shadow-md shrink-0"
+                  className="px-5 py-3 text-xs font-extrabold text-white bg-amber-500 hover:bg-amber-600 rounded-2xl shadow-md shrink-0"
                 >
                   + Add Skill
                 </button>
@@ -604,10 +604,10 @@ const ApplyJob = () => {
                   {formData.skills.map((s) => (
                     <span
                       key={s}
-                      className="px-3 py-1 text-xs font-bold bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-500/30 rounded-xl flex items-center gap-1.5"
+                      className="px-3 py-1 text-xs font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 rounded-xl flex items-center gap-1.5"
                     >
                       <span>{s}</span>
-                      <button type="button" onClick={() => removeSkill(s)} className="text-orange-600 hover:text-red-500 font-bold">
+                      <button type="button" onClick={() => removeSkill(s)} className="text-amber-600 hover:text-red-500 font-bold">
                         ✕
                       </button>
                     </span>
@@ -632,11 +632,11 @@ const ApplyJob = () => {
 
             {/* Step 7: Resume Upload Dropzone */}
             <div className="space-y-3">
-              <h2 className="text-xs font-extrabold text-orange-600 dark:text-orange-400 uppercase tracking-wider">📄 7. Upload Resume PDF/DOCX *</h2>
+              <h2 className="text-xs font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider">📄 7. Upload Resume PDF/DOCX *</h2>
 
               <div className={`border-2 border-dashed rounded-3xl p-6 text-center transition-all relative ${theme === 'dark'
-                ? 'border-slate-800 hover:border-orange-400 bg-slate-950/80'
-                : 'border-orange-200/80 hover:border-orange-400 bg-orange-50/40 shadow-sm'
+                ? 'border-slate-800 hover:border-amber-400 bg-slate-950/80'
+                : 'border-amber-200/80 hover:border-amber-400 bg-white shadow-sm'
                 }`}>
                 <input
                   type="file"
@@ -689,7 +689,7 @@ const ApplyJob = () => {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full py-4 text-xs font-black text-slate-950 bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500 hover:from-orange-400 hover:to-orange-400 rounded-2xl transition-all shadow-xl shadow-orange-500/25 uppercase tracking-wider text-center"
+              className="w-full py-4 text-xs font-black text-slate-950 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-400 rounded-2xl transition-all shadow-xl shadow-amber-500/25 uppercase tracking-wider text-center"
             >
               {submitting ? 'Submitting & Running Real AI Resume Screening...' : 'Submit Application & Run AI Resume Screening →'}
             </button>

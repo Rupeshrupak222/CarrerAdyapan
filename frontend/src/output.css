@@ -928,7 +928,7 @@ video {
   background-color: rgb(254 243 199 / var(--tw-bg-opacity, 1));
 }
 
-.bg-orange-50 {
+.bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 251 235 / var(--tw-bg-opacity, 1));
 }
@@ -1179,7 +1179,7 @@ video {
   font-weight: 600;
 }
 
-.text-orange-600 {
+.text-amber-600 {
   --tw-text-opacity: 1;
   color: rgb(217 119 6 / var(--tw-text-opacity, 1));
 }

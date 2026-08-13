@@ -164,12 +164,12 @@ const Candidates = () => {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header Bar */}
-        <div className={`p-6 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden shadow-sm ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-900'
+        <div className={`p-6 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden shadow-sm ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
           }`}>
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-600 via-orange-500 to-orange-500" />
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-500" />
 
           <div className="pt-1 space-y-1">
-            <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-500/30">
+            <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
               👥 Adyapan Candidate Management
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
@@ -193,7 +193,7 @@ const Candidates = () => {
 
             <button
               onClick={() => setShowAddModal(true)}
-              className="px-4 py-2.5 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-xl shadow-sm transition-all"
+              className="px-4 py-2.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all"
             >
               + Add Candidate Manually
             </button>
@@ -201,11 +201,11 @@ const Candidates = () => {
         </div>
 
         {/* Search & Filter Bar */}
-        <div className={`p-4 rounded-3xl border shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-orange-200/80'
+        <div className={`p-4 rounded-3xl border shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-amber-200/80'
           }`}>
           {/* Search Input */}
           <div className="relative w-full md:w-80">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-orange-500 font-bold text-xs">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-amber-500 font-bold text-xs">
               🔍
             </span>
             <input
@@ -214,8 +214,8 @@ const Candidates = () => {
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search candidate name, skills, role..."
               className={`w-full pl-9 pr-4 py-2 text-xs font-normal border rounded-xl focus:outline-none ${theme === 'dark'
-                  ? 'bg-slate-950 border-slate-700 text-white placeholder-slate-500 focus:border-orange-400'
-                  : 'bg-orange-50/40 border-orange-200/80 text-slate-800 placeholder-slate-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20'
+                  ? 'bg-slate-950 border-slate-700 text-white placeholder-slate-500 focus:border-amber-400'
+                  : 'bg-white border-amber-200/80 text-slate-800 placeholder-slate-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20'
                 }`}
             />
           </div>
@@ -227,9 +227,9 @@ const Candidates = () => {
                 key={st}
                 onClick={() => setStatusFilter(st)}
                 className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition-all border ${statusFilter === st
-                    ? 'bg-orange-400 text-slate-950 border-orange-300 shadow-sm'
+                    ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-sm'
                     : theme === 'dark'
-                      ? 'bg-slate-950 text-slate-300 border-slate-800 hover:border-orange-400/50'
+                      ? 'bg-slate-950 text-slate-300 border-slate-800 hover:border-amber-400/50'
                       : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
                   }`}
               >
@@ -242,7 +242,7 @@ const Candidates = () => {
         {/* Candidate Cards Grid */}
         <div className="space-y-4">
           {filteredCandidates.length === 0 ? (
-            <div className={`p-8 text-center rounded-3xl border text-xs font-normal ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-slate-400' : 'bg-white border-orange-200/80 text-slate-500'
+            <div className={`p-8 text-center rounded-3xl border text-xs font-normal ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-slate-400' : 'bg-white border-amber-200/80 text-slate-500'
               }`}>
               No candidates found matching filter criteria. Click "+ Add Candidate Manually" to add one.
             </div>
@@ -263,16 +263,16 @@ const Candidates = () => {
               return (
                 <div
                   key={cand.id}
-                  className={`p-6 rounded-3xl border shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative overflow-hidden group ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-900'
+                  className={`p-6 rounded-3xl border shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative overflow-hidden group ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
                     }`}
                 >
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500 opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 opacity-80 group-hover:opacity-100 transition-opacity" />
 
                   {/* Candidate Info */}
                   <div className="flex items-start gap-4 pt-1">
                     <Link
                       to={`/candidates/${cand.id}`}
-                      className="w-12 h-12 rounded-2xl bg-orange-400 text-slate-950 font-bold text-base flex items-center justify-center shrink-0 shadow-sm hover:scale-105 hover:bg-orange-500 transition-all cursor-pointer"
+                      className="w-12 h-12 rounded-2xl bg-amber-400 text-slate-950 font-bold text-base flex items-center justify-center shrink-0 shadow-sm hover:scale-105 hover:bg-amber-500 transition-all cursor-pointer"
                       title={`View ${cand.firstName}'s Profile`}
                     >
                       {cand.firstName?.charAt(0)}
@@ -283,12 +283,12 @@ const Candidates = () => {
                       <div className="flex flex-wrap items-center gap-2.5">
                         <Link
                           to={`/candidates/${cand.id}`}
-                          className="text-base font-bold text-slate-900 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors cursor-pointer group/name"
+                          className="text-base font-bold text-slate-900 dark:text-white hover:text-amber-500 dark:hover:text-amber-400 transition-colors cursor-pointer group/name"
                           title={`View ${cand.firstName}'s Profile`}
                         >
                           <span className="group-hover/name:underline">{cand.firstName} {cand.lastName}</span>
                         </Link>
-                        <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-500/30">
+                        <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
                           ● {isStudent ? 'Student / Fresher' : `Working (${cand.currentCompanyTenure || 'Professional'})`}
                         </span>
                         <span className="px-2.5 py-0.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 rounded-full border border-emerald-500/30">
@@ -323,9 +323,9 @@ const Candidates = () => {
 
                       <p className={`text-xs font-normal mt-1 p-3 rounded-2xl border leading-relaxed ${theme === 'dark'
                           ? 'bg-slate-950 text-slate-300 border-slate-800'
-                          : 'bg-orange-50/50 text-slate-800 border-orange-200/60'
+                          : 'bg-white text-slate-800 border-amber-200/60'
                         }`}>
-                        🤖 <strong className="font-bold text-orange-600 dark:text-orange-400">AI Match Insight:</strong> {candReason}
+                        🤖 <strong className="font-bold text-amber-600 dark:text-amber-400">AI Match Insight:</strong> {candReason}
                       </p>
                     </div>
                   </div>
@@ -343,7 +343,7 @@ const Candidates = () => {
                     </Link>
                     <Link
                       to={`/interviews?candidateId=${cand.id}`}
-                      className="px-3.5 py-2 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-xl transition-all shadow-sm text-center w-full"
+                      className="px-3.5 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition-all shadow-sm text-center w-full"
                     >
                       Schedule Interview
                     </Link>

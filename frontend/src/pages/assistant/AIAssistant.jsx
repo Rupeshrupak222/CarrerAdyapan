@@ -116,13 +116,13 @@ How may I assist you with candidate evaluation, drafting interview questions, or
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header Bar */}
         <div className={`p-6 rounded-3xl border transition-all relative overflow-hidden shadow-sm ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-900'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
         }`}>
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500" />
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
 
           <div className="space-y-1.5 pt-1">
             <BackButton label="Back to Dashboard" to="/dashboard" />
-            <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-500/30">
+            <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
               🤖 Adyapan AI Hiring Intelligence
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
@@ -136,9 +136,9 @@ How may I assist you with candidate evaluation, drafting interview questions, or
 
         {/* Prompt Chips */}
         <div className={`p-6 rounded-3xl border shadow-sm space-y-3 ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-800'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-800'
         }`}>
-          <span className="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider block">
+          <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider block">
             💡 Suggested Questions for Founder / HR:
           </span>
           <div className="flex flex-wrap gap-2">
@@ -148,8 +148,8 @@ How may I assist you with candidate evaluation, drafting interview questions, or
                 onClick={() => handleSend(prompt)}
                 className={`px-3.5 py-2 text-xs font-medium rounded-xl border transition-all text-left shadow-sm ${
                   theme === 'dark'
-                    ? 'bg-slate-950 text-slate-200 hover:border-orange-400 border-slate-800'
-                    : 'bg-orange-50/50 text-slate-800 hover:bg-orange-100 hover:border-orange-300 border-orange-200/60'
+                    ? 'bg-slate-950 text-slate-200 hover:border-amber-400 border-slate-800'
+                    : 'bg-white text-slate-800 hover:bg-orange-100 hover:border-amber-300 border-amber-200/60'
                 }`}
               >
                 {prompt}
@@ -160,7 +160,7 @@ How may I assist you with candidate evaluation, drafting interview questions, or
 
         {/* Chat Window */}
         <div className={`rounded-3xl border shadow-sm flex flex-col h-[520px] overflow-hidden ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-orange-200/80'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-amber-200/80'
         }`}>
           {/* Messages Container */}
           <div className="flex-1 p-6 overflow-y-auto space-y-4">
@@ -172,7 +172,7 @@ How may I assist you with candidate evaluation, drafting interview questions, or
                 <div
                   className={`max-w-xl p-4 rounded-2xl text-xs font-normal leading-relaxed whitespace-pre-line shadow-sm ${
                     msg.sender === 'user'
-                      ? 'bg-orange-400 text-slate-950 font-semibold rounded-br-none'
+                      ? 'bg-amber-400 text-slate-950 font-semibold rounded-br-none'
                       : theme === 'dark'
                       ? 'bg-slate-950 text-slate-100 border border-slate-800 rounded-bl-none'
                       : 'bg-slate-50 text-slate-800 border border-slate-200 rounded-bl-none'
@@ -185,8 +185,8 @@ How may I assist you with candidate evaluation, drafting interview questions, or
 
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-orange-500/15 text-orange-800 dark:text-orange-300 p-3.5 rounded-2xl text-xs font-semibold flex items-center gap-2 border border-orange-500/30">
-                  <span className="w-2 h-2 bg-orange-500 rounded-full animate-ping"></span>
+                <div className="bg-amber-500/15 text-amber-800 dark:text-amber-300 p-3.5 rounded-2xl text-xs font-semibold flex items-center gap-2 border border-amber-500/30">
+                  <span className="w-2 h-2 bg-amber-500 rounded-full animate-ping"></span>
                   HireAI Copilot is analyzing candidate data...
                 </div>
               </div>
@@ -195,7 +195,7 @@ How may I assist you with candidate evaluation, drafting interview questions, or
 
           {/* Chat Input */}
           <div className={`p-4 border-t flex items-center gap-3 ${
-            theme === 'dark' ? 'border-slate-800 bg-slate-950/50' : 'border-orange-200/60 bg-orange-50/30'
+            theme === 'dark' ? 'border-slate-800 bg-slate-950/50' : 'border-amber-200/60 bg-white/30'
           }`}>
             <input
               type="text"
@@ -203,16 +203,16 @@ How may I assist you with candidate evaluation, drafting interview questions, or
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
               placeholder="Ask HireAI: e.g. Who are top candidates for BDA role? Why was Rahul shortlisted?"
-              className={`flex-1 px-4 py-2.5 text-xs font-normal border rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 ${
+              className={`flex-1 px-4 py-2.5 text-xs font-normal border rounded-xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 ${
                 theme === 'dark'
                   ? 'bg-slate-900 border-slate-700 text-white placeholder-slate-500'
-                  : 'bg-white border-orange-200/80 text-slate-800 placeholder-slate-400'
+                  : 'bg-white border-amber-200/80 text-slate-800 placeholder-slate-400'
               }`}
             />
             <button
               onClick={() => handleSend()}
               disabled={loading}
-              className="px-4 py-2.5 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-xl transition-all shadow-sm shrink-0"
+              className="px-4 py-2.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition-all shadow-sm shrink-0"
             >
               Send Query
             </button>

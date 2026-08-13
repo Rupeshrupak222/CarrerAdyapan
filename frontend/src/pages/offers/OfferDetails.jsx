@@ -124,9 +124,9 @@ const OfferDetails = () => {
       <div className="space-y-6">
         {/* Header */}
         <div className={`p-6 rounded-3xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden shadow-sm ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-900'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
         }`}>
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500" />
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
 
           <div className="space-y-1.5 pt-1">
             <BackButton label="Back to Offers & Agreements" to="/offers" />
@@ -134,14 +134,14 @@ const OfferDetails = () => {
               Offer Letter: {offer.candidateName}
             </h1>
             <p className="text-xs text-slate-600 dark:text-slate-300 font-normal">
-              {offer.jobTitle} • Active Corporate Template: <strong className="text-orange-600 dark:text-orange-400 font-bold">{globalTpl.templateName}</strong>
+              {offer.jobTitle} • Active Corporate Template: <strong className="text-amber-600 dark:text-amber-400 font-bold">{globalTpl.templateName}</strong>
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <button
               onClick={() => setShowAdyapanModal(true)}
-              className="px-4 py-2.5 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-xl shadow-sm transition-all flex items-center gap-2"
+              className="px-4 py-2.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all flex items-center gap-2"
             >
               <span>📄</span> Adyapan 4-Page PDF Generator
             </button>
@@ -158,7 +158,7 @@ const OfferDetails = () => {
             <button
               onClick={handleSendEmail}
               disabled={sendingEmail}
-              className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-xl shadow-sm transition-all disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all disabled:opacity-50"
             >
               <span>✉️</span> {sendingEmail ? 'Sending...' : 'Send Email'}
             </button>
@@ -171,7 +171,7 @@ const OfferDetails = () => {
             onClick={() => setActiveTab('adyapan4page')}
             className={`px-4 py-2 text-xs font-bold rounded-t-xl transition-all ${
               activeTab === 'adyapan4page'
-                ? 'bg-orange-500 text-slate-950 border-b-2 border-orange-600'
+                ? 'bg-amber-500 text-slate-950 border-b-2 border-amber-600'
                 : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
@@ -191,11 +191,11 @@ const OfferDetails = () => {
 
         {activeTab === 'adyapan4page' ? (
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-900 rounded-2xl">
+            <div className="flex items-center justify-between p-4 bg-white dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-2xl">
               <div className="flex items-center gap-3">
                 <span className="text-2xl">📄</span>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-orange-300">
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-amber-300">
                     Official SR'S ADYAPAN EDUTECH PRIVATE LIMITED 4-Page Offer Letter
                   </h3>
                   <p className="text-xs text-slate-600 dark:text-slate-400">
@@ -205,7 +205,7 @@ const OfferDetails = () => {
               </div>
               <button
                 onClick={() => setShowAdyapanModal(true)}
-                className="px-4 py-2 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-xl shadow-sm transition-all"
+                className="px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all"
               >
                 🖨️ Print / Customize
               </button>

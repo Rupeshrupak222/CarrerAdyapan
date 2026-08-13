@@ -66,7 +66,7 @@ const Login = () => {
             <button
               onClick={toggleTheme}
               className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 border shadow-sm ${theme === 'dark'
-                  ? 'bg-slate-900 text-orange-300 border-slate-700 hover:bg-slate-800'
+                  ? 'bg-slate-900 text-amber-300 border-slate-700 hover:bg-slate-800'
                   : 'bg-slate-100 text-slate-900 border-slate-300 hover:bg-slate-200'
                 }`}
               title="Click to Switch Light / Dark Mode"
@@ -78,7 +78,7 @@ const Login = () => {
             {/* Public Careers Portal Pill Button */}
             <Link
               to="/careers"
-              className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-black text-white bg-orange-500 hover:bg-orange-600 rounded-xl transition-all shadow-md shadow-orange-400/20 uppercase tracking-wider flex items-center gap-1.5 shrink-0"
+              className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-black text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition-all shadow-md shadow-amber-400/20 uppercase tracking-wider flex items-center gap-1.5 shrink-0"
             >
               <span>🌐</span>
               <span className="hidden md:inline">Public Careers Portal ↗</span>
@@ -96,7 +96,7 @@ const Login = () => {
           }`}>
           {/* Header Title */}
           <div className="text-center space-y-2">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 text-[11px] font-black bg-orange-500/20 text-orange-700 dark:text-orange-300 border border-orange-500/30 rounded-full uppercase">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 text-[11px] font-black bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 rounded-full uppercase">
               🔐 ADYAPAN RECRUITER PORTAL
             </div>
             <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
@@ -114,7 +114,7 @@ const Login = () => {
             <button
               type="button"
               onClick={handleDemoFill}
-              className="px-3.5 py-1.5 bg-orange-400 text-slate-950 font-black rounded-xl text-[10px] uppercase hover:bg-orange-600 transition-colors shadow-md shadow-orange-400/20"
+              className="px-3.5 py-1.5 bg-amber-400 text-slate-950 font-black rounded-xl text-[10px] uppercase hover:bg-amber-600 transition-colors shadow-md shadow-amber-400/20"
             >
               Autofill Admin
             </button>
@@ -133,7 +133,7 @@ const Login = () => {
                 required
                 placeholder="admin@adyapan.com"
                 className={`w-full px-4 py-3 rounded-xl text-xs font-bold focus:outline-none border transition-all ${theme === 'dark'
-                    ? 'bg-slate-950 border-slate-700 text-white focus:border-orange-400'
+                    ? 'bg-slate-950 border-slate-700 text-white focus:border-amber-400'
                     : 'bg-white border-slate-300 text-slate-900 focus:border-blue-600 shadow-sm'
                   }`}
               />
@@ -150,7 +150,7 @@ const Login = () => {
                 required
                 placeholder="••••••••"
                 className={`w-full px-4 py-3 rounded-xl text-xs font-bold focus:outline-none border transition-all ${theme === 'dark'
-                    ? 'bg-slate-950 border-slate-700 text-white focus:border-orange-400'
+                    ? 'bg-slate-950 border-slate-700 text-white focus:border-amber-400'
                     : 'bg-white border-slate-300 text-slate-900 focus:border-blue-600 shadow-sm'
                   }`}
               />
@@ -159,7 +159,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 text-xs font-black text-slate-950 bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-300 hover:to-orange-400 rounded-xl transition-all shadow-xl shadow-orange-400/20 uppercase tracking-wider text-center"
+              className="w-full py-4 text-xs font-black text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl transition-all shadow-xl shadow-amber-400/20 uppercase tracking-wider text-center"
             >
               {loading ? 'Authenticating Recruiter Account...' : 'Sign In to Recruiter Dashboard →'}
             </button>
@@ -168,7 +168,7 @@ const Login = () => {
           {/* Footer Links */}
           <div className="pt-2 border-t border-slate-200 dark:border-slate-800 text-center text-xs font-bold space-y-2">
             <p className="text-slate-700 dark:text-slate-300">
-              Need HR access? <Link to="/register" className="text-blue-600 dark:text-orange-400 hover:underline font-black">Request Admin Account</Link>
+              Need HR access? <Link to="/register" className="text-blue-600 dark:text-amber-400 hover:underline font-black">Request Admin Account</Link>
             </p>
             <p>
               <Link to="/careers" className="text-slate-600 dark:text-slate-400 hover:underline text-[11px]">

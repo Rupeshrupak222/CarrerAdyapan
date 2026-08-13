@@ -67,12 +67,12 @@ const Jobs = () => {
       <div className="space-y-6">
         {/* Header Section */}
         <div className={`p-6 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden shadow-sm ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-900'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
         }`}>
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500" />
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
           
           <div className="pt-1 space-y-1">
-            <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-500/30">
+            <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
               💼 Adyapan Job Postings Control
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
@@ -85,7 +85,7 @@ const Jobs = () => {
 
           <Link
             to="/jobs/create"
-            className="flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-xl shadow-sm transition-all shrink-0"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all shrink-0"
           >
             <span>+</span> Post New Opening
           </Link>
@@ -95,16 +95,16 @@ const Jobs = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {jobs.length === 0 && !loading ? (
             <div className={`p-8 rounded-3xl border text-center col-span-full space-y-3 ${
-              theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-800 shadow-sm'
+              theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-800 shadow-sm'
             }`}>
-              <div className="w-12 h-12 rounded-2xl bg-orange-500/20 text-orange-500 font-bold flex items-center justify-center text-xl mx-auto">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-500 font-bold flex items-center justify-center text-xl mx-auto">
                 💼
               </div>
               <h3 className="text-sm font-bold">No Active Job Openings</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">There are currently no active job postings in the database.</p>
               <Link
                 to="/jobs/create"
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-xl transition-all shadow-sm"
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition-all shadow-sm"
               >
                 + Post New Role Opening
               </Link>
@@ -114,15 +114,15 @@ const Jobs = () => {
               <div
                 key={job.id || job._id}
                 className={`rounded-3xl p-6 transition-all duration-200 flex flex-col justify-between space-y-4 border shadow-sm hover:shadow-md relative overflow-hidden group ${
-                  theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-900'
+                  theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
                 }`}
               >
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500 opacity-80 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 opacity-80 group-hover:opacity-100 transition-opacity" />
 
                 <div className="space-y-3 pt-1">
                   <div className="flex items-center justify-between">
                     <span className={`w-10 h-10 rounded-2xl text-xl flex items-center justify-center border ${
-                      theme === 'dark' ? 'bg-slate-950 border-slate-800 text-orange-400' : 'bg-orange-50 border-orange-200 text-orange-600'
+                      theme === 'dark' ? 'bg-slate-950 border-slate-800 text-amber-400' : 'bg-white border-amber-200 text-amber-600'
                     }`}>
                       {job.icon || '💼'}
                     </span>
@@ -134,7 +134,7 @@ const Jobs = () => {
                   <h2 className="text-base font-bold leading-snug text-slate-900 dark:text-white">{job.title}</h2>
 
                   <div className="flex flex-wrap gap-2 text-xs font-medium">
-                    <span className="px-2.5 py-1 rounded-xl bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-500/30">
+                    <span className="px-2.5 py-1 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
                       🏢 {job.department || 'EdTech Growth'}
                     </span>
                     <span className={`px-2.5 py-1 rounded-xl border ${
@@ -146,7 +146,7 @@ const Jobs = () => {
 
                   <div className="text-xs font-medium space-y-1 pt-2 border-t border-slate-100 dark:border-slate-800">
                     <p className="text-slate-600 dark:text-slate-300">
-                      📥 Applicants: <strong className="text-orange-600 dark:text-orange-400 font-bold">{job.applications?.length || 0} Candidates</strong>
+                      📥 Applicants: <strong className="text-amber-600 dark:text-amber-400 font-bold">{job.applications?.length || 0} Candidates</strong>
                     </p>
                     {job.salaryMin && (
                       <p className="text-slate-600 dark:text-slate-300">
@@ -169,7 +169,7 @@ const Jobs = () => {
                     <button
                       onClick={() => shareLinkedIn(job)}
                       className={`py-1.5 text-[11px] font-semibold rounded-xl border transition-colors text-center ${
-                        theme === 'dark' ? 'bg-slate-950 text-orange-300 border-slate-800' : 'bg-orange-50 text-orange-900 border-orange-200'
+                        theme === 'dark' ? 'bg-slate-950 text-amber-300 border-slate-800' : 'bg-white text-amber-900 border-amber-200'
                       }`}
                       title="Share on LinkedIn"
                     >
@@ -190,7 +190,7 @@ const Jobs = () => {
                     <Link
                       to={`/careers/${job.slug || 'bda-role'}`}
                       target="_blank"
-                      className="flex-1 text-center py-2 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-xl transition-all shadow-sm"
+                      className="flex-1 text-center py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition-all shadow-sm"
                     >
                       Public Candidate View ↗
                     </Link>

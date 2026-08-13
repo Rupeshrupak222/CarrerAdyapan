@@ -55,7 +55,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
   };
 
   const navStyle = theme === 'dark'
-    ? { background: 'rgba(13,13,26,0.95)', borderColor: 'rgba(249,115,22,0.2)', color: '#f1f5f9' }
+    ? { background: 'rgba(13,13,26,0.95)', borderColor: 'rgba(245, 158, 11,0.2)', color: '#f1f5f9' }
     : { background: 'rgba(255,255,255,0.97)', borderColor: '#e8e0d8', color: '#1a1a2e', boxShadow: '0 1px 8px rgba(26,26,46,0.06)' };
 
   return (
@@ -71,8 +71,8 @@ const Navbar = ({ toggleMobileSidebar }) => {
             onClick={toggleMobileSidebar}
             className="p-2 rounded-xl lg:hidden transition-colors border shadow-sm shrink-0"
             style={theme === 'dark'
-              ? { background: 'rgba(249,115,22,0.15)', borderColor: 'rgba(249,115,22,0.3)', color: '#f97316' }
-              : { background: '#fdfaf6', borderColor: '#e0d8d0', color: '#f97316' }
+              ? { background: 'rgba(245, 158, 11,0.15)', borderColor: 'rgba(245, 158, 11,0.3)', color: '#f59e0b' }
+              : { background: '#fdfaf6', borderColor: '#e0d8d0', color: '#f59e0b' }
             }
             aria-label="Toggle menu"
           >
@@ -83,7 +83,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
 
           {/* Search Input */}
           <div className="relative flex-1 max-w-[140px] xs:max-w-[200px] sm:max-w-xs md:max-w-sm lg:max-w-md">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none" style={{ color: '#f97316' }}>
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none" style={{ color: '#f59e0b' }}>
               🔍
             </span>
             <input
@@ -94,8 +94,8 @@ const Navbar = ({ toggleMobileSidebar }) => {
               className="w-full pl-8 sm:pl-9 pr-3 py-1.5 sm:py-2 text-xs rounded-xl focus:outline-none transition-all font-semibold"
               style={theme === 'dark'
                 ? {
-                  background: 'rgba(249,115,22,0.08)',
-                  border: '1.5px solid rgba(249,115,22,0.2)',
+                  background: 'rgba(245, 158, 11,0.08)',
+                  border: '1.5px solid rgba(245, 158, 11,0.2)',
                   color: '#f1f5f9',
                 }
                 : {
@@ -105,11 +105,11 @@ const Navbar = ({ toggleMobileSidebar }) => {
                 }
               }
               onFocus={(e) => {
-                e.target.style.borderColor = '#f97316';
-                e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.15)';
+                e.target.style.borderColor = '#f59e0b';
+                e.target.style.boxShadow = '0 0 0 3px rgba(245, 158, 11,0.15)';
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = theme === 'dark' ? 'rgba(249,115,22,0.2)' : '#e0d8d0';
+                e.target.style.borderColor = theme === 'dark' ? 'rgba(245, 158, 11,0.2)' : '#e0d8d0';
                 e.target.style.boxShadow = 'none';
               }}
             />
@@ -124,7 +124,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
             onClick={toggleTheme}
             className="px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 border"
             style={theme === 'dark'
-              ? { background: 'rgba(249,115,22,0.15)', color: '#f97316', borderColor: 'rgba(249,115,22,0.3)' }
+              ? { background: 'rgba(245, 158, 11,0.15)', color: '#f59e0b', borderColor: 'rgba(245, 158, 11,0.3)' }
               : { background: '#fdfaf6', color: '#1a1a2e', borderColor: '#e0d8d0' }
             }
             title="Switch Theme"
@@ -139,9 +139,9 @@ const Navbar = ({ toggleMobileSidebar }) => {
             target="_blank"
             className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-all border"
             style={{
-              background: 'linear-gradient(135deg, rgba(249,115,22,0.15), rgba(234,88,12,0.1))',
-              color: '#f97316',
-              borderColor: 'rgba(249,115,22,0.3)',
+              background: 'linear-gradient(135deg, rgba(245, 158, 11,0.15), rgba(234,88,12,0.1))',
+              color: '#f59e0b',
+              borderColor: 'rgba(245, 158, 11,0.3)',
             }}
           >
             <span>🌐 Careers ↗</span>
@@ -159,7 +159,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
               {unreadCount > 0 && (
                 <span
                   className="absolute top-0.5 right-0.5 px-1.5 py-0.2 font-bold text-[9px] rounded-full text-white"
-                  style={{ background: '#f97316' }}
+                  style={{ background: '#f59e0b' }}
                 >
                   {unreadCount}
                 </span>
@@ -170,14 +170,14 @@ const Navbar = ({ toggleMobileSidebar }) => {
               <div
                 className="absolute right-0 mt-2 w-72 sm:w-80 rounded-2xl shadow-xl border py-2 z-50"
                 style={theme === 'dark'
-                  ? { background: '#14162a', borderColor: 'rgba(249,115,22,0.25)', color: '#f1f5f9' }
+                  ? { background: '#14162a', borderColor: 'rgba(245, 158, 11,0.25)', color: '#f1f5f9' }
                   : { background: '#ffffff', borderColor: '#e8e0d8', boxShadow: '0 8px 32px rgba(26,26,46,0.12)' }
                 }
               >
                 <div
                   className="px-4 py-2.5 border-b flex items-center justify-between"
                   style={theme === 'dark'
-                    ? { borderColor: 'rgba(249,115,22,0.15)', background: 'rgba(13,13,26,0.5)' }
+                    ? { borderColor: 'rgba(245, 158, 11,0.15)', background: 'rgba(13,13,26,0.5)' }
                     : { borderColor: '#f0e8df', background: '#fdfaf6' }
                   }
                 >
@@ -186,7 +186,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
                   </span>
                   <span
                     className="text-[10px] font-bold px-2 py-0.5 rounded-full border"
-                    style={{ background: 'rgba(249,115,22,0.15)', color: '#f97316', borderColor: 'rgba(249,115,22,0.3)' }}
+                    style={{ background: 'rgba(245, 158, 11,0.15)', color: '#f59e0b', borderColor: 'rgba(245, 158, 11,0.3)' }}
                   >
                     {notifications.length} New
                   </span>
@@ -194,7 +194,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
 
                 <div
                   className="max-h-72 overflow-y-auto divide-y"
-                  style={{ borderColor: theme === 'dark' ? 'rgba(249,115,22,0.1)' : '#f0e8df' }}
+                  style={{ borderColor: theme === 'dark' ? 'rgba(245, 158, 11,0.1)' : '#f0e8df' }}
                 >
                   {notifications.length === 0 ? (
                     <div className="p-4 text-center text-xs" style={{ color: '#94a3b8' }}>No new notifications</div>
@@ -205,8 +205,8 @@ const Navbar = ({ toggleMobileSidebar }) => {
                         to="/candidates"
                         onClick={() => setShowNotifMenu(false)}
                         className="block p-3 transition-colors"
-                        style={{ borderColor: theme === 'dark' ? 'rgba(249,115,22,0.1)' : '#f0e8df' }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = theme === 'dark' ? 'rgba(249,115,22,0.08)' : '#fdfaf6'; }}
+                        style={{ borderColor: theme === 'dark' ? 'rgba(245, 158, 11,0.1)' : '#f0e8df' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = theme === 'dark' ? 'rgba(245, 158, 11,0.08)' : '#fdfaf6'; }}
                         onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                       >
                         <div className="flex items-center justify-between">
@@ -228,13 +228,13 @@ const Navbar = ({ toggleMobileSidebar }) => {
               onClick={() => setShowProfileMenu(!showProfileMenu)}
               className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border transition-all"
               style={theme === 'dark'
-                ? { background: 'rgba(249,115,22,0.12)', borderColor: 'rgba(249,115,22,0.25)' }
+                ? { background: 'rgba(245, 158, 11,0.12)', borderColor: 'rgba(245, 158, 11,0.25)' }
                 : { background: '#fdfaf6', borderColor: '#e0d8d0' }
               }
             >
               <div
                 className="w-7 h-7 rounded-lg font-bold flex items-center justify-center text-xs shadow-sm"
-                style={{ background: 'linear-gradient(135deg, #ea580c, #f97316)', color: '#ffffff' }}
+                style={{ background: 'linear-gradient(135deg, #d97706, #f59e0b)', color: '#ffffff' }}
               >
                 {user?.name?.charAt(0) || 'A'}
               </div>
@@ -252,13 +252,13 @@ const Navbar = ({ toggleMobileSidebar }) => {
               <div
                 className="absolute right-0 mt-2 w-56 rounded-2xl shadow-xl border py-2 z-50"
                 style={theme === 'dark'
-                  ? { background: '#14162a', borderColor: 'rgba(249,115,22,0.25)', color: '#f1f5f9' }
+                  ? { background: '#14162a', borderColor: 'rgba(245, 158, 11,0.25)', color: '#f1f5f9' }
                   : { background: '#ffffff', borderColor: '#e8e0d8', boxShadow: '0 8px 32px rgba(26,26,46,0.12)' }
                 }
               >
                 <div
                   className="px-4 py-2.5 border-b"
-                  style={theme === 'dark' ? { borderColor: 'rgba(249,115,22,0.15)' } : { borderColor: '#f0e8df' }}
+                  style={theme === 'dark' ? { borderColor: 'rgba(245, 158, 11,0.15)' } : { borderColor: '#f0e8df' }}
                 >
                   <p className="text-xs font-bold" style={{ color: theme === 'dark' ? '#f1f5f9' : '#1a1a2e' }}>
                     {user?.name || 'Recruiter Lead'}
@@ -270,9 +270,9 @@ const Navbar = ({ toggleMobileSidebar }) => {
                 <Link
                   to="/profile"
                   className="flex items-center gap-2 px-4 py-2 text-xs font-bold transition-colors"
-                  style={{ color: '#f97316' }}
+                  style={{ color: '#f59e0b' }}
                   onClick={() => setShowProfileMenu(false)}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = theme === 'dark' ? 'rgba(249,115,22,0.12)' : '#fdfaf6'; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = theme === 'dark' ? 'rgba(245, 158, 11,0.12)' : '#fdfaf6'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                 >
                   <span>👤</span> View Admin Profile
@@ -282,7 +282,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
                   className="flex items-center gap-2 px-4 py-2 text-xs font-semibold transition-colors"
                   style={{ color: theme === 'dark' ? '#cbd5e1' : '#4b5563' }}
                   onClick={() => setShowProfileMenu(false)}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = theme === 'dark' ? 'rgba(249,115,22,0.12)' : '#fdfaf6'; e.currentTarget.style.color = '#f97316'; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = theme === 'dark' ? 'rgba(245, 158, 11,0.12)' : '#fdfaf6'; e.currentTarget.style.color = '#f59e0b'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = theme === 'dark' ? '#cbd5e1' : '#4b5563'; }}
                 >
                   <span>🌐</span> Public Careers Portal
@@ -292,12 +292,12 @@ const Navbar = ({ toggleMobileSidebar }) => {
                   className="flex items-center gap-2 px-4 py-2 text-xs font-semibold transition-colors"
                   style={{ color: theme === 'dark' ? '#cbd5e1' : '#4b5563' }}
                   onClick={() => setShowProfileMenu(false)}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = theme === 'dark' ? 'rgba(249,115,22,0.12)' : '#fdfaf6'; e.currentTarget.style.color = '#f97316'; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = theme === 'dark' ? 'rgba(245, 158, 11,0.12)' : '#fdfaf6'; e.currentTarget.style.color = '#f59e0b'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = theme === 'dark' ? '#cbd5e1' : '#4b5563'; }}
                 >
                   <span>🤖</span> AI Hiring Copilot
                 </Link>
-                <div className="border-t my-1" style={theme === 'dark' ? { borderColor: 'rgba(249,115,22,0.15)' } : { borderColor: '#f0e8df' }} />
+                <div className="border-t my-1" style={theme === 'dark' ? { borderColor: 'rgba(245, 158, 11,0.15)' } : { borderColor: '#f0e8df' }} />
                 <button
                   onClick={() => { setShowProfileMenu(false); logout(); }}
                   className="w-full text-left flex items-center gap-2 px-4 py-2 text-xs font-semibold transition-colors"

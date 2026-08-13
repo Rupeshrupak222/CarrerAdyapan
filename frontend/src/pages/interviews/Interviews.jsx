@@ -235,13 +235,13 @@ const Interviews = () => {
       <div className="space-y-6">
         {/* Header Bar */}
         <div className={`p-6 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden shadow-sm ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-900'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
         }`}>
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500" />
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
 
           <div className="space-y-1.5 pt-1">
             <BackButton label="Back to Dashboard" to="/dashboard" />
-            <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-500/30">
+            <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
               🎯 Adyapan Interview Management
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
@@ -253,7 +253,7 @@ const Interviews = () => {
           </div>
           <button
             onClick={() => setShowAddModal(true)}
-            className="px-4 py-2.5 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-xl shadow-sm transition-all shrink-0"
+            className="px-4 py-2.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all shrink-0"
           >
             + Schedule New Interview
           </button>
@@ -261,16 +261,16 @@ const Interviews = () => {
 
         {/* Filter Bar */}
         <div className={`flex flex-wrap items-center gap-2 p-3 rounded-3xl border shadow-sm ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-orange-200/80'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-amber-200/80'
         }`}>
           <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-2">Status:</span>
           <button
             onClick={() => setFilterStatus('ALL')}
             className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all border ${
               filterStatus === 'ALL'
-                ? 'bg-orange-400 text-slate-950 border-orange-300 shadow-sm'
+                ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-sm'
                 : theme === 'dark'
-                ? 'bg-slate-950 text-slate-300 border-slate-800 hover:border-orange-400/50'
+                ? 'bg-slate-950 text-slate-300 border-slate-800 hover:border-amber-400/50'
                 : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
             }`}
           >
@@ -280,9 +280,9 @@ const Interviews = () => {
             onClick={() => setFilterStatus('SCHEDULED')}
             className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all border ${
               filterStatus === 'SCHEDULED'
-                ? 'bg-orange-400 text-slate-950 border-orange-300 shadow-sm'
+                ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-sm'
                 : theme === 'dark'
-                ? 'bg-slate-950 text-slate-300 border-slate-800 hover:border-orange-400/50'
+                ? 'bg-slate-950 text-slate-300 border-slate-800 hover:border-amber-400/50'
                 : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
             }`}
           >
@@ -292,9 +292,9 @@ const Interviews = () => {
             onClick={() => setFilterStatus('COMPLETED')}
             className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all border ${
               filterStatus === 'COMPLETED'
-                ? 'bg-orange-400 text-slate-950 border-orange-300 shadow-sm'
+                ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-sm'
                 : theme === 'dark'
-                ? 'bg-slate-950 text-slate-300 border-slate-800 hover:border-orange-400/50'
+                ? 'bg-slate-950 text-slate-300 border-slate-800 hover:border-amber-400/50'
                 : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
             }`}
           >
@@ -306,7 +306,7 @@ const Interviews = () => {
         <div className="space-y-4">
           {filteredInterviews.length === 0 ? (
             <div className={`p-8 text-center rounded-3xl border text-xs font-medium ${
-              theme === 'dark' ? 'bg-slate-900 border-slate-800 text-slate-400' : 'bg-white border-orange-200/80 text-slate-500'
+              theme === 'dark' ? 'bg-slate-900 border-slate-800 text-slate-400' : 'bg-white border-amber-200/80 text-slate-500'
             }`}>
               No interviews found for this filter. Click "+ Schedule New Interview" to create one.
             </div>
@@ -322,20 +322,20 @@ const Interviews = () => {
                 <div
                   key={interview.id}
                   className={`p-6 rounded-3xl border shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative overflow-hidden ${
-                    theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-900'
+                    theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
                   }`}
                 >
                   <div className="space-y-2 flex-1">
                     {/* Round & Status Badges */}
                     <div className="flex flex-wrap items-center gap-2.5">
-                      <span className="px-3 py-0.5 text-xs font-semibold rounded-full bg-orange-500/15 text-orange-800 dark:text-orange-300 border border-orange-500/30">
+                      <span className="px-3 py-0.5 text-xs font-semibold rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30">
                         🎯 {interview.type?.replace(/_/g, ' ') || 'SALES PITCH ROUND'}
                       </span>
                       <span
                         className={`px-3 py-0.5 text-xs font-bold rounded-full border ${
                           interview.status === 'COMPLETED'
                             ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
-                            : 'bg-orange-100 text-orange-800 dark:bg-orange-950/60 dark:text-orange-300 border-orange-300 dark:border-orange-800'
+                            : 'bg-orange-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-300 dark:border-amber-800'
                         }`}
                       >
                         ● Status: {interview.status}

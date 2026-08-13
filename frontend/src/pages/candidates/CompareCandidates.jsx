@@ -67,13 +67,13 @@ const CompareCandidates = () => {
       <div className="space-y-6">
         {/* Header */}
         <div className={`p-6 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden shadow-sm ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-900'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
         }`}>
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500" />
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
 
           <div className="space-y-1.5 pt-1">
             <BackButton label="Back to Candidate Directory" to="/candidates" />
-            <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-500/30">
+            <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
               ⚡ Candidate AI Side-by-Side Comparison
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
@@ -88,7 +88,7 @@ const CompareCandidates = () => {
             <button
               onClick={runAIComparison}
               disabled={comparing}
-              className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-xl shadow-sm transition-all disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all disabled:opacity-50"
             >
               <span>🤖</span>
               <span>{comparing ? 'Analyzing Profiles...' : 'Re-Run AI Comparison Matrix'}</span>
@@ -99,7 +99,7 @@ const CompareCandidates = () => {
         {/* Comparison Grid */}
         {loading ? (
           <div className="p-8 text-center">
-            <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
             <p className="mt-3 text-xs text-slate-500 font-medium">Loading database candidates for AI matrix...</p>
           </div>
         ) : (
@@ -108,19 +108,19 @@ const CompareCandidates = () => {
               <div
                 key={cand.id}
                 className={`rounded-3xl border shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col justify-between relative group ${
-                  theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-900'
+                  theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
                 }`}
               >
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500 opacity-80 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 opacity-80 group-hover:opacity-100 transition-opacity" />
 
                 <div>
                   {/* Candidate Top Banner */}
                   <div className={`p-5 border-b pt-6 ${
-                    theme === 'dark' ? 'border-slate-800 bg-slate-950/50' : 'border-orange-200/60 bg-orange-50/40'
+                    theme === 'dark' ? 'border-slate-800 bg-slate-950/50' : 'border-amber-200/60 bg-white'
                   }`}>
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-orange-400 text-slate-950 font-bold text-base flex items-center justify-center shadow-sm">
+                        <div className="w-12 h-12 rounded-2xl bg-amber-400 text-slate-950 font-bold text-base flex items-center justify-center shadow-sm">
                           {cand.avatar}
                         </div>
                         <div>
@@ -154,7 +154,7 @@ const CompareCandidates = () => {
                       </div>
                       <div>
                         <span className="text-[10px] uppercase font-semibold text-slate-400 block">Notice Period</span>
-                        <span className="text-xs font-bold text-orange-600 dark:text-orange-400">{cand.noticePeriod}</span>
+                        <span className="text-xs font-bold text-amber-600 dark:text-amber-400">{cand.noticePeriod}</span>
                       </div>
                     </div>
 
@@ -165,7 +165,7 @@ const CompareCandidates = () => {
                         {cand.skills.map((skill) => (
                           <span
                             key={skill}
-                            className="px-2.5 py-0.5 text-xs font-semibold bg-orange-500/15 text-orange-700 dark:text-orange-300 rounded-xl border border-orange-500/30"
+                            className="px-2.5 py-0.5 text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 rounded-xl border border-amber-500/30"
                           >
                             {skill}
                           </span>
@@ -192,7 +192,7 @@ const CompareCandidates = () => {
                         {cand.gaps.map((gap) => (
                           <span
                             key={gap}
-                            className="px-2.5 py-0.5 text-xs font-medium bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300 rounded-xl border border-orange-200 dark:border-orange-900"
+                            className="px-2.5 py-0.5 text-xs font-medium bg-white text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 rounded-xl border border-amber-200 dark:border-amber-900"
                           >
                             ⚠️ {gap}
                           </span>
@@ -204,17 +204,17 @@ const CompareCandidates = () => {
 
                 {/* Action Footer */}
                 <div className={`p-4 border-t flex items-center justify-between ${
-                  theme === 'dark' ? 'border-slate-800 bg-slate-950/50' : 'border-orange-200/60 bg-orange-50/40'
+                  theme === 'dark' ? 'border-slate-800 bg-slate-950/50' : 'border-amber-200/60 bg-white'
                 }`}>
                   <Link
                     to={`/candidates/${cand.id}`}
-                    className="text-xs font-semibold text-orange-600 dark:text-orange-400 hover:underline"
+                    className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline"
                   >
                     View Full Profile →
                   </Link>
                   <Link
                     to="/interviews"
-                    className="px-4 py-2 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-xl transition-all shadow-sm"
+                    className="px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition-all shadow-sm"
                   >
                     Schedule Interview
                   </Link>

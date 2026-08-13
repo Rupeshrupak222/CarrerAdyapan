@@ -433,12 +433,12 @@ const Offers = () => {
       <div className="space-y-6">
         {/* Header Bar */}
         <div className={`p-6 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden shadow-sm ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-900'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
         }`}>
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500" />
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
 
           <div className="space-y-1.5 pt-1">
-            <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-500/30">
+            <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
               📄 Adyapan Offer Letter Management
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
@@ -452,10 +452,10 @@ const Offers = () => {
 
         {/* Global Company Offer Letter Template Header Banner */}
         <div className={`p-6 rounded-3xl border shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-900'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
         }`}>
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-orange-500/15 text-orange-600 dark:text-orange-400 text-xl flex items-center justify-center border border-orange-500/30 shadow-sm shrink-0">
+            <div className="w-11 h-11 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 text-xl flex items-center justify-center border border-amber-500/30 shadow-sm shrink-0">
               📄
             </div>
             <div>
@@ -466,7 +466,7 @@ const Offers = () => {
                 </span>
               </div>
               <p className="text-xs font-normal text-slate-600 dark:text-slate-300 mt-0.5">
-                Uploaded File: <strong className="text-orange-600 dark:text-orange-400 font-bold">{companyTemplate}</strong>
+                Uploaded File: <strong className="text-amber-600 dark:text-amber-400 font-bold">{companyTemplate}</strong>
               </p>
             </div>
           </div>
@@ -482,7 +482,7 @@ const Offers = () => {
               <span>👁️</span> View / Download Active Template
             </button>
 
-            <label className="cursor-pointer px-4 py-2 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-xl shadow-sm transition-all flex items-center gap-1.5">
+            <label className="cursor-pointer px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all flex items-center gap-1.5">
               <span>📤</span> Upload / Replace Template (PDF/DOCX)
               <input
                 type="file"
@@ -500,13 +500,13 @@ const Offers = () => {
             <div
               key={offer.id}
               className={`p-6 rounded-3xl border shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative overflow-hidden ${
-                theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-900'
+                theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
               }`}
             >
               <div className="space-y-3 flex-1">
                 {/* Header Pills: Job Role & Status */}
                 <div className="flex flex-wrap items-center gap-2.5">
-                  <span className="px-3 py-0.5 text-xs font-semibold rounded-full bg-orange-500/15 text-orange-800 dark:text-orange-300 border border-orange-500/30">
+                  <span className="px-3 py-0.5 text-xs font-semibold rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30">
                     🎓 {offer.jobTitle || 'Student / Fresher'}
                   </span>
 
@@ -518,7 +518,7 @@ const Offers = () => {
                         ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 border-blue-300 dark:border-blue-800'
                         : offer.status === 'REJECTED'
                         ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border-rose-300 dark:border-rose-800'
-                        : 'bg-orange-100 text-orange-800 dark:bg-orange-950/60 dark:text-orange-300 border-orange-300 dark:border-orange-800'
+                        : 'bg-orange-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-300 dark:border-amber-800'
                     }`}
                   >
                     ● Status: {offer.status}
@@ -536,11 +536,11 @@ const Offers = () => {
                 {/* Compensation & Joining Date Grid */}
                 <div className="flex flex-wrap items-center gap-2.5 text-xs font-semibold">
                   <span className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
-                    💰 Fixed Base: <strong className="text-orange-700 dark:text-orange-300 font-bold">{formatDisplaySalary(offer.salary, offer.stipend)}</strong>
+                    💰 Fixed Base: <strong className="text-amber-700 dark:text-amber-300 font-bold">{formatDisplaySalary(offer.salary, offer.stipend)}</strong>
                   </span>
                   {offer.bonus > 0 && (
                     <span className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
-                      🎁 Variable Bonus: <strong className="text-orange-700 dark:text-orange-300 font-bold">₹{offer.bonus?.toLocaleString('en-IN')}</strong>
+                      🎁 Variable Bonus: <strong className="text-amber-700 dark:text-amber-300 font-bold">₹{offer.bonus?.toLocaleString('en-IN')}</strong>
                     </span>
                   )}
                   <span className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
@@ -550,7 +550,7 @@ const Offers = () => {
 
                 {/* Key Offer Details Pills Grid */}
                 <div className="flex flex-wrap items-center gap-2 text-xs font-medium pt-0.5">
-                  <span className="px-2.5 py-1 rounded-xl bg-orange-500/10 text-orange-800 dark:text-orange-300 border border-orange-500/20">
+                  <span className="px-2.5 py-1 rounded-xl bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/20">
                     📍 Location: <strong className="font-semibold">{offer.location || 'HYDERABAD / Remote'}</strong>
                   </span>
                   <span className="px-2.5 py-1 rounded-xl bg-indigo-500/10 text-indigo-800 dark:text-indigo-300 border border-indigo-500/20">
@@ -605,7 +605,7 @@ const Offers = () => {
                     setSelectedCandidateForAdyapan(offer);
                     setShowAdyapanModal(true);
                   }}
-                  className="px-4 py-2 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-xl transition-all flex items-center gap-1.5 shadow-sm"
+                  className="px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition-all flex items-center gap-1.5 shadow-sm"
                   title="View, customize, or print official 4-Page Adyapan Offer Letter PDF"
                 >
                   <span>📄</span> View Offer Letter

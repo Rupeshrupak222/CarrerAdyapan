@@ -35,7 +35,7 @@ const AdyapanOfferDocument = ({ data = {}, printMode = false }) => {
   // Header SVG Emblem Logo matching Adyapan branding
   const AdyapanLogo = () => (
     <div 
-      className="w-16 h-16 rounded-full flex flex-col items-center justify-center p-1 border-2 border-orange-300 shrink-0 shadow-sm"
+      className="w-16 h-16 rounded-full flex flex-col items-center justify-center p-1 border-2 border-amber-300 shrink-0 shadow-sm"
       style={{ background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%)' }}
     >
       <span className="font-extrabold text-xl leading-none tracking-tighter text-slate-950">ady.</span>
@@ -205,7 +205,7 @@ const AdyapanOfferDocument = ({ data = {}, printMode = false }) => {
             Please indicate your acceptance, by signing in the letter and mail the signed and scanned soft copy of the training Offer Letter and the documents as mentioned below to the <a href={`mailto:${hrEmail}`} className="text-blue-600 underline font-semibold">{hrEmail}</a> within <strong className="font-bold text-slate-900">2 working days from the receipt of this mail</strong>. The offer shall stand automatically withdrawn without further action on the part of <strong className="font-bold text-slate-900">adyapan if we do not receive your acceptance as per the mentioned timeline</strong>.
           </p>
 
-          <div className="pt-16 pb-8 px-6 border border-dashed border-slate-300 rounded-lg bg-orange-50/20 text-center max-w-2xl mx-auto space-y-6">
+          <div className="pt-16 pb-8 px-6 border border-dashed border-slate-300 rounded-lg bg-white/20 text-center max-w-2xl mx-auto space-y-6">
             <p className="text-center font-medium leading-relaxed">
               I have read and understood the above terms and conditions and I accept this offer, as set forth above, with adyapan, and will report on or before <strong className="font-bold text-slate-900">{reportingDate}</strong>.
             </p>
@@ -244,7 +244,7 @@ const AdyapanOfferDocument = ({ data = {}, printMode = false }) => {
           </ul>
 
           {/* Working Details Card */}
-          <div className="my-3 pl-8 py-2 space-y-1.5 font-medium border-l-2 border-orange-500">
+          <div className="my-3 pl-8 py-2 space-y-1.5 font-medium border-l-2 border-amber-500">
             <div><strong className="font-bold text-slate-900">Working Hours:</strong> {workingHours}</div>
             <div><strong className="font-bold text-slate-900">Work Timing:</strong> {workTiming}</div>
             <div><strong className="font-bold text-slate-900">Job Type:</strong> {jobType}</div>

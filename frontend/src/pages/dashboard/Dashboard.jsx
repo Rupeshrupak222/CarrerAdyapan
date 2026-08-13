@@ -200,19 +200,19 @@ const Dashboard = () => {
     }
   };
 
-  const COLORS = ['#f59e0b', '#d97706', '#10b981', '#f97316', '#ea580c', '#b45309'];
+  const COLORS = ['#f59e0b', '#d97706', '#10b981', '#f59e0b', '#d97706', '#b45309'];
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
         {/* Welcome Header Banner */}
         <div className={`p-6 md:p-8 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden shadow-sm ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-900'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
         }`}>
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500" />
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
 
           <div className="space-y-2 pt-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-500/30">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
               🎓 ADYAPAN EDUTECH RECRUITMENT CONTROL CENTER
             </div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
@@ -226,13 +226,13 @@ const Dashboard = () => {
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <Link
               to="/candidates"
-              className="px-4 py-2.5 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-xl shadow-sm transition-all flex items-center gap-1.5"
+              className="px-4 py-2.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all flex items-center gap-1.5"
             >
               <span>👥</span> Review Candidates
             </Link>
             <Link
               to="/offers"
-              className="px-4 py-2.5 text-xs font-semibold text-orange-700 dark:text-orange-300 bg-orange-500/15 border border-orange-500/30 hover:bg-orange-600/25 rounded-xl transition-all flex items-center gap-1.5"
+              className="px-4 py-2.5 text-xs font-semibold text-amber-700 dark:text-amber-300 bg-amber-500/15 border border-amber-500/30 hover:bg-amber-600/25 rounded-xl transition-all flex items-center gap-1.5"
             >
               <span>📄</span> Offer Letters
             </Link>
@@ -258,9 +258,9 @@ const Dashboard = () => {
 
         {/* Hired & Selected Candidates Section */}
         <div className={`p-6 rounded-3xl border shadow-sm space-y-5 relative overflow-hidden ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-900'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
         }`}>
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500" />
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3.5 pt-1">
             <div>
@@ -274,7 +274,7 @@ const Dashboard = () => {
                 Track hired candidates, view agreed compensation packages, onboarding milestones, and trigger welcome emails.
               </p>
             </div>
-            <Link to="/offers" className="text-xs font-semibold text-orange-600 dark:text-orange-400 hover:underline shrink-0">
+            <Link to="/offers" className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline shrink-0">
               Manage All Offers →
             </Link>
           </div>
@@ -289,13 +289,13 @@ const Dashboard = () => {
                 <div
                   key={cand.id}
                   className={`p-5 rounded-2xl border transition-all flex flex-col justify-between gap-4 ${
-                    theme === 'dark' ? 'bg-slate-950 border-slate-800 hover:border-orange-500/30' : 'bg-slate-50 border-slate-200 hover:border-orange-300'
+                    theme === 'dark' ? 'bg-slate-950 border-slate-800 hover:border-amber-500/30' : 'bg-slate-50 border-slate-200 hover:border-amber-300'
                   }`}
                 >
                   <div className="space-y-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-orange-400 text-slate-950 font-bold flex items-center justify-center text-sm shadow-sm shrink-0">
+                        <div className="w-10 h-10 rounded-2xl bg-amber-400 text-slate-950 font-bold flex items-center justify-center text-sm shadow-sm shrink-0">
                           {cand.candidateName.charAt(0)}
                         </div>
                         <div>
@@ -325,11 +325,11 @@ const Dashboard = () => {
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-300">
                         <span>Onboarding Setup Progress</span>
-                        <span className="text-orange-600 dark:text-orange-400 font-bold">{cand.onboardingProgress}%</span>
+                        <span className="text-amber-600 dark:text-amber-400 font-bold">{cand.onboardingProgress}%</span>
                       </div>
                       <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-orange-400 rounded-full transition-all duration-500"
+                          className="h-full bg-amber-400 rounded-full transition-all duration-500"
                           style={{ width: `${cand.onboardingProgress}%` }}
                         ></div>
                       </div>
@@ -355,7 +355,7 @@ const Dashboard = () => {
                     <button
                       onClick={() => handleSendWelcomeEmail(cand)}
                       disabled={sendingWelcomeId === cand.id}
-                      className="flex-1 py-2 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-xl shadow-sm transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+                      className="flex-1 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
                     >
                       <span>✉️</span> {sendingWelcomeId === cand.id ? 'Sending...' : 'Send Welcome Email'}
                     </button>
@@ -383,10 +383,10 @@ const Dashboard = () => {
             <ChartSkeleton />
           ) : (
             <div className={`rounded-3xl shadow-sm border p-6 space-y-3 ${
-              theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-900'
+              theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
             }`}>
               <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <span className="text-orange-500">📊</span> Recruitment Funnel Conversion
+                <span className="text-amber-500">📊</span> Recruitment Funnel Conversion
               </h3>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
@@ -407,10 +407,10 @@ const Dashboard = () => {
           )}
 
           <div className={`rounded-3xl shadow-sm border p-6 space-y-3 ${
-            theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-900'
+            theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
           }`}>
             <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <span className="text-orange-500">📈</span> Application Inflow Trends
+              <span className="text-amber-500">📈</span> Application Inflow Trends
             </h3>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -440,13 +440,13 @@ const Dashboard = () => {
           <JobListSkeleton />
         ) : (
           <div className={`rounded-3xl shadow-sm border p-6 space-y-4 ${
-            theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-orange-200/80 text-slate-900'
+            theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
           }`}>
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <span className="text-orange-500">💼</span> Current Openings (Real-Time Control)
+                <span className="text-amber-500">💼</span> Current Openings (Real-Time Control)
               </h3>
-              <Link to="/jobs" className="text-xs font-semibold text-orange-600 dark:text-orange-400 hover:underline">
+              <Link to="/jobs" className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline">
                 View All Openings →
               </Link>
             </div>
@@ -471,7 +471,7 @@ const Dashboard = () => {
                     <span className="px-2.5 py-0.5 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 rounded-full text-xs font-semibold">
                       ● {job.status}
                     </span>
-                    <Link to={`/jobs`} className="text-xs font-semibold text-orange-600 dark:text-orange-400 hover:underline">
+                    <Link to={`/jobs`} className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline">
                       Manage →
                     </Link>
                   </div>
