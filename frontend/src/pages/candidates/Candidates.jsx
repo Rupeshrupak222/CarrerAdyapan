@@ -14,12 +14,6 @@ const Candidates = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [showAtsModal, setShowAtsModal] = useState(false);
-  const [atsResumeText, setAtsResumeText] = useState('');
-  const [atsResumeFile, setAtsResumeFile] = useState(null);
-  const [atsTargetJobTitle, setAtsTargetJobTitle] = useState('Senior Business Development Associate (BDA)');
-  const [atsLoading, setAtsLoading] = useState(false);
-  const [atsResult, setAtsResult] = useState(null);
   const { theme } = useTheme();
 
   const [formData, setFormData] = useState({
@@ -97,40 +91,6 @@ const Candidates = () => {
       localStorage.setItem(key, JSON.stringify(stored.filter((c) => c.id !== id)));
     } catch (e) { }
     toast.success(`Candidate "${name}" deleted! 🗑️`);
-  };
-
-  const handleRunAtsEngine = async (e) => {
-    e.preventDefault();
-    if (!atsResumeText && !atsResumeFile) {
-      return toast.error('Please enter resume text or upload a PDF/DOCX file');
-    }
-
-    setAtsLoading(true);
-    try {
-      let payload;
-      if (atsResumeFile) {
-        payload = new FormData();
-        payload.append('resumeFile', atsResumeFile);
-        payload.append('jobTitle', atsTargetJobTitle);
-      } else {
-        payload = {
-          resumeText: atsResumeText,
-          jobTitle: atsTargetJobTitle,
-        };
-      }
-
-      const res = await candidateService.parseAndScoreResume(payload);
-      if (res?.success) {
-        setAtsResult(res);
-        toast.success(`ATS AI Resume Analysis Complete! Score: ${res.atsResult?.aiScore}% ⚡`);
-      } else {
-        toast.error('Failed to calculate ATS score');
-      }
-    } catch (err) {
-      toast.error('ATS Engine processing error');
-    } finally {
-      setAtsLoading(false);
-    }
   };
 
   const handleDownloadCandidateResume = (cand) => {
@@ -510,137 +470,6 @@ const Candidates = () => {
         </div>
       )}
 
-      {/* Real-Time ATS AI Resume Matcher & Score Engine Modal */}
-      {showAtsModal && (
-        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className={`rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl border max-h-[90vh] overflow-y-auto ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
-            }`}>
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <div>
-                <h2 className="text-base font-bold flex items-center gap-2">
-                  <span>⚡ Real-Time ATS AI Resume Parsing & Scoring Engine</span>
-                </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                  Upload PDF/DOCX or paste resume text to extract skills and calculate real-time ATS job requirements score.
-                </p>
-              </div>
-              <button onClick={() => setShowAtsModal(false)} className="text-slate-400 hover:text-slate-600 font-bold text-sm">✕</button>
-            </div>
-
-            <form onSubmit={handleRunAtsEngine} className="space-y-4 text-xs font-medium">
-              <div>
-                <label className="block mb-1 font-semibold">Targeted Job Opening *</label>
-                <select
-                  value={atsTargetJobTitle}
-                  onChange={(e) => setAtsTargetJobTitle(e.target.value)}
-                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                    }`}
-                >
-                  <option value="Senior Business Development Associate (BDA)">Senior Business Development Associate (BDA)</option>
-                  <option value="Academic Counsellor / Student Advisor">Academic Counsellor / Student Advisor</option>
-                  <option value="Inside Sales Executive / Telecaller">Inside Sales Executive / Telecaller</option>
-                </select>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block mb-1 font-semibold">Upload PDF / DOCX Resume File</label>
-                  <input
-                    type="file"
-                    accept=".pdf,.docx,.doc"
-                    onChange={(e) => setAtsResumeFile(e.target.files[0])}
-                    className={`w-full p-2 rounded-xl text-xs border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-700'
-                      }`}
-                  />
-                  {atsResumeFile && (
-                    <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1">
-                      📄 File Attached: {atsResumeFile.name}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block mb-1 font-semibold">OR Paste Raw Resume Content</label>
-                  <textarea
-                    rows="3"
-                    value={atsResumeText}
-                    onChange={(e) => setAtsResumeText(e.target.value)}
-                    placeholder="Paste candidate resume text, skills, and work history..."
-                    className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white placeholder:text-slate-600' : 'bg-slate-50 border-slate-200 text-slate-800 placeholder:text-slate-400'
-                      }`}
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={atsLoading}
-                className="w-full py-3 font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                <span>⚡</span> {atsLoading ? 'Parsing & Scoring ATS Match...' : 'Run ATS AI Match Engine'}
-              </button>
-            </form>
-
-            {/* ATS Scoring Result View */}
-            {atsResult && (
-              <div className={`p-4 rounded-xl border space-y-3 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-indigo-50/50 border-indigo-200'
-                }`}>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-14 h-14 rounded-2xl bg-indigo-600 text-white font-extrabold text-lg flex items-center justify-center shadow-md">
-                      {atsResult.atsResult?.aiScore}%
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-sm font-bold">ATS AI Match Score</h3>
-                        <span className="px-2 py-0.5 text-[10px] font-bold bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-300 rounded-md">
-                          {atsResult.atsResult?.atsCategory}
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                        Target Role: <strong>{atsResult.job?.title || atsTargetJobTitle}</strong>
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Extracted Skills & Experience */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-medium">
-                  <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                    <span className="text-slate-400 text-[10px] font-bold block uppercase">Matched Key Skills</span>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {(atsResult.atsResult?.matchedSkills || []).map((s) => (
-                        <span key={s} className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 rounded-md">
-                          ✓ {s}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                    <span className="text-slate-400 text-[10px] font-bold block uppercase">Missing / Recommended Skills</span>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {(atsResult.atsResult?.missingSkills || ['None']).map((s) => (
-                        <span key={s} className="px-2 py-0.5 text-[10px] font-semibold bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300 rounded-md">
-                          ! {s}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Match Reason Explanation */}
-                <div className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs leading-relaxed">
-                  <strong className="text-slate-700 dark:text-slate-300 block mb-1">🤖 AI ATS Match Reason Explanation:</strong>
-                  <p className="text-slate-600 dark:text-slate-400 italic">
-                    "{atsResult.atsResult?.matchReason}"
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </DashboardLayout>
   );
 };

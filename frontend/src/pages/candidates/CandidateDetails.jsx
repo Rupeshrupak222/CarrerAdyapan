@@ -231,10 +231,6 @@ const CandidateDetails = () => {
     toast.error('No uploaded resume file found for this candidate');
   };
 
-  const [showManualScoreModal, setShowManualScoreModal] = useState(false);
-  const [manualScoreInput, setManualScoreInput] = useState(88);
-  const [manualReasonInput, setManualReasonInput] = useState('');
-
   const handleRunAIScreening = async () => {
     if (!candidate) return;
     setAiScoring(true);
@@ -291,41 +287,6 @@ const CandidateDetails = () => {
     } finally {
       setAiScoring(false);
     }
-  };
-
-  const handleOpenManualScoreModal = () => {
-    if (!candidate) return;
-    setManualScoreInput(candidate.score || candidate.applications?.[0]?.aiScore || 88);
-    setManualReasonInput(candidate.reason || candidate.applications?.[0]?.matchReason || '');
-    setShowManualScoreModal(true);
-  };
-
-  const handleSaveManualScore = async (e) => {
-    e.preventDefault();
-    if (!candidate) return;
-
-    const numScore = Math.min(100, Math.max(0, parseInt(manualScoreInput) || 0));
-    const newReason = manualReasonInput || candidate.reason || 'Manually verified candidate score.';
-    const updated = {
-      ...candidate,
-      score: numScore,
-      reason: newReason,
-    };
-
-    setCandidate(updated);
-    try {
-      const stored = JSON.parse(localStorage.getItem('adyapan_candidates') || '[]');
-      const updatedList = stored.map((c) => (c.id === candidate.id ? updated : c));
-      localStorage.setItem('adyapan_candidates', JSON.stringify(updatedList));
-    } catch (e) { }
-
-    // Persist score & reason directly to PostgreSQL Database
-    try {
-      await candidateService.updateCandidate(candidate.id, { score: numScore, reason: newReason });
-    } catch (err) { }
-
-    toast.success(`Manual ATS Score for ${candidate.firstName} updated to ${numScore}% & saved to DB! ✏️🎯`);
-    setShowManualScoreModal(false);
   };
 
   const handleStatusChange = (newStatus) => {
