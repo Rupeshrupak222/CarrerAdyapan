@@ -1,0 +1,210 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  password     String
+  role         String   @default("HR")
+  company      String
+  phone        String?
+  designation  String?  @default("Head of Talent Acquisition")
+  department   String?  @default("Executive HR & Placement")
+  location     String?  @default("Hyderabad / Remote")
+  bio          String?
+  avatar       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  jobs         Job[]
+  activities   Activity[]
+  conversations AIConversation[]
+  offers       Offer[]
+}
+
+model Job {
+  id              String      @id @default(cuid())
+  title           String
+  slug            String      @unique
+  department      String
+  description     String
+  requirements    String
+  responsibilities String
+  type            String      @default("FULL_TIME")
+  experienceLevel String
+  salaryMin       Float?
+  salaryMax       Float?
+  location        String
+  status          String      @default("DRAFT")
+  publishedAt     DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  applications    Application[]
+  activities      Activity[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Candidate {
+  id              String        @id @default(cuid())
+  firstName       String
+  lastName        String
+  email           String        @unique
+  phone           String?
+  resumeUrl       String
+  parsedResume    Json?         
+  totalExperience Float?        
+  education       Json?         
+  skills          String[]      
+  currentCompany  String?
+  currentPosition String?
+  employmentStatus String?      @default("EMPLOYED")
+  location        String?
+  linkedin        String?
+  portfolio       String?
+  aiScore         Float?        @default(75)
+  matchReason     String?
+  atsBreakdown    Json?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  applications    Application[]
+  activities      Activity[]
+}
+
+model Application {
+  id              String          @id @default(cuid())
+  status          String          @default("PENDING")
+  aiScore         Float?          
+  scoreBreakdown  Json?           
+  matchReason     String?         
+  missingSkills   String[]        
+  strengths       String[]        
+  recommendations String[]        
+  notes           String?
+  appliedAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  jobId           String
+  job             Job             @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  
+  candidateId     String
+  candidate       Candidate       @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  
+  interviews      Interview[]
+  offer           Offer?
+  activities      Activity[]
+
+  @@index([jobId])
+  @@index([candidateId])
+  @@index([status])
+}
+
+model Interview {
+  id              String          @id @default(cuid())
+  type            String          @default("PHONE")
+  scheduledAt     DateTime
+  duration        Int             @default(30)
+  location        String?         
+  meetingLink     String?
+  status          String          @default("SCHEDULED")
+  feedback        String?
+  rating          Int?            
+  generatedQuestions Json?        
+  notes           String?
+  candidateName   String?
+  candidateEmail  String?
+  jobTitle        String?
+  candidateId     String?
+  jobId           String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  applicationId   String?
+  application     Application?    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  
+  offer           Offer?
+}
+
+model Offer {
+  id              String          @id @default(cuid())
+  candidateId     String?
+  candidateName   String?
+  candidateEmail  String?
+  jobTitle        String?
+  salary          Float           @default(0)
+  bonus           Float?
+  equity          Float?
+  benefits        String[]
+  joiningDate     DateTime        @default(now())
+  expirationDate  DateTime        @default(now())
+  status          String          @default("PENDING")
+  offerLetterUrl  String?         
+  customTerms     String?         @db.Text
+  offerDetails    Json?
+  notes           String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  applicationId   String?         @unique
+  application     Application?    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  
+  interviewId     String?         @unique
+  interview       Interview?      @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  
+  userId          String?
+  user            User?           @relation(fields: [userId], references: [id])
+
+  @@index([candidateId])
+  @@index([candidateEmail])
+}
+
+model SystemSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  dataUrl   String?  @db.Text
+  updatedAt DateTime @updatedAt
+}
+
+model Activity {
+  id              String          @id @default(cuid())
+  action          String
+  details         Json?
+  createdAt       DateTime        @default(now())
+  
+  userId          String
+  user            User            @relation(fields: [userId], references: [id])
+  
+  jobId           String?
+  job             Job?            @relation(fields: [jobId], references: [id])
+  
+  candidateId     String?
+  candidate       Candidate?      @relation(fields: [candidateId], references: [id])
+  
+  applicationId   String?
+  application     Application?    @relation(fields: [applicationId], references: [id])
+
+  @@index([userId])
+}
+
+model AIConversation {
+  id              String          @id @default(cuid())
+  userId          String
+  user            User            @relation(fields: [userId], references: [id])
+  messages        Json[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
