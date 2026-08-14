@@ -27,6 +27,9 @@ import Careers from '../candidate-portal/Careers';
 import PublicJob from '../candidate-portal/PublicJob';
 import ApplyJob from '../candidate-portal/ApplyJob';
 import ApplicationSuccess from '../candidate-portal/ApplicationSuccess';
+import ContactUs from '../pages/contact/ContactUs';
+import LegalPrivacy from '../pages/legal/LegalPrivacy';
+import LegalTerms from '../pages/legal/LegalTerms';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -185,12 +188,14 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-
       {/* Public Candidate Portal Routes */}
       <Route path="/careers" element={<Careers />} />
       <Route path="/careers/:slug" element={<PublicJob />} />
       <Route path="/careers/:slug/apply" element={<ApplyJob />} />
       <Route path="/application-success" element={<ApplicationSuccess />} />
+      <Route path="/contact" element={<ContactUs />} />
+      <Route path="/privacy" element={<LegalPrivacy />} />
+      <Route path="/terms" element={<LegalTerms />} />
 
       {/* Fallback Redirect */}
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

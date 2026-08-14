@@ -1,12 +1,9 @@
-import pkg from '@prisma/client';
-const { PrismaClient } = pkg;
+import prisma from '../config/db.js';
 import { logger } from './logger.js';
-
-const prisma = new PrismaClient();
 
 export const autoSeed = async () => {
   try {
-    console.log('🌱 Checking PostgreSQL Database Seeding Status...');
+    console.log('Checking PostgreSQL Database Seeding Status...');
 
     // 1. Ensure Default Admin User
     let defaultUser = await prisma.user.findFirst();
@@ -21,7 +18,7 @@ export const autoSeed = async () => {
           company: 'Adyapan Edutech Pvt Ltd',
         },
       });
-      console.log('✅ Default User Created in PostgreSQL DB');
+      console.log('Default User Created in PostgreSQL DB');
     }
 
     const userId = defaultUser.id;
@@ -47,7 +44,7 @@ export const autoSeed = async () => {
           userId: userId,
         },
       });
-      console.log('✅ Default Published Job Created in PostgreSQL DB');
+      console.log('Default Published Job Created in PostgreSQL DB');
     }
 
     // 3. Deduplicate Any Existing Duplicate Offers in PostgreSQL DB
@@ -59,15 +56,15 @@ export const autoSeed = async () => {
       const key = emailKey || nameKey;
 
       if (key && seenOfferKeys.has(key)) {
-        console.log(`🧹 Removing duplicate DB offer ID ${off.id} for ${off.candidateName}`);
+        console.log(`Removing duplicate DB offer ID ${off.id} for ${off.candidateName}`);
         await prisma.offer.delete({ where: { id: off.id } }).catch(() => null);
       } else if (key) {
         seenOfferKeys.add(key);
       }
     }
 
-    console.log('🚀 PostgreSQL Database Initialization Complete!');
+    console.log('PostgreSQL Database Initialization Complete!');
   } catch (error) {
-    console.error('❌ Auto Seed Error:', error.message);
+    console.error('Auto Seed Error:', error.message);
   }
 };

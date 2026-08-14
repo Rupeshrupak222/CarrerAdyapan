@@ -16,7 +16,7 @@ const Login = () => {
   const handleDemoFill = () => {
     setEmail('admin@adyapan.com');
     setPassword('password123');
-    toast.success('Demo HR Credentials loaded! ⚡');
+    toast.success('Demo HR Credentials loaded! ');
   };
 
   const handleSubmit = async (e) => {
@@ -32,7 +32,7 @@ const Login = () => {
     try {
       const result = await login(email, password);
       if (result.success) {
-        toast.success('Welcome back, Recruiter Admin! 👋');
+        toast.success('Welcome back, Recruiter Admin! ');
         navigate('/dashboard');
       } else {
         toast.error(result.error || 'Login failed. Please try again.');
@@ -71,8 +71,8 @@ const Login = () => {
                 }`}
               title="Click to Switch Light / Dark Mode"
             >
-              <span className="hidden sm:inline">{theme === 'dark' ? '🌙 Dark Mode' : '☀️ Light Mode'}</span>
-              <span className="sm:hidden">{theme === 'dark' ? '🌙' : '☀️'}</span>
+              <span className="hidden sm:inline">{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
+              <span className="sm:hidden">{theme === 'dark' ? '' : ''}</span>
             </button>
 
             {/* Public Careers Portal Pill Button */}
@@ -80,7 +80,6 @@ const Login = () => {
               to="/careers"
               className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-black text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition-all shadow-md shadow-amber-400/20 uppercase tracking-wider flex items-center gap-1.5 shrink-0"
             >
-              <span>🌐</span>
               <span className="hidden md:inline">Public Careers Portal ↗</span>
               <span className="md:hidden">Careers ↗</span>
             </Link>
@@ -97,7 +96,7 @@ const Login = () => {
           {/* Header Title */}
           <div className="text-center space-y-2">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 text-[11px] font-black bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 rounded-full uppercase">
-              🔐 ADYAPAN RECRUITER PORTAL
+               ADYAPAN RECRUITER PORTAL
             </div>
             <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
               Recruiter & Admin Login
@@ -110,7 +109,7 @@ const Login = () => {
           {/* Quick Demo Autofill Button */}
           <div className={`p-3.5 rounded-2xl border flex items-center justify-between text-xs font-bold ${theme === 'dark' ? 'bg-slate-950/80 border-slate-800 text-slate-300' : 'bg-slate-100 border-slate-300 text-slate-800 shadow-inner'
             }`}>
-            <span>⚡ Quick Demo Credentials</span>
+            <span>Quick Demo Credentials</span>
             <button
               type="button"
               onClick={handleDemoFill}

@@ -33,10 +33,15 @@ const Interviews = () => {
   }, []);
 
   useEffect(() => {
-    if (location.state?.scheduleCandidateId) {
+    const searchParams = new URLSearchParams(location.search);
+    const candIdFromQuery = searchParams.get('candidateId');
+    const candIdFromState = location.state?.scheduleCandidateId;
+    const targetCandidateId = candIdFromQuery || candIdFromState;
+
+    if (targetCandidateId) {
       setFormData((prev) => ({
         ...prev,
-        candidateId: location.state.scheduleCandidateId,
+        candidateId: targetCandidateId,
       }));
       setShowAddModal(true);
     }
@@ -69,6 +74,9 @@ const Interviews = () => {
     try {
       localStorage.setItem('adyapan_interviews', JSON.stringify(list));
     } catch (e) {}
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('adyapan_data_sync'));
+    }
   };
 
   const fetchInterviews = async () => {
@@ -156,7 +164,7 @@ const Interviews = () => {
 
     const updated = [created, ...interviews];
     saveInterviewsToStore(updated);
-    toast.success(`Interview scheduled for ${fullCandName} & saved to Database! 🎯`);
+    toast.success(`Interview scheduled for ${fullCandName} & saved to Database! `);
     setShowAddModal(false);
   };
 
@@ -206,11 +214,32 @@ const Interviews = () => {
 
       syncUpdateOffer(offerEntry);
 
+      // Update candidate status to INTERVIEWED in local storage candidates list
+      try {
+        const targetCandId = targetInt.candidateId || targetInt.application?.candidate?.id;
+        if (targetCandId) {
+          await candidateService.updateCandidate(targetCandId, { status: 'INTERVIEWED' }).catch(() => {});
+        }
+        const candKey = 'adyapan_candidates';
+        const existingCands = JSON.parse(localStorage.getItem(candKey) || '[]');
+        const updatedCands = existingCands.map((c) => {
+          if (
+            (targetCandId && String(c.id) === String(targetCandId)) ||
+            (c.email && candEmail && c.email.toLowerCase() === candEmail.toLowerCase())
+          ) {
+            return { ...c, status: 'INTERVIEWED' };
+          }
+          return c;
+        });
+        localStorage.setItem(candKey, JSON.stringify(updatedCands));
+      } catch (e) {}
+
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('adyapan_data_updated'));
+        window.dispatchEvent(new Event('adyapan_data_sync'));
       }
 
-      toast.success('Interview marked as Completed & persisted to Database! Candidate added to Offers section! 🎯');
+      toast.success('Interview marked as Completed & persisted to Database! Candidate added to Offers section! ');
     };
 
   const handleDeleteInterview = async (id) => {
@@ -221,7 +250,7 @@ const Interviews = () => {
     try { await interviewService.deleteInterview(id); } catch (e) {}
     const updated = interviews.filter((i) => i.id !== id);
     saveInterviewsToStore(updated);
-    toast.success(`Interview for "${name}" deleted! 🗑️`);
+    toast.success(`Interview for "${name}" deleted! `);
   };
 
   const filteredInterviews = interviews.filter((i) => {
@@ -242,7 +271,7 @@ const Interviews = () => {
           <div className="space-y-1.5 pt-1">
             <BackButton label="Back to Dashboard" to="/dashboard" />
             <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-              🎯 Adyapan Interview Management
+              Adyapan Interview Management
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               Interview Schedule & AI Questions
@@ -318,6 +347,16 @@ const Interviews = () => {
               const roleTitle = interview.jobTitle || interview.application?.job?.title || 'Business Development Associate (BDA)';
               const emailDisplay = interview.candidateEmail || interview.application?.candidate?.email || 'candidate@example.com';
 
+              const targetCandidate = candidates.find(
+                (c) => c.id === interview.candidateId ||
+                       c.id === interview.application?.candidateId ||
+                       c.id === interview.application?.candidate?.id ||
+                       (c.email && c.email.toLowerCase() === emailDisplay.toLowerCase()) ||
+                       (`${c.firstName || ''} ${c.lastName || ''}`.trim().toLowerCase() === candidateFullName.toLowerCase())
+              );
+              const candidateProfileId = targetCandidate?.id || interview.candidateId || interview.application?.candidateId || interview.application?.candidate?.id;
+              const profileLink = candidateProfileId ? `/candidates/${candidateProfileId}` : '/candidates';
+
               return (
                 <div
                   key={interview.id}
@@ -329,7 +368,7 @@ const Interviews = () => {
                     {/* Round & Status Badges */}
                     <div className="flex flex-wrap items-center gap-2.5">
                       <span className="px-3 py-0.5 text-xs font-semibold rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30">
-                        🎯 {interview.type?.replace(/_/g, ' ') || 'SALES PITCH ROUND'}
+                        {interview.type?.replace(/_/g, ' ') || 'SALES PITCH ROUND'}
                       </span>
                       <span
                         className={`px-3 py-0.5 text-xs font-bold rounded-full border ${
@@ -342,12 +381,19 @@ const Interviews = () => {
                       </span>
                     </div>
 
-                    {/* Candidate Name & Email */}
-                    <div className="flex items-center gap-3">
+                    {/* Candidate Name & Email & Profile Link */}
+                    <div className="flex flex-wrap items-center gap-3">
                       <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">{candidateFullName}</h3>
                       <span className="text-xs font-normal text-slate-600 dark:text-slate-300">
-                        (📧 {emailDisplay})
+                        ( {emailDisplay})
                       </span>
+                      <Link
+                        to={profileLink}
+                        className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1"
+                        title="View Candidate Profile"
+                      >
+                        View Profile ↗
+                      </Link>
                     </div>
 
                     {/* Role & Meeting Details */}
@@ -356,8 +402,8 @@ const Interviews = () => {
                     </p>
 
                     <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-600 dark:text-slate-300 pt-0.5">
-                      <span>📅 Date: <strong className="font-semibold text-slate-800 dark:text-slate-200">{new Date(interview.scheduledAt).toLocaleDateString()}</strong></span>
-                      <span>⏰ Time: <strong className="font-semibold text-slate-800 dark:text-slate-200">{new Date(interview.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong></span>
+                      <span> Date: <strong className="font-semibold text-slate-800 dark:text-slate-200">{new Date(interview.scheduledAt).toLocaleDateString()}</strong></span>
+                      <span>Time: <strong className="font-semibold text-slate-800 dark:text-slate-200">{new Date(interview.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong></span>
                       {interview.meetingLink && (
                         <a
                           href={interview.meetingLink}
@@ -365,7 +411,7 @@ const Interviews = () => {
                           rel="noopener noreferrer"
                           className="text-blue-600 dark:text-blue-400 font-bold hover:underline flex items-center gap-1"
                         >
-                          🔗 Join Meeting Link
+                          Join Meeting Link
                         </a>
                       )}
                     </div>
@@ -373,12 +419,19 @@ const Interviews = () => {
 
                   {/* Actions Bar */}
                   <div className="flex flex-wrap items-center gap-2 shrink-0 border-t lg:border-t-0 pt-4 lg:pt-0 border-slate-200 dark:border-slate-800">
+                    <Link
+                      to={profileLink}
+                      className="px-3.5 py-2.5 text-xs font-bold text-amber-800 dark:text-amber-300 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 rounded-xl transition-all shadow-sm flex items-center gap-1.5"
+                      title="View Candidate Profile & Resume"
+                    >
+                      View Profile
+                    </Link>
                     {interview.status === 'SCHEDULED' && (
                       <button
                         onClick={() => handleCompleteInterview(interview.id)}
                         className="px-4 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all shadow-sm flex items-center gap-1.5"
                       >
-                        <span>✓</span> Mark Completed
+                        Mark Completed
                       </button>
                     )}
                     <button
@@ -386,7 +439,7 @@ const Interviews = () => {
                       className="px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 hover:bg-rose-100 rounded-xl transition-all flex items-center gap-1.5"
                       title="Delete interview permanently from DB, backend & frontend"
                     >
-                      <span>🗑️</span> Delete
+                      Delete
                     </button>
                   </div>
                 </div>

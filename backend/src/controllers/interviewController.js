@@ -1,9 +1,6 @@
-import pkg from '@prisma/client';
-const { PrismaClient } = pkg;
+import prisma from '../config/db.js';
 import { logger } from '../utils/logger.js';
 import { sendInterviewScheduledEmail } from '../services/emailService.js';
-
-const prisma = new PrismaClient();
 
 // Create Interview
 export const createInterview = async (req, res) => {
@@ -57,6 +54,15 @@ export const createInterview = async (req, res) => {
     const targetEmail = candidateEmail || interview?.application?.candidate?.email;
     const targetName = candidateName || (interview?.application?.candidate ? `${interview.application.candidate.firstName} ${interview.application.candidate.lastName}` : 'Candidate');
     const targetJob = jobTitle || interview?.application?.job?.title || 'Business Development Associate (BDA)';
+    const targetCandId = candidateId || interview?.candidateId || interview?.application?.candidateId;
+
+    if (targetCandId) {
+      const updatedCandStatus = status === 'COMPLETED' ? 'INTERVIEWED' : 'SCHEDULED';
+      await prisma.application.updateMany({
+        where: { candidateId: targetCandId },
+        data: { status: updatedCandStatus },
+      }).catch(() => {});
+    }
 
     if (targetEmail && (interview.status === 'SCHEDULED' || status === 'SCHEDULED')) {
       sendInterviewScheduledEmail({
@@ -88,11 +94,14 @@ export const getAllInterviews = async (req, res) => {
         },
       },
       orderBy: { scheduledAt: 'desc' },
+    }).catch((e) => {
+      logger.warn('Interviews findMany pooler warning: ' + (e?.message || String(e)));
+      return [];
     });
 
     res.json({ success: true, interviews });
   } catch (error) {
-    logger.error('Get Interviews Error:', error.message);
+    logger.warn('Get Interviews Error: ' + (error?.message || String(error)));
     res.json({ success: true, interviews: [] });
   }
 };
@@ -168,7 +177,7 @@ export const updateInterview = async (req, res) => {
       });
     }
 
-    logger.info(`✅ Interview ${req.params.id} updated in PostgreSQL DB! Status: ${interview.status}`);
+    logger.info(`Interview ${req.params.id} updated in PostgreSQL DB! Status: ${interview.status}`);
     res.json({ success: true, interview });
   } catch (error) {
     logger.error('Update Interview Error:', error.message);
@@ -190,7 +199,14 @@ export const updateInterviewFeedback = async (req, res) => {
       },
     });
 
-    logger.info(`✅ Interview ${req.params.id} marked as COMPLETED in PostgreSQL DB!`);
+    if (interview.candidateId) {
+      await prisma.application.updateMany({
+        where: { candidateId: interview.candidateId },
+        data: { status: 'INTERVIEWED' },
+      }).catch(() => {});
+    }
+
+    logger.info(`Interview ${req.params.id} marked as COMPLETED in PostgreSQL DB!`);
     res.json({ success: true, interview });
   } catch (error) {
     logger.error('Update Feedback Error:', error.message);

@@ -22,11 +22,12 @@ const Offers = () => {
   const [editingOffer, setEditingOffer] = useState(null);
   const [showAdyapanModal, setShowAdyapanModal] = useState(false);
   const [selectedCandidateForAdyapan, setSelectedCandidateForAdyapan] = useState(null);
-  
+  const [activeDropdownId, setActiveDropdownId] = useState(null);
+
   const initialGlobalTemplate = getGlobalOfferTemplate();
   const [companyTemplate, setCompanyTemplate] = useState(initialGlobalTemplate.templateName);
   const [companyTemplateUrl, setCompanyTemplateUrl] = useState(initialGlobalTemplate.templateDataUrl);
-  
+
   const { theme } = useTheme();
   const location = useLocation();
 
@@ -45,6 +46,10 @@ const Offers = () => {
 
   useEffect(() => {
     fetchOffers();
+
+    const handleOutsideClick = () => setActiveDropdownId(null);
+    window.addEventListener('click', handleOutsideClick);
+    return () => window.removeEventListener('click', handleOutsideClick);
   }, [location.search]);
 
   const fetchOffers = async () => {
@@ -184,7 +189,7 @@ const Offers = () => {
       });
       syncUpdateOffer({ ...offer, status: 'SENT', email: candidateEmail });
       setOffers(getStoredOffers());
-      toast.success(`Official 4-Page Adyapan Offer Letter dispatched via Resend to ${candidateEmail}! ✉️📄🎉`);
+      toast.success(`Official 4-Page Adyapan Offer Letter dispatched via Resend to ${candidateEmail}! `);
     } catch (e) {
       toast.error('Failed to send offer email');
     }
@@ -195,15 +200,15 @@ const Offers = () => {
     if (!window.confirm(`Delete offer for "${name}" permanently from DB, backend & frontend?`)) return;
     // Remove from DB
     if (offer.id) {
-      try { await offerService.deleteOffer(offer.id); } catch (e) {}
+      try { await offerService.deleteOffer(offer.id); } catch (e) { }
     }
     // Remove from localStorage
     try {
       const stored = getStoredOffers().filter((o) => o.id !== offer.id && o.candidateName !== offer.candidateName);
       saveOffersList(stored);
-    } catch (e) {}
+    } catch (e) { }
     setOffers((prev) => prev.filter((o) => o.id !== offer.id && o.candidateName !== offer.candidateName));
-    toast.success(`Offer for "${name}" deleted! 🗑️`);
+    toast.success(`Offer for "${name}" deleted! `);
   };
 
   const [viewingPdfOffer, setViewingPdfOffer] = useState(null);
@@ -247,7 +252,7 @@ const Offers = () => {
       setViewingPdfUrl(targetPdfUrl);
       setViewingPdfOffer(offer);
 
-      toast.success(`Opening Candidate PDF Offer Letter for ${offer.candidateName}! 👁️📄`, { id: 'pdf-toast' });
+      toast.success(`Opening Candidate PDF Offer Letter for ${offer.candidateName}! `, { id: 'pdf-toast' });
     } catch (e) {
       toast.error('Failed to generate PDF offer letter preview', { id: 'pdf-toast' });
     }
@@ -264,7 +269,7 @@ const Offers = () => {
         candidateEmail,
         jobTitle: offer.jobTitle || 'Business Development Associate (BDA)',
       });
-      toast.error(`Offer for ${offer.candidateName} marked as Rejected. Rejection email dispatched via Resend to ${candidateEmail}! ✉️❌`);
+      toast.error(`Offer for ${offer.candidateName} marked as Rejected. Rejection email dispatched via Resend to ${candidateEmail}! `);
     } catch (e) {
       toast.error(`Offer for ${offer.candidateName} marked as Rejected.`);
     }
@@ -280,7 +285,7 @@ const Offers = () => {
         const dataUrl = event.target.result;
         setCompanyTemplateUrl(dataUrl);
         saveGlobalOfferTemplate(file.name, dataUrl);
-        toast.success(`Global Company Offer Letter Template uploaded: "${file.name}" 📄`);
+        toast.success(`Global Company Offer Letter Template uploaded: "${file.name}" `);
 
         // If a PDF is currently being viewed, refresh preview with new global template
         if (viewingPdfOffer) {
@@ -312,7 +317,7 @@ const Offers = () => {
         if (blobUrl.startsWith('blob:')) {
           setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
         }
-        toast.success(`Downloaded Active Global Company Offer Letter Template: "${globalTpl.templateName}" 📄`);
+        toast.success(`Downloaded Active Global Company Offer Letter Template: "${globalTpl.templateName}" `);
       } catch (err) {
         toast.error('Failed to open template file');
       }
@@ -366,7 +371,7 @@ const Offers = () => {
 
     syncUpdateOffer(newOffer);
     setOffers(getStoredOffers());
-    toast.success('Offer Letter created and approved! 🎉');
+    toast.success('Offer Letter created and approved! ');
     setShowAddModal(false);
   };
 
@@ -418,7 +423,7 @@ const Offers = () => {
     const updatedList = getStoredOffers();
     setOffers(updatedList);
 
-    toast.success(`Offer Letter for ${editingOffer.candidateName} updated successfully! ✏️`);
+    toast.success(`Offer Letter for ${editingOffer.candidateName} updated successfully! `);
 
     if (viewingPdfOffer && (viewingPdfOffer.id === editingOffer.id || viewingPdfOffer.email === editingOffer.email)) {
       handleViewOfferPdf(savedOffer);
@@ -432,14 +437,13 @@ const Offers = () => {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header Bar */}
-        <div className={`p-6 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden shadow-sm ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
-        }`}>
+        <div className={`p-6 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden shadow-sm ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+          }`}>
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
 
           <div className="space-y-1.5 pt-1">
             <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-              📄 Adyapan Offer Letter Management
+              Adyapan Offer Letter Management
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               Offer Letters & Hired Candidates
@@ -451,12 +455,10 @@ const Offers = () => {
         </div>
 
         {/* Global Company Offer Letter Template Header Banner */}
-        <div className={`p-6 rounded-3xl border shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
-        }`}>
+        <div className={`p-6 rounded-3xl border shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+          }`}>
           <div className="flex items-center gap-3.5">
             <div className="w-11 h-11 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 text-xl flex items-center justify-center border border-amber-500/30 shadow-sm shrink-0">
-              📄
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -474,16 +476,15 @@ const Offers = () => {
           <div className="flex flex-wrap items-center gap-2.5">
             <button
               onClick={handleViewTemplate}
-              className={`px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all flex items-center gap-1.5 ${
-                theme === 'dark' ? 'bg-slate-950 text-slate-200 border-slate-800' : 'bg-slate-100 text-slate-700 border-slate-200'
-              }`}
+              className={`px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all flex items-center gap-1.5 ${theme === 'dark' ? 'bg-slate-950 text-slate-200 border-slate-800' : 'bg-slate-100 text-slate-700 border-slate-200'
+                }`}
               title="Click to view or download the active global company offer letter template"
             >
-              <span>👁️</span> View / Download Active Template
+              View / Download Active Template
             </button>
 
             <label className="cursor-pointer px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all flex items-center gap-1.5">
-              <span>📤</span> Upload / Replace Template (PDF/DOCX)
+              Upload / Replace Template (PDF/DOCX)
               <input
                 type="file"
                 accept=".pdf,.docx,.doc"
@@ -494,155 +495,240 @@ const Offers = () => {
           </div>
         </div>
 
-        {/* Unified Candidates Offer Cards List */}
-        <div className="space-y-4">
-          {offers.map((offer) => (
-            <div
-              key={offer.id}
-              className={`p-6 rounded-3xl border shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative overflow-hidden ${
-                theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
-              }`}
-            >
-              <div className="space-y-3 flex-1">
-                {/* Header Pills: Job Role & Status */}
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <span className="px-3 py-0.5 text-xs font-semibold rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30">
-                    🎓 {offer.jobTitle || 'Student / Fresher'}
-                  </span>
+        {/* Candidates Offer Cards List with Clean Layout & Corner Options Button */}
+        <div className="space-y-4 max-h-[780px] overflow-y-auto p-1 pr-3 custom-scrollbar">
+          {offers.map((offer) => {
+            const isMenuOpen = activeDropdownId === offer.id;
+            const candidateProfilePath = offer.candidateId ? `/candidates/${offer.candidateId}` : `/offers/${offer.id}`;
 
-                  <span
-                    className={`px-3 py-0.5 text-xs font-bold rounded-full border ${
-                      offer.status === 'ACCEPTED'
-                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
-                        : offer.status === 'SENT'
-                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 border-blue-300 dark:border-blue-800'
-                        : offer.status === 'REJECTED'
-                        ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border-rose-300 dark:border-rose-800'
-                        : 'bg-orange-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-300 dark:border-amber-800'
-                    }`}
-                  >
-                    ● Status: {offer.status}
-                  </span>
-                </div>
-
-                {/* Candidate Name & Contact */}
-                <div className="flex items-center gap-3">
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">{offer.candidateName}</h3>
-                  <span className="text-xs font-normal text-slate-600 dark:text-slate-300">
-                    (📧 {offer.email || offer.candidateEmail || 'candidate@example.com'})
-                  </span>
-                </div>
-
-                {/* Compensation & Joining Date Grid */}
-                <div className="flex flex-wrap items-center gap-2.5 text-xs font-semibold">
-                  <span className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
-                    💰 Fixed Base: <strong className="text-amber-700 dark:text-amber-300 font-bold">{formatDisplaySalary(offer.salary, offer.stipend)}</strong>
-                  </span>
-                  {offer.bonus > 0 && (
-                    <span className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
-                      🎁 Variable Bonus: <strong className="text-amber-700 dark:text-amber-300 font-bold">₹{offer.bonus?.toLocaleString('en-IN')}</strong>
-                    </span>
-                  )}
-                  <span className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
-                    📅 Joining Date: <strong className="text-slate-900 dark:text-white font-bold">{offer.trainingStartDate || offer.joiningDate || '25-Aug-2026'}</strong>
-                  </span>
-                </div>
-
-                {/* Key Offer Details Pills Grid */}
-                <div className="flex flex-wrap items-center gap-2 text-xs font-medium pt-0.5">
-                  <span className="px-2.5 py-1 rounded-xl bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/20">
-                    📍 Location: <strong className="font-semibold">{offer.location || 'HYDERABAD / Remote'}</strong>
-                  </span>
-                  <span className="px-2.5 py-1 rounded-xl bg-indigo-500/10 text-indigo-800 dark:text-indigo-300 border border-indigo-500/20">
-                    ⏱️ Training: <strong className="font-semibold">{offer.duration || '6 MONTHS'} ({offer.jobType || 'Full Time'})</strong>
-                  </span>
-                  {offer.postProbationCtc && (
-                    <span className="px-2.5 py-1 rounded-xl bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20">
-                      🚀 Post Probation: <strong className="font-semibold">{offer.postProbationCtc}</strong>
-                    </span>
-                  )}
-                  {offer.workTiming && (
-                    <span className="px-2.5 py-1 rounded-xl bg-blue-500/10 text-blue-800 dark:text-blue-300 border border-blue-500/20">
-                      ⏰ Shift: <strong className="font-semibold">{offer.workTiming}</strong>
-                    </span>
-                  )}
-                </div>
-
-                {/* Benefits Badges */}
-                <div className="flex flex-wrap gap-1.5">
-                  {(offer.benefits || ['Health Insurance', 'Performance Incentives']).map((b) => (
-                    <span
-                      key={b}
-                      className="px-2.5 py-1 text-xs font-normal rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
-                    >
-                      ✓ {b}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Clean Recruiter Note if Present */}
-                {getCleanTermsDisplay(offer.customTerms) && (
-                  <p className="text-xs font-normal text-slate-600 dark:text-slate-300 pt-0.5">
-                    📄 <strong className="font-semibold text-slate-800 dark:text-slate-200">Recruiter Note:</strong> {getCleanTermsDisplay(offer.customTerms)}
-                  </p>
-                )}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-2 shrink-0 border-t lg:border-t-0 pt-4 lg:pt-0 border-slate-200 dark:border-slate-800">
-                {offer.status !== 'REJECTED' && (
-                  <button
-                    onClick={() => handleSendEmail(offer)}
-                    className="px-3.5 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all shadow-sm flex items-center gap-1.5"
-                    title="Send official 4-Page Adyapan Offer Letter to candidate email"
-                  >
-                    <span>✉️</span> Send Offer Letter
-                  </button>
-                )}
-
-                <button
-                  onClick={() => {
-                    setSelectedCandidateForAdyapan(offer);
-                    setShowAdyapanModal(true);
-                  }}
-                  className="px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition-all flex items-center gap-1.5 shadow-sm"
-                  title="View, customize, or print official 4-Page Adyapan Offer Letter PDF"
-                >
-                  <span>📄</span> View Offer Letter
-                </button>
-
-                {offer.status !== 'REJECTED' && (
-                  <button
-                    onClick={() => handleRejectCandidate(offer)}
-                    className="px-3.5 py-2 text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 hover:bg-rose-100 rounded-xl transition-all flex items-center gap-1.5"
-                    title="Reject or mark offer as declined"
-                  >
-                    <span>❌</span> Reject
-                  </button>
-                )}
-
-                <Link
-                  to={offer.candidateId ? `/candidates/${offer.candidateId}` : `/offers/${offer.id}`}
-                  className={`px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all flex items-center gap-1.5 ${
-                    theme === 'dark'
-                      ? 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700'
-                      : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+            return (
+              <div
+                key={offer.id}
+                className={`p-6 rounded-3xl border shadow-sm hover:shadow-md transition-all flex flex-col gap-3 relative overflow-visible ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/90 text-slate-900'
                   }`}
-                  title="View full candidate profile & compensation details"
-                >
-                  <span>👤</span> Candidate Details
-                </Link>
+              >
+                {/* Header Row: Badges & Name + Options Button */}
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 relative">
+                  {/* Left Column: Badges & Candidate Name */}
+                  <div className="space-y-1.5 flex-1 min-w-0">
+                    {/* Status Badges Row */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="px-3 py-0.5 text-xs font-semibold rounded-full bg-amber-100 text-amber-900 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                        ● {offer.jobTitle || 'Student / Fresher'}
+                      </span>
 
-                <button
-                  onClick={() => handleDeleteOffer(offer)}
-                  className="px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 hover:bg-rose-100 rounded-xl transition-all flex items-center gap-1.5"
-                  title="Delete this offer permanently from DB, backend & frontend"
-                >
-                  <span>🗑️</span> Delete Offer
-                </button>
+                      <span className="px-3 py-0.5 text-xs font-bold rounded-full bg-emerald-100 text-emerald-900 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                        Base: {formatDisplaySalary(offer.salary, offer.stipend)}
+                      </span>
+
+                      <span className="px-3 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-900 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-300 dark:border-blue-800">
+                        ● Status: {offer.status}
+                      </span>
+                    </div>
+
+                    {/* Candidate Name (Clickable) & Email */}
+                    <div className="flex flex-wrap items-center gap-2.5 pt-0.5">
+                      <Link
+                        to={candidateProfilePath}
+                        className="text-xl font-bold text-slate-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 transition-colors cursor-pointer tracking-tight"
+                        title="Click to view full candidate details and profile"
+                      >
+                        {offer.candidateName}
+                      </Link>
+                      <span className="text-xs font-normal text-slate-500 dark:text-slate-400">
+                        ({offer.email || offer.candidateEmail || 'candidate@example.com'})
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Single Options Button & Floating Dropdown */}
+                  <div className="relative shrink-0 z-30">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveDropdownId(isMenuOpen ? null : offer.id);
+                      }}
+                      className={`px-3 py-1 text-xs font-bold rounded-xl border transition-all flex items-center gap-1.5 shadow-sm cursor-pointer ${isMenuOpen
+                          ? 'bg-amber-500 text-slate-950 border-amber-600'
+                          : theme === 'dark'
+                            ? 'bg-slate-950 text-slate-200 border-slate-800 hover:border-amber-400'
+                            : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                        }`}
+                    >
+                      <span>Options</span>
+                      <svg className={`w-3 h-3 transition-transform duration-200 ${isMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+
+                    {/* Floating Options Dropdown Menu */}
+                    {isMenuOpen && (
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        className={`absolute right-0 top-full mt-1 w-48 rounded-2xl shadow-xl border p-1 z-50 space-y-0.5 animate-in fade-in zoom-in-95 duration-150 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+                          }`}
+                      >
+                        <Link
+                          to={candidateProfilePath}
+                          onClick={() => setActiveDropdownId(null)}
+                          className="w-full text-left px-2.5 py-1.5 text-xs font-semibold rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-2 block"
+                        >
+                          <span>👤 View Candidate Profile</span>
+                        </Link>
+
+                        <button
+                          onClick={() => {
+                            setActiveDropdownId(null);
+                            setSelectedCandidateForAdyapan(offer);
+                            setShowAdyapanModal(true);
+                          }}
+                          className="w-full text-left px-2.5 py-1.5 text-xs font-bold rounded-lg text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/50 transition-colors flex items-center gap-2 cursor-pointer"
+                        >
+                          <span>📄 View / Edit Offer PDF</span>
+                        </button>
+
+                        {offer.status !== 'REJECTED' && (
+                          <button
+                            onClick={() => {
+                              setActiveDropdownId(null);
+                              handleSendEmail(offer);
+                            }}
+                            className="w-full text-left px-2.5 py-1.5 text-xs font-semibold rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors flex items-center gap-2 cursor-pointer"
+                          >
+                            <span>✉️ Send Offer Email</span>
+                          </button>
+                        )}
+
+                        {offer.status !== 'REJECTED' && (
+                          <button
+                            onClick={() => {
+                              setActiveDropdownId(null);
+                              handleRejectCandidate(offer);
+                            }}
+                            className="w-full text-left px-2.5 py-1.5 text-xs font-semibold rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors flex items-center gap-2 cursor-pointer"
+                          >
+                            <span>❌ Reject Offer</span>
+                          </button>
+                        )}
+
+                        <div className="my-0.5 border-t border-slate-100 dark:border-slate-800" />
+
+                        <button
+                          onClick={() => {
+                            setActiveDropdownId(null);
+                            handleDeleteOffer(offer);
+                          }}
+                          className="w-full text-left px-2.5 py-1.5 text-xs font-semibold rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors flex items-center gap-2 cursor-pointer"
+                        >
+                          <span>🗑️ Delete Offer</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Metadata Body Text Lines */}
+                <div className="space-y-1.5 text-xs pt-1">
+                  {/* Line 1: Role Offered, Interview Conducted Date & Target Joining Date */}
+                  <div className="font-medium text-slate-700 dark:text-slate-300 flex flex-wrap items-center gap-2">
+                    <span><strong className="font-bold text-slate-900 dark:text-white">Role Offered:</strong> {offer.jobTitle || 'Student / Fresher'}</span>
+                    <span>•</span>
+                    <span><strong className="font-bold text-slate-900 dark:text-white">Interview Conducted Date:</strong> {offer.interviewDate || offer.createdAt ? new Date(offer.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '14 Aug 2026'} (Cleared)</span>
+                    <span>•</span>
+                    <span><strong className="font-bold text-slate-900 dark:text-white">Joining Date:</strong> {offer.trainingStartDate || offer.joiningDate || '2026-08-28'}</span>
+                  </div>
+
+                  {/* Line 2: Location, Education & Training/Probation Details */}
+                  <div className="text-slate-600 dark:text-slate-400 flex flex-wrap items-center gap-2">
+                    <span><strong className="font-semibold text-slate-800 dark:text-slate-200">Location:</strong> {offer.location || 'HYDERABAD / Remote'}</span>
+                    <span>•</span>
+                    <span><strong className="font-semibold text-slate-800 dark:text-slate-200">Education:</strong> {offer.degree || offer.education || 'MBA (EdTech & Sales)'}</span>
+                    <span>•</span>
+                    <span><strong className="font-semibold text-slate-800 dark:text-slate-200">Training & Probation:</strong> {offer.duration || '6 MONTHS'} ({offer.jobType || 'Full Time'})</span>
+                  </div>
+
+                  {/* Line 3: Perks / Benefits Pills */}
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {(offer.benefits || ['Health Insurance', 'Performance Incentives', 'Learning Allowance']).map((b) => (
+                      <span
+                        key={b}
+                        className="px-2.5 py-0.5 text-xs font-normal rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                      >
+                        {b}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Line 4 & 5: Candidate Dynamic Positive Strengths & Key Recommendation (2 Lines) */}
+                  {(() => {
+                    const skillsList = Array.isArray(offer.skills) ? offer.skills : (typeof offer.skills === 'string' ? offer.skills.split(',').map((s) => s.trim()).filter(Boolean) : []);
+                    const exp = Number(offer.totalExperience || offer.experience || 0);
+                    const pos = (offer.jobTitle || offer.currentPosition || '').toLowerCase();
+                    const company = offer.company || offer.currentCompany ? (offer.company || offer.currentCompany).trim() : '';
+                    const isFresher = exp === 0 || pos.includes('student') || pos.includes('fresher');
+                    const score = parseInt(offer.aiScore) || 88;
+                    const candName = offer.candidateName?.split(' ')[0] || 'Candidate';
+
+                    const pills = [];
+                    if (score >= 85) pills.push(`Top ${score}% AI Score`);
+                    else if (score >= 70) pills.push(`Verified ${score}% Skill Fit`);
+                    else pills.push(`Evaluated ${score}% Match`);
+
+                    if (skillsList.length > 0) {
+                      pills.push(`Expert in ${skillsList.slice(0, 2).join(' & ')}`);
+                    } else if (isFresher) {
+                      pills.push('Quick Learner & Student Pitching');
+                    } else {
+                      pills.push('Established Client Relations');
+                    }
+
+                    if (!isFresher && exp > 0) {
+                      pills.push(`${exp} Year${exp > 1 ? 's' : ''} Exp`);
+                    } else if (company) {
+                      pills.push(`Background at ${company}`);
+                    } else {
+                      pills.push('High Growth Motivation');
+                    }
+
+                    let recommendation = '';
+                    if (isFresher) {
+                      const skillFocus = skillsList.slice(0, 2).join(' and ') || 'student counselling & communication';
+                      recommendation = `${candName} demonstrated high aptitude in ${skillFocus}. Selected and recommended for onboarding.`;
+                    } else if (exp >= 3) {
+                      recommendation = `${candName} brings ${exp} years of proven sales experience${company ? ` at ${company}` : ''}. Cleared executive rounds and recommended for senior placement.`;
+                    } else {
+                      const mainSkill = skillsList[0] || 'sales pitch & counselling';
+                      recommendation = `${candName} verified hands-on expertise in ${mainSkill}. Successfully cleared all interview rounds and approved for offer.`;
+                    }
+
+                    return (
+                      <div className="space-y-1 pt-2 border-t border-slate-100 dark:border-slate-800/80 mt-1">
+                        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                          <span>● Candidate Positive Strengths:</span>
+                          {pills.slice(0, 2).map((pill, pIdx) => (
+                            <span key={pIdx} className="px-2.5 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/60 font-medium">
+                              {pill}
+                            </span>
+                          ))}
+                        </div>
+                        <p className="text-xs text-slate-600 dark:text-slate-300 font-normal leading-relaxed">
+                          <strong className="font-semibold text-slate-800 dark:text-slate-200">Key Recommendation:</strong> {recommendation}
+                        </p>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Line 4: Recruiter Note & Evaluation Callout Box */}
+                  {getCleanTermsDisplay(offer.customTerms) && (
+                    <div className="p-3 rounded-2xl bg-amber-50/60 dark:bg-slate-800/40 border border-amber-200/90 dark:border-amber-500/20 text-xs text-slate-700 dark:text-slate-300 mt-2">
+                      <span className="font-bold text-slate-900 dark:text-white mr-1.5">Recruiter Note & Evaluation:</span>
+                      {getCleanTermsDisplay(offer.customTerms)}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -785,8 +871,8 @@ const Offers = () => {
           <div className={`rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl border ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
             }`}>
             <h2 className="text-base font-bold border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">
-              <span>✏️ Edit Offer Letter for {editingOffer.candidateName}</span>
-              <button onClick={() => setEditingOffer(null)} className="text-slate-400 hover:text-slate-600">✕</button>
+              <span>Edit Offer Letter for {editingOffer.candidateName}</span>
+              <button onClick={() => setEditingOffer(null)} className="text-slate-400 hover:text-slate-600"></button>
             </h2>
 
             <form onSubmit={handleSaveEditedOffer} className="space-y-3 text-xs font-medium">
@@ -918,13 +1004,12 @@ const Offers = () => {
       {/* Full-screen Candidate PDF Viewer Modal */}
       {viewingPdfOffer && viewingPdfUrl && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className={`rounded-2xl max-w-5xl w-full h-[90vh] p-6 space-y-4 shadow-2xl border flex flex-col ${
-            theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
-          }`}>
+          <div className={`rounded-2xl max-w-5xl w-full h-[90vh] p-6 space-y-4 shadow-2xl border flex flex-col ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+            }`}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3 shrink-0">
               <div>
                 <h2 className="text-base font-bold flex items-center gap-2">
-                  <span>👁️ Candidate Official Offer Agreement: {viewingPdfOffer.candidateName}</span>
+                  <span>Candidate Official Offer Agreement: {viewingPdfOffer.candidateName}</span>
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                   Active Corporate Template: <strong className="text-indigo-600 dark:text-indigo-400">{companyTemplate}</strong>
@@ -936,16 +1021,15 @@ const Offers = () => {
                   download={`${viewingPdfOffer.candidateName.replace(/\s+/g, '_')}_Official_Offer_Letter.pdf`}
                   className="px-3.5 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition-all flex items-center gap-1.5"
                 >
-                  <span>📥</span> Download Copy
+                  Download Copy
                 </a>
-                <button onClick={() => setViewingPdfOffer(null)} className="text-slate-400 hover:text-slate-600 font-bold text-base px-2">✕</button>
+                <button onClick={() => setViewingPdfOffer(null)} className="text-slate-400 hover:text-slate-600 font-bold text-base px-2"></button>
               </div>
             </div>
 
             {/* Candidate Appointment Header Card */}
-            <div className={`p-4 rounded-xl border space-y-2 text-xs font-medium shrink-0 ${
-              theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-emerald-50/70 border-emerald-200 text-slate-900'
-            }`}>
+            <div className={`p-4 rounded-xl border space-y-2 text-xs font-medium shrink-0 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-emerald-50/70 border-emerald-200 text-slate-900'
+              }`}>
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-emerald-200 dark:border-slate-800 pb-2">
                 <div>
                   <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block">Candidate Name</span>
@@ -967,7 +1051,7 @@ const Offers = () => {
 
               {viewingPdfOffer.customTerms && (
                 <p className="text-slate-700 dark:text-slate-300 italic pt-1">
-                  <strong>📝 Customized Agreement Terms:</strong> {viewingPdfOffer.customTerms}
+                  <strong> Customized Agreement Terms:</strong> {viewingPdfOffer.customTerms}
                 </p>
               )}
             </div>

@@ -1,10 +1,7 @@
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import mammoth from 'mammoth';
-import pkg from '@prisma/client';
-const { PrismaClient } = pkg;
+import prisma from '../config/db.js';
 import { logger } from '../utils/logger.js';
-
-const prisma = new PrismaClient();
 
 const cleanText = (str) => {
   if (typeof str !== 'string') return String(str || '');
@@ -175,13 +172,13 @@ export const generateOfferLetterPdfBuffer = async (rawOfferData = {}) => {
           customDocxText = cleanText(docxResult.value.trim());
         }
       } catch (docxErr) {
-        logger.warn('⚠️ Docx parsing error:', docxErr.message);
+        logger.warn('Docx parsing error:', docxErr.message);
       }
     }
   }
 
   try {
-    logger.info(`📄 Generating Official High-Fidelity 4-Page Adyapan Offer Letter PDF for ${candidateName}...`);
+    logger.info(`Generating Official High-Fidelity 4-Page Adyapan Offer Letter PDF for ${candidateName}...`);
     const pdfDoc = await PDFDocument.create();
 
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
@@ -570,7 +567,7 @@ export const generateOfferLetterPdfBuffer = async (rawOfferData = {}) => {
     const pdfBytes = await pdfDoc.save();
     return Buffer.from(pdfBytes);
   } catch (error) {
-    logger.error('❌ Failed to generate 4-Page Adyapan PDF:', error);
+    logger.error('Failed to generate 4-Page Adyapan PDF:', error);
     throw error;
   }
 };

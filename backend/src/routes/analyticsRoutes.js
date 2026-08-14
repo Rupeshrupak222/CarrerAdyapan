@@ -6,6 +6,7 @@ const router = express.Router();
 
 router.use(authMiddleware);
 router.get('/stats', getDashboardStats);
+router.get('/dashboard', getDashboardStats);
 router.get('/funnel', getHiringFunnel);
 router.get('/activity', getRecentActivity);
 

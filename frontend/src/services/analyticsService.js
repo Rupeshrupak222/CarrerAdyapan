@@ -10,15 +10,15 @@ export const analyticsService = {
     }
 
     try {
-      console.log('📊 Fetching dashboard stats');
+      console.log('Fetching dashboard stats');
       const response = await api.get('/analytics/stats');
-      console.log('✅ Stats fetched:', response.data);
+      console.log(' Stats fetched:', response.data);
       if (response.data) {
         cacheService.set(cacheKey, response.data);
       }
       return response.data;
     } catch (error) {
-      console.error('❌ API Error, using fallback data:', error);
+      console.error(' API Error, using fallback data:', error);
       const fallback = {
         totalApplications: 156,
         aiScreened: 112,
@@ -43,15 +43,15 @@ export const analyticsService = {
     }
 
     try {
-      console.log('📊 Fetching hiring funnel');
+      console.log('Fetching hiring funnel');
       const response = await api.get('/analytics/funnel');
-      console.log('✅ Funnel fetched:', response.data);
+      console.log(' Funnel fetched:', response.data);
       if (response.data) {
         cacheService.set(cacheKey, response.data);
       }
       return response.data;
     } catch (error) {
-      console.error('❌ API Error, using fallback data:', error);
+      console.error(' API Error, using fallback data:', error);
       const fallback = {
         data: [
           { stage: 'Applications', count: 156 },
@@ -75,28 +75,28 @@ export const analyticsService = {
     }
 
     try {
-      console.log('📊 Fetching recent activity');
+      console.log('Fetching recent activity');
       const response = await api.get('/analytics/activity');
-      console.log('✅ Activity fetched:', response.data);
+      console.log(' Activity fetched:', response.data);
       if (response.data) {
         cacheService.set(cacheKey, response.data);
       }
       return response.data;
     } catch (error) {
-      console.error('❌ API Error, using fallback data:', error);
+      console.error(' API Error, using fallback data:', error);
       const fallback = {
         activities: [
-          { 
-            action: 'APPLIED', 
-            candidate: { firstName: 'John', lastName: 'Doe' }, 
-            job: { title: 'Sales Executive' }, 
-            createdAt: new Date() 
+          {
+            action: 'APPLIED',
+            candidate: { firstName: 'John', lastName: 'Doe' },
+            job: { title: 'Sales Executive' },
+            createdAt: new Date()
           },
-          { 
-            action: 'SHORTLISTED', 
-            candidate: { firstName: 'Jane', lastName: 'Smith' }, 
-            job: { title: 'BDE' }, 
-            createdAt: new Date() 
+          {
+            action: 'SHORTLISTED',
+            candidate: { firstName: 'Jane', lastName: 'Smith' },
+            job: { title: 'BDE' },
+            createdAt: new Date()
           }
         ]
       };

@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('token', response.token);
         setUser(response.user);
         localStorage.setItem('user', JSON.stringify(response.user));
-        toast.success('Welcome back! 🎉');
+        toast.success('Welcome back! ');
         return { success: true };
       }
       
@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }) => {
       };
       setUser(loggedUser);
       localStorage.setItem('user', JSON.stringify(loggedUser));
-      toast.success('Signed in successfully! 🚀');
+      toast.success('Signed in successfully! ');
       return { success: true };
     } catch (error) {
       const loggedUser = {
@@ -79,7 +79,7 @@ export const AuthProvider = ({ children }) => {
       };
       setUser(loggedUser);
       localStorage.setItem('user', JSON.stringify(loggedUser));
-      toast.success('Signed in successfully! 🚀');
+      toast.success('Signed in successfully! ');
       return { success: true };
     }
   };

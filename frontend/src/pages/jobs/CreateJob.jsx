@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 
 const EDTECH_TEMPLATES = [
   {
-    name: '🎯 Business Development Associate (BDA)',
+    name: 'Business Development Associate (BDA)',
     role: 'BDA',
     title: 'Business Development Associate (EdTech Sales)',
     department: 'Sales & Growth',
@@ -22,7 +22,7 @@ const EDTECH_TEMPLATES = [
     responsibilities: 'Connect with prospective student leads; conduct detailed course counselling sessions; meet monthly enrolment targets; maintain CRM lead status.',
   },
   {
-    name: '🎓 Academic Counsellor',
+    name: 'Academic Counsellor',
     role: 'Counsellor',
     title: 'Academic Counsellor / Student Advisor',
     department: 'Student Admissions',
@@ -36,7 +36,7 @@ const EDTECH_TEMPLATES = [
     responsibilities: 'Guide students on career choices and course curricula; follow up on inbound leads; resolve parent queries; achieve monthly student admissions goals.',
   },
   {
-    name: '📞 Telecaller / Inside Sales',
+    name: 'Telecaller / Inside Sales',
     role: 'Telecaller',
     title: 'Inside Sales Executive / Telecaller',
     department: 'Inside Sales',
@@ -50,7 +50,7 @@ const EDTECH_TEMPLATES = [
     responsibilities: 'Make 80-100 calls daily to inbound leads; pitch course offerings; book product demos for Senior Counsellors; maintain daily call logs.',
   },
   {
-    name: '💻 Full Stack Software Engineer',
+    name: ' Full Stack Software Engineer',
     role: 'Tech',
     title: 'Senior Full Stack Developer (React & Node.js)',
     department: 'Engineering',
@@ -99,7 +99,7 @@ const CreateJob = () => {
       requirements: tpl.requirements,
       responsibilities: tpl.responsibilities,
     });
-    toast.success(`Loaded "${tpl.title}" template! ✨`);
+    toast.success(`Loaded "${tpl.title}" template! `);
   };
 
   const handleSubmit = async (e) => {
@@ -116,7 +116,7 @@ const CreateJob = () => {
       const response = await jobService.createJob(formData);
 
       if (response.success) {
-        toast.success('Job created successfully! 🎉');
+        toast.success('Job created successfully! ');
         navigate('/jobs');
       } else {
         toast.error(response.message || 'Failed to create job');
@@ -148,7 +148,7 @@ const CreateJob = () => {
           }`}>
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
             <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-              ⚡ Adyapan Job Creation Studio
+              Adyapan Job Creation Studio
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               Create & Publish Job Opening
@@ -164,7 +164,7 @@ const CreateJob = () => {
           theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
         }`}>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">⚡ 1-Click EdTech Role Templates</span>
+            <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">1-Click EdTech Role Templates</span>
             <span className="text-[11px] text-slate-500 font-medium">Click to auto-fill form</span>
           </div>
           <div className="flex flex-wrap gap-2">

@@ -73,7 +73,7 @@ const AdminProfile = () => {
         // Update local session cache if available
         const updatedUser = { ...user, ...editForm };
         localStorage.setItem('user', JSON.stringify(updatedUser));
-        toast.success(res.message || 'Admin Profile updated & saved to PostgreSQL DB! 👤✨');
+        toast.success(res.message || 'Admin Profile updated & saved to PostgreSQL DB! ');
         setShowEditModal(false);
       } else {
         toast.error(res?.message || 'Failed to update profile');
@@ -82,7 +82,7 @@ const AdminProfile = () => {
       console.error('Save profile error:', err);
       // Fallback local update
       setProfileData({ ...editForm });
-      toast.success('Admin Profile saved to session store! 👤✨');
+      toast.success('Admin Profile saved to session store! ');
       setShowEditModal(false);
     } finally {
       setSaving(false);
@@ -112,7 +112,7 @@ const AdminProfile = () => {
       });
 
       if (res?.success) {
-        toast.success(res.message || 'Password changed & hashed in PostgreSQL DB! 🔒');
+        toast.success(res.message || 'Password changed & hashed in PostgreSQL DB! ');
         setShowPasswordModal(false);
         setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
       } else {
@@ -133,7 +133,7 @@ const AdminProfile = () => {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <BackButton label="Back to Dashboard" to="/dashboard" />
           <span className="px-2.5 sm:px-3.5 py-1 text-[10px] sm:text-xs font-extrabold rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-            🔒 Super HR Admin Profile & Security
+             Super HR Admin Profile & Security
           </span>
         </div>
 
@@ -161,7 +161,7 @@ const AdminProfile = () => {
                   {profileData.designation} • {profileData.department}
                 </p>
                 <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
-                  📧 {profileData.email} • 🏢 {profileData.company}
+                   {profileData.email} •  {profileData.company}
                 </p>
               </div>
             </div>
@@ -174,7 +174,7 @@ const AdminProfile = () => {
                 }}
                 className="px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-md transition-all flex items-center gap-1.5"
               >
-                <span>✏️</span> Edit Profile
+                Edit Profile
               </button>
 
               <button
@@ -182,7 +182,7 @@ const AdminProfile = () => {
                 className={`px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs font-bold rounded-xl border transition-all flex items-center gap-1.5 ${theme === 'dark' ? 'bg-slate-950 text-slate-200 border-slate-800 hover:bg-slate-800' : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
                   }`}
               >
-                <span>🔒</span> Change Password
+                Change Password
               </button>
             </div>
           </div>
@@ -197,7 +197,7 @@ const AdminProfile = () => {
               }`}>
               <div className="flex flex-wrap items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 gap-2">
                 <h2 className="text-sm sm:text-base font-bold flex items-center gap-2">
-                  <span>📋 Personal & Professional Details</span>
+                  <span>Personal & Professional Details</span>
                 </h2>
                 <span className="text-[10px] sm:text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
                   PostgreSQL Neon Live Sync
@@ -238,7 +238,7 @@ const AdminProfile = () => {
 
               {profileData.bio && (
                 <div className={`p-4 rounded-2xl border text-xs font-normal leading-relaxed ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-700'}`}>
-                  <strong className="text-slate-900 dark:text-white font-bold block mb-1">📝 Recruiter Overview & Scope:</strong>
+                  <strong className="text-slate-900 dark:text-white font-bold block mb-1"> Recruiter Overview & Scope:</strong>
                   {profileData.bio}
                 </div>
               )}
@@ -250,12 +250,12 @@ const AdminProfile = () => {
             <div className={`p-6 rounded-3xl border shadow-sm space-y-4 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
               }`}>
               <h2 className="text-base font-bold border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
-                <span>🛡️ Security & Database Status</span>
+                <span> Security & Database Status</span>
               </h2>
 
               <div className="space-y-2.5 text-xs font-semibold">
                 <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 flex items-center justify-between">
-                  <span>🔒 Account Security</span>
+                  <span> Account Security</span>
                   <button
                     onClick={() => setShowPasswordModal(true)}
                     className="font-bold text-xs text-amber-600 dark:text-amber-400 hover:underline"
@@ -265,18 +265,18 @@ const AdminProfile = () => {
                 </div>
 
                 <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300 flex items-center justify-between">
-                  <span>⚡ ATS Match Engine</span>
+                  <span>ATS Match Engine</span>
                   <span className="font-bold text-emerald-600 dark:text-emerald-400">FULL ACCESS</span>
                 </div>
 
                 <div className="p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-800 dark:text-indigo-300 flex items-center justify-between">
-                  <span>🗑️ Candidate Cascade Delete</span>
+                  <span>Candidate Cascade Delete</span>
                   <span className="font-bold text-indigo-600 dark:text-indigo-400">SUPER ADMIN</span>
                 </div>
 
                 <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-800 dark:text-blue-300 flex items-center justify-between">
-                  <span>🗄️ PostgreSQL Database</span>
-                  <span className="font-bold text-blue-600 dark:text-blue-400">NEON LIVE SYNC ⚡</span>
+                  <span> PostgreSQL Database</span>
+                  <span className="font-bold text-blue-600 dark:text-blue-400">NEON LIVE SYNC </span>
                 </div>
               </div>
             </div>
@@ -291,9 +291,9 @@ const AdminProfile = () => {
             }`}>
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <h3 className="text-sm sm:text-base font-bold flex items-center gap-2">
-                <span>✏️ Edit Admin Profile</span>
+                <span>Edit Admin Profile</span>
               </h3>
-              <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-slate-600 font-bold p-1">✕</button>
+              <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-slate-600 font-bold p-1"></button>
             </div>
 
             <form onSubmit={handleSaveProfile} className="space-y-3 sm:space-y-4 text-xs font-semibold">
@@ -409,9 +409,9 @@ const AdminProfile = () => {
             }`}>
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <h3 className="text-sm sm:text-base font-bold flex items-center gap-2">
-                <span>🔒 Change Admin Password</span>
+                <span> Change Admin Password</span>
               </h3>
-              <button onClick={() => setShowPasswordModal(false)} className="text-slate-400 hover:text-slate-600 font-bold p-1">✕</button>
+              <button onClick={() => setShowPasswordModal(false)} className="text-slate-400 hover:text-slate-600 font-bold p-1"></button>
             </div>
 
             <form onSubmit={handleChangePassword} className="space-y-3 sm:space-y-4 text-xs font-semibold">

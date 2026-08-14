@@ -5,10 +5,10 @@ import { useTheme } from '../../context/ThemeContext';
 import { getStoredCandidates } from '../../utils/applicationStore';
 
 const QUICK_PROMPTS = [
-  '🏆 Who are the top candidates for open roles?',
-  '🎯 Draft 3 interview scenario questions for student counselling.',
-  '📜 What are the key criteria for shortlisting candidates?',
-  '📊 Summarize candidate pipeline status.',
+  'Who are the top candidates for open roles?',
+  'Draft 3 interview scenario questions for student counselling.',
+  'What are the key criteria for shortlisting candidates?',
+  'Summarize candidate pipeline status.',
 ];
 
 const MOCK_CHAT_HISTORY = [
@@ -62,22 +62,21 @@ const AIAssistant = () => {
           year: 'numeric',
         });
 
-        aiResponse = `${timeOfDayGreeting}, Admin! 👋 Welcome to Adyapan Edutech AI Hiring Control Center.
+        aiResponse = `${timeOfDayGreeting}, Admin! Welcome to Adyapan Edutech AI Hiring Control Center.
 
 Here is your Live Web Platform Summary & Today's Updates (${dateFormatted}):
 
-📊 **Real-Time Candidate Pipeline Data:**
+**Real-Time Candidate Pipeline Data:**
 • **Total Applicants Registered:** ${totalCandidates} Candidates
 • **AI Shortlisted & Qualified:** ${shortlistedCount} High-Fit Applicants
 • **Hired & Offered Candidates:** ${hiredCount} Onboarding
 
-💼 **Active Roles & Top Talent:**
+**Active Roles & Top Talent:**
 • **Primary Openings:** Business Development Associate (BDA), Inside Sales Executive, Academic Counsellor
 • **Top Ranked Candidate:** ${topCandidate ? `${topCandidate.firstName} ${topCandidate.lastName || ''} (${topCandidate.score || 85}% AI Match Score - ${topCandidate.currentPosition || 'Applicant'})` : 'No applicant data available yet.'}
 
-⚡ **System Architecture Status:**
-• **PostgreSQL Database:** Neon Cloud Live Connected ⚡
-• **ATS AI Engine:** Deterministic Job-Specific Scoring Active
+**System Architecture Status:**
+• **PostgreSQL Database:** Neon Cloud Live Connected • **ATS AI Engine:** Deterministic Job-Specific Scoring Active
 
 How may I assist you with candidate evaluation, drafting interview questions, or reviewing job postings today?`;
       } else if (qLower.includes('top') || qLower.includes('candidate') || qLower.includes('bda')) {
@@ -123,7 +122,7 @@ How may I assist you with candidate evaluation, drafting interview questions, or
           <div className="space-y-1.5 pt-1">
             <BackButton label="Back to Dashboard" to="/dashboard" />
             <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-              🤖 Adyapan AI Hiring Intelligence
+              Adyapan AI Hiring Intelligence
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               AI Recruitment Copilot
@@ -139,7 +138,7 @@ How may I assist you with candidate evaluation, drafting interview questions, or
           theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-800'
         }`}>
           <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider block">
-            💡 Suggested Questions for Founder / HR:
+             Suggested Questions for Founder / HR:
           </span>
           <div className="flex flex-wrap gap-2">
             {QUICK_PROMPTS.map((prompt) => (

@@ -1,9 +1,6 @@
 import bcrypt from 'bcryptjs';
-import pkg from '@prisma/client';
-const { PrismaClient } = pkg;
 import jwt from 'jsonwebtoken';
-
-const prisma = new PrismaClient();
+import prisma from '../config/db.js';
 
 const generateToken = (user) => {
   return jwt.sign(
@@ -185,7 +182,7 @@ export const updateProfile = async (req, res) => {
       const { password: _, ...userWithoutPassword } = user;
       return res.json({
         success: true,
-        message: 'Admin Profile updated successfully in PostgreSQL DB! 👤✨',
+        message: 'Admin Profile updated successfully in PostgreSQL DB!',
         user: userWithoutPassword
       });
     } catch (dbErr) {
@@ -243,7 +240,7 @@ export const changePassword = async (req, res) => {
 
         return res.json({
           success: true,
-          message: 'Password updated & hashed in PostgreSQL DB successfully! 🔒'
+          message: 'Password updated & hashed in PostgreSQL DB successfully! '
         });
       }
     } catch (dbErr) {

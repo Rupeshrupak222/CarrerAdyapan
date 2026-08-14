@@ -60,7 +60,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
 
   return (
     <header
-      className="sticky top-0 z-30 border-b transition-all backdrop-blur-md"
+      className="sticky top-0 z-50 border-b transition-all backdrop-blur-xl shadow-md"
       style={navStyle}
     >
       <div className="flex items-center justify-between px-3 py-2.5 sm:px-6 sm:py-3 gap-2">
@@ -84,8 +84,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
           {/* Search Input */}
           <div className="relative flex-1 max-w-[140px] xs:max-w-[200px] sm:max-w-xs md:max-w-sm lg:max-w-md">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none" style={{ color: '#f59e0b' }}>
-              🔍
-            </span>
+              </span>
             <input
               type="text"
               value={searchQuery}
@@ -129,9 +128,35 @@ const Navbar = ({ toggleMobileSidebar }) => {
             }
             title="Switch Theme"
           >
-            <span className="hidden sm:inline">{theme === 'dark' ? '🌙 Dark Mode' : '☀️ Light Mode'}</span>
-            <span className="sm:hidden">{theme === 'dark' ? '🌙' : '☀️'}</span>
+            <span className="hidden sm:inline">{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
+            <span className="sm:hidden">{theme === 'dark' ? 'Dark' : 'Light'}</span>
           </button>
+
+          {/* AI Copilot Button */}
+          <Link
+            to="/assistant"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-all shadow-md hover:scale-105 active:scale-95"
+            style={{
+              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+              color: '#ffffff',
+              boxShadow: '0 3px 12px rgba(245, 158, 11, 0.4)',
+            }}
+          >
+            <span>AI Copilot</span>
+            <span className="px-1.5 py-0.5 text-[9px] font-extrabold rounded-full bg-white/25 text-white">AI</span>
+          </Link>
+
+          {/* Contact Us Button */}
+          <Link
+            to="/contact"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-all border hover:border-amber-400 cursor-pointer"
+            style={theme === 'dark'
+              ? { background: 'rgba(245, 158, 11,0.15)', color: '#f59e0b', borderColor: 'rgba(245, 158, 11,0.3)' }
+              : { background: '#fdfaf6', color: '#1a1a2e', borderColor: '#e0d8d0' }
+            }
+          >
+            Contact Us
+          </Link>
 
           {/* Careers Portal */}
           <Link
@@ -144,7 +169,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
               borderColor: 'rgba(245, 158, 11,0.3)',
             }}
           >
-            <span>🌐 Careers ↗</span>
+            <span>Careers ↗</span>
           </Link>
 
           {/* Notifications Bell */}
@@ -155,7 +180,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
               style={{ color: theme === 'dark' ? '#94a3b8' : '#6b7280' }}
               title="Notifications"
             >
-              <span className="text-base">🔔</span>
+              <span className="text-base"></span>
               {unreadCount > 0 && (
                 <span
                   className="absolute top-0.5 right-0.5 px-1.5 py-0.2 font-bold text-[9px] rounded-full text-white"
@@ -182,7 +207,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
                   }
                 >
                   <span className="text-xs font-bold" style={{ color: theme === 'dark' ? '#f1f5f9' : '#1a1a2e' }}>
-                    🔔 Applicant Alerts
+                     Applicant Alerts
                   </span>
                   <span
                     className="text-[10px] font-bold px-2 py-0.5 rounded-full border"
@@ -275,7 +300,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
                   onMouseEnter={(e) => { e.currentTarget.style.background = theme === 'dark' ? 'rgba(245, 158, 11,0.12)' : '#fdfaf6'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                 >
-                  <span>👤</span> View Admin Profile
+                  View Admin Profile
                 </Link>
                 <Link
                   to="/careers"
@@ -285,7 +310,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
                   onMouseEnter={(e) => { e.currentTarget.style.background = theme === 'dark' ? 'rgba(245, 158, 11,0.12)' : '#fdfaf6'; e.currentTarget.style.color = '#f59e0b'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = theme === 'dark' ? '#cbd5e1' : '#4b5563'; }}
                 >
-                  <span>🌐</span> Public Careers Portal
+                  Public Careers Portal
                 </Link>
                 <Link
                   to="/assistant"
@@ -295,7 +320,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
                   onMouseEnter={(e) => { e.currentTarget.style.background = theme === 'dark' ? 'rgba(245, 158, 11,0.12)' : '#fdfaf6'; e.currentTarget.style.color = '#f59e0b'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = theme === 'dark' ? '#cbd5e1' : '#4b5563'; }}
                 >
-                  <span>🤖</span> AI Hiring Copilot
+                  AI Hiring Copilot
                 </Link>
                 <div className="border-t my-1" style={theme === 'dark' ? { borderColor: 'rgba(245, 158, 11,0.15)' } : { borderColor: '#f0e8df' }} />
                 <button
@@ -305,7 +330,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
                   onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239,68,68,0.06)'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                 >
-                  <span>🚪</span> Sign Out
+                  Sign Out
                 </button>
               </div>
             )}

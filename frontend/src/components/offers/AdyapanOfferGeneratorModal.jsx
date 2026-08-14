@@ -204,7 +204,7 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
     }
 
     if (onOfferSaved) onOfferSaved();
-    toast.success(`Offer Letter details saved successfully for ${selectedCandidates.length} candidate(s)! 💾✨`);
+    toast.success(`Offer Letter details saved successfully for ${selectedCandidates.length} candidate(s)! `);
     onClose();
   };
 
@@ -247,7 +247,7 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
       }
 
       if (onOfferSaved) onOfferSaved();
-      toast.success(`Downloaded official Adyapan Offer Letter PDF for ${selectedCandidates.length} candidate(s)! 📥📄`, { id: toastId });
+      toast.success(`Downloaded official Adyapan Offer Letter PDF for ${selectedCandidates.length} candidate(s)! `, { id: toastId });
     } catch (err) {
       toast.error('Failed to download PDF offer letter', { id: toastId });
     } finally {
@@ -297,7 +297,7 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
 
     setIsSendingEmails(false);
     if (onOfferSaved) onOfferSaved();
-    toast.success(`Successfully dispatched official Adyapan Offer Letters to ${successCount} candidate(s)! ✉️🎉`);
+    toast.success(`Successfully dispatched official Adyapan Offer Letters to ${successCount} candidate(s)! `);
   };
 
   const handleCloseAndSave = async () => {
@@ -331,8 +331,7 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 print:hidden">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl font-bold">
-              📄
-            </div>
+              </div>
             <div>
               <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 Adyapan Official 4-Page Offer Letter Generator
@@ -352,7 +351,7 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
               className="px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all flex items-center gap-2"
               title="Save offer letter edits into system"
             >
-              <span>💾</span> Save PDF ({selectedCandidates.length})
+              Save PDF ({selectedCandidates.length})
             </button>
 
             <button
@@ -360,7 +359,7 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
               disabled={isSendingEmails || selectedCandidates.length === 0}
               className="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm transition-all flex items-center gap-2 disabled:opacity-50"
             >
-              <span>✉️</span> {isSendingEmails ? 'Sending...' : `Send Emails (${selectedCandidates.length})`}
+              {isSendingEmails ? 'Sending...' : `Send Emails (${selectedCandidates.length})`}
             </button>
 
             <button
@@ -368,7 +367,7 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
               className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               title="Save changes and close"
             >
-              ✕
+              
             </button>
           </div>
         </div>
@@ -383,7 +382,7 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
             <div className="bg-white dark:bg-slate-800/80 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
-                  <span>👥</span> Target Candidates ({selectedCandidates.length} Selected)
+                  Target Candidates ({selectedCandidates.length} Selected)
                 </h3>
                 <button
                   onClick={handleSelectAllCandidates}
@@ -424,7 +423,7 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
               <div className="pt-2 border-t border-slate-100 dark:border-slate-700">
                 <details className="text-xs group">
                   <summary className="font-semibold text-slate-700 dark:text-slate-300 cursor-pointer flex items-center gap-1 text-amber-600 dark:text-amber-400">
-                    ➕ Add Custom Candidate Names (Bulk Paste)
+                     Add Custom Candidate Names (Bulk Paste)
                   </summary>
                   <div className="mt-2 space-y-2">
                     <textarea
@@ -448,7 +447,7 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
             {/* Offer Fields Customizer Form */}
             <div className="bg-white dark:bg-slate-800/80 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
-                <span>📝</span> Offer Letter Parameters
+                Offer Letter Parameters
               </h3>
 
               <div className="grid grid-cols-2 gap-3 text-xs">
@@ -456,7 +455,7 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
                 {activeCandidate && (
                   <div className="col-span-2 p-3 bg-white/70 dark:bg-amber-950/30 rounded-xl border border-amber-300 dark:border-amber-900/60 space-y-2.5">
                     <div className="text-[11px] font-bold text-amber-900 dark:text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
-                      <span>👤</span> Candidate Name & Details (Edit Live)
+                      Candidate Name & Details (Edit Live)
                     </div>
 
                     <div>

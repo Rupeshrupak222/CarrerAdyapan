@@ -4,6 +4,7 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import BackButton from '../../components/common/BackButton';
 import { candidateService } from '../../services/candidateService';
 import { offerService } from '../../services/offerService';
+import { interviewService } from '../../services/interviewService';
 import {
   getStoredCandidates,
   calculateRealAIScore,
@@ -21,8 +22,17 @@ const CandidateDetails = () => {
   const [loading, setLoading] = useState(true);
   const [aiScoring, setAiScoring] = useState(false);
 
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [scheduleFormData, setScheduleFormData] = useState({
+    type: 'SALES_PITCH_ROUND',
+    scheduledAt: '',
+    duration: 30,
+    meetingLink: 'https://meet.google.com/adyapan-hiring-call',
+  });
+
   const [showEditOfferModal, setShowEditOfferModal] = useState(false);
   const [editingOfferData, setEditingOfferData] = useState(null);
+  const [interviews, setInterviews] = useState([]);
   const [viewingPdfUrl, setViewingPdfUrl] = useState(null);
   const [showPdfModal, setShowPdfModal] = useState(false);
 
@@ -30,7 +40,43 @@ const CandidateDetails = () => {
 
   useEffect(() => {
     fetchCandidate();
+    fetchInterviewsData();
+
+    const handleSync = () => {
+      fetchCandidate();
+      fetchInterviewsData();
+    };
+
+    window.addEventListener('storage', handleSync);
+    window.addEventListener('adyapan_data_sync', handleSync);
+
+    return () => {
+      window.removeEventListener('storage', handleSync);
+      window.removeEventListener('adyapan_data_sync', handleSync);
+    };
   }, [id]);
+
+  const fetchInterviewsData = async () => {
+    let list = [];
+    try {
+      const res = await interviewService.getAllInterviews(true);
+      list = res?.interviews || [];
+    } catch (e) {}
+    try {
+      const localStr = localStorage.getItem('adyapan_interviews');
+      if (localStr) {
+        const localList = JSON.parse(localStr);
+        const map = new Map();
+        list.forEach((i) => map.set(i.id, i));
+        localList.forEach((i) => {
+          if (!map.has(i.id)) map.set(i.id, i);
+          else map.set(i.id, { ...map.get(i.id), ...i });
+        });
+        list = Array.from(map.values());
+      }
+    } catch (e) {}
+    setInterviews(list);
+  };
 
   const fetchCandidate = async () => {
     setLoading(true);
@@ -192,7 +238,7 @@ const CandidateDetails = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      toast.success(`Downloading original file: ${fileName} 📥`);
+      toast.success(`Downloading original file: ${fileName} `);
       return;
     }
 
@@ -221,7 +267,7 @@ const CandidateDetails = () => {
         link.click();
         document.body.removeChild(link);
         setTimeout(() => URL.revokeObjectURL(blobUrl), 3000);
-        toast.success(`Downloaded original file: ${fileName} 📥`);
+        toast.success(`Downloaded original file: ${fileName} `);
         return;
       } catch (e) {
         console.error('Base64 decode error:', e);
@@ -229,6 +275,62 @@ const CandidateDetails = () => {
     }
 
     toast.error('No uploaded resume file found for this candidate');
+  };
+
+  const handleOpenScheduleModal = () => {
+    if (!candidate) return;
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(11, 0, 0, 0);
+    const formattedDateTime = new Date(tomorrow.getTime() - (tomorrow.getTimezoneOffset() * 60000))
+      .toISOString()
+      .slice(0, 16);
+
+    setScheduleFormData({
+      type: 'SALES_PITCH_ROUND',
+      scheduledAt: formattedDateTime,
+      duration: 30,
+      meetingLink: 'https://meet.google.com/adyapan-hiring-call',
+    });
+    setShowScheduleModal(true);
+  };
+
+  const handleConfirmSchedule = async (e) => {
+    e.preventDefault();
+    if (!candidate) return;
+
+    const fullCandName = `${candidate.firstName || ''} ${candidate.lastName || ''}`.trim() || 'Candidate';
+    const newInterviewData = {
+      id: `int-${Date.now()}`,
+      candidateName: fullCandName,
+      candidateEmail: candidate.email || 'candidate@example.com',
+      jobTitle: candidate.currentPosition || 'Business Development Associate (BDA)',
+      candidateId: candidate.id,
+      applicationId: candidate.applications?.[0]?.id || null,
+      type: scheduleFormData.type || 'SALES_PITCH_ROUND',
+      scheduledAt: scheduleFormData.scheduledAt ? new Date(scheduleFormData.scheduledAt).toISOString() : new Date().toISOString(),
+      duration: parseInt(scheduleFormData.duration) || 30,
+      meetingLink: scheduleFormData.meetingLink || 'https://meet.google.com/adyapan-hiring-call',
+      notes: `Scheduled interview for ${fullCandName}`,
+      status: 'SCHEDULED',
+    };
+
+    try {
+      await interviewService.createInterview(newInterviewData);
+    } catch (err) {
+      console.warn('DB interview create fallback:', err.message);
+    }
+
+    try {
+      const key = 'adyapan_interviews';
+      const existing = JSON.parse(localStorage.getItem(key) || '[]');
+      const updated = [newInterviewData, ...existing.filter((i) => i.id !== newInterviewData.id)];
+      localStorage.setItem(key, JSON.stringify(updated));
+    } catch (e) {}
+
+    toast.success(`Interview scheduled for ${fullCandName} & saved to Interviews directory!`);
+    setShowScheduleModal(false);
+    navigate('/interviews');
   };
 
   const handleRunAIScreening = async () => {
@@ -281,7 +383,7 @@ const CandidateDetails = () => {
         atsBreakdown: res?.atsResult?.breakdown || updated.aiBreakdown
       }).catch(() => null);
 
-      toast.success(`Automated AI ATS Audit Complete! Score updated & saved to Database: ${newScore}% ⚡`);
+      toast.success(`Automated AI ATS Audit Complete! Score updated & saved to Database: ${newScore}% `);
     } catch (e) {
       toast.error('Failed to calculate automatic ATS score');
     } finally {
@@ -293,7 +395,7 @@ const CandidateDetails = () => {
     if (!candidate) return;
     const updated = { ...candidate, status: newStatus };
     setCandidate(updated);
-    toast.success(`Candidate pipeline updated to ${newStatus}! ⚡`);
+    toast.success(`Candidate pipeline updated to ${newStatus}! `);
   };
 
   const handleDeleteCandidate = async () => {
@@ -323,7 +425,7 @@ const CandidateDetails = () => {
       localStorage.setItem('adyapan_interviews', JSON.stringify(updatedInterviews));
     } catch (e) {}
 
-    toast.success(`Candidate "${candName}" & all linked data permanently deleted from DB! 🗑️`);
+    toast.success(`Candidate "${candName}" & all linked data permanently deleted from DB! `);
     navigate('/candidates');
   };
 
@@ -390,7 +492,7 @@ const CandidateDetails = () => {
       },
     }));
 
-    toast.success(`Official Offer Letter for ${editingOfferData.candidateName} updated & saved! 📄✨`);
+    toast.success(`Official Offer Letter for ${editingOfferData.candidateName} updated & saved! `);
     setShowEditOfferModal(false);
 
     if (showPdfModal) {
@@ -424,7 +526,7 @@ const CandidateDetails = () => {
       setViewingPdfUrl(targetUrl);
       setShowPdfModal(true);
 
-      toast.success(`Opened PDF Offer Letter Preview for ${fullCandName}! 👁️📄`, { id: 'cand-pdf-toast' });
+      toast.success(`Opened PDF Offer Letter Preview for ${fullCandName}! `, { id: 'cand-pdf-toast' });
     } catch (err) {
       toast.error('Failed to generate PDF offer letter preview', { id: 'cand-pdf-toast' });
     }
@@ -486,6 +588,27 @@ const CandidateDetails = () => {
   const offerJoining = candidate.offerDetails?.joiningDate || '2026-09-01';
   const offerTerms = candidate.offerDetails?.customTerms || 'Standard Adyapan Edutech employment terms apply.';
 
+  const candInterview = interviews.find((i) => {
+    if (!i) return false;
+    const cId = id ? String(id).trim().toLowerCase() : '';
+    const cEmail = email ? String(email).trim().toLowerCase() : '';
+    const cName = `${firstName || ''} ${lastName || ''}`.trim().toLowerCase();
+
+    const iCandId = i.candidateId || i.application?.candidateId || i.application?.candidate?.id;
+    if (cId && iCandId && String(iCandId).trim().toLowerCase() === cId) return true;
+
+    const iEmail = (i.candidateEmail || i.application?.candidate?.email || '').trim().toLowerCase();
+    if (cEmail && iEmail && cEmail === iEmail) return true;
+
+    const iName = (i.candidateName || `${i.application?.candidate?.firstName || ''} ${i.application?.candidate?.lastName || ''}`).trim().toLowerCase();
+    if (cName && iName && cName.length > 2 && cName === iName) return true;
+
+    return false;
+  });
+
+  const isCompleted = candInterview?.status === 'COMPLETED' || candidate?.status === 'INTERVIEWED' || candidate?.status === 'COMPLETED';
+  const isScheduled = candInterview?.status === 'SCHEDULED' || candidate?.status === 'SCHEDULED' || candidate?.status === 'INTERVIEW_SCHEDULED';
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -505,19 +628,32 @@ const CandidateDetails = () => {
                 {lastName.charAt(0)}
               </div>
               <div className="space-y-1">
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2.5">
                   <h1 className="text-2xl font-bold">{firstName} {lastName}</h1>
                   <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
                     ● {isStudent ? 'Student / Fresher' : `Working (${currentCompanyTenure})`}
                   </span>
+                  {isCompleted ? (
+                    <span className="px-2.5 py-0.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 rounded-full border border-emerald-500/30">
+                      ● Interview Completed
+                    </span>
+                  ) : isScheduled ? (
+                    <span className="px-2.5 py-0.5 text-xs font-bold text-blue-700 dark:text-blue-300 bg-blue-500/15 rounded-full border border-blue-500/30">
+                      ● Interview Scheduled {candInterview && candInterview.scheduledAt ? `(${new Date(candInterview.scheduledAt).toLocaleDateString([], { month: 'short', day: 'numeric' })})` : ''}
+                    </span>
+                  ) : (
+                    <span className="px-2.5 py-0.5 text-xs font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-full border border-slate-200 dark:border-slate-700">
+                      ● Interview Not Scheduled
+                    </span>
+                  )}
                 </div>
                 <p className="text-xs font-normal text-slate-600 dark:text-slate-300">
                   {currentPosition} {currentCompany ? (isStudent ? `(${currentCompany})` : `• ${currentCompany}`) : ''}
                 </p>
                 <div className="flex flex-wrap gap-4 pt-1 text-xs font-normal text-slate-500 dark:text-slate-400">
-                  <span>📧 {email}</span>
-                  <span>📱 {phone}</span>
-                  <span>📍 {location}</span>
+                  <span> {email}</span>
+                  <span> {phone}</span>
+                  <span>{location}</span>
                 </div>
               </div>
             </div>
@@ -529,7 +665,7 @@ const CandidateDetails = () => {
                 className={`px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all flex items-center gap-1.5 ${theme === 'dark' ? 'bg-slate-950 text-slate-200 border-slate-800' : 'bg-slate-100 text-slate-700 border-slate-200'
                   }`}
               >
-                <span>📥</span> Download Resume
+                Download Resume
               </button>
 
               <button
@@ -537,7 +673,14 @@ const CandidateDetails = () => {
                 disabled={aiScoring}
                 className="px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-md transition-all flex items-center gap-1.5"
               >
-                <span>🤖</span> {aiScoring ? 'Auditing Resume...' : 'Auto AI ATS Audit'}
+                {aiScoring ? 'Auditing Resume...' : 'Auto AI ATS Audit'}
+              </button>
+
+              <button
+                onClick={handleOpenScheduleModal}
+                className="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                Schedule Interview
               </button>
 
               <button
@@ -545,9 +688,56 @@ const CandidateDetails = () => {
                 className="px-3.5 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 hover:bg-rose-100 rounded-xl transition-all flex items-center gap-1.5"
                 title="Delete candidate permanently from PostgreSQL DB and local store"
               >
-                <span>🗑️</span> Delete Candidate
+                Delete Candidate
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* Interview Status Banner Card */}
+        <div className={`p-5 rounded-3xl border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+          isCompleted
+            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-950 dark:text-emerald-200'
+            : isScheduled
+              ? 'bg-blue-500/10 border-blue-500/20 text-blue-950 dark:text-blue-200'
+              : 'bg-amber-500/10 border-amber-500/20 text-amber-950 dark:text-amber-200'
+        }`}>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
+              <span>● Interview Status:</span>
+              <span>
+                {isCompleted
+                  ? 'Completed'
+                  : isScheduled
+                    ? 'Scheduled'
+                    : 'Not Scheduled'}
+              </span>
+            </div>
+            <p className="text-xs font-normal">
+              {isCompleted
+                ? `Interview round (${candInterview?.type?.replace(/_/g, ' ') || 'Sales Pitch'}) is completed.`
+                : isScheduled
+                  ? `Scheduled Round: ${candInterview?.type?.replace(/_/g, ' ') || 'Sales Pitch'} ${candInterview && candInterview.scheduledAt ? `on ${new Date(candInterview.scheduledAt).toLocaleString([], { dateStyle: 'full', timeStyle: 'short' })}` : ''}`
+                  : 'No interview has been scheduled for this candidate yet. Click "Schedule Interview" to assign a date & time.'}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            {isScheduled || isCompleted ? (
+              <Link
+                to="/interviews"
+                className="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all shadow-sm flex items-center gap-1"
+              >
+                View in Interviews Directory →
+              </Link>
+            ) : (
+              <button
+                onClick={handleOpenScheduleModal}
+                className="px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition-all shadow-sm cursor-pointer"
+              >
+                + Schedule Interview Now
+              </button>
+            )}
           </div>
         </div>
 
@@ -584,7 +774,7 @@ const CandidateDetails = () => {
         }`}>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
             <div className="flex items-center gap-2.5">
-              <span className="text-xl">📊</span>
+              <span className="text-xl"></span>
               <div>
                 <h3 className="text-base font-bold tracking-tight">Deterministic ATS Scoring Architecture Breakdown</h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 font-normal">
@@ -593,7 +783,7 @@ const CandidateDetails = () => {
               </div>
             </div>
             <span className="px-3.5 py-1 text-xs font-extrabold rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-300 self-start sm:self-auto shrink-0">
-              ⚡ Deterministic Score: {aiScore}%
+              Deterministic Score: {aiScore}%
             </span>
           </div>
 
@@ -642,7 +832,7 @@ const CandidateDetails = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs font-semibold">
                 <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-slate-900 dark:text-white space-y-1">
                   <div className="flex items-center justify-between">
-                    <span>🎯 Keyword Matching</span>
+                    <span>Keyword Matching</span>
                     <span className="text-amber-700 dark:text-amber-300 font-bold">{kwPts} / 20 Pts</span>
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 font-normal">Role keywords density & title match</p>
@@ -650,7 +840,7 @@ const CandidateDetails = () => {
 
                 <div className="p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-slate-900 dark:text-white space-y-1">
                   <div className="flex items-center justify-between">
-                    <span>💡 Skills Matching</span>
+                    <span> Skills Matching</span>
                     <span className="text-indigo-700 dark:text-indigo-300 font-bold">{skPts} / 30 Pts</span>
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 font-normal">Core skill overlap & verified stack</p>
@@ -658,7 +848,7 @@ const CandidateDetails = () => {
 
                 <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-slate-900 dark:text-white space-y-1">
                   <div className="flex items-center justify-between">
-                    <span>💼 Experience Matching</span>
+                    <span>Experience Matching</span>
                     <span className="text-emerald-700 dark:text-emerald-300 font-bold">{expPts} / 20 Pts</span>
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 font-normal">Experience duration vs required years</p>
@@ -666,7 +856,7 @@ const CandidateDetails = () => {
 
                 <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-slate-900 dark:text-white space-y-1">
                   <div className="flex items-center justify-between">
-                    <span>🎓 Education Matching</span>
+                    <span>Education Matching</span>
                     <span className="text-blue-700 dark:text-blue-300 font-bold">{eduPts} / 10 Pts</span>
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 font-normal">Educational degree level & field alignment</p>
@@ -674,7 +864,7 @@ const CandidateDetails = () => {
 
                 <div className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-slate-900 dark:text-white space-y-1">
                   <div className="flex items-center justify-between">
-                    <span>🌐 Semantic Matching</span>
+                    <span>Semantic Matching</span>
                     <span className="text-purple-700 dark:text-purple-300 font-bold">{semPts} / 10 Pts</span>
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 font-normal">Domain relevance & contextual fit</p>
@@ -682,7 +872,7 @@ const CandidateDetails = () => {
 
                 <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-slate-900 dark:text-white space-y-1">
                   <div className="flex items-center justify-between">
-                    <span>⏱️ Required Criteria</span>
+                    <span>Required Criteria</span>
                     <span className="text-rose-700 dark:text-rose-300 font-bold">{reqPts} / 10 Pts</span>
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 font-normal">Notice period & location availability</p>
@@ -695,7 +885,7 @@ const CandidateDetails = () => {
           {aiReason && (
             <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-normal text-slate-700 dark:text-slate-300 space-y-1">
               <div className="font-bold text-slate-900 dark:text-white flex items-center justify-between">
-                <span className="flex items-center gap-1.5">🤖 Personalized AI Audit Explanation:</span>
+                <span className="flex items-center gap-1.5">Personalized AI Audit Explanation:</span>
                 <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30">
                   Recommendation: {candidate.atsBreakdown?.finalRecommendation || candidate.atsBreakdown?.evaluationDetails?.finalRecommendation || (aiScore >= 85 ? 'Strong Match' : (aiScore >= 70 ? 'Good Match' : (aiScore >= 50 ? 'Moderate Match' : 'Weak Match')))}
                 </span>
@@ -714,14 +904,14 @@ const CandidateDetails = () => {
             const lossList = evalDetails.hiringLoss || candidate.hiringLoss || [
               `Training Bandwidth Loss: Key skill gaps require initial internal training before full target throughput.`,
             ];
-            const verdict = evalDetails.hiringVerdict || candidate.hiringVerdict || (aiScore >= 85 ? 'HIGH RETURN / LOW RISK HIRE 🌟' : (aiScore >= 70 ? 'MODERATE RETURN / MANAGEABLE RISK 👍' : 'CONDITIONAL HIRE / REQUIRES UPSKILLING ⚠️'));
+            const verdict = evalDetails.hiringVerdict || candidate.hiringVerdict || (aiScore >= 85 ? 'HIGH RETURN / LOW RISK HIRE ' : (aiScore >= 70 ? 'MODERATE RETURN / MANAGEABLE RISK ' : 'CONDITIONAL HIRE / REQUIRES UPSKILLING '));
 
             return (
               <div className={`p-5 rounded-3xl border shadow-md space-y-4 transition-all ${theme === 'dark' ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-amber-300/80 text-slate-900'
                 }`}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
                   <div className="flex items-center gap-2.5">
-                    <span className="text-2xl">📊</span>
+                    <span className="text-2xl"></span>
                     <div>
                       <h4 className="text-base font-bold tracking-tight text-amber-600 dark:text-amber-400">
                         Executive Hiring ROI Analysis (Profit vs Potential Loss Risk)
@@ -740,7 +930,7 @@ const CandidateDetails = () => {
                   {/* Expected Business Profit / Pros Card */}
                   <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-slate-900 dark:text-white space-y-2">
                     <div className="font-extrabold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5 text-xs uppercase tracking-wide">
-                      <span>📈 Expected Business Profit & Pros (Why Hire)</span>
+                      <span> Expected Business Profit & Pros (Why Hire)</span>
                     </div>
                     <ul className="space-y-2 text-slate-800 dark:text-emerald-100 text-xs list-disc list-inside font-medium leading-relaxed">
                       {profitList.map((p, i) => (
@@ -752,7 +942,7 @@ const CandidateDetails = () => {
                   {/* Potential Business Loss & Risk Card */}
                   <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-slate-900 dark:text-white space-y-2">
                     <div className="font-extrabold text-rose-700 dark:text-rose-300 flex items-center gap-1.5 text-xs uppercase tracking-wide">
-                      <span>📉 Potential Business Loss & Risks (What to Watch Out)</span>
+                      <span> Potential Business Loss & Risks (What to Watch Out)</span>
                     </div>
                     <ul className="space-y-2 text-slate-800 dark:text-rose-100 text-xs list-disc list-inside font-medium leading-relaxed">
                       {lossList.map((l, i) => (
@@ -769,7 +959,7 @@ const CandidateDetails = () => {
           <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-base">🔍</span>
+                <span className="text-base"></span>
                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
                   ATS Resume Keyword Extraction & Density Engine
                 </h4>
@@ -782,12 +972,12 @@ const CandidateDetails = () => {
             {/* Matched Keywords Grid */}
             <div className="space-y-1.5">
               <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide block">
-                ✓ Matched Keywords Found in Resume
+                 Matched Keywords Found in Resume
               </span>
               <div className="flex flex-wrap gap-2">
                 {(candidate.aiBreakdown?.matchedSkills || (Array.isArray(candidate.skills) && candidate.skills.length > 0 ? candidate.skills : ['EdTech Sales', 'Student Counselling', 'Telesales', 'Target Handling', 'Communication'])).map((kw, idx) => (
                   <span key={idx} className="px-3 py-1 text-xs font-semibold rounded-xl bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20 flex items-center gap-1.5">
-                    <span>✓</span> {kw}
+                    {kw}
                   </span>
                 ))}
               </div>
@@ -797,7 +987,7 @@ const CandidateDetails = () => {
             {(candidate.aiBreakdown?.missingSkills || ['Objection Handling', 'Cold Calling']).length > 0 && (
               <div className="space-y-1.5 pt-2">
                 <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wide block">
-                  ⚠️ Missing Keywords for Target Role ({currentPosition})
+                   Missing Keywords for Target Role ({currentPosition})
                 </span>
                 <div className="flex flex-wrap gap-2">
                   {(candidate.aiBreakdown?.missingSkills || ['Objection Handling', 'Cold Calling']).map((kw, idx) => (
@@ -817,8 +1007,7 @@ const CandidateDetails = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-3">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-lg font-bold">
-                📄
-              </div>
+                </div>
               <div>
                 <h2 className="text-base font-bold flex items-center gap-2">
                   <span>Candidate Official Offer Letter & Package</span>
@@ -837,14 +1026,14 @@ const CandidateDetails = () => {
                 onClick={handleViewCandidatePdfPreview}
                 className="px-3.5 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 hover:bg-emerald-100 rounded-xl transition-all flex items-center gap-1.5"
               >
-                <span>👁️</span> View Offer PDF Preview
+                View Offer PDF Preview
               </button>
 
               <button
                 onClick={handleOpenEditOfferModal}
                 className="px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition-all flex items-center gap-1.5"
               >
-                <span>✏️</span> Edit Offer Terms & Salary
+                Edit Offer Terms & Salary
               </button>
             </div>
           </div>
@@ -868,7 +1057,7 @@ const CandidateDetails = () => {
 
           {offerTerms && (
             <p className="text-xs text-slate-600 dark:text-slate-300 font-medium italic pt-1">
-              <strong>📝 Agreement Terms:</strong> {offerTerms}
+              <strong> Agreement Terms:</strong> {offerTerms}
             </p>
           )}
         </div>
@@ -878,7 +1067,7 @@ const CandidateDetails = () => {
           <div className={`rounded-2xl border p-5 shadow-sm space-y-3 ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
             }`}>
             <h2 className="text-sm font-bold border-b border-slate-100 dark:border-slate-800 pb-2.5 flex items-center justify-between">
-              <span>🏢 Current Work Role & Organization Tenure</span>
+              <span> Current Work Role & Organization Tenure</span>
               <span className="text-xs font-semibold text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 px-2.5 py-0.5 rounded-full">
                 Tenure: {currentCompanyTenure}
               </span>
@@ -899,7 +1088,7 @@ const CandidateDetails = () => {
         <div className={`rounded-2xl border p-5 shadow-sm space-y-3 ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
           }`}>
           <h2 className="text-sm font-bold border-b border-slate-100 dark:border-slate-800 pb-2.5">
-            🎓 Educational Qualification & Study Details
+            Educational Qualification & Study Details
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-medium">
             <div className={`p-3 rounded-xl border ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'
@@ -928,7 +1117,7 @@ const CandidateDetails = () => {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
             <div>
               <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <span>🧠 AI Candidate Executive Evaluation & Hiring Recommendation Report</span>
+                <span> AI Candidate Executive Evaluation & Hiring Recommendation Report</span>
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                 Detailed comparison against role requirements, key strengths, skill gaps, and hiring pros & cons.
@@ -937,7 +1126,7 @@ const CandidateDetails = () => {
 
             <div className="flex items-center gap-3 shrink-0">
               <div className="px-3.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center gap-1.5">
-                <span>⚡ ATS Match:</span>
+                <span>ATS Match:</span>
                 <span className="text-sm font-extrabold">{aiScore}%</span>
               </div>
             </div>
@@ -946,7 +1135,7 @@ const CandidateDetails = () => {
           {/* Section 1: Role Requirements vs Candidate Qualifications Table */}
           <div className="space-y-2">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              📊 Job Requirements vs Candidate Qualification Comparison
+              Job Requirements vs Candidate Qualification Comparison
             </h3>
 
             <div className={`rounded-xl border overflow-hidden text-xs font-medium ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50/60 border-slate-200'
@@ -969,7 +1158,7 @@ const CandidateDetails = () => {
                 <div className="font-semibold text-slate-600 dark:text-slate-400">Total Experience</div>
                 <div>2.0+ Years Minimum</div>
                 <div className="font-semibold text-emerald-600 dark:text-emerald-400">
-                  {totalExperience} Years ({totalExperience >= 2 ? '✓ Exceeds Requirement' : (isStudent ? '🎓 Student / Fresher Applicant' : '⚠️ Below Ideal')})
+                  {totalExperience} Years ({totalExperience >= 2 ? ' Exceeds Requirement' : (isStudent ? 'Student / Fresher Applicant' : ' Below Ideal')})
                 </div>
               </div>
 
@@ -988,12 +1177,12 @@ const CandidateDetails = () => {
             <div className={`p-4 rounded-xl border space-y-2 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-emerald-50/50 border-emerald-200'
               }`}>
               <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block">
-                ✓ Verified Matched Skills & Capabilities:
+                 Verified Matched Skills & Capabilities:
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {skills.map((sk) => (
                   <span key={sk} className="px-2.5 py-1 text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 rounded-lg border border-emerald-200 dark:border-emerald-900">
-                    ✓ {sk}
+                     {sk}
                   </span>
                 ))}
               </div>
@@ -1002,7 +1191,7 @@ const CandidateDetails = () => {
             <div className={`p-4 rounded-xl border space-y-2 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-white border-amber-200'
               }`}>
               <span className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider block">
-                ⚠️ Skills Gaps / To Probe in Interview:
+                 Skills Gaps / To Probe in Interview:
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {(candidate.aiBreakdown?.missingSkills || ['Institutional B2B Partnerships', 'Enterprise Contract Closing']).map((sk) => (
@@ -1016,33 +1205,33 @@ const CandidateDetails = () => {
 
           {/* Section 3: Why Hire vs Why Not Hire Analysis */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* 🚀 Why Hire This Candidate */}
+            {/* Why Hire This Candidate */}
             <div className={`p-4 rounded-xl border space-y-2 border-l-4 border-l-emerald-500 ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
               }`}>
               <h4 className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-                <span>🚀 Why Hire {firstName}? (Key Hiring Pros & Strengths)</span>
+                <span>Why Hire {firstName}? (Key Hiring Pros & Strengths)</span>
               </h4>
               <ul className="space-y-1.5 text-xs text-slate-700 dark:text-slate-300 font-medium">
                 <li className="flex items-start gap-1.5">
-                  <span className="text-emerald-500 font-bold shrink-0">✓</span>
+                  <span className="text-emerald-500 font-bold shrink-0"></span>
                   <span><strong>Proven Domain Experience:</strong> Brings {totalExperience} years direct hands-on experience in EdTech sales and student admissions counselling.</span>
                 </li>
                 <li className="flex items-start gap-1.5">
-                  <span className="text-emerald-500 font-bold shrink-0">✓</span>
+                  <span className="text-emerald-500 font-bold shrink-0"></span>
                   <span><strong>Short Training Curve:</strong> Demonstrated strong candidate pitch capability with immediate capability to manage telesales pipeline.</span>
                 </li>
                 <li className="flex items-start gap-1.5">
-                  <span className="text-emerald-500 font-bold shrink-0">✓</span>
+                  <span className="text-emerald-500 font-bold shrink-0"></span>
                   <span><strong>Strong AI Audit Score:</strong> {aiReason}</span>
                 </li>
               </ul>
             </div>
 
-            {/* ⚠️ Why Not Hire / Potential Risks */}
+            {/*  Why Not Hire / Potential Risks */}
             <div className={`p-4 rounded-xl border space-y-2 border-l-4 border-l-amber-500 ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
               }`}>
               <h4 className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                <span>⚠️ Why Not Hire / Potential Risks (To Probe in Interview)</span>
+                <span> Why Not Hire / Potential Risks (To Probe in Interview)</span>
               </h4>
               <ul className="space-y-1.5 text-xs text-slate-700 dark:text-slate-300 font-medium">
                 <li className="flex items-start gap-1.5">
@@ -1095,8 +1284,8 @@ const CandidateDetails = () => {
           <div className={`rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl border ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
             }`}>
             <h2 className="text-base font-bold border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">
-              <span>✏️ Edit Offer Letter Terms for {editingOfferData.candidateName}</span>
-              <button onClick={() => setShowEditOfferModal(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+              <span>Edit Offer Letter Terms for {editingOfferData.candidateName}</span>
+              <button onClick={() => setShowEditOfferModal(false)} className="text-slate-400 hover:text-slate-600"></button>
             </h2>
 
             <form onSubmit={handleSaveCandidateOffer} className="space-y-3 text-xs font-medium">
@@ -1233,7 +1422,7 @@ const CandidateDetails = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3 shrink-0">
               <div>
                 <h2 className="text-base font-bold flex items-center gap-2">
-                  <span>👁️ Official PDF Offer Letter Preview: {firstName} {lastName}</span>
+                  <span>Official PDF Offer Letter Preview: {firstName} {lastName}</span>
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                   Active Global Corporate Template: <strong className="text-indigo-600 dark:text-indigo-400">{globalTemplateInfo.templateName}</strong>
@@ -1245,9 +1434,9 @@ const CandidateDetails = () => {
                   download={`${firstName}_${lastName}_Official_Offer_Letter.pdf`}
                   className="px-3.5 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition-all flex items-center gap-1.5"
                 >
-                  <span>📥</span> Download Copy
+                  Download Copy
                 </a>
-                <button onClick={() => setShowPdfModal(false)} className="text-slate-400 hover:text-slate-600 font-bold text-base px-2">✕</button>
+                <button onClick={() => setShowPdfModal(false)} className="text-slate-400 hover:text-slate-600 font-bold text-base px-2"></button>
               </div>
             </div>
 
@@ -1258,6 +1447,104 @@ const CandidateDetails = () => {
                 title={`Offer Letter PDF - ${firstName} ${lastName}`}
               />
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Schedule Interview Modal */}
+      {showScheduleModal && candidate && (
+        <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className={`rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl border ${
+            theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+          }`}>
+            <h2 className="text-base font-bold border-b border-slate-100 dark:border-slate-800 pb-3">
+              Schedule Interview for {candidate.firstName} {candidate.lastName}
+            </h2>
+            <form onSubmit={handleConfirmSchedule} className="space-y-3 text-xs font-medium">
+              <div>
+                <label className="block mb-1 font-semibold">Candidate</label>
+                <input
+                  type="text"
+                  readOnly
+                  value={`${candidate.firstName || ''} ${candidate.lastName || ''} (${candidate.email || ''})`}
+                  className={`w-full p-2.5 rounded-xl font-medium border opacity-80 ${
+                    theme === 'dark' ? 'bg-slate-950 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-semibold">Interview Round Type *</label>
+                <select
+                  value={scheduleFormData.type}
+                  onChange={(e) => setScheduleFormData({ ...scheduleFormData, type: e.target.value })}
+                  className={`w-full p-2.5 rounded-xl font-medium border ${
+                    theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                  }`}
+                >
+                  <option value="SALES_PITCH_ROUND">Sales Pitch Round (BDA)</option>
+                  <option value="HR_SCREENING">HR Screening Round</option>
+                  <option value="MANAGERIAL_ROUND">Managerial Interview</option>
+                  <option value="TECHNICAL_ROUND">Technical Sales Round</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block mb-1 font-semibold">Date & Time *</label>
+                <input
+                  type="datetime-local"
+                  required
+                  value={scheduleFormData.scheduledAt}
+                  onChange={(e) => setScheduleFormData({ ...scheduleFormData, scheduledAt: e.target.value })}
+                  className={`w-full p-2.5 rounded-xl font-medium border ${
+                    theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-semibold">Duration (Minutes)</label>
+                <select
+                  value={scheduleFormData.duration}
+                  onChange={(e) => setScheduleFormData({ ...scheduleFormData, duration: e.target.value })}
+                  className={`w-full p-2.5 rounded-xl font-medium border ${
+                    theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                  }`}
+                >
+                  <option value={30}>30 Minutes</option>
+                  <option value={45}>45 Minutes</option>
+                  <option value={60}>60 Minutes</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block mb-1 font-semibold">Meeting Link</label>
+                <input
+                  type="url"
+                  value={scheduleFormData.meetingLink}
+                  onChange={(e) => setScheduleFormData({ ...scheduleFormData, meetingLink: e.target.value })}
+                  className={`w-full p-2.5 rounded-xl font-medium border ${
+                    theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                  }`}
+                  placeholder="https://meet.google.com/..."
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button type="submit" className="flex-1 py-2.5 font-semibold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm cursor-pointer">
+                  Confirm & Schedule Interview
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowScheduleModal(false)}
+                  className={`flex-1 py-2.5 font-medium rounded-xl border ${
+                    theme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
+                  }`}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

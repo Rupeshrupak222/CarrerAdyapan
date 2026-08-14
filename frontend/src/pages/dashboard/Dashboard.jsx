@@ -120,7 +120,7 @@ const Dashboard = () => {
         jobTitle: cand.jobTitle,
         joiningDate: cand.joiningDate,
       });
-      toast.success(`Welcome Onboarding Package Email dispatched via Resend to ${cand.email}! 🚀✉️`);
+      toast.success(`Welcome Onboarding Package Email dispatched via Resend to ${cand.email}! `);
     } catch (e) {
       toast.error('Failed to send welcome email');
     } finally {
@@ -206,18 +206,16 @@ const Dashboard = () => {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Welcome Header Banner */}
-        <div className={`p-6 md:p-8 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden shadow-sm ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
-        }`}>
+        <div className={`p-6 md:p-8 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden shadow-sm ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+          }`}>
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
 
           <div className="space-y-2 pt-1">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-              🎓 ADYAPAN EDUTECH RECRUITMENT CONTROL CENTER
+              ADYAPAN EDUTECH RECRUITMENT CONTROL CENTER
             </div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Welcome back, {user?.name || 'Recruiter'}! 👋
-            </h1>
+              Welcome back, {user?.name || 'Recruiter'}! </h1>
             <p className="text-xs text-slate-600 dark:text-slate-300 font-normal">
               AI Screening, Automated Interview Schedules, and Offer Letter Pipeline is fully operational.
             </p>
@@ -228,13 +226,13 @@ const Dashboard = () => {
               to="/candidates"
               className="px-4 py-2.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all flex items-center gap-1.5"
             >
-              <span>👥</span> Review Candidates
+              Review Candidates
             </Link>
             <Link
               to="/offers"
               className="px-4 py-2.5 text-xs font-semibold text-amber-700 dark:text-amber-300 bg-amber-500/15 border border-amber-500/30 hover:bg-amber-600/25 rounded-xl transition-all flex items-center gap-1.5"
             >
-              <span>📄</span> Offer Letters
+              Offer Letters
             </Link>
           </div>
         </div>
@@ -249,23 +247,22 @@ const Dashboard = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="Total Applications" value={stats.totalApplications} icon="📥" change="+14% this week" trend="up" color="amber" />
-            <StatCard title="AI Screened & Qualified" value={stats.aiScreened} icon="⚡" change={`${stats.averageScore}% Avg AI Match`} trend="up" color="amber" />
-            <StatCard title="Interviews Scheduled" value={stats.interviewed} icon="📅" change="Google Meet Synced" trend="neutral" color="amber" />
-            <StatCard title="Hired Candidates" value={stats.hired} icon="🏆" change="Offers Accepted" trend="up" color="emerald" />
+            <StatCard title="Total Applications" value={stats.totalApplications} icon="" change="+14% this week" trend="up" color="amber" />
+            <StatCard title="AI Screened & Qualified" value={stats.aiScreened} icon="" change={`${stats.averageScore}% Avg AI Match`} trend="up" color="amber" />
+            <StatCard title="Interviews Scheduled" value={stats.interviewed} icon="" change="Google Meet Synced" trend="neutral" color="amber" />
+            <StatCard title="Hired Candidates" value={stats.hired} icon="" change="Offers Accepted" trend="up" color="emerald" />
           </div>
         )}
 
         {/* Hired & Selected Candidates Section */}
-        <div className={`p-6 rounded-3xl border shadow-sm space-y-5 relative overflow-hidden ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
-        }`}>
+        <div className={`p-6 rounded-3xl border shadow-sm space-y-5 relative overflow-hidden ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+          }`}>
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3.5 pt-1">
             <div>
               <h2 className="text-base font-bold flex items-center gap-2">
-                <span>🏆 Hired & Selected Candidates (Onboarding Control)</span>
+                <span>Hired & Selected Candidates (Onboarding Control)</span>
                 <span className="px-2.5 py-0.5 text-xs font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 rounded-full">
                   {selectedCandidates.length} Selected
                 </span>
@@ -288,9 +285,8 @@ const Dashboard = () => {
               selectedCandidates.map((cand) => (
                 <div
                   key={cand.id}
-                  className={`p-5 rounded-2xl border transition-all flex flex-col justify-between gap-4 ${
-                    theme === 'dark' ? 'bg-slate-950 border-slate-800 hover:border-amber-500/30' : 'bg-slate-50 border-slate-200 hover:border-amber-300'
-                  }`}
+                  className={`p-5 rounded-2xl border transition-all flex flex-col justify-between gap-4 ${theme === 'dark' ? 'bg-slate-950 border-slate-800 hover:border-amber-500/30' : 'bg-slate-50 border-slate-200 hover:border-amber-300'
+                    }`}
                 >
                   <div className="space-y-3">
                     <div className="flex items-start justify-between gap-3">
@@ -309,42 +305,45 @@ const Dashboard = () => {
                       </span>
                     </div>
 
-                    <div className={`p-3.5 rounded-xl border grid grid-cols-2 gap-2 text-xs font-normal ${
-                      theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
-                    }`}>
+                    <div className={`p-3.5 rounded-xl border grid grid-cols-2 gap-2 text-xs font-normal ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
+                      }`}>
                       <div>
                         <span className="text-slate-400 block text-[10px] font-semibold uppercase">Agreed Compensation</span>
-                        <span className="text-emerald-600 dark:text-emerald-400 font-bold">Fixed Base: ₹{cand.salary?.toLocaleString()}</span>
+                        <span className="text-emerald-600 dark:text-emerald-400 font-bold">Fixed Base: {typeof cand.salary === 'number' ? `₹${cand.salary.toLocaleString()}/- Per Month` : String(cand.salary || '₹20,000/- Per Month')}</span>
                       </div>
                       <div>
                         <span className="text-slate-400 block text-[10px] font-semibold uppercase">Target Joining Date</span>
-                        <span className="font-semibold text-slate-900 dark:text-white">📅 {cand.joiningDate}</span>
+                        <span className="font-semibold text-slate-900 dark:text-white"> {String(cand.joiningDate || '25-Aug-2026')}</span>
                       </div>
                     </div>
 
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-300">
                         <span>Onboarding Setup Progress</span>
-                        <span className="text-amber-600 dark:text-amber-400 font-bold">{cand.onboardingProgress}%</span>
+                        <span className="text-amber-600 dark:text-amber-400 font-bold">{cand.onboardingProgress || 50}%</span>
                       </div>
                       <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-amber-400 rounded-full transition-all duration-500"
-                          style={{ width: `${cand.onboardingProgress}%` }}
+                          style={{ width: `${cand.onboardingProgress || 50}%` }}
                         ></div>
                       </div>
 
                       <div className="flex flex-wrap gap-1.5 pt-1">
-                        {cand.milestones.map((m, idx) => (
+                        {(cand.milestones || [
+                          { name: 'Offer Letter Signed', done: true },
+                          { name: 'Background Audit', done: true },
+                          { name: 'IT Laptop Allocation', done: true },
+                          { name: 'Day 1 Orientation', done: false }
+                        ]).map((m, idx) => (
                           <span
                             key={idx}
-                            className={`px-2 py-0.5 text-[11px] font-medium rounded-md border ${
-                              m.done
+                            className={`px-2 py-0.5 text-[11px] font-medium rounded-md border ${m.done
                                 ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
                                 : 'bg-slate-200/60 text-slate-600 border-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
-                            }`}
+                              }`}
                           >
-                            {m.done ? '✓' : '⏳'} {m.name}
+                            {m.name}
                           </span>
                         ))}
                       </div>
@@ -357,16 +356,15 @@ const Dashboard = () => {
                       disabled={sendingWelcomeId === cand.id}
                       className="flex-1 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
                     >
-                      <span>✉️</span> {sendingWelcomeId === cand.id ? 'Sending...' : 'Send Welcome Email'}
+                      {sendingWelcomeId === cand.id ? 'Sending...' : 'Send Welcome Email'}
                     </button>
 
                     <Link
                       to={`/offers/${cand.id}`}
-                      className={`px-3 py-2 text-xs font-semibold rounded-xl border transition-all ${
-                        theme === 'dark'
+                      className={`px-3 py-2 text-xs font-semibold rounded-xl border transition-all ${theme === 'dark'
                           ? 'bg-slate-900 text-slate-200 border-slate-800 hover:bg-slate-800'
                           : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
-                      }`}
+                        }`}
                     >
                       View Offer →
                     </Link>
@@ -382,11 +380,10 @@ const Dashboard = () => {
           {loading ? (
             <ChartSkeleton />
           ) : (
-            <div className={`rounded-3xl shadow-sm border p-6 space-y-3 ${
-              theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
-            }`}>
+            <div className={`rounded-3xl shadow-sm border p-6 space-y-3 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+              }`}>
               <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <span className="text-amber-500">📊</span> Recruitment Funnel Conversion
+                <span className="text-amber-500"></span> Recruitment Funnel Conversion
               </h3>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
@@ -406,11 +403,10 @@ const Dashboard = () => {
             </div>
           )}
 
-          <div className={`rounded-3xl shadow-sm border p-6 space-y-3 ${
-            theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
-          }`}>
+          <div className={`rounded-3xl shadow-sm border p-6 space-y-3 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+            }`}>
             <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <span className="text-amber-500">📈</span> Application Inflow Trends
+              <span className="text-amber-500"></span> Application Inflow Trends
             </h3>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -439,12 +435,11 @@ const Dashboard = () => {
         {loading && recentJobs.length === 0 ? (
           <JobListSkeleton />
         ) : (
-          <div className={`rounded-3xl shadow-sm border p-6 space-y-4 ${
-            theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
-          }`}>
+          <div className={`rounded-3xl shadow-sm border p-6 space-y-4 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+            }`}>
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <span className="text-amber-500">💼</span> Current Openings (Real-Time Control)
+                <span className="text-amber-500"></span> Current Openings (Real-Time Control)
               </h3>
               <Link to="/jobs" className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline">
                 View All Openings →
@@ -457,9 +452,8 @@ const Dashboard = () => {
               ) : recentJobs.map((job) => (
                 <div
                   key={job.id || job._id}
-                  className={`flex items-center justify-between p-4 rounded-2xl border transition-colors ${
-                    theme === 'dark' ? 'bg-slate-950 border-slate-800 hover:bg-slate-800/60' : 'bg-slate-50 border-slate-200/80 hover:bg-slate-100/60'
-                  }`}
+                  className={`flex items-center justify-between p-4 rounded-2xl border transition-colors ${theme === 'dark' ? 'bg-slate-950 border-slate-800 hover:bg-slate-800/60' : 'bg-slate-50 border-slate-200/80 hover:bg-slate-100/60'
+                    }`}
                 >
                   <div>
                     <p className="text-xs font-bold text-slate-900 dark:text-white">

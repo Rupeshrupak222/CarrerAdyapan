@@ -1,8 +1,5 @@
-import pkg from '@prisma/client';
-const { PrismaClient } = pkg;
+import prisma from '../config/db.js';
 import { logger } from '../utils/logger.js';
-
-const prisma = new PrismaClient();
 
 // Create Application
 export const createApplication = async (req, res) => {

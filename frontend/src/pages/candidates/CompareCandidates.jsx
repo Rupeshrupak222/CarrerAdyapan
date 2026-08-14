@@ -74,7 +74,7 @@ const CompareCandidates = () => {
           <div className="space-y-1.5 pt-1">
             <BackButton label="Back to Candidate Directory" to="/candidates" />
             <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-              ⚡ Candidate AI Side-by-Side Comparison
+              Candidate AI Side-by-Side Comparison
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               Candidate Comparison Matrix
@@ -90,7 +90,6 @@ const CompareCandidates = () => {
               disabled={comparing}
               className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all disabled:opacity-50"
             >
-              <span>🤖</span>
               <span>{comparing ? 'Analyzing Profiles...' : 'Re-Run AI Comparison Matrix'}</span>
             </button>
           </div>
@@ -132,7 +131,7 @@ const CompareCandidates = () => {
 
                       <div className="text-right">
                         <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 rounded-full font-bold text-xs">
-                          <span>✨ {cand.score}% Match</span>
+                          <span> {cand.score}% Match</span>
                         </div>
                       </div>
                     </div>
@@ -179,7 +178,7 @@ const CompareCandidates = () => {
                       <ul className="space-y-1.5">
                         {cand.strengths.map((str) => (
                           <li key={str} className="flex items-center gap-2 text-xs font-normal text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20">
-                            <span>✅</span> {str}
+                            {str}
                           </li>
                         ))}
                       </ul>
@@ -194,7 +193,7 @@ const CompareCandidates = () => {
                             key={gap}
                             className="px-2.5 py-0.5 text-xs font-medium bg-white text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 rounded-xl border border-amber-200 dark:border-amber-900"
                           >
-                            ⚠️ {gap}
+                             {gap}
                           </span>
                         ))}
                       </div>

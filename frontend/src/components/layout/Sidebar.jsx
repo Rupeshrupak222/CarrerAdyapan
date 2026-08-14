@@ -10,14 +10,60 @@ const Sidebar = ({ isOpen, onClose }) => {
   const { theme } = useTheme();
 
   const navigation = [
-    { path: '/dashboard', label: 'Dashboard', icon: '📊' },
-    { path: '/jobs', label: 'Jobs', icon: '💼' },
-    { path: '/candidates', label: 'Candidates', icon: '👥' },
-    { path: '/interviews', label: 'Interviews', icon: '🎯' },
-    { path: '/offers', label: 'Offers', icon: '📄' },
-    { path: '/analytics', label: 'Analytics', icon: '📈' },
-    { path: '/assistant', label: 'AI Copilot', icon: '🤖', badge: 'AI' },
-    { path: '/profile', label: 'My Profile', icon: '👤' },
+    {
+      path: '/dashboard',
+      label: 'Dashboard',
+      icon: (
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-5 h-5">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+        </svg>
+      ),
+    },
+    {
+      path: '/jobs',
+      label: 'Jobs',
+      icon: (
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-5 h-5">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      ),
+    },
+    {
+      path: '/candidates',
+      label: 'Candidates',
+      icon: (
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-5 h-5">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+      ),
+    },
+    {
+      path: '/interviews',
+      label: 'Interviews',
+      icon: (
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-5 h-5">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      ),
+    },
+    {
+      path: '/offers',
+      label: 'Offers',
+      icon: (
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-5 h-5">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      ),
+    },
+    {
+      path: '/analytics',
+      label: 'Analytics',
+      icon: (
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-5 h-5">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      ),
+    },
   ];
 
   const isActive = (path) => location.pathname === path || (path !== '/dashboard' && location.pathname.startsWith(path));
@@ -55,7 +101,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               className="p-1 lg:hidden transition-colors font-bold text-sm"
               style={{ color: theme === 'dark' ? '#94a3b8' : '#6b7280' }}
             >
-              ✕
+              
             </button>
           </div>
 
@@ -93,7 +139,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                   }}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-base">{item.icon}</span>
+                    <span className="flex items-center justify-center">{item.icon}</span>
                     <span className="font-medium text-sm">{item.label}</span>
                   </div>
                   {item.badge && (
@@ -120,26 +166,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             : { borderColor: '#f0e8df', background: '#fdfaf6' }
           }
         >
-          <Link
-            to="/profile"
-            onClick={onClose}
-            className="flex items-center gap-3 p-2 rounded-xl mb-2 hover:bg-amber-500/10 transition-colors border border-transparent hover:border-amber-500/20 group"
-          >
-            <div
-              className="w-8 h-8 rounded-lg font-bold flex items-center justify-center text-xs shadow-sm shrink-0"
-              style={{ background: 'linear-gradient(135deg, #d97706, #f59e0b)', color: '#ffffff' }}
-            >
-              {user?.name?.charAt(0) || 'A'}
-            </div>
-            <div className="overflow-hidden flex-1">
-              <p className="text-xs font-semibold truncate group-hover:text-amber-500 transition-colors" style={{ color: theme === 'dark' ? '#f1f5f9' : '#1a1a2e' }}>
-                {user?.name || 'Recruiter Lead'}
-              </p>
-              <p className="text-[10px] font-medium truncate" style={{ color: theme === 'dark' ? '#64748b' : '#6b7280' }}>
-                {user?.company || 'Adyapan Edutech'}
-              </p>
-            </div>
-          </Link>
+
 
           <button
             onClick={logout}
@@ -159,7 +186,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(245, 158, 11,0.2)' : '#e8e0d8';
             }}
           >
-            <span>🚪</span> Sign Out
+            Sign Out
           </button>
         </div>
       </aside>

@@ -96,12 +96,12 @@ export const calculateRealAIScore = (skills = [], experience = 1, jobTitle = 'Bu
   };
 
   const explanation = [
-    `🎯 Keyword Matching (${keywordScore}/20): Matched job title target keywords.`,
-    `💡 Skills Matching (${skillsScore}/30): Matched ${matchedSkillsCount > 0 ? matchedSkillsCount : skillsList.length} verified key skills (${matchedLabels}).`,
-    `💼 Experience Matching (${experienceScore}/20): Demonstrated ${expNum} years relevant domain experience.`,
-    `🎓 Education Matching (${educationScore}/10): Verified educational qualification (${education}).`,
-    `🌐 Semantic Matching (${semanticScore}/10): High domain relevance to ${jobTitle}.`,
-    `⏱️ Required Criteria (${requiredCriteriaScore}/10): Met notice period (${noticePeriod}) & availability criteria.`
+    `Keyword Matching (${keywordScore}/20): Matched job title target keywords.`,
+    ` Skills Matching (${skillsScore}/30): Matched ${matchedSkillsCount > 0 ? matchedSkillsCount : skillsList.length} verified key skills (${matchedLabels}).`,
+    `Experience Matching (${experienceScore}/20): Demonstrated ${expNum} years relevant domain experience.`,
+    `Education Matching (${educationScore}/10): Verified educational qualification (${education}).`,
+    `Semantic Matching (${semanticScore}/10): High domain relevance to ${jobTitle}.`,
+    `Required Criteria (${requiredCriteriaScore}/10): Met notice period (${noticePeriod}) & availability criteria.`
   ].join(' ');
 
   return {
@@ -189,7 +189,7 @@ export const saveCandidateApplication = (formData, jobTitle = 'Business Developm
   const statusLabel = newCandidate.employmentStatus === 'STUDENT' ? 'Student' : `${newCandidate.totalExperience}Y Exp Professional`;
   const newNotif = {
     id: `notif-${Date.now()}`,
-    title: '🔔 New Candidate Application',
+    title: ' New Candidate Application',
     message: `${newCandidate.firstName} ${newCandidate.lastName} (${statusLabel}) applied for ${jobTitle}`,
     time: 'Just now',
     unread: true,
@@ -218,7 +218,7 @@ export const addCandidateNotification = (candidateName, jobTitle, score) => {
   const notifications = getStoredNotifications();
   const newNotif = {
     id: `notif-${Date.now()}`,
-    title: '🔔 New Candidate Application Received',
+    title: ' New Candidate Application Received',
     message: `${candidateName} applied for ${jobTitle}`,
     time: 'Just now',
     unread: true,

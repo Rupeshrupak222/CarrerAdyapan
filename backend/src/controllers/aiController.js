@@ -1,8 +1,5 @@
-import pkg from '@prisma/client';
-const { PrismaClient } = pkg;
+import prisma from '../config/db.js';
 import { logger } from '../utils/logger.js';
-
-const prisma = new PrismaClient();
 
 // AI Score Candidate
 export const scoreCandidate = async (req, res) => {

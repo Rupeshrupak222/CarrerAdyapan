@@ -28,7 +28,7 @@ const Register = () => {
     try {
       const result = await register(formData);
       if (result.success) {
-        toast.success('Recruiter Account created! Welcome to Adyapan Platform 🎉');
+        toast.success('Recruiter Account created! Welcome to Adyapan Platform ');
         navigate('/dashboard');
       } else {
         toast.error(result.error || 'Registration failed.');
@@ -67,8 +67,8 @@ const Register = () => {
                 }`}
               title="Click to Switch Light / Dark Mode"
             >
-              <span className="hidden sm:inline">{theme === 'dark' ? '🌙 Dark Mode' : '☀️ Light Mode'}</span>
-              <span className="sm:hidden">{theme === 'dark' ? '🌙' : '☀️'}</span>
+              <span className="hidden sm:inline">{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
+              <span className="sm:hidden">{theme === 'dark' ? '' : ''}</span>
             </button>
 
             {/* Already Have Account Button */}
@@ -76,7 +76,6 @@ const Register = () => {
               to="/login"
               className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-black text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition-all shadow-md shadow-amber-400/20 uppercase tracking-wider flex items-center gap-1.5 shrink-0"
             >
-              <span>🔐</span>
               <span className="hidden sm:inline">Sign In to Dashboard →</span>
               <span className="sm:hidden">Sign In →</span>
             </Link>
@@ -93,7 +92,7 @@ const Register = () => {
           {/* Header Title */}
           <div className="text-center space-y-2">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 text-[11px] font-black bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30 rounded-full uppercase">
-              ✨ REQUEST RECRUITER HR ACCESS
+               REQUEST RECRUITER HR ACCESS
             </div>
             <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
               Create HR Admin Account

@@ -51,7 +51,7 @@ const AnalyticsPage = () => {
           <div className="space-y-1.5 pt-1">
             <BackButton label="Back to Dashboard" to="/dashboard" />
             <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-              📊 Recruitment Analytics & Metrics
+              Recruitment Analytics & Metrics
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               Hiring Analytics & Pipeline Metrics
@@ -112,7 +112,7 @@ const AnalyticsPage = () => {
               theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-amber-200/80'
             }`}>
               <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                <span className="text-amber-500">📊</span> Hiring Pipeline Funnel
+                <span className="text-amber-500"></span> Hiring Pipeline Funnel
               </h3>
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
@@ -142,7 +142,7 @@ const AnalyticsPage = () => {
             theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-amber-200/80'
           }`}>
             <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-              <span className="text-amber-500">📈</span> Monthly Application Velocity
+              <span className="text-amber-500"></span> Monthly Application Velocity
             </h3>
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">

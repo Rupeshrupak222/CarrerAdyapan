@@ -14,16 +14,16 @@ export const extractTextFromBuffer = async (buffer, mimeType = '', filename = ''
   try {
     const isDocx = filename.endsWith('.docx') || filename.endsWith('.doc') || mimeType.includes('word');
     if (isDocx) {
-      logger.info('📄 Extracting text from DOCX resume using Mammoth...');
+      logger.info('Extracting text from DOCX resume using Mammoth...');
       const result = await mammoth.extractRawText({ buffer });
       return result.value || '';
     }
 
-    logger.info('📄 Extracting text from PDF resume using pdf-parse...');
+    logger.info('Extracting text from PDF resume using pdf-parse...');
     const pdfData = await pdfParse(buffer);
     return pdfData.text || '';
   } catch (error) {
-    logger.error('❌ Resume Text Extraction Error:', error.message);
+    logger.error('Resume Text Extraction Error:', error.message);
     return '';
   }
 };
@@ -146,7 +146,7 @@ export const calculateAtsScore = (parsedResume, job = {}) => {
       atsCategory: 'NO_RESUME_TEXT',
       matchedSkills: [],
       missingSkills: [],
-      matchReason: '❌ Resume text extraction failed or resume file was unreadable. Unable to calculate ATS score.',
+      matchReason: 'Resume text extraction failed or resume file was unreadable. Unable to calculate ATS score.',
       calculatedExp: 0,
       breakdown: {
         keywordMatching: { score: 0, maxScore: 15 },
@@ -331,9 +331,9 @@ export const calculateAtsScore = (parsedResume, job = {}) => {
 
   // Executive Hiring Verdict
   let hiringVerdict = 'HIGH RISK / LOW RETURN';
-  if (deterministicScore >= 85) hiringVerdict = 'HIGH RETURN / LOW RISK HIRE 🌟';
-  else if (deterministicScore >= 70) hiringVerdict = 'MODERATE RETURN / MANAGEABLE RISK 👍';
-  else if (deterministicScore >= 50) hiringVerdict = 'CONDITIONAL HIRE / REQUIRES UPSKILLING ⚠️';
+  if (deterministicScore >= 85) hiringVerdict = 'HIGH RETURN / LOW RISK HIRE ';
+  else if (deterministicScore >= 70) hiringVerdict = 'MODERATE RETURN / MANAGEABLE RISK ';
+  else if (deterministicScore >= 50) hiringVerdict = 'CONDITIONAL HIRE / REQUIRES UPSKILLING ';
 
   // AI Structured Explanation Output
   const breakdown = {
@@ -356,11 +356,11 @@ export const calculateAtsScore = (parsedResume, job = {}) => {
   };
 
   const explanation = [
-    `🎯 Role Title & Keywords (${titleScore + keywordsScore}/30): Matched ${matchedTitleTokens}/${titleTokens.length} title terms against ${jobTitle}.`,
-    `💡 Required Skills (${skillsScore}/35): Matched ${matchedSkills.length}/${jobRequiredSkills.length} job skills (${matchedSkills.join(', ') || 'None matched'}).`,
-    `💼 Experience (${experienceScore}/20): Candidate has ${yearsOfExperience} yrs vs ${jobReqExp} yrs required for this role.`,
-    `🎓 Education (${educationScore}/10): Qualification fit evaluated (${education[0] || 'Unspecified'}).`,
-    missingSkills.length > 0 ? `⚠️ Missing Key Skills for ${jobTitle}: ${missingSkills.join(', ')}.` : '✓ All mandatory skills verified.'
+    ` Role Title & Keywords (${titleScore + keywordsScore}/30): Matched ${matchedTitleTokens}/${titleTokens.length} title terms against ${jobTitle}.`,
+    `Required Skills (${skillsScore}/35): Matched ${matchedSkills.length}/${jobRequiredSkills.length} job skills (${matchedSkills.join(', ') || 'None matched'}).`,
+    `Experience (${experienceScore}/20): Candidate has ${yearsOfExperience} yrs vs ${jobReqExp} yrs required for this role.`,
+    `Education (${educationScore}/10): Qualification fit evaluated (${education[0] || 'Unspecified'}).`,
+    missingSkills.length > 0 ? `Missing Key Skills for ${jobTitle}: ${missingSkills.join(', ')}.` : 'All mandatory skills verified.'
   ].join(' ');
 
   return {

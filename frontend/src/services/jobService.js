@@ -4,9 +4,9 @@ import { cacheService } from './cacheService';
 export const jobService = {
   createJob: async (data) => {
     try {
-      console.log('📝 Creating job:', data.title);
+      console.log(' Creating job:', data.title);
       const response = await api.post('/jobs', data);
-      console.log('✅ Job created:', response.data);
+      console.log(' Job created:', response.data);
       cacheService.invalidate('all_jobs'); // invalidate cached job list
       cacheService.invalidate('dashboard_stats');
       cacheService.invalidate('hiring_funnel');
@@ -15,7 +15,7 @@ export const jobService = {
       }
       return response.data;
     } catch (error) {
-      console.error('❌ Create Job Error:', error);
+      console.error(' Create Job Error:', error);
       throw error;
     }
   },
@@ -28,26 +28,26 @@ export const jobService = {
     }
 
     try {
-      console.log('📋 Fetching all jobs');
+      console.log('Fetching all jobs');
       const response = await api.get('/jobs');
-      console.log('✅ Jobs fetched:', response.data.jobs?.length || 0);
+      console.log(' Jobs fetched:', response.data.jobs?.length || 0);
       if (response.data && Array.isArray(response.data.jobs)) {
         cacheService.set(cacheKey, response.data);
       }
       return response.data;
     } catch (error) {
-      console.error('❌ Get Jobs Error:', error);
+      console.error(' Get Jobs Error:', error);
       throw error;
     }
   },
 
   getJobById: async (id) => {
     try {
-      console.log('📋 Fetching job:', id);
+      console.log('Fetching job:', id);
       const response = await api.get(`/jobs/${id}`);
       return response.data;
     } catch (error) {
-      console.error('❌ Get Job Error:', error);
+      console.error(' Get Job Error:', error);
       throw error;
     }
   },
@@ -63,7 +63,7 @@ export const jobService = {
       }
       return response.data;
     } catch (error) {
-      console.error('❌ Update Job Error:', error);
+      console.error(' Update Job Error:', error);
       throw error;
     }
   },
@@ -79,7 +79,7 @@ export const jobService = {
       }
       return response.data;
     } catch (error) {
-      console.error('❌ Delete Job Error:', error);
+      console.error(' Delete Job Error:', error);
       throw error;
     }
   },
@@ -90,7 +90,7 @@ export const jobService = {
       cacheService.invalidate('all_jobs');
       return response.data;
     } catch (error) {
-      console.error('❌ Publish Job Error:', error);
+      console.error(' Publish Job Error:', error);
       throw error;
     }
   },
@@ -100,7 +100,7 @@ export const jobService = {
       const response = await api.get(`/jobs/public/${slug}`);
       return response.data;
     } catch (error) {
-      console.error('❌ Get Public Job Error:', error);
+      console.error(' Get Public Job Error:', error);
       throw error;
     }
   },

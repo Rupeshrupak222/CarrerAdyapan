@@ -1,10 +1,7 @@
-import pkg from '@prisma/client';
-const { PrismaClient } = pkg;
+import prisma from '../config/db.js';
 import { logger } from '../utils/logger.js';
 import { sendOfferLetterEmail, sendWelcomeOnboardingEmail } from '../services/emailService.js';
 import { generateOfferLetterPdfBuffer } from '../services/pdfGeneratorService.js';
-
-const prisma = new PrismaClient();
 
 // Create or Upsert Offer in PostgreSQL DB
 export const createOffer = async (req, res) => {
@@ -114,7 +111,7 @@ export const createOffer = async (req, res) => {
       },
     });
 
-    logger.info(`✅ Individual Offer Letter for candidate "${offer.candidateName}" (ID: ${offer.id}) saved to PostgreSQL DB!`);
+    logger.info(`Individual Offer Letter for candidate "${offer.candidateName}" (ID: ${offer.id}) saved to PostgreSQL DB!`);
 
     // Only send selection email if explicitly requested and status is not REJECTED
     if (candidateEmail && req.body.sendEmail === true && status !== 'REJECTED') {
@@ -188,6 +185,9 @@ export const getAllOffers = async (req, res) => {
         },
       },
       orderBy: { createdAt: 'desc' },
+    }).catch((e) => {
+      logger.warn('Offers findMany pooler warning: ' + (e?.message || String(e)));
+      return [];
     });
 
     const offers = rawOffers.map((off) => {
@@ -215,7 +215,7 @@ export const getAllOffers = async (req, res) => {
 
     res.json({ success: true, offers });
   } catch (error) {
-    logger.error('Get Offers Error:', error.message);
+    logger.warn('Get Offers Error: ' + (error?.message || String(error)));
     res.json({ success: true, offers: [] });
   }
 };
@@ -257,7 +257,7 @@ export const updateOfferStatus = async (req, res) => {
       data: { status },
     });
 
-    logger.info(`✅ Offer ${req.params.id} status updated to ${status} in PostgreSQL DB!`);
+    logger.info(`Offer ${req.params.id} status updated to ${status} in PostgreSQL DB!`);
     res.json({ success: true, offer });
   } catch (error) {
     logger.error('Update Offer Status Error:', error.message);

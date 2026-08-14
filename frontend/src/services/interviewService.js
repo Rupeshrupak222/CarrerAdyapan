@@ -9,7 +9,7 @@ export const interviewService = {
       cacheService.invalidate('dashboard_stats');
       return response.data;
     } catch (error) {
-      console.error('❌ Create Interview Error:', error);
+      console.error(' Create Interview Error:', error);
       throw error;
     }
   },
@@ -28,7 +28,7 @@ export const interviewService = {
       }
       return response.data;
     } catch (error) {
-      console.error('❌ Get Interviews Error:', error);
+      console.error(' Get Interviews Error:', error);
       throw error;
     }
   },
@@ -38,7 +38,7 @@ export const interviewService = {
       const response = await api.get(`/interviews/${id}`);
       return response.data;
     } catch (error) {
-      console.error('❌ Get Interview Error:', error);
+      console.error(' Get Interview Error:', error);
       throw error;
     }
   },
@@ -49,7 +49,7 @@ export const interviewService = {
       cacheService.invalidate('all_interviews');
       return response.data;
     } catch (error) {
-      console.error('❌ Update Interview Error:', error);
+      console.error(' Update Interview Error:', error);
       throw error;
     }
   },
@@ -60,7 +60,7 @@ export const interviewService = {
       cacheService.invalidate('all_interviews');
       return response.data;
     } catch (error) {
-      console.error('❌ Delete Interview Error:', error);
+      console.error(' Delete Interview Error:', error);
       throw error;
     }
   },

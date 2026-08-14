@@ -1,8 +1,5 @@
-import pkg from '@prisma/client';
-const { PrismaClient } = pkg;
+import prisma from '../config/db.js';
 import { logger } from '../utils/logger.js';
-
-const prisma = new PrismaClient();
 
 // Get Global Offer Template from DB
 export const getGlobalTemplate = async (req, res) => {
@@ -45,11 +42,11 @@ export const saveGlobalTemplate = async (req, res) => {
       });
     }
 
-    logger.info(`✅ Global Company Offer Template "${nameStr}" persisted to PostgreSQL DB!`);
+    logger.info(`Global Company Offer Template "${nameStr}" persisted to PostgreSQL DB!`);
 
     res.json({
       success: true,
-      message: `Global Offer Template "${nameStr}" saved to PostgreSQL Database! 📄`,
+      message: `Global Offer Template "${nameStr}" saved to PostgreSQL Database! `,
       templateName: nameStr,
       templateDataUrl: templateDataUrl || null,
     });

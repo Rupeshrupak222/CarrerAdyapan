@@ -50,7 +50,7 @@ const InterviewDetails = () => {
     setSubmitting(true);
     setTimeout(() => {
       setSubmitting(false);
-      toast.success('Interview feedback and rating saved successfully! 🎯');
+      toast.success('Interview feedback and rating saved successfully! ');
     }, 600);
   };
 
@@ -74,13 +74,19 @@ const InterviewDetails = () => {
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
+            <Link
+              to="/candidates"
+              className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-amber-800 dark:text-amber-300 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 rounded-xl transition-all shadow-sm"
+            >
+              View Candidate Profile
+            </Link>
             <a
               href={interview.meetingLink}
               target="_blank"
               rel="noreferrer"
               className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all"
             >
-              <span>🎥</span> Join Video Meeting
+              Join Video Meeting
             </a>
           </div>
         </div>
@@ -93,7 +99,7 @@ const InterviewDetails = () => {
               theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
             }`}>
               <h2 className="text-sm font-bold border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
-                <span className="text-amber-500">📌</span> Interview Details & Schedule
+                <span className="text-amber-500"></span> Interview Details & Schedule
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs font-normal">
                 <div>
@@ -119,7 +125,7 @@ const InterviewDetails = () => {
             }`}>
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">🤖</span>
+                  <span className="text-lg"></span>
                   <h2 className="text-sm font-bold">AI Generated Interview Questions</h2>
                 </div>
                 <span className="px-3 py-1 text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 rounded-full border border-amber-500/30">
@@ -170,7 +176,7 @@ const InterviewDetails = () => {
                         star <= rating ? 'text-amber-400' : 'text-slate-300 dark:text-slate-700'
                       }`}
                     >
-                      ★
+                      
                     </button>
                   ))}
                   <span className="text-xs font-bold text-slate-600 dark:text-slate-400 ml-2">{rating} / 5 Stars</span>

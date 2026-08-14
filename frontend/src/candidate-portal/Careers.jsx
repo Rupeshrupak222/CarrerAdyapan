@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import AdyapanLogo from '../components/common/AdyapanLogo';
+import Footer from '../components/layout/Footer';
 import { useTheme } from '../context/ThemeContext';
 import { jobService } from '../services/jobService';
 
@@ -71,8 +72,18 @@ const Careers = () => {
                   : 'bg-white border-amber-200 text-amber-900 hover:bg-orange-100 shadow-sm'
                 }`}
             >
-              <span>💼 Active Roles</span>
+              <span>Active Roles</span>
             </a>
+
+            <Link
+              to="/contact"
+              className={`px-3.5 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 ${theme === 'dark'
+                  ? 'bg-slate-900 border-slate-700 text-slate-200 hover:border-amber-400'
+                  : 'bg-white border-slate-200 text-slate-700 hover:border-amber-400 shadow-sm'
+                }`}
+            >
+              <span>Contact Us</span>
+            </Link>
 
             <a
               href="https://www.adyapan.com"
@@ -83,7 +94,7 @@ const Careers = () => {
                   : 'bg-white border-slate-200 text-slate-700 hover:border-amber-400 shadow-sm'
                 }`}
             >
-              <span>🌐 adyapan.com</span>
+              <span>adyapan.com</span>
               <span className="text-amber-500 font-extrabold">↗</span>
             </a>
           </div>
@@ -97,15 +108,14 @@ const Careers = () => {
                   : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-100'
                 }`}
             >
-              <span className="hidden sm:inline">{theme === 'dark' ? '🌙 Dark Mode' : '☀️ Light Mode'}</span>
-              <span className="sm:hidden">{theme === 'dark' ? '🌙' : '☀️'}</span>
+              <span className="hidden sm:inline">{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
+              <span className="sm:hidden">{theme === 'dark' ? '' : ''}</span>
             </button>
 
             <Link
               to="/login"
               className="px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-extrabold text-white bg-gradient-to-r from-amber-600 via-amber-500 to-amber-500 hover:from-amber-500 hover:to-amber-600 rounded-xl transition-all shadow-md shadow-amber-500/25 uppercase tracking-wider flex items-center gap-1 shrink-0"
             >
-              <span>🔐</span>
               <span className="hidden sm:inline">HR Login</span>
               <span className="sm:hidden">Login</span>
             </Link>
@@ -123,7 +133,7 @@ const Careers = () => {
 
         <div className="relative max-w-4xl mx-auto space-y-4 sm:space-y-5">
           <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 text-[10px] sm:text-xs font-extrabold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 rounded-full shadow-sm">
-            <span>✨ OFFICIAL ADYAPAN EDUTECH CAREERS PORTAL</span>
+            <span> OFFICIAL ADYAPAN EDUTECH CAREERS PORTAL</span>
           </div>
 
           <h1 className="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight text-slate-900 dark:text-white">
@@ -140,11 +150,11 @@ const Careers = () => {
           {/* Accreditation Badges */}
           <div className="pt-2 flex flex-wrap justify-center items-center gap-2.5 text-[11px] font-extrabold">
             <span className={`px-3.5 py-1.5 rounded-full border ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-amber-400' : 'bg-white border-amber-200 text-amber-800 shadow-sm'
-              }`}>★ ISO 9001:2015 Certified</span>
+              }`}> ISO 9001:2015 Certified</span>
             <span className={`px-3.5 py-1.5 rounded-full border ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-amber-300' : 'bg-white border-amber-200 text-amber-800 shadow-sm'
-              }`}>🇮🇳 Skill India Digital Partner</span>
+              }`}> Skill India Digital Partner</span>
             <span className={`px-3.5 py-1.5 rounded-full border ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-emerald-400' : 'bg-white border-emerald-200 text-emerald-800 shadow-sm'
-              }`}>🏢 MSME Govt. Recognized</span>
+              }`}> MSME Govt. Recognized</span>
           </div>
 
           {/* Highlight Metrics */}
@@ -179,7 +189,7 @@ const Careers = () => {
         <div className={`p-5 rounded-3xl border shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-amber-200/80'
           }`}>
           <div className="relative w-full md:w-80">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-500 font-bold">🔍</span>
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-500 font-bold"></span>
             <input
               type="text"
               value={searchTerm}
@@ -222,8 +232,7 @@ const Careers = () => {
           <div className={`p-12 rounded-3xl border text-center space-y-4 shadow-xl ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200 text-slate-900'
             }`}>
             <div className="w-16 h-16 rounded-3xl bg-amber-500/20 text-amber-500 flex items-center justify-center text-3xl mx-auto shadow-inner">
-              💼
-            </div>
+              </div>
             <h3 className="text-lg font-black">No Roles Currently Match Your Search</h3>
             <p className="text-xs font-medium text-slate-500 dark:text-slate-400 max-w-md mx-auto">
               Try adjusting your search terms or selecting "All Roles" above. New opportunities are published daily!
@@ -253,7 +262,7 @@ const Careers = () => {
                   {/* Category Header */}
                   <div className="flex items-center justify-between">
                     <span className="px-3 py-1 text-[11px] font-extrabold bg-amber-500/15 text-amber-700 dark:text-amber-300 rounded-full border border-amber-500/30">
-                      🏢 {job.department || 'EdTech Role'}
+                       {job.department || 'EdTech Role'}
                     </span>
                     <span className="px-2.5 py-0.5 text-[10px] font-extrabold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 rounded-full border border-emerald-500/30">
                       ● Active Hiring
@@ -269,14 +278,14 @@ const Careers = () => {
                   <div className="flex flex-wrap gap-2 text-xs font-bold">
                     <span className={`px-3 py-1.5 rounded-xl border ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-700'
                       }`}>
-                      📍 {job.location || 'India'}
+                      {job.location || 'India'}
                     </span>
                     <span className={`px-3 py-1.5 rounded-xl border ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-700'
                       }`}>
-                      💼 {job.type === 'FULL_TIME' ? 'Full Time' : job.type || 'Full Time'}
+                      {job.type === 'FULL_TIME' ? 'Full Time' : job.type || 'Full Time'}
                     </span>
                     <span className="px-3 py-1.5 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 font-extrabold">
-                      💰 {formatSalary(job.salaryMin, job.salaryMax)}
+                       {formatSalary(job.salaryMin, job.salaryMax)}
                     </span>
                   </div>
 
@@ -302,22 +311,9 @@ const Careers = () => {
         )}
       </main>
 
-      {/* Official Adyapan Edutech Footer */}
-      <footer className={`border-t py-10 px-6 text-center text-xs font-medium ${theme === 'dark' ? 'border-slate-800 bg-slate-950 text-slate-400' : 'border-amber-200/80 bg-white text-slate-600 shadow-inner'
-        }`}>
-        <div className="max-w-4xl mx-auto space-y-3">
-          <div className="flex justify-center">
-            <AdyapanLogo variant={theme === 'dark' ? 'dark' : 'light'} size="small" />
-          </div>
-          <p className="font-bold text-slate-800 dark:text-slate-200">
-            Adyapan Edutech Pvt. Ltd. — Empowering Students, Counsellors & Tech Leaders Across India.
-          </p>
-          <p>© 2026 Adyapan Edutech. All rights reserved. Sattva Magnus, Sabza Colony, Toli Chowki, Hyderabad, Telangana 500008</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
 
 export default Careers;
-

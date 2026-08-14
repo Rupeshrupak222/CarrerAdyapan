@@ -54,7 +54,7 @@ const JobDetails = () => {
   const copyShareLink = () => {
     const shareUrl = `${window.location.origin}/careers/${job?.slug || 'bda-role'}`;
     navigator.clipboard.writeText(shareUrl);
-    toast.success('Public Job URL copied! 🔗');
+    toast.success('Public Job URL copied! ');
   };
 
   const shareWhatsApp = () => {
@@ -93,7 +93,7 @@ const JobDetails = () => {
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="px-3 py-1 text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 rounded-full">
-                  🏢 {job.department}
+                   {job.department}
                 </span>
                 <span className="px-3 py-1 text-xs font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 rounded-full">
                   ● {job.status}
@@ -101,7 +101,7 @@ const JobDetails = () => {
               </div>
 
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{job.title}</h1>
-              <p className="text-xs text-slate-600 dark:text-slate-300">📍 {job.location} • {job.type}</p>
+              <p className="text-xs text-slate-600 dark:text-slate-300">{job.location} • {job.type}</p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2.5">
@@ -109,7 +109,7 @@ const JobDetails = () => {
                 onClick={shareWhatsApp}
                 className="px-3.5 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-xl transition-all flex items-center gap-1.5"
               >
-                <span>💬</span> WhatsApp
+                WhatsApp
               </button>
               <button
                 onClick={copyShareLink}
@@ -117,7 +117,7 @@ const JobDetails = () => {
                   theme === 'dark' ? 'bg-slate-950 text-slate-200 border-slate-800' : 'bg-slate-100 text-slate-700 border-slate-200'
                 }`}
               >
-                <span>🔗</span> Copy Link
+                Copy Link
               </button>
               <Link
                 to={`/careers/${job.slug || 'bda-role'}`}
@@ -135,7 +135,7 @@ const JobDetails = () => {
           theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
         }`}>
           <h2 className="text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
-            <span className="text-amber-500">📋</span> Job Overview & Requirements
+            <span className="text-amber-500"></span> Job Overview & Requirements
           </h2>
           <p className="text-xs font-normal text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-line">{job.description}</p>
           
@@ -151,7 +151,7 @@ const JobDetails = () => {
           theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
         }`}>
           <h2 className="text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
-            <span className="text-amber-500">📥</span> Candidates Applied ({job.applications?.length || 0})
+            <span className="text-amber-500"></span> Candidates Applied ({job.applications?.length || 0})
           </h2>
 
           <div className="space-y-3">

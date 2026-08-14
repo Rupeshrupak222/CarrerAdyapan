@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import AdyapanLogo from '../components/common/AdyapanLogo';
+import Footer from '../components/layout/Footer';
 import { candidateService } from '../services/candidateService';
 import { calculateRealAIScore, addCandidateNotification, saveCandidateApplication } from '../utils/applicationStore';
 import { useTheme } from '../context/ThemeContext';
@@ -114,7 +115,7 @@ const ApplyJob = () => {
         resumeDataUrl: event.target.result,
         resumeText: `Parsed candidate resume: ${file.name}. Verified candidate application.`,
       }));
-      toast.success(`Resume attached: ${file.name} 📄`);
+      toast.success(`Resume attached: ${file.name} `);
     };
     reader.readAsDataURL(file);
   };
@@ -171,7 +172,7 @@ const ApplyJob = () => {
 
       addCandidateNotification(`${formData.firstName} ${formData.lastName}`, jobTitle, aiAnalysis.score);
 
-      toast.success(`Application submitted! Confirmation email dispatched to ${formData.email} 🎯`);
+      toast.success(`Application submitted! Confirmation email dispatched to ${formData.email} `);
       setSubmitting(false);
 
       navigate('/application-success', {
@@ -220,8 +221,8 @@ const ApplyJob = () => {
                 : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-100'
                 }`}
             >
-              <span className="hidden sm:inline">{theme === 'dark' ? '🌙 Dark Mode' : '☀️ Light Mode'}</span>
-              <span className="sm:hidden">{theme === 'dark' ? '🌙' : '☀️'}</span>
+              <span className="hidden sm:inline">{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
+              <span className="sm:hidden">{theme === 'dark' ? '' : ''}</span>
             </button>
             <Link
               to={`/careers/${slug}`}
@@ -239,7 +240,7 @@ const ApplyJob = () => {
 
           <div className="pt-1">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 rounded-full text-[11px] font-extrabold uppercase">
-              ⚡ OFFICIAL ADYAPAN DIRECT APPLICATION PORTAL
+              OFFICIAL ADYAPAN DIRECT APPLICATION PORTAL
             </div>
             <h1 className="text-2xl md:text-3xl font-black mt-3 text-slate-900 dark:text-white leading-tight">
               Application for {getJobTitle()}
@@ -254,7 +255,7 @@ const ApplyJob = () => {
             {/* Step 1: Candidate Current Status */}
             <div className={sectionClass}>
               <h2 className="text-xs font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider flex items-center gap-2">
-                <span>📌 1. What is your current employment status?</span>
+                <span> 1. What is your current employment status?</span>
               </h2>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -268,7 +269,7 @@ const ApplyJob = () => {
                       : 'bg-white text-slate-800 border-slate-200 hover:border-amber-400 shadow-sm'
                     }`}
                 >
-                  💼 Working Professional
+                  Working Professional
                 </button>
                 <button
                   type="button"
@@ -280,7 +281,7 @@ const ApplyJob = () => {
                       : 'bg-white text-slate-800 border-slate-200 hover:border-amber-400 shadow-sm'
                     }`}
                 >
-                  🎓 Currently Student / Fresher
+                  Currently Student / Fresher
                 </button>
                 <button
                   type="button"
@@ -292,7 +293,7 @@ const ApplyJob = () => {
                       : 'bg-white text-slate-800 border-slate-200 hover:border-amber-400 shadow-sm'
                     }`}
                 >
-                  🔍 Actively Job Hunting
+                  Actively Job Hunting
                 </button>
                 <button
                   type="button"
@@ -304,14 +305,14 @@ const ApplyJob = () => {
                       : 'bg-white text-slate-800 border-slate-200 hover:border-amber-400 shadow-sm'
                     }`}
                 >
-                  ⚡ Freelancer
+                  Freelancer
                 </button>
               </div>
             </div>
 
             {/* Step 2: Personal Contact Information */}
             <div className="space-y-4">
-              <h2 className="text-xs font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider">👤 2. Personal Contact Information</h2>
+              <h2 className="text-xs font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider">2. Personal Contact Information</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className={labelClass}>First Name *</label>
@@ -379,7 +380,7 @@ const ApplyJob = () => {
             {/* Conditional Step 3: Current Job & Company Details */}
             {(formData.employmentStatus === 'EMPLOYED' || formData.employmentStatus === 'FREELANCER' || formData.employmentStatus === 'LOOKING_FOR_JOB') && (
               <div className={sectionClass}>
-                <h2 className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">🏢 3. Current Work & Company Details</h2>
+                <h2 className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider"> 3. Current Work & Company Details</h2>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
@@ -489,7 +490,7 @@ const ApplyJob = () => {
 
             {/* Conditional Step 4: Education & College Details */}
             <div className={sectionClass}>
-              <h2 className="text-xs font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider">🎓 4. Educational Qualifications & College</h2>
+              <h2 className="text-xs font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider">4. Educational Qualifications & College</h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -555,7 +556,7 @@ const ApplyJob = () => {
 
             {/* Step 5: Skills Tag Selector */}
             <div className="space-y-4">
-              <h2 className="text-xs font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider">🛠️ 5. Key Skills & Domain Expertise</h2>
+              <h2 className="text-xs font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider"> 5. Key Skills & Domain Expertise</h2>
 
               <div className="flex flex-wrap gap-2">
                 {SUGGESTED_SKILLS.map((skill) => {
@@ -572,7 +573,7 @@ const ApplyJob = () => {
                           : 'bg-white text-slate-800 border border-slate-200 hover:bg-slate-100 shadow-sm'
                         }`}
                     >
-                      {selected ? '✓ ' : '+ '}
+                      {selected ? ' ' : '+ '}
                       {skill}
                     </button>
                   );
@@ -608,7 +609,7 @@ const ApplyJob = () => {
                     >
                       <span>{s}</span>
                       <button type="button" onClick={() => removeSkill(s)} className="text-amber-600 hover:text-red-500 font-bold">
-                        ✕
+                        
                       </button>
                     </span>
                   ))}
@@ -619,7 +620,7 @@ const ApplyJob = () => {
             {/* Motivation Pitch */}
             <div>
               <label className={labelClass}>
-                💬 6. Why do you want to join Adyapan Edutech?
+                6. Why do you want to join Adyapan Edutech?
               </label>
               <textarea
                 rows={3}
@@ -632,7 +633,7 @@ const ApplyJob = () => {
 
             {/* Step 7: Resume Upload Dropzone */}
             <div className="space-y-3">
-              <h2 className="text-xs font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider">📄 7. Upload Resume PDF/DOCX *</h2>
+              <h2 className="text-xs font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider">7. Upload Resume PDF/DOCX *</h2>
 
               <div className={`border-2 border-dashed rounded-3xl p-6 text-center transition-all relative ${theme === 'dark'
                 ? 'border-slate-800 hover:border-amber-400 bg-slate-950/80'
@@ -645,7 +646,7 @@ const ApplyJob = () => {
                   className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                 />
                 <div className="space-y-2 pointer-events-none">
-                  <div className="text-3xl">📥</div>
+                  <div className="text-3xl"></div>
                   {formData.resumeFileName ? (
                     <div>
                       <p className="text-sm font-black text-emerald-600 dark:text-emerald-400">Attached: {formData.resumeFileName}</p>
@@ -696,6 +697,7 @@ const ApplyJob = () => {
           </form>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

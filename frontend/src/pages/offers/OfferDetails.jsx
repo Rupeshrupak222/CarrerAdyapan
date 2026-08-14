@@ -97,7 +97,7 @@ const OfferDetails = () => {
         companyTemplateName: globalTpl.templateName,
         templateDataUrl: globalTpl.templateDataUrl,
       });
-      toast.success(`Official Offer Letter email dispatched via Resend to ${offer.candidateEmail || offer.email}! ✉️🎉`);
+      toast.success(`Official Offer Letter email dispatched via Resend to ${offer.candidateEmail || offer.email}! `);
     } catch (e) {
       toast.error('Failed to send offer email');
     } finally {
@@ -143,7 +143,7 @@ const OfferDetails = () => {
               onClick={() => setShowAdyapanModal(true)}
               className="px-4 py-2.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all flex items-center gap-2"
             >
-              <span>📄</span> Adyapan 4-Page PDF Generator
+              Adyapan 4-Page PDF Generator
             </button>
 
             <Link
@@ -152,7 +152,7 @@ const OfferDetails = () => {
                 theme === 'dark' ? 'bg-slate-950 text-slate-200 border-slate-800' : 'bg-slate-100 text-slate-700 border-slate-200'
               }`}
             >
-              ✏️ Edit Terms
+              Edit Terms
             </Link>
 
             <button
@@ -160,7 +160,7 @@ const OfferDetails = () => {
               disabled={sendingEmail}
               className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all disabled:opacity-50"
             >
-              <span>✉️</span> {sendingEmail ? 'Sending...' : 'Send Email'}
+              {sendingEmail ? 'Sending...' : 'Send Email'}
             </button>
           </div>
         </div>
@@ -175,7 +175,7 @@ const OfferDetails = () => {
                 : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
-            📄 Official 4-Page Adyapan Offer Document
+            Official 4-Page Adyapan Offer Document
           </button>
           <button
             onClick={() => setActiveTab('summary')}
@@ -185,7 +185,7 @@ const OfferDetails = () => {
                 : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
-            📋 Brief Package Summary
+            Brief Package Summary
           </button>
         </div>
 
@@ -193,7 +193,7 @@ const OfferDetails = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-white dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-2xl">
               <div className="flex items-center gap-3">
-                <span className="text-2xl">📄</span>
+                <span className="text-2xl"></span>
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 dark:text-amber-300">
                     Official SR'S ADYAPAN EDUTECH PRIVATE LIMITED 4-Page Offer Letter
@@ -207,7 +207,7 @@ const OfferDetails = () => {
                 onClick={() => setShowAdyapanModal(true)}
                 className="px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all"
               >
-                🖨️ Print / Customize
+                 Print / Customize
               </button>
             </div>
 
@@ -279,7 +279,7 @@ const OfferDetails = () => {
                     <li key={b} className={`text-xs font-medium flex items-center gap-2 p-2.5 rounded-xl border ${
                       theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-slate-50 border-slate-200 text-slate-700'
                     }`}>
-                      <span className="text-emerald-500 font-bold">✔</span> {b}
+                      <span className="text-emerald-500 font-bold"></span> {b}
                     </li>
                   ))}
                 </ul>
@@ -287,7 +287,7 @@ const OfferDetails = () => {
 
               {offer.customTerms && (
                 <p className="text-xs text-slate-600 dark:text-slate-300 italic pt-2 border-t border-slate-100 dark:border-slate-800">
-                  <strong>📝 Terms:</strong> {offer.customTerms}
+                  <strong> Terms:</strong> {offer.customTerms}
                 </p>
               )}
             </div>

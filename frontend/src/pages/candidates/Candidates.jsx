@@ -1,19 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import * as XLSX from 'xlsx';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { candidateService } from '../../services/candidateService';
-import { calculateRealAIScore } from '../../utils/applicationStore';
+import { interviewService } from '../../services/interviewService';
+import { calculateRealAIScore, getStoredCandidates } from '../../utils/applicationStore';
 import { useTheme } from '../../context/ThemeContext';
 import toast from 'react-hot-toast';
 
-const DEFAULT_FALLBACK_CANDIDATES = [];
-
 const Candidates = () => {
+  const navigate = useNavigate();
   const [candidates, setCandidates] = useState([]);
+  const [interviews, setInterviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [interviewFilter, setInterviewFilter] = useState('ALL');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [schedulingCandidate, setSchedulingCandidate] = useState(null);
+  const [scheduleFormData, setScheduleFormData] = useState({
+    type: 'SALES_PITCH_ROUND',
+    scheduledAt: '',
+    duration: 30,
+    meetingLink: 'https://meet.google.com/adyapan-hiring-call',
+  });
+  const [showBulkScheduleModal, setShowBulkScheduleModal] = useState(false);
+  const [isBulkScheduling, setIsBulkScheduling] = useState(false);
+  const [bulkScheduleFormData, setBulkScheduleFormData] = useState({
+    type: 'SALES_PITCH_ROUND',
+    scheduledAt: '',
+    duration: 30,
+    meetingLink: 'https://meet.google.com/adyapan-hiring-call',
+  });
   const { theme } = useTheme();
 
   const [formData, setFormData] = useState({
@@ -29,22 +47,246 @@ const Candidates = () => {
 
   useEffect(() => {
     fetchCandidates();
+    fetchInterviewsData();
+
+    const handleSync = () => {
+      fetchCandidates();
+      fetchInterviewsData();
+    };
+
+    window.addEventListener('storage', handleSync);
+    window.addEventListener('adyapan_data_sync', handleSync);
+
+    return () => {
+      window.removeEventListener('storage', handleSync);
+      window.removeEventListener('adyapan_data_sync', handleSync);
+    };
   }, []);
 
   const fetchCandidates = async () => {
+    let list = [];
     try {
       const res = await candidateService.getAllCandidates();
-      if (res?.candidates && res.candidates.length > 0) {
-        setCandidates(res.candidates);
-      } else {
-        setCandidates(DEFAULT_FALLBACK_CANDIDATES);
+      if (res?.candidates && Array.isArray(res.candidates) && res.candidates.length > 0) {
+        list = res.candidates;
       }
     } catch (error) {
-      console.warn('Backend candidates fetch error, using fallback:', error);
-      setCandidates(DEFAULT_FALLBACK_CANDIDATES);
-    } finally {
-      setLoading(false);
+      console.warn('Backend candidates fetch error:', error);
     }
+
+    try {
+      const localCandidates = getStoredCandidates();
+      if (localCandidates && Array.isArray(localCandidates) && localCandidates.length > 0) {
+        const map = new Map();
+        list.forEach((c) => c && c.id && map.set(String(c.id), c));
+        localCandidates.forEach((c) => {
+          if (c && c.id) {
+            if (!map.has(String(c.id))) {
+              map.set(String(c.id), c);
+            } else {
+              map.set(String(c.id), { ...map.get(String(c.id)), ...c });
+            }
+          }
+        });
+        list = Array.from(map.values());
+      }
+    } catch (e) { }
+
+    setCandidates(list);
+    setLoading(false);
+  };
+
+  const fetchInterviewsData = async () => {
+    let list = [];
+    try {
+      const res = await interviewService.getAllInterviews(true);
+      if (res?.interviews && Array.isArray(res.interviews)) {
+        list = res.interviews;
+      }
+    } catch (e) {
+      console.warn('Error fetching interviews for candidates:', e);
+    }
+    try {
+      const localStr = localStorage.getItem('adyapan_interviews');
+      if (localStr) {
+        const localList = JSON.parse(localStr);
+        if (Array.isArray(localList)) {
+          const map = new Map();
+          list.forEach((i) => i && i.id && map.set(String(i.id), i));
+          localList.forEach((i) => {
+            if (i && i.id) {
+              if (!map.has(String(i.id))) map.set(String(i.id), i);
+              else map.set(String(i.id), { ...map.get(String(i.id)), ...i });
+            }
+          });
+          list = Array.from(map.values());
+        }
+      }
+    } catch (e) { }
+    setInterviews(Array.isArray(list) ? list : []);
+  };
+
+  // Excel / CSV File Import Handler
+  const handleImportExcel = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const data = evt.target.result;
+        const workbook = XLSX.read(data, { type: 'binary' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+
+        if (!jsonRows || jsonRows.length === 0) {
+          toast.error('No rows or candidate data found in the uploaded file.');
+          return;
+        }
+
+        const importedCandidates = [];
+        const storedList = getStoredCandidates();
+
+        for (let i = 0; i < jsonRows.length; i++) {
+          const row = jsonRows[i];
+
+          // Extract candidate fields with flexible column header matching
+          const fullName = String(
+            row['Candidate Name'] || row['Name'] || row['Full Name'] || row['Student Name'] || row['firstName'] || `Candidate ${i + 1}`
+          ).trim();
+
+          const nameParts = fullName.split(' ');
+          const firstName = nameParts[0] || 'Candidate';
+          const lastName = nameParts.slice(1).join(' ') || '';
+
+          const email = String(row['Email ID'] || row['Email'] || row['Email Address'] || row['email'] || `candidate_${Date.now()}_${i + 1}@gmail.com`).trim();
+          const phone = String(row['Phone Number'] || row['Phone'] || row['Mobile'] || row['Contact Number'] || row['phone'] || '9876543210').trim();
+          const currentPosition = String(
+            row['Current Position / Role'] || row['Role'] || row['Position'] || row['Designation'] || row['Current Position'] || row['currentPosition'] || 'Business Development Associate (BDA)'
+          ).trim();
+
+          const expVal = Number(row['Experience (Years)'] || row['Experience'] || row['Total Experience'] || row['Yrs'] || row['experience'] || 0);
+          const location = String(row['Location'] || row['City'] || row['location'] || 'HYDERABAD / Remote').trim();
+          const education = String(row['Education / Degree'] || row['Education'] || row['Degree'] || row['Qualification'] || row['education'] || 'MBA (EdTech & Sales)').trim();
+          const currentCompany = String(row['Company / College'] || row['Company'] || row['College'] || row['Institution'] || row['currentCompany'] || 'Recognized Institute').trim();
+
+          const skillsRaw = row['Key Skills'] || row['Skills'] || row['skills'] || 'EdTech Sales, Student Counselling, Telesales, Lead Conversion';
+          const skills = typeof skillsRaw === 'string' ? skillsRaw.split(',').map((s) => s.trim()).filter(Boolean) : (Array.isArray(skillsRaw) ? skillsRaw : ['EdTech Sales']);
+
+          const isStudent = expVal === 0 || String(currentPosition || '').toLowerCase().includes('student') || String(currentPosition || '').toLowerCase().includes('fresher');
+          const calculated = calculateRealAIScore(skills, isStudent ? 0 : expVal, currentPosition || 'Business Development Associate (BDA)');
+
+          const candId = `cand_imp_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 4)}`;
+
+          const newCand = {
+            id: candId,
+            firstName,
+            lastName,
+            name: `${firstName} ${lastName}`.trim(),
+            email,
+            phone,
+            currentPosition,
+            experience: expVal,
+            totalExperience: expVal,
+            location,
+            education,
+            collegeName: currentCompany,
+            currentCompany,
+            skills,
+            employmentStatus: isStudent ? 'STUDENT' : 'PROFESSIONAL',
+            score: calculated.score,
+            reason: calculated.reason,
+            status: 'APPLIED',
+            createdAt: new Date().toISOString(),
+          };
+
+          importedCandidates.push(newCand);
+
+          // Optionally push to backend DB
+          try {
+            await candidateService.createCandidate(newCand);
+          } catch (e) {
+            // Silently fallback to local storage
+          }
+        }
+
+        // Merge & Save to LocalStorage
+        const updatedList = [...importedCandidates, ...storedList];
+        localStorage.setItem('adyapan_candidates', JSON.stringify(updatedList));
+
+        // Update UI State
+        setCandidates((prev) => [...importedCandidates, ...prev]);
+        toast.success(`🎉 Successfully imported ${importedCandidates.length} candidate(s) from Excel!`);
+
+        // Real-time Event Dispatch
+        window.dispatchEvent(new Event('adyapan_data_sync'));
+        window.dispatchEvent(new Event('storage'));
+      } catch (err) {
+        console.error('Excel parse error:', err);
+        toast.error('Failed to parse Excel file. Please ensure it is a valid .xlsx or .csv sheet.');
+      }
+    };
+
+    reader.readAsBinaryString(file);
+    if (e.target) e.target.value = '';
+  };
+
+  // Excel Export Handler (With Real AI Match Scores)
+  const handleExportExcel = () => {
+    if (!candidates || candidates.length === 0) {
+      toast.error('No candidates available to export.');
+      return;
+    }
+
+    const exportData = candidates.map((cand, index) => {
+      const fullName = `${cand.firstName || ''} ${cand.lastName || ''}`.trim() || cand.name || `Candidate ${index + 1}`;
+      const skillsList = Array.isArray(cand.skills)
+        ? cand.skills
+        : (typeof cand.skills === 'string' ? cand.skills.split(',').map((s) => s.trim()).filter(Boolean) : []);
+      const skillsStr = skillsList.join(', ');
+
+      const isStudent = cand.employmentStatus === 'STUDENT'
+        || Number(cand.totalExperience || cand.experience || 0) === 0
+        || String(cand.currentPosition || '').toLowerCase().includes('student')
+        || String(cand.currentPosition || '').toLowerCase().includes('fresher');
+
+      const calculated = calculateRealAIScore(
+        skillsList,
+        isStudent ? 0 : (cand.totalExperience || cand.experience || 0),
+        cand.currentPosition || cand.jobTitle || 'Business Development Associate (BDA)'
+      );
+
+      const realAiScore = cand.score || cand.applications?.[0]?.aiScore || calculated.score;
+      const rawReason = cand.reason || cand.applications?.[0]?.matchReason || calculated.reason;
+      const eduStr = typeof cand.education === 'object' ? (cand.education?.degree || 'Graduate') : (cand.education || 'Graduate');
+
+      return {
+        'S.No': index + 1,
+        'Candidate Name': fullName,
+        'Email ID': cand.email || 'N/A',
+        'Phone Number': cand.phone || 'N/A',
+        'Current Position / Role': cand.currentPosition || cand.jobTitle || 'Business Development Associate',
+        'Experience (Years)': cand.totalExperience || cand.experience || 0,
+        'Location': cand.location || 'HYDERABAD / Remote',
+        'Education / Degree': eduStr,
+        'Company / College': cand.currentCompany || cand.collegeName || 'N/A',
+        'Key Skills': skillsStr,
+        'Status': cand.status || 'APPLIED',
+        'AI Match Score (%)': `${realAiScore}%`,
+        'AI Match Evaluation Summary': typeof rawReason === 'string' ? rawReason : 'Verified skill evaluation & domain experience.',
+        'Created Date': cand.createdAt ? new Date(cand.createdAt).toLocaleDateString('en-IN') : 'N/A',
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Candidates Directory');
+
+    const fileName = `Adyapan_Candidates_Export_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+
+    toast.success(`Exported ${exportData.length} candidate(s) with real AI scores to ${fileName}! 📄`);
   };
 
   const handleAddCandidate = async (e) => {
@@ -58,7 +300,7 @@ const Candidates = () => {
       const response = await candidateService.createCandidate(formData);
       if (response?.candidate) {
         setCandidates([response.candidate, ...candidates]);
-        toast.success(`Candidate ${response.candidate.firstName} saved to PostgreSQL DB! 🎉`);
+        toast.success(`Candidate ${response.candidate.firstName} saved to PostgreSQL DB! `);
       }
       setShowAddModal(false);
       setFormData({
@@ -90,7 +332,7 @@ const Candidates = () => {
       const stored = JSON.parse(localStorage.getItem(key) || '[]');
       localStorage.setItem(key, JSON.stringify(stored.filter((c) => c.id !== id)));
     } catch (e) { }
-    toast.success(`Candidate "${name}" deleted! 🗑️`);
+    toast.success(`Candidate "${name}" deleted! `);
   };
 
   const handleDownloadCandidateResume = (cand) => {
@@ -107,7 +349,7 @@ const Candidates = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      toast.success(`Downloading original file: ${fileName} 📥`);
+      toast.success(`Downloading original file: ${fileName} `);
       return;
     }
 
@@ -136,7 +378,7 @@ const Candidates = () => {
         link.click();
         document.body.removeChild(link);
         setTimeout(() => URL.revokeObjectURL(blobUrl), 3000);
-        toast.success(`Downloaded original file: ${fileName} 📥`);
+        toast.success(`Downloaded original file: ${fileName} `);
         return;
       } catch (e) {
         console.error('Base64 decode error:', e);
@@ -144,6 +386,196 @@ const Candidates = () => {
     }
 
     toast.error('No uploaded resume file found for this candidate');
+  };
+
+  const handleOpenScheduleModal = (cand) => {
+    setSchedulingCandidate(cand);
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(11, 0, 0, 0);
+    const formattedDateTime = new Date(tomorrow.getTime() - (tomorrow.getTimezoneOffset() * 60000))
+      .toISOString()
+      .slice(0, 16);
+
+    setScheduleFormData({
+      type: 'SALES_PITCH_ROUND',
+      scheduledAt: formattedDateTime,
+      duration: 30,
+      meetingLink: 'https://meet.google.com/adyapan-hiring-call',
+    });
+  };
+
+  const handleConfirmSchedule = async (e) => {
+    e.preventDefault();
+    if (!schedulingCandidate) return;
+
+    const fullCandName = `${schedulingCandidate.firstName || ''} ${schedulingCandidate.lastName || ''}`.trim() || 'Candidate';
+    const newInterviewData = {
+      id: `int-${Date.now()}`,
+      candidateName: fullCandName,
+      candidateEmail: schedulingCandidate.email || 'candidate@example.com',
+      jobTitle: schedulingCandidate.currentPosition || 'Business Development Associate (BDA)',
+      candidateId: schedulingCandidate.id,
+      applicationId: schedulingCandidate.applications?.[0]?.id || null,
+      type: scheduleFormData.type || 'SALES_PITCH_ROUND',
+      scheduledAt: scheduleFormData.scheduledAt ? new Date(scheduleFormData.scheduledAt).toISOString() : new Date().toISOString(),
+      duration: parseInt(scheduleFormData.duration) || 30,
+      meetingLink: scheduleFormData.meetingLink || 'https://meet.google.com/adyapan-hiring-call',
+      notes: `Scheduled interview for ${fullCandName}`,
+      status: 'SCHEDULED',
+    };
+
+    try {
+      await interviewService.createInterview(newInterviewData);
+      await candidateService.updateCandidate(schedulingCandidate.id, { status: 'SCHEDULED' }).catch(() => { });
+    } catch (err) {
+      console.warn('DB interview create fallback:', err.message);
+    }
+
+    try {
+      const key = 'adyapan_interviews';
+      const existing = JSON.parse(localStorage.getItem(key) || '[]');
+      const updated = [newInterviewData, ...existing.filter((i) => i.id !== newInterviewData.id)];
+      localStorage.setItem(key, JSON.stringify(updated));
+
+      const candKey = 'adyapan_candidates';
+      const existingCands = JSON.parse(localStorage.getItem(candKey) || '[]');
+      const updatedCands = existingCands.map((c) => {
+        if (c.id === schedulingCandidate.id || (c.email && schedulingCandidate.email && c.email.toLowerCase() === schedulingCandidate.email.toLowerCase())) {
+          return { ...c, status: 'SCHEDULED' };
+        }
+        return c;
+      });
+      localStorage.setItem(candKey, JSON.stringify(updatedCands));
+    } catch (e) { }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('adyapan_data_sync'));
+    }
+
+    toast.success(`Interview scheduled for ${fullCandName} & saved to Interviews directory!`);
+    setSchedulingCandidate(null);
+    navigate('/interviews');
+  };
+
+  const handleOpenBulkScheduleModal = () => {
+    if (!filteredCandidates || filteredCandidates.length === 0) {
+      toast.error('No candidates found to schedule interview for.');
+      return;
+    }
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(11, 0, 0, 0);
+    const formattedDateTime = new Date(tomorrow.getTime() - (tomorrow.getTimezoneOffset() * 60000))
+      .toISOString()
+      .slice(0, 16);
+
+    setBulkScheduleFormData({
+      type: 'SALES_PITCH_ROUND',
+      scheduledAt: formattedDateTime,
+      duration: 30,
+      meetingLink: 'https://meet.google.com/adyapan-hiring-call',
+    });
+    setShowBulkScheduleModal(true);
+  };
+
+  const handleConfirmBulkSchedule = async (e) => {
+    e.preventDefault();
+    if (!filteredCandidates || filteredCandidates.length === 0) {
+      toast.error('No candidates found to schedule interview for.');
+      return;
+    }
+
+    setIsBulkScheduling(true);
+    let scheduledCount = 0;
+
+    try {
+      const key = 'adyapan_interviews';
+      const existingInterviews = JSON.parse(localStorage.getItem(key) || '[]');
+      const candKey = 'adyapan_candidates';
+      let existingCands = JSON.parse(localStorage.getItem(candKey) || '[]');
+
+      const newInterviewsList = [];
+
+      for (const cand of filteredCandidates) {
+        const fullCandName = `${cand.firstName || ''} ${cand.lastName || ''}`.trim() || cand.name || 'Candidate';
+        const candEmail = cand.email || 'candidate@example.com';
+        const jobTitle = cand.currentPosition || 'Business Development Associate (BDA)';
+
+        const newInterviewData = {
+          id: `int-bulk-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+          candidateName: fullCandName,
+          candidateEmail: candEmail,
+          jobTitle: jobTitle,
+          candidateId: cand.id,
+          applicationId: cand.applications?.[0]?.id || null,
+          type: bulkScheduleFormData.type || 'SALES_PITCH_ROUND',
+          scheduledAt: bulkScheduleFormData.scheduledAt ? new Date(bulkScheduleFormData.scheduledAt).toISOString() : new Date().toISOString(),
+          duration: parseInt(bulkScheduleFormData.duration) || 30,
+          meetingLink: bulkScheduleFormData.meetingLink || 'https://meet.google.com/adyapan-hiring-call',
+          notes: `Bulk scheduled interview for ${fullCandName}`,
+          status: 'SCHEDULED',
+        };
+
+        try {
+          await interviewService.createInterview(newInterviewData);
+          await candidateService.updateCandidate(cand.id, { status: 'SCHEDULED' }).catch(() => { });
+        } catch (err) {
+          console.warn(`Bulk interview create fallback for ${fullCandName}:`, err.message);
+        }
+
+        newInterviewsList.push(newInterviewData);
+        scheduledCount++;
+      }
+
+      const updatedInterviews = [...newInterviewsList, ...existingInterviews];
+      localStorage.setItem(key, JSON.stringify(updatedInterviews));
+
+      const updatedCands = existingCands.map((c) => {
+        const isMatch = filteredCandidates.some(
+          (fc) => fc.id === c.id || (fc.email && c.email && fc.email.toLowerCase() === c.email.toLowerCase())
+        );
+        return isMatch ? { ...c, status: 'SCHEDULED' } : c;
+      });
+      localStorage.setItem(candKey, JSON.stringify(updatedCands));
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('adyapan_data_sync'));
+        window.dispatchEvent(new Event('adyapan_data_updated'));
+      }
+
+      toast.success(`Successfully scheduled interview & dispatched invitation emails to all ${scheduledCount} candidates!`);
+      setShowBulkScheduleModal(false);
+      fetchCandidates();
+      fetchInterviewsData();
+      navigate('/interviews');
+    } catch (err) {
+      console.error('Error bulk scheduling interviews:', err);
+      toast.error('Failed to complete bulk interview scheduling: ' + err.message);
+    } finally {
+      setIsBulkScheduling(false);
+    }
+  };
+
+  const getCandidateInterview = (cand) => {
+    if (!cand) return null;
+    const cId = cand.id ? String(cand.id).trim().toLowerCase() : '';
+    const cEmail = cand.email ? String(cand.email).trim().toLowerCase() : '';
+    const cName = `${cand.firstName || ''} ${cand.lastName || ''}`.trim().toLowerCase();
+
+    return interviews.find((i) => {
+      if (!i) return false;
+      const iCandId = i.candidateId || i.application?.candidateId || i.application?.candidate?.id;
+      if (cId && iCandId && String(iCandId).trim().toLowerCase() === cId) return true;
+
+      const iEmail = (i.candidateEmail || i.application?.candidate?.email || '').trim().toLowerCase();
+      if (cEmail && iEmail && cEmail === iEmail) return true;
+
+      const iName = (i.candidateName || `${i.application?.candidate?.firstName || ''} ${i.application?.candidate?.lastName || ''}`).trim().toLowerCase();
+      if (cName && iName && cName.length > 2 && cName === iName) return true;
+
+      return false;
+    });
   };
 
   const filteredCandidates = candidates.filter((cand) => {
@@ -157,7 +589,20 @@ const Candidates = () => {
     const matchesSearch = fullName.includes(query) || skillsText.includes(query) || pos.includes(query);
     const matchesStatus = statusFilter === 'ALL' ? true : cand.status === statusFilter;
 
-    return matchesSearch && matchesStatus;
+    const candInterview = getCandidateInterview(cand);
+    const isScheduled = candInterview?.status === 'SCHEDULED' || cand.status === 'SCHEDULED' || cand.status === 'INTERVIEW_SCHEDULED';
+    const isCompleted = candInterview?.status === 'COMPLETED' || cand.status === 'INTERVIEWED' || cand.status === 'COMPLETED';
+
+    let matchesInterviewFilter = true;
+    if (interviewFilter === 'SCHEDULED') {
+      matchesInterviewFilter = isScheduled;
+    } else if (interviewFilter === 'COMPLETED') {
+      matchesInterviewFilter = isCompleted;
+    } else if (interviewFilter === 'NOT_SCHEDULED') {
+      matchesInterviewFilter = !isScheduled && !isCompleted;
+    }
+
+    return matchesSearch && matchesStatus && matchesInterviewFilter;
   });
 
   return (
@@ -170,7 +615,7 @@ const Candidates = () => {
 
           <div className="pt-1 space-y-1">
             <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-              👥 Adyapan Candidate Management
+              Adyapan Candidate Management
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               Candidate Directory & AI Audit
@@ -180,20 +625,61 @@ const Candidates = () => {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            {/* Import Excel / CSV Button */}
+            <label
+              className={`px-3.5 py-2.5 text-xs font-bold rounded-xl border transition-all flex items-center gap-1.5 cursor-pointer shadow-sm hover:bg-amber-500 hover:text-white hover:border-amber-500 ${theme === 'dark'
+                  ? 'bg-slate-900 text-slate-200 border-slate-700'
+                  : 'bg-white text-slate-800 border-slate-300'
+                }`}
+              title="Import students / candidates list from Excel sheet (.xlsx, .csv)"
+            >
+              <span>Import Excel</span>
+              <input
+                type="file"
+                accept=".xlsx, .xls, .csv"
+                onChange={handleImportExcel}
+                className="hidden"
+              />
+            </label>
+
+            {/* Export Excel Button */}
+            <button
+              onClick={handleExportExcel}
+              className={`px-3.5 py-2.5 text-xs font-bold rounded-xl border transition-all flex items-center gap-1.5 shadow-sm cursor-pointer hover:bg-amber-500 hover:text-white hover:border-amber-500 ${theme === 'dark'
+                  ? 'bg-slate-900 text-slate-200 border-slate-700'
+                  : 'bg-white text-slate-800 border-slate-300'
+                }`}
+              title="Export all candidates data to Excel spreadsheet"
+            >
+              <span>Export Excel</span>
+            </button>
+
+            {/* Schedule All Interviews Button */}
+            <button
+              onClick={handleOpenBulkScheduleModal}
+              className={`px-3.5 py-2.5 text-xs font-bold rounded-xl border transition-all flex items-center gap-1.5 shadow-sm cursor-pointer hover:bg-amber-500 hover:text-white hover:border-amber-500 ${theme === 'dark'
+                  ? 'bg-slate-900 text-slate-200 border-slate-700'
+                  : 'bg-white text-slate-800 border-slate-300'
+                }`}
+              title="Schedule interview for all candidates at once and send invitation emails"
+            >
+              <span>Schedule All Interviews</span>
+            </button>
+
             <Link
               to="/candidates/compare"
               className={`px-3.5 py-2.5 text-xs font-semibold rounded-xl border transition-all flex items-center gap-1.5 ${theme === 'dark'
-                  ? 'bg-slate-950 text-slate-200 border-slate-800 hover:bg-slate-800'
-                  : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+                ? 'bg-slate-950 text-slate-200 border-slate-800 hover:bg-slate-800'
+                : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
                 }`}
             >
-              <span>⚡ Compare Matrix</span>
+              <span>Compare Matrix</span>
             </Link>
 
             <button
               onClick={() => setShowAddModal(true)}
-              className="px-4 py-2.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all"
+              className="px-4 py-2.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all cursor-pointer"
             >
               + Add Candidate Manually
             </button>
@@ -206,7 +692,6 @@ const Candidates = () => {
           {/* Search Input */}
           <div className="relative w-full md:w-80">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-amber-500 font-bold text-xs">
-              🔍
             </span>
             <input
               type="text"
@@ -214,26 +699,31 @@ const Candidates = () => {
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search candidate name, skills, role..."
               className={`w-full pl-9 pr-4 py-2 text-xs font-normal border rounded-xl focus:outline-none ${theme === 'dark'
-                  ? 'bg-slate-950 border-slate-700 text-white placeholder-slate-500 focus:border-amber-400'
-                  : 'bg-white border-amber-200/80 text-slate-800 placeholder-slate-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20'
+                ? 'bg-slate-950 border-slate-700 text-white placeholder-slate-500 focus:border-amber-400'
+                : 'bg-white border-amber-200/80 text-slate-800 placeholder-slate-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20'
                 }`}
             />
           </div>
 
           {/* Status Filter Badges */}
           <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-            {['ALL', 'SHORTLISTED', 'INTERVIEWED', 'AI_SCREENED'].map((st) => (
+            {[
+              { id: 'ALL', label: 'All Candidates' },
+              { id: 'SCHEDULED', label: 'Interview Scheduled' },
+              { id: 'COMPLETED', label: 'Interview Completed' },
+              { id: 'NOT_SCHEDULED', label: 'Not Scheduled' },
+            ].map((f) => (
               <button
-                key={st}
-                onClick={() => setStatusFilter(st)}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition-all border ${statusFilter === st
-                    ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-sm'
-                    : theme === 'dark'
-                      ? 'bg-slate-950 text-slate-300 border-slate-800 hover:border-amber-400/50'
-                      : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+                key={f.id}
+                onClick={() => setInterviewFilter(f.id)}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition-all border ${interviewFilter === f.id
+                  ? 'bg-amber-500 text-white border-amber-600 shadow-sm font-bold'
+                  : theme === 'dark'
+                    ? 'bg-slate-950 text-slate-300 border-slate-800 hover:border-amber-400/50'
+                    : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
                   }`}
               >
-                {st === 'ALL' ? 'All Applicants' : st.replace('_', ' ')}
+                {f.label}
               </button>
             ))}
           </div>
@@ -253,12 +743,23 @@ const Candidates = () => {
               const calculated = calculateRealAIScore(skillsList, isStudent ? 0 : (cand.totalExperience || 0), cand.currentPosition || cand.jobTitle || 'Business Development Associate (BDA)');
 
               const aiScore = cand.score || cand.applications?.[0]?.aiScore || calculated.score;
-              const candReason = cand.reason || cand.applications?.[0]?.matchReason || calculated.reason;
-              const eduDegree = typeof cand.education === 'object' && cand.education?.degree ? cand.education.degree : (cand.education || 'Graduate');
-              const college = typeof cand.education === 'object' && cand.education?.college ? cand.education.college : (cand.collegeName || 'Recognized College');
+              const rawReason = cand.reason || cand.applications?.[0]?.matchReason || calculated.reason;
+              const candReason = typeof rawReason === 'string' ? rawReason : 'Verified skill evaluation & domain experience.';
+
+              const eduDegree = typeof cand.education === 'object'
+                ? (cand.education?.degree || cand.education?.fieldOfStudy || 'Graduate')
+                : (typeof cand.education === 'string' ? cand.education : 'Graduate');
+
+              const college = typeof cand.education === 'object'
+                ? (cand.education?.college || cand.education?.institution || 'Recognized College')
+                : (typeof cand.collegeName === 'string' ? cand.collegeName : 'Recognized College');
 
               const positionDisplay = cand.currentPosition || (isStudent ? 'Student / Fresher' : 'Applicant');
               const companyDisplay = cand.currentCompany ? (isStudent ? `(${cand.currentCompany})` : `at ${cand.currentCompany}`) : '';
+
+              const candInterview = getCandidateInterview(cand);
+              const isCompleted = candInterview?.status === 'COMPLETED' || cand.status === 'INTERVIEWED' || cand.status === 'COMPLETED';
+              const isScheduled = candInterview?.status === 'SCHEDULED' || cand.status === 'SCHEDULED' || cand.status === 'INTERVIEW_SCHEDULED';
 
               return (
                 <div
@@ -292,8 +793,22 @@ const Candidates = () => {
                           ● {isStudent ? 'Student / Fresher' : `Working (${cand.currentCompanyTenure || 'Professional'})`}
                         </span>
                         <span className="px-2.5 py-0.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 rounded-full border border-emerald-500/30">
-                          ✨ {aiScore}% AI Match
+                          {aiScore}% AI Match
                         </span>
+
+                        {isCompleted ? (
+                          <span className="px-2.5 py-0.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 rounded-full border border-emerald-500/30">
+                            ● Interview Completed
+                          </span>
+                        ) : isScheduled ? (
+                          <span className="px-2.5 py-0.5 text-xs font-bold text-blue-700 dark:text-blue-300 bg-blue-500/15 rounded-full border border-blue-500/30" title={candInterview && candInterview.scheduledAt ? `Scheduled for ${new Date(candInterview.scheduledAt).toLocaleString()}` : 'Interview Scheduled'}>
+                            ● Interview Scheduled {candInterview && candInterview.scheduledAt ? `(${new Date(candInterview.scheduledAt).toLocaleDateString([], { month: 'short', day: 'numeric' })})` : ''}
+                          </span>
+                        ) : (
+                          <span className="px-2.5 py-0.5 text-xs font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-full border border-slate-200 dark:border-slate-700">
+                            ● Interview Not Scheduled
+                          </span>
+                        )}
                       </div>
 
                       <p className="text-xs text-slate-600 dark:text-slate-300 font-normal">
@@ -301,9 +816,9 @@ const Candidates = () => {
                       </p>
 
                       <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 dark:text-slate-400 font-normal">
-                        <span>📧 {cand.email}</span>
-                        <span>📍 {cand.location || 'India'}</span>
-                        <span>🎓 {eduDegree} ({college})</span>
+                        <span> {cand.email}</span>
+                        <span>{cand.location || 'India'}</span>
+                        <span>{eduDegree} ({college})</span>
                       </div>
 
                       {/* Skill Badges */}
@@ -312,8 +827,8 @@ const Candidates = () => {
                           <span
                             key={sk}
                             className={`px-2.5 py-0.5 text-xs font-medium rounded-xl border ${theme === 'dark'
-                                ? 'bg-slate-950 text-slate-300 border-slate-800'
-                                : 'bg-slate-100 text-slate-700 border-slate-200'
+                              ? 'bg-slate-950 text-slate-300 border-slate-800'
+                              : 'bg-slate-100 text-slate-700 border-slate-200'
                               }`}
                           >
                             {sk}
@@ -322,11 +837,70 @@ const Candidates = () => {
                       </div>
 
                       <p className={`text-xs font-normal mt-1 p-3 rounded-2xl border leading-relaxed ${theme === 'dark'
-                          ? 'bg-slate-950 text-slate-300 border-slate-800'
-                          : 'bg-white text-slate-800 border-amber-200/60'
+                        ? 'bg-slate-950 text-slate-300 border-slate-800'
+                        : 'bg-white text-slate-800 border-amber-200/60'
                         }`}>
-                        🤖 <strong className="font-bold text-amber-600 dark:text-amber-400">AI Match Insight:</strong> {candReason}
+                        <strong className="font-bold text-amber-600 dark:text-amber-400">AI Match Insight:</strong> {candReason}
                       </p>
+
+                      {/* Candidate Dynamic Positive Things Section (2 Lines) */}
+                      {(() => {
+                        const skillsList = Array.isArray(cand.skills) ? cand.skills : (typeof cand.skills === 'string' ? cand.skills.split(',').map((s) => s.trim()).filter(Boolean) : []);
+                        const exp = Number(cand.totalExperience || cand.experience || 0);
+                        const pos = (cand.currentPosition || cand.jobTitle || '').toLowerCase();
+                        const company = cand.currentCompany ? cand.currentCompany.trim() : '';
+                        const isFresher = exp === 0 || pos.includes('student') || pos.includes('fresher');
+                        const score = parseInt(aiScore) || 75;
+                        const candName = cand.firstName || cand.name?.split(' ')[0] || 'Candidate';
+
+                        const pills = [];
+                        if (score >= 85) pills.push(`Top ${score}% AI Match`);
+                        else if (score >= 70) pills.push(`Verified ${score}% Skill Fit`);
+                        else pills.push(`Evaluated ${score}% Match`);
+
+                        if (skillsList.length > 0) {
+                          pills.push(`Expert in ${skillsList.slice(0, 2).join(' & ')}`);
+                        } else if (isFresher) {
+                          pills.push('Quick Learner & Fast Adaptability');
+                        } else {
+                          pills.push('Established Client Pitching');
+                        }
+
+                        if (!isFresher && exp > 0) {
+                          pills.push(`${exp} Year${exp > 1 ? 's' : ''} Industry Exp`);
+                        } else if (company) {
+                          pills.push(`Background at ${company}`);
+                        } else {
+                          pills.push('High Career Growth Potential');
+                        }
+
+                        let recommendation = '';
+                        if (isFresher) {
+                          const skillFocus = skillsList.slice(0, 2).join(' and ') || 'student counselling and sales communication';
+                          recommendation = `${candName} shows high growth potential as a fresher with strong skills in ${skillFocus}. Recommended for junior BDA and Counselling roles.`;
+                        } else if (exp >= 3) {
+                          recommendation = `${candName} brings ${exp} years of proven hands-on experience${company ? ` from ${company}` : ''} with strong execution. Recommended for senior executive and lead roles.`;
+                        } else {
+                          const mainSkill = skillsList[0] || 'sales pitch & counselling';
+                          recommendation = `${candName} has verified hands-on expertise in ${mainSkill}. Recommended for executive interview and client-facing rounds.`;
+                        }
+
+                        return (
+                          <div className="space-y-1 pt-1.5 border-t border-slate-100 dark:border-slate-800/80 mt-1">
+                            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                              <span>● Candidate Positive Strengths:</span>
+                              {pills.slice(0, 2).map((pill, pIdx) => (
+                                <span key={pIdx} className="px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/60 font-medium">
+                                  {pill}
+                                </span>
+                              ))}
+                            </div>
+                            <p className="text-xs text-slate-600 dark:text-slate-300 font-normal leading-relaxed">
+                              <strong className="font-semibold text-slate-800 dark:text-slate-200">Recommendation:</strong> {recommendation}
+                            </p>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
 
@@ -335,24 +909,24 @@ const Candidates = () => {
                     <Link
                       to={`/candidates/${cand.id}`}
                       className={`px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all text-center w-full ${theme === 'dark'
-                          ? 'bg-slate-950 text-slate-200 border-slate-800 hover:bg-slate-800'
-                          : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+                        ? 'bg-slate-950 text-slate-200 border-slate-800 hover:bg-slate-800'
+                        : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
                         }`}
                     >
                       Profile & Resume →
                     </Link>
-                    <Link
-                      to={`/interviews?candidateId=${cand.id}`}
-                      className="px-3.5 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition-all shadow-sm text-center w-full"
+                    <button
+                      onClick={() => handleOpenScheduleModal(cand)}
+                      className="px-3.5 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition-all shadow-sm text-center w-full cursor-pointer"
                     >
                       Schedule Interview
-                    </Link>
+                    </button>
                     <button
                       onClick={() => handleDeleteCandidate(cand.id, `${cand.firstName} ${cand.lastName}`)}
                       className="px-3.5 py-2 text-xs font-semibold text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 rounded-xl transition-all w-full flex items-center justify-center gap-1.5"
                       title="Delete candidate from DB, backend & frontend"
                     >
-                      🗑️ Delete Candidate
+                      Delete Candidate
                     </button>
                   </div>
                 </div>
@@ -459,6 +1033,188 @@ const Candidates = () => {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
+                  className={`flex-1 py-2.5 font-medium rounded-xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
+                    }`}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Quick Schedule Interview Modal */}
+      {schedulingCandidate && (
+        <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className={`rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl border ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+            }`}>
+            <h2 className="text-base font-bold border-b border-slate-100 dark:border-slate-800 pb-3">
+              Schedule Interview for {schedulingCandidate.firstName} {schedulingCandidate.lastName}
+            </h2>
+            <form onSubmit={handleConfirmSchedule} className="space-y-3 text-xs font-medium">
+              <div>
+                <label className="block mb-1 font-semibold">Candidate</label>
+                <input
+                  type="text"
+                  readOnly
+                  value={`${schedulingCandidate.firstName || ''} ${schedulingCandidate.lastName || ''} (${schedulingCandidate.email || ''})`}
+                  className={`w-full p-2.5 rounded-xl font-medium border opacity-80 ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
+                    }`}
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-semibold">Interview Round Type *</label>
+                <select
+                  value={scheduleFormData.type}
+                  onChange={(e) => setScheduleFormData({ ...scheduleFormData, type: e.target.value })}
+                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                    }`}
+                >
+                  <option value="SALES_PITCH_ROUND">Sales Pitch Round (BDA)</option>
+                  <option value="HR_SCREENING">HR Screening Round</option>
+                  <option value="MANAGERIAL_ROUND">Managerial Interview</option>
+                  <option value="TECHNICAL_ROUND">Technical Sales Round</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block mb-1 font-semibold">Date & Time *</label>
+                <input
+                  type="datetime-local"
+                  required
+                  value={scheduleFormData.scheduledAt}
+                  onChange={(e) => setScheduleFormData({ ...scheduleFormData, scheduledAt: e.target.value })}
+                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                    }`}
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-semibold">Duration (Minutes)</label>
+                <select
+                  value={scheduleFormData.duration}
+                  onChange={(e) => setScheduleFormData({ ...scheduleFormData, duration: e.target.value })}
+                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                    }`}
+                >
+                  <option value={30}>30 Minutes</option>
+                  <option value={45}>45 Minutes</option>
+                  <option value={60}>60 Minutes</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block mb-1 font-semibold">Meeting Link</label>
+                <input
+                  type="url"
+                  value={scheduleFormData.meetingLink}
+                  onChange={(e) => setScheduleFormData({ ...scheduleFormData, meetingLink: e.target.value })}
+                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                    }`}
+                  placeholder="https://meet.google.com/..."
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button type="submit" className="flex-1 py-2.5 font-semibold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm cursor-pointer">
+                  Confirm & Schedule Interview
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSchedulingCandidate(null)}
+                  className={`flex-1 py-2.5 font-medium rounded-xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
+                    }`}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Schedule Interview Modal */}
+      {showBulkScheduleModal && (
+        <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className={`rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl border ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+            }`}>
+            <div className="border-b border-slate-100 dark:border-slate-800 pb-3">
+              <h2 className="text-base font-bold">
+                Schedule Interview for All Candidates
+              </h2>
+              <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mt-0.5">
+                Total {filteredCandidates.length} candidate(s) will be scheduled & notified via email
+              </p>
+            </div>
+
+            <form onSubmit={handleConfirmBulkSchedule} className="space-y-3 text-xs font-medium">
+              <div>
+                <label className="block mb-1 font-semibold">Interview Round Type *</label>
+                <select
+                  value={bulkScheduleFormData.type}
+                  onChange={(e) => setBulkScheduleFormData({ ...bulkScheduleFormData, type: e.target.value })}
+                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                    }`}
+                >
+                  <option value="SALES_PITCH_ROUND">Sales Pitch Round (BDA)</option>
+                  <option value="HR_SCREENING">HR Screening Round</option>
+                  <option value="MANAGERIAL_ROUND">Managerial Interview</option>
+                  <option value="TECHNICAL_ROUND">Technical Sales Round</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block mb-1 font-semibold">Date & Time for All *</label>
+                <input
+                  type="datetime-local"
+                  required
+                  value={bulkScheduleFormData.scheduledAt}
+                  onChange={(e) => setBulkScheduleFormData({ ...bulkScheduleFormData, scheduledAt: e.target.value })}
+                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                    }`}
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-semibold">Duration (Minutes)</label>
+                <select
+                  value={bulkScheduleFormData.duration}
+                  onChange={(e) => setBulkScheduleFormData({ ...bulkScheduleFormData, duration: e.target.value })}
+                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                    }`}
+                >
+                  <option value={30}>30 Minutes</option>
+                  <option value={45}>45 Minutes</option>
+                  <option value={60}>60 Minutes</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block mb-1 font-semibold">Meeting Link</label>
+                <input
+                  type="url"
+                  value={bulkScheduleFormData.meetingLink}
+                  onChange={(e) => setBulkScheduleFormData({ ...bulkScheduleFormData, meetingLink: e.target.value })}
+                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                    }`}
+                  placeholder="https://meet.google.com/..."
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="submit"
+                  disabled={isBulkScheduling || filteredCandidates.length === 0}
+                  className="flex-1 py-2.5 font-semibold text-white bg-amber-500 hover:bg-amber-600 disabled:opacity-50 rounded-xl shadow-sm cursor-pointer flex items-center justify-center gap-2"
+                >
+                  {isBulkScheduling ? 'Scheduling & Sending Mails...' : `Confirm & Schedule (${filteredCandidates.length})`}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowBulkScheduleModal(false)}
+                  disabled={isBulkScheduling}
                   className={`flex-1 py-2.5 font-medium rounded-xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
                     }`}
                 >

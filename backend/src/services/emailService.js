@@ -38,11 +38,11 @@ const createSmtpTransporter = () => {
  */
 const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }) => {
   if (!to || typeof to !== 'string' || !to.includes('@')) {
-    logger.warn(`⚠️ Invalid or missing recipient email address: "${to}"`);
+    logger.warn(`Invalid or missing recipient email address: "${to}"`);
     return { success: false, message: 'Invalid recipient email address' };
   }
 
-  logger.info(`📧 Dispatching email with ${attachments.length} attachment(s) to candidate: ${to}...`);
+  logger.info(`Dispatching email with ${attachments.length} attachment(s) to candidate: ${to}...`);
 
   // Format attachments for Nodemailer (requires Buffer)
   const nodemailerAttachments = attachments.map((att) => ({
@@ -75,10 +75,10 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] })
         html,
         attachments: nodemailerAttachments,
       });
-      logger.info(`✅ REAL EMAIL WITH PDF ATTACHMENT DELIVERED to candidate ${to} via SMTP! MessageID: ${info.messageId}`);
+      logger.info(`REAL EMAIL WITH PDF ATTACHMENT DELIVERED to candidate ${to} via SMTP! MessageID: ${info.messageId}`);
       return { success: true, method: 'SMTP', messageId: info.messageId };
     } catch (smtpErr) {
-      logger.warn(`⚠️ SMTP delivery error for ${to}: ${smtpErr.message}. Trying Resend API...`);
+      logger.warn(`SMTP delivery error for ${to}: ${smtpErr.message}. Trying Resend API...`);
     }
   }
 
@@ -93,7 +93,7 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] })
     });
 
     if (resendResponse.error) {
-      logger.warn(`⚠️ Resend API notice for recipient ${to}: ${resendResponse.error.message}`);
+      logger.warn(`Resend API notice for recipient ${to}: ${resendResponse.error.message}`);
       
       // Fallback: try test SMTP transport to guarantee candidate email dispatch
       try {
@@ -117,17 +117,17 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] })
         });
 
         const previewUrl = nodemailer.getTestMessageUrl(testInfo);
-        logger.info(`✅ Email with PDF attachment dispatched to candidate ${to} via Ethereal Mail! Preview URL: ${previewUrl}`);
+        logger.info(`Email with PDF attachment dispatched to candidate ${to} via Ethereal Mail! Preview URL: ${previewUrl}`);
         return { success: true, method: 'Ethereal', previewUrl, data: resendResponse.data };
       } catch (testErr) {
         return { success: true, message: `Dispatched to ${to}`, note: resendResponse.error.message };
       }
     }
 
-    logger.info(`✅ Email with PDF attachment successfully delivered to candidate ${to} via Resend! ID: ${resendResponse.data?.id}`);
+    logger.info(`Email with PDF attachment successfully delivered to candidate ${to} via Resend! ID: ${resendResponse.data?.id}`);
     return { success: true, method: 'Resend', data: resendResponse.data };
   } catch (err) {
-    logger.error(`❌ Email delivery exception for ${to}:`, err.message);
+    logger.error(`Email delivery exception for ${to}:`, err.message);
     return { success: false, error: err.message };
   }
 };
@@ -147,14 +147,14 @@ export const sendApplicationConfirmationEmail = async ({ candidateName, candidat
       </div>
       
       <div style="padding: 32px;">
-        <h2 style="color: #0f172a; margin-top: 0; font-size: 18px;">Hello ${targetName}, 👋</h2>
+        <h2 style="color: #0f172a; margin-top: 0; font-size: 18px;">Hello ${targetName}, </h2>
         <p style="color: #334155; line-height: 1.6; font-size: 14px;">
           Thank you for applying for the <strong>${jobTitle || 'Business Development Associate'}</strong> position at Adyapan Edutech! We have successfully received your application in our recruitment database.
         </p>
         
         <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; padding: 18px; margin: 24px 0; text-align: center;">
           <span style="display: block; font-size: 12px; text-transform: uppercase; color: #64748b; font-weight: 600; letter-spacing: 0.5px;">AI Skill Screening Score</span>
-          <span style="display: block; font-size: 28px; font-weight: 800; color: #059669; margin-top: 4px;">${aiScore || 88}% Match ✨</span>
+          <span style="display: block; font-size: 28px; font-weight: 800; color: #059669; margin-top: 4px;">${aiScore || 88}% Match </span>
         </div>
 
         <p style="color: #334155; line-height: 1.6; font-size: 14px;">
@@ -171,7 +171,7 @@ export const sendApplicationConfirmationEmail = async ({ candidateName, candidat
 
   return await dispatchEmailToCandidate({
     to: targetEmail,
-    subject: `Application Received: ${jobTitle || 'Role Application'} at Adyapan Edutech 🎯`,
+    subject: `Application Received: ${jobTitle || 'Role Application'} at Adyapan Edutech `,
     html: emailHtml,
   });
 };
@@ -197,14 +197,14 @@ export const sendInterviewScheduledEmail = async ({ candidateName, candidateEmai
       </div>
       
       <div style="padding: 32px;">
-        <h2 style="color: #0f172a; margin-top: 0; font-size: 18px;">Hi ${targetName}, 🎉</h2>
+        <h2 style="color: #0f172a; margin-top: 0; font-size: 18px;">Hi ${targetName}, </h2>
         <p style="color: #334155; line-height: 1.6; font-size: 14px;">
           Congratulations! You have been shortlisted for an interview round for the <strong>${targetRole}</strong> position.
         </p>
         
         <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 20px; margin: 24px 0;">
-          <p style="margin: 0 0 8px 0; font-size: 14px; color: #1e40af;"><strong>📅 Date & Time:</strong> ${formattedDate}</p>
-          <p style="margin: 0 0 16px 0; font-size: 14px; color: #1e40af;"><strong>⏱️ Duration:</strong> 45 Minutes</p>
+          <p style="margin: 0 0 8px 0; font-size: 14px; color: #1e40af;"><strong>Date & Time:</strong> ${formattedDate}</p>
+          <p style="margin: 0 0 16px 0; font-size: 14px; color: #1e40af;"><strong>Duration:</strong> 45 Minutes</p>
           <a href="${meetingLink || 'https://meet.google.com'}" style="display: inline-block; background-color: #2563eb; color: #ffffff; font-weight: 600; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-size: 14px;">
             Join Google Meet Interview →
           </a>
@@ -219,7 +219,7 @@ export const sendInterviewScheduledEmail = async ({ candidateName, candidateEmai
 
   return await dispatchEmailToCandidate({
     to: targetEmail,
-    subject: `Interview Scheduled: ${targetRole} Round at Adyapan 📅`,
+    subject: `Interview Scheduled: ${targetRole} Round at Adyapan `,
     html: emailHtml,
   });
 };
@@ -271,9 +271,9 @@ export const sendOfferLetterEmail = async (offerPayload = {}) => {
       customTerms,
       companyTemplateName,
     });
-    logger.info(`✅ Generated ${pdfBuffer ? pdfBuffer.length : 0} bytes PDF offer letter buffer for ${candidateName}`);
+    logger.info(`Generated ${pdfBuffer ? pdfBuffer.length : 0} bytes PDF offer letter buffer for ${candidateName}`);
   } catch (pdfErr) {
-    logger.error('❌ PDF Buffer generation error:', pdfErr.message);
+    logger.error('PDF Buffer generation error:', pdfErr.message);
   }
 
   const formattedSalary = typeof salary === 'number' ? `₹${(salary / 100000).toFixed(1)} LPA` : (salary || '₹6.5 LPA');
@@ -286,15 +286,15 @@ export const sendOfferLetterEmail = async (offerPayload = {}) => {
       </div>
       
       <div style="padding: 32px;">
-        <h2 style="color: #0f172a; margin-top: 0; font-size: 18px;">Dear ${candidateName}, 🎊</h2>
+        <h2 style="color: #0f172a; margin-top: 0; font-size: 18px;">Dear ${candidateName}, </h2>
         <p style="color: #334155; line-height: 1.6; font-size: 14px;">
           We are delighted to extend an official offer of employment for the <strong>${jobTitle}</strong> position at Adyapan Edutech! Your formal Offer Letter PDF document is attached to this email.
         </p>
         
         <div style="background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 20px; margin: 24px 0;">
-          <p style="margin: 0 0 8px 0; font-size: 14px; color: #065f46;"><strong>💰 Offered CTC:</strong> ${formattedSalary}</p>
-          <p style="margin: 0 0 8px 0; font-size: 14px; color: #065f46;"><strong>🗓️ Target Joining Date:</strong> ${joiningDate || '2026-09-01'}</p>
-          <p style="margin: 0; font-size: 14px; color: #065f46;"><strong>📄 Attached Document:</strong> ${candidateName.replace(/\s+/g, '_')}_Official_Offer_Letter.pdf</p>
+          <p style="margin: 0 0 8px 0; font-size: 14px; color: #065f46;"><strong>Offered CTC:</strong> ${formattedSalary}</p>
+          <p style="margin: 0 0 8px 0; font-size: 14px; color: #065f46;"><strong>Target Joining Date:</strong> ${joiningDate || '2026-09-01'}</p>
+          <p style="margin: 0; font-size: 14px; color: #065f46;"><strong>Attached Document:</strong> ${candidateName.replace(/\s+/g, '_')}_Official_Offer_Letter.pdf</p>
         </div>
 
         <p style="color: #334155; line-height: 1.6; font-size: 14px;">
@@ -315,7 +315,7 @@ export const sendOfferLetterEmail = async (offerPayload = {}) => {
 
   return await dispatchEmailToCandidate({
     to: targetEmail,
-    subject: `Official Offer Letter: ${jobTitle} at Adyapan Edutech 💼`,
+    subject: `Official Offer Letter: ${jobTitle} at Adyapan Edutech `,
     html: emailHtml,
     attachments,
   });
@@ -387,13 +387,13 @@ export const sendWelcomeOnboardingEmail = async ({ candidateName, candidateEmail
       </div>
       
       <div style="padding: 32px;">
-        <h2 style="color: #0f172a; margin-top: 0; font-size: 18px;">Welcome to the Team, ${targetName}! 🎉</h2>
+        <h2 style="color: #0f172a; margin-top: 0; font-size: 18px;">Welcome to the Team, ${targetName}! </h2>
         <p style="color: #334155; line-height: 1.6; font-size: 14px;">
           We are thrilled to welcome you as <strong>${targetRole}</strong> at Adyapan Edutech! Your official joining date is set for <strong>${joiningDate || '1 Sept 2026'}</strong>.
         </p>
         
         <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 20px; margin: 24px 0;">
-          <p style="margin: 0 0 10px 0; color: #1e40af; font-size: 14px; font-weight: 700;">📋 Your Onboarding Checklist:</p>
+          <p style="margin: 0 0 10px 0; color: #1e40af; font-size: 14px; font-weight: 700;">Your Onboarding Checklist:</p>
           <ul style="margin: 0; padding-left: 20px; color: #1e3a8a; font-size: 13px; line-height: 1.8;">
             <li>Identity & Educational Degree Verification (Complete)</li>
             <li>Adyapan IT Laptop & Slack Work Account Provisioning (In Progress)</li>
@@ -415,7 +415,53 @@ export const sendWelcomeOnboardingEmail = async ({ candidateName, candidateEmail
 
   return await dispatchEmailToCandidate({
     to: targetEmail,
-    subject: `Welcome to Adyapan Edutech! 🚀 Joining Details for ${targetRole}`,
+    subject: `Welcome to Adyapan Edutech! Joining Details for ${targetRole}`,
+    html: emailHtml,
+  });
+};
+
+/**
+ * Send Contact Us Form Submission Email to Support (support@adyapan.com)
+ */
+export const sendContactUsSupportEmail = async ({ fullName, email, phone, subject, message }) => {
+  const targetSupportEmail = 'support@adyapan.com';
+
+  const emailHtml = `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+      <div style="background-color: #f59e0b; padding: 24px 32px; text-align: center;">
+        <h1 style="color: #1a1a2e; margin: 0; font-size: 22px; font-weight: 800;">Adyapan Support Inquiry</h1>
+        <p style="color: #1a1a2e; margin: 4px 0 0 0; font-size: 13px; font-weight: 600;">New Message from Contact Us Form</p>
+      </div>
+      
+      <div style="padding: 32px;">
+        <h2 style="color: #0f172a; margin-top: 0; font-size: 18px;">Inquiry Subject: ${subject || 'General Inquiry'}</h2>
+        
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin: 20px 0; font-size: 14px;">
+          <p style="margin: 0 0 8px 0; color: #334155;"><strong>From Name:</strong> ${fullName}</p>
+          <p style="margin: 0 0 8px 0; color: #334155;"><strong>Sender Email:</strong> <a href="mailto:${email}" style="color: #2563eb; font-weight: 600;">${email}</a></p>
+          <p style="margin: 0 0 8px 0; color: #334155;"><strong>Phone Number:</strong> ${phone || 'Not Provided'}</p>
+          <p style="margin: 0; color: #334155;"><strong>Received At:</strong> ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</p>
+        </div>
+
+        <div style="background-color: #fffbe6; border-left: 4px solid #f59e0b; border-radius: 8px; padding: 18px; margin: 24px 0;">
+          <span style="display: block; font-size: 11px; text-transform: uppercase; color: #b45309; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 6px;">User Message:</span>
+          <p style="margin: 0; color: #1a1a2e; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">${message}</p>
+        </div>
+
+        <p style="color: #64748b; font-size: 13px; margin-top: 24px;">
+          Reply directly to <a href="mailto:${email}" style="color: #d97706; font-weight: 700; text-decoration: underline;">${email}</a> to respond to this candidate or user inquiry.
+        </p>
+
+        <div style="border-top: 1px solid #e2e8f0; margin-top: 32px; padding-top: 20px; text-align: center; color: #94a3b8; font-size: 12px;">
+          <p style="margin: 0;">Adyapan Edutech Support System • support@adyapan.com</p>
+        </div>
+      </div>
+    </div>
+  `;
+
+  return await dispatchEmailToCandidate({
+    to: targetSupportEmail,
+    subject: `[Contact Support] ${subject || 'New Message'}: ${fullName}`,
     html: emailHtml,
   });
 };
@@ -426,4 +472,5 @@ export default {
   sendOfferLetterEmail,
   sendRejectionEmail,
   sendWelcomeOnboardingEmail,
+  sendContactUsSupportEmail,
 };
