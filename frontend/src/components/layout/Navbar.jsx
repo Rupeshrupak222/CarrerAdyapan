@@ -148,7 +148,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
 
           {/* Contact Us Button */}
           <Link
-            to="/contact"
+            to="/admin-contact"
             className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-all border hover:border-amber-400 cursor-pointer"
             style={theme === 'dark'
               ? { background: 'rgba(245, 158, 11,0.15)', color: '#f59e0b', borderColor: 'rgba(245, 158, 11,0.3)' }

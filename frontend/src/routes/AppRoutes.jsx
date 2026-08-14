@@ -21,6 +21,7 @@ import OfferDetails from '../pages/offers/OfferDetails';
 import AnalyticsPage from '../pages/analytics/AnalyticsPage';
 import AIAssistant from '../pages/assistant/AIAssistant';
 import AdminProfile from '../pages/profile/AdminProfile';
+import AdminContactUs from '../pages/contact/AdminContactUs';
 
 // Public Candidate Portal Pages
 import Careers from '../candidate-portal/Careers';
@@ -185,6 +186,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <AdminProfile />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin-contact"
+        element={
+          <ProtectedRoute>
+            <AdminContactUs />
           </ProtectedRoute>
         }
       />

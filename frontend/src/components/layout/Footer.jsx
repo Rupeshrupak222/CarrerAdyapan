@@ -121,7 +121,7 @@ const Footer = ({ isPublic }) => {
                 </Link>
               </li>
               <li>
-                <Link to="/contact" className="hover:text-amber-500 transition-all hover:translate-x-1 inline-block">
+                <Link to={isPublicPage ? "/contact" : "/admin-contact"} className="hover:text-amber-500 transition-all hover:translate-x-1 inline-block">
                   → Candidate Help & Contact
                 </Link>
               </li>
@@ -184,10 +184,10 @@ const Footer = ({ isPublic }) => {
 
           {/* Col 4: Corporate Contact Info */}
           <div id="contact" className="space-y-4 scroll-mt-24">
-            <div className="flex items-center gap-2 text-xs font-bold tracking-widest text-amber-500 uppercase">
+            <Link to={isPublicPage ? "/contact" : "/admin-contact"} className="flex items-center gap-2 text-xs font-bold tracking-widest text-amber-500 uppercase hover:underline">
               <span className="w-4 h-[2px] bg-amber-500 inline-block" />
               <span>CONTACT</span>
-            </div>
+            </Link>
 
             {/* Phone Item */}
             <div className="flex items-center gap-3 group">
@@ -257,9 +257,9 @@ const Footer = ({ isPublic }) => {
               Terms of Service
             </Link>
             <span>•</span>
-            <a href="https://adyapan.com/contact" target="_blank" rel="noopener noreferrer" className="hover:text-amber-500 transition-colors">
-              Contact Us ↗
-            </a>
+            <Link to={isPublicPage ? "/contact" : "/admin-contact"} className="hover:text-amber-500 transition-colors font-semibold">
+              Contact Us
+            </Link>
             <span>•</span>
             <a href="https://adyapan.com/" target="_blank" rel="noopener noreferrer" className="hover:text-amber-500 transition-colors font-bold">
               Home ↗

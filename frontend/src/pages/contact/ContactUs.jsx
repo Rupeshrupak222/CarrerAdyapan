@@ -65,35 +65,25 @@ const ContactUs = () => {
     <div className={`min-h-screen font-sans antialiased flex flex-col transition-colors ${
       theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'
     }`}>
-      {/* Frozen Glassmorphic Navbar */}
+      {/* Candidate Careers Portal Glassmorphic Navbar */}
       <nav className={`sticky top-0 z-50 px-4 sm:px-8 py-3.5 backdrop-blur-xl border-b transition-all ${
         theme === 'dark'
           ? 'bg-slate-950/90 border-slate-800 shadow-2xl'
           : 'bg-white/95 border-amber-200/80 shadow-md'
       }`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <Link to="/dashboard" className="flex items-center gap-2">
+          <Link to="/careers" className="flex items-center gap-2">
             <AdyapanLogo variant={theme === 'dark' ? 'dark' : 'light'} size="normal" />
           </Link>
 
           <div className="flex items-center gap-3">
             <Link
-              to="/dashboard"
-              className="px-4 py-2 text-xs font-bold text-slate-950 bg-amber-400 hover:bg-amber-500 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
-            >
-              <span>Home</span>
-              <span>→</span>
-            </Link>
-            <Link
               to="/careers"
-              className={`px-4 py-2 text-xs font-bold rounded-xl border transition-all ${
-                theme === 'dark'
-                  ? 'bg-slate-900 border-slate-700 text-slate-200 hover:border-amber-400'
-                  : 'bg-white border-amber-200 text-amber-900 hover:bg-amber-50 shadow-sm'
-              }`}
+              className="px-4 py-2 text-xs font-black text-slate-950 bg-amber-400 hover:bg-amber-500 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
             >
-              Careers Portal
+              <span>← Back to Careers Portal</span>
             </Link>
+
             <button
               onClick={toggleTheme}
               className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all ${
@@ -115,7 +105,7 @@ const ContactUs = () => {
             Get in <span className="text-adyapan-orange font-extrabold">Touch</span>
           </h1>
           <p className="text-sm sm:text-base font-medium leading-relaxed max-w-2xl mx-auto" style={{ color: '#cbd5e1' }}>
-            Have questions about our programs or need career guidance? Our team is here to help you every step of the way.
+            Have questions about our programs, job roles, or career guidance? Our team is here to help you every step of the way.
           </p>
         </div>
       </header>
@@ -279,7 +269,7 @@ const ContactUs = () => {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-4 text-xs font-black text-slate-950 bg-amber-500 hover:bg-amber-400 rounded-2xl transition-all shadow-lg shadow-amber-500/20 uppercase tracking-wider flex items-center justify-center gap-2"
+                className="w-full py-4 text-xs font-black text-slate-950 bg-amber-500 hover:bg-amber-400 rounded-2xl transition-all shadow-lg shadow-amber-500/20 uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -332,7 +322,7 @@ const ContactUs = () => {
         </div>
       </main>
 
-      <Footer />
+      <Footer isPublic={true} />
     </div>
   );
 };
