@@ -61,7 +61,7 @@ const CandidateDetails = () => {
     try {
       const res = await interviewService.getAllInterviews(true);
       list = res?.interviews || [];
-    } catch (e) {}
+    } catch (e) { }
     try {
       const localStr = localStorage.getItem('adyapan_interviews');
       if (localStr) {
@@ -74,7 +74,7 @@ const CandidateDetails = () => {
         });
         list = Array.from(map.values());
       }
-    } catch (e) {}
+    } catch (e) { }
     setInterviews(list);
   };
 
@@ -153,7 +153,7 @@ const CandidateDetails = () => {
         if (dbMatch) {
           loadedCandidate = dbMatch;
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // 5. Final fallback
@@ -326,7 +326,7 @@ const CandidateDetails = () => {
       const existing = JSON.parse(localStorage.getItem(key) || '[]');
       const updated = [newInterviewData, ...existing.filter((i) => i.id !== newInterviewData.id)];
       localStorage.setItem(key, JSON.stringify(updated));
-    } catch (e) {}
+    } catch (e) { }
 
     toast.success(`Interview scheduled for ${fullCandName} & saved to Interviews directory!`);
     setShowScheduleModal(false);
@@ -423,7 +423,7 @@ const CandidateDetails = () => {
       const storedInterviews = JSON.parse(localStorage.getItem('adyapan_interviews') || '[]');
       const updatedInterviews = storedInterviews.filter((i) => i.candidateId !== candidate.id && i.candidateEmail !== candidate.email);
       localStorage.setItem('adyapan_interviews', JSON.stringify(updatedInterviews));
-    } catch (e) {}
+    } catch (e) { }
 
     toast.success(`Candidate "${candName}" & all linked data permanently deleted from DB! `);
     navigate('/candidates');
@@ -695,13 +695,12 @@ const CandidateDetails = () => {
         </div>
 
         {/* Interview Status Banner Card */}
-        <div className={`p-5 rounded-3xl border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-          isCompleted
+        <div className={`p-5 rounded-3xl border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${isCompleted
             ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-950 dark:text-emerald-200'
             : isScheduled
               ? 'bg-blue-500/10 border-blue-500/20 text-blue-950 dark:text-blue-200'
               : 'bg-amber-500/10 border-amber-500/20 text-amber-950 dark:text-amber-200'
-        }`}>
+          }`}>
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
               <span>● Interview Status:</span>
@@ -769,9 +768,8 @@ const CandidateDetails = () => {
         </div>
 
         {/* 6-Dimensional ATS Audit Architecture Breakdown */}
-        <div className={`p-6 rounded-3xl border shadow-sm space-y-4 ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
-        }`}>
+        <div className={`p-6 rounded-3xl border shadow-sm space-y-4 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+          }`}>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
             <div className="flex items-center gap-2.5">
               <span className="text-xl"></span>
@@ -972,7 +970,7 @@ const CandidateDetails = () => {
             {/* Matched Keywords Grid */}
             <div className="space-y-1.5">
               <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide block">
-                 Matched Keywords Found in Resume
+                Matched Keywords Found in Resume
               </span>
               <div className="flex flex-wrap gap-2">
                 {(candidate.aiBreakdown?.matchedSkills || (Array.isArray(candidate.skills) && candidate.skills.length > 0 ? candidate.skills : ['EdTech Sales', 'Student Counselling', 'Telesales', 'Target Handling', 'Communication'])).map((kw, idx) => (
@@ -987,7 +985,7 @@ const CandidateDetails = () => {
             {(candidate.aiBreakdown?.missingSkills || ['Objection Handling', 'Cold Calling']).length > 0 && (
               <div className="space-y-1.5 pt-2">
                 <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wide block">
-                   Missing Keywords for Target Role ({currentPosition})
+                  Missing Keywords for Target Role ({currentPosition})
                 </span>
                 <div className="flex flex-wrap gap-2">
                   {(candidate.aiBreakdown?.missingSkills || ['Objection Handling', 'Cold Calling']).map((kw, idx) => (
@@ -1007,7 +1005,7 @@ const CandidateDetails = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-3">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-lg font-bold">
-                </div>
+              </div>
               <div>
                 <h2 className="text-base font-bold flex items-center gap-2">
                   <span>Candidate Official Offer Letter & Package</span>
@@ -1177,12 +1175,12 @@ const CandidateDetails = () => {
             <div className={`p-4 rounded-xl border space-y-2 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-emerald-50/50 border-emerald-200'
               }`}>
               <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block">
-                 Verified Matched Skills & Capabilities:
+                Verified Matched Skills & Capabilities:
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {skills.map((sk) => (
                   <span key={sk} className="px-2.5 py-1 text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 rounded-lg border border-emerald-200 dark:border-emerald-900">
-                     {sk}
+                    {sk}
                   </span>
                 ))}
               </div>
@@ -1191,7 +1189,7 @@ const CandidateDetails = () => {
             <div className={`p-4 rounded-xl border space-y-2 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-white border-amber-200'
               }`}>
               <span className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider block">
-                 Skills Gaps / To Probe in Interview:
+                Skills Gaps / To Probe in Interview:
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {(candidate.aiBreakdown?.missingSkills || ['Institutional B2B Partnerships', 'Enterprise Contract Closing']).map((sk) => (
@@ -1454,9 +1452,8 @@ const CandidateDetails = () => {
       {/* Schedule Interview Modal */}
       {showScheduleModal && candidate && (
         <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className={`rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl border ${
-            theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
-          }`}>
+          <div className={`rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl border ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+            }`}>
             <h2 className="text-base font-bold border-b border-slate-100 dark:border-slate-800 pb-3">
               Schedule Interview for {candidate.firstName} {candidate.lastName}
             </h2>
@@ -1467,9 +1464,8 @@ const CandidateDetails = () => {
                   type="text"
                   readOnly
                   value={`${candidate.firstName || ''} ${candidate.lastName || ''} (${candidate.email || ''})`}
-                  className={`w-full p-2.5 rounded-xl font-medium border opacity-80 ${
-                    theme === 'dark' ? 'bg-slate-950 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
-                  }`}
+                  className={`w-full p-2.5 rounded-xl font-medium border opacity-80 ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
+                    }`}
                 />
               </div>
 
@@ -1478,9 +1474,8 @@ const CandidateDetails = () => {
                 <select
                   value={scheduleFormData.type}
                   onChange={(e) => setScheduleFormData({ ...scheduleFormData, type: e.target.value })}
-                  className={`w-full p-2.5 rounded-xl font-medium border ${
-                    theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                  }`}
+                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                    }`}
                 >
                   <option value="SALES_PITCH_ROUND">Sales Pitch Round (BDA)</option>
                   <option value="HR_SCREENING">HR Screening Round</option>
@@ -1496,9 +1491,8 @@ const CandidateDetails = () => {
                   required
                   value={scheduleFormData.scheduledAt}
                   onChange={(e) => setScheduleFormData({ ...scheduleFormData, scheduledAt: e.target.value })}
-                  className={`w-full p-2.5 rounded-xl font-medium border ${
-                    theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                  }`}
+                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                    }`}
                 />
               </div>
 
@@ -1507,9 +1501,8 @@ const CandidateDetails = () => {
                 <select
                   value={scheduleFormData.duration}
                   onChange={(e) => setScheduleFormData({ ...scheduleFormData, duration: e.target.value })}
-                  className={`w-full p-2.5 rounded-xl font-medium border ${
-                    theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                  }`}
+                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                    }`}
                 >
                   <option value={30}>30 Minutes</option>
                   <option value={45}>45 Minutes</option>
@@ -1523,9 +1516,8 @@ const CandidateDetails = () => {
                   type="url"
                   value={scheduleFormData.meetingLink}
                   onChange={(e) => setScheduleFormData({ ...scheduleFormData, meetingLink: e.target.value })}
-                  className={`w-full p-2.5 rounded-xl font-medium border ${
-                    theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                  }`}
+                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                    }`}
                   placeholder="https://meet.google.com/..."
                 />
               </div>
@@ -1537,9 +1529,8 @@ const CandidateDetails = () => {
                 <button
                   type="button"
                   onClick={() => setShowScheduleModal(false)}
-                  className={`flex-1 py-2.5 font-medium rounded-xl border ${
-                    theme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
-                  }`}
+                  className={`flex-1 py-2.5 font-medium rounded-xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
+                    }`}
                 >
                   Cancel
                 </button>

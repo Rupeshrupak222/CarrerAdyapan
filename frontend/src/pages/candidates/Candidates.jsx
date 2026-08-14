@@ -629,8 +629,8 @@ const Candidates = () => {
             {/* Import Excel / CSV Button */}
             <label
               className={`px-3.5 py-2.5 text-xs font-bold rounded-xl border transition-all flex items-center gap-1.5 cursor-pointer shadow-sm hover:bg-amber-500 hover:text-white hover:border-amber-500 ${theme === 'dark'
-                  ? 'bg-slate-900 text-slate-200 border-slate-700'
-                  : 'bg-white text-slate-800 border-slate-300'
+                ? 'bg-slate-900 text-slate-200 border-slate-700'
+                : 'bg-white text-slate-800 border-slate-300'
                 }`}
               title="Import students / candidates list from Excel sheet (.xlsx, .csv)"
             >
@@ -647,8 +647,8 @@ const Candidates = () => {
             <button
               onClick={handleExportExcel}
               className={`px-3.5 py-2.5 text-xs font-bold rounded-xl border transition-all flex items-center gap-1.5 shadow-sm cursor-pointer hover:bg-amber-500 hover:text-white hover:border-amber-500 ${theme === 'dark'
-                  ? 'bg-slate-900 text-slate-200 border-slate-700'
-                  : 'bg-white text-slate-800 border-slate-300'
+                ? 'bg-slate-900 text-slate-200 border-slate-700'
+                : 'bg-white text-slate-800 border-slate-300'
                 }`}
               title="Export all candidates data to Excel spreadsheet"
             >
@@ -659,8 +659,8 @@ const Candidates = () => {
             <button
               onClick={handleOpenBulkScheduleModal}
               className={`px-3.5 py-2.5 text-xs font-bold rounded-xl border transition-all flex items-center gap-1.5 shadow-sm cursor-pointer hover:bg-amber-500 hover:text-white hover:border-amber-500 ${theme === 'dark'
-                  ? 'bg-slate-900 text-slate-200 border-slate-700'
-                  : 'bg-white text-slate-800 border-slate-300'
+                ? 'bg-slate-900 text-slate-200 border-slate-700'
+                : 'bg-white text-slate-800 border-slate-300'
                 }`}
               title="Schedule interview for all candidates at once and send invitation emails"
             >

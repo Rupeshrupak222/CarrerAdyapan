@@ -1,5 +1,6 @@
 import prisma from '../config/db.js';
 import { logger } from '../utils/logger.js';
+import { queryGeminiCopilot } from '../services/geminiService.js';
 
 // AI Score Candidate
 export const scoreCandidate = async (req, res) => {
@@ -18,11 +19,7 @@ export const scoreCandidate = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Application not found' });
     }
 
-    // AI Scoring Logic (Enhanced)
-    const skills = application.candidate.skills || [];
-    const experience = application.candidate.totalExperience || 0;
-    
-    // Calculate scores based on job requirements
+    // AI Scoring Logic
     const skillMatch = Math.min(Math.floor(Math.random() * 30) + 70, 100);
     const experienceFit = Math.min(Math.floor(Math.random() * 30) + 65, 100);
     const educationFit = Math.min(Math.floor(Math.random() * 30) + 70, 100);
@@ -39,7 +36,6 @@ export const scoreCandidate = async (req, res) => {
       achievements
     };
 
-    // Generate match reason
     const matchReasons = [
       'Candidate shows strong alignment with job requirements',
       'Excellent skills match for this position',
@@ -94,7 +90,6 @@ export const generateQuestions = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Application not found' });
     }
 
-    // AI Generated Questions based on job and candidate
     const questions = {
       questions: [
         {
@@ -140,7 +135,6 @@ export const generateQuestions = async (req, res) => {
       ]
     };
 
-    // Store questions in interview
     await prisma.interview.updateMany({
       where: { applicationId: applicationId },
       data: { generatedQuestions: questions }
@@ -153,97 +147,127 @@ export const generateQuestions = async (req, res) => {
   }
 };
 
-// AI Hiring Assistant
+/**
+ * Standard Non-Streaming AI Recruitment Assistant (Gemini API + Database Tools)
+ */
 export const getHiringAssistant = async (req, res) => {
   try {
-    const { query } = req.body;
+    const { query, history = [] } = req.body;
 
-    if (!query) {
+    if (!query || !query.trim()) {
       return res.status(400).json({ success: false, message: 'Query is required' });
     }
 
-    // Get hiring data
-    const [totalApplications, shortlisted, hired, avgScore] = await Promise.all([
-      prisma.application.count({ where: { job: { userId: req.user.id } } }),
-      prisma.application.count({ where: { job: { userId: req.user.id }, status: 'SHORTLISTED' } }),
-      prisma.application.count({ where: { job: { userId: req.user.id }, status: 'HIRED' } }),
-      prisma.application.aggregate({
-        where: { job: { userId: req.user.id } },
-        _avg: { aiScore: true }
-      })
-    ]);
-
-    // Top candidates
-    const topCandidates = await prisma.application.findMany({
-      where: { job: { userId: req.user.id } },
-      include: { candidate: true, job: true },
-      orderBy: { aiScore: 'desc' },
-      take: 5
+    const { reply } = await queryGeminiCopilot({
+      message: query.trim(),
+      history
     });
 
-    // Generate AI response based on query
-    let response = {
-      message: '',
-      data: {}
-    };
-
-    const lowerQuery = query.toLowerCase();
-
-    if (lowerQuery.includes('top') || lowerQuery.includes('best') || lowerQuery.includes('candidate')) {
-      response.message = `Here are the top candidates based on AI scoring:`;
-      response.data = {
-        candidates: topCandidates.map(app => ({
-          name: `${app.candidate.firstName} ${app.candidate.lastName}`,
-          score: app.aiScore,
-          status: app.status,
-          job: app.job.title
-        }))
-      };
-    } else if (lowerQuery.includes('hiring') || lowerQuery.includes('pipeline') || lowerQuery.includes('funnel')) {
-      response.message = `Here's your hiring pipeline summary:`;
-      response.data = {
-        totalApplications,
-        shortlisted,
-        hired,
-        conversionRate: totalApplications > 0 ? Math.round((hired / totalApplications) * 100) : 0,
-        averageScore: Math.round(avgScore._avg.aiScore || 0)
-      };
-    } else if (lowerQuery.includes('score') || lowerQuery.includes('match')) {
-      response.message = `AI scoring analysis:`;
-      response.data = {
-        averageScore: Math.round(avgScore._avg.aiScore || 0),
-        topScore: topCandidates[0]?.aiScore || 0,
-        totalScored: await prisma.application.count({
-          where: { job: { userId: req.user.id }, aiScore: { not: null } }
-        })
-      };
-    } else {
-      response.message = `I understand you're asking about "${query}". Here's what I can help with:`;
-      response.data = {
-        totalApplications,
-        shortlisted,
-        hired,
-        topCandidates: topCandidates.slice(0, 3).map(app => ({
-          name: `${app.candidate.firstName} ${app.candidate.lastName}`,
-          score: app.aiScore
-        }))
-      };
+    // Save conversation to DB
+    try {
+      await prisma.aIConversation.create({
+        data: {
+          userId: req.user.id,
+          messages: [
+            { role: 'user', content: query },
+            { role: 'assistant', content: reply }
+          ]
+        }
+      });
+    } catch (saveErr) {
+      logger.warn('Failed to save AIConversation record:', saveErr);
     }
 
-    // Save conversation
-    await prisma.aIConversation.create({
-      data: {
-        userId: req.user.id,
-        messages: [
-          { role: 'user', content: query },
-          { role: 'assistant', content: response.message }
-        ]
+    res.json({
+      success: true,
+      response: {
+        message: reply,
+        text: reply
       }
     });
-
-    res.json({ success: true, response });
   } catch (error) {
     logger.error('AI Assistant Error:', error);
-    res.status(500).json({ success: false, message: 'Failed to get AI response' });
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to get response from Gemini AI Assistant'
+    });
+  }
+};
+
+/**
+ * Server-Sent Events (SSE) Streaming AI Recruitment Assistant
+ */
+export const streamHiringAssistant = async (req, res) => {
+  try {
+    const { query, history = [] } = req.body;
+
+    if (!query || !query.trim()) {
+      return res.status(400).json({ success: false, message: 'Query is required' });
+    }
+
+    // Set SSE headers
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders?.();
+
+    const sendEvent = (data) => {
+      res.write(`data: ${JSON.stringify(data)}\n\n`);
+    };
+
+    const { reply } = await queryGeminiCopilot({
+      message: query.trim(),
+      history
+    });
+
+    // Stream out chunks for smooth typing animation
+    const chunkSize = 15;
+    for (let i = 0; i < reply.length; i += chunkSize) {
+      const textChunk = reply.slice(i, i + chunkSize);
+      sendEvent({ chunk: textChunk, done: false });
+      await new Promise(r => setTimeout(r, 20));
+    }
+
+    sendEvent({ chunk: '', done: true });
+    res.end();
+
+    // Save conversation to database
+    try {
+      await prisma.aIConversation.create({
+        data: {
+          userId: req.user.id,
+          messages: [
+            { role: 'user', content: query },
+            { role: 'assistant', content: reply }
+          ]
+        }
+      });
+    } catch (saveErr) {
+      logger.warn('Failed to save streamed conversation:', saveErr);
+    }
+  } catch (error) {
+    logger.error('Stream AI Assistant Error:', error);
+    if (!res.headersSent) {
+      res.status(500).json({ success: false, message: error.message || 'Failed to stream response' });
+    } else {
+      res.write(`data: ${JSON.stringify({ error: error.message || 'Streaming failed', done: true })}\n\n`);
+      res.end();
+    }
+  }
+};
+
+/**
+ * Clear conversation memory
+ */
+export const clearConversation = async (req, res) => {
+  try {
+    await prisma.aIConversation.deleteMany({
+      where: { userId: req.user.id }
+    });
+
+    res.json({ success: true, message: 'Conversation memory cleared successfully' });
+  } catch (error) {
+    logger.error('Clear Conversation Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to clear conversation history' });
   }
 };

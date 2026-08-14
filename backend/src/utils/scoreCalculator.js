@@ -37,10 +37,10 @@ export const calculateMatchScore = (candidateSkills = [], jobRequirements = '', 
   let baseScore = Math.min(95, Math.max(65, matchedSkills.length * 15 + 40));
 
   if (isSalesRole) {
-    const hasEdTechExp = candidateSkills.some(s => 
-      s.toLowerCase().includes('edtech') || 
-      s.toLowerCase().includes('counsell') || 
-      s.toLowerCase().includes('tele') || 
+    const hasEdTechExp = candidateSkills.some(s =>
+      s.toLowerCase().includes('edtech') ||
+      s.toLowerCase().includes('counsell') ||
+      s.toLowerCase().includes('tele') ||
       s.toLowerCase().includes('target') ||
       s.toLowerCase().includes('lead')
     );

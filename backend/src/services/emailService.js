@@ -94,7 +94,7 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] })
 
     if (resendResponse.error) {
       logger.warn(`Resend API notice for recipient ${to}: ${resendResponse.error.message}`);
-      
+
       // Fallback: try test SMTP transport to guarantee candidate email dispatch
       try {
         const testAccount = await nodemailer.createTestAccount();
@@ -466,9 +466,58 @@ export const sendContactUsSupportEmail = async ({ fullName, email, phone, subjec
   });
 };
 
+/**
+ * Send Today's Interview Reminder Email
+ */
+export const sendInterviewReminderEmail = async ({ recipientEmail, recipientName, candidateName, jobTitle, scheduledAt, meetingLink, isHR = false }) => {
+  const formattedDate = new Date(scheduledAt || Date.now()).toLocaleString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    dateStyle: 'full',
+    timeStyle: 'short',
+  });
+
+  const subject = isHR
+    ? `Today's Interview Reminder – ${candidateName}`
+    : `Your Interview is Today – ${jobTitle}`;
+
+  const html = `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0;">
+      <div style="background-color: #f59e0b; padding: 24px 32px; text-align: center;">
+        <h1 style="color: #1a1a2e; margin: 0; font-size: 22px; font-weight: 800;">Adyapan Edutech</h1>
+        <p style="color: #1a1a2e; margin: 4px 0 0 0; font-size: 13px; font-weight: 600;">Today's Scheduled Interview</p>
+      </div>
+      
+      <div style="padding: 32px;">
+        <h2 style="color: #0f172a; margin-top: 0; font-size: 18px;">Hello ${recipientName || 'Team'},</h2>
+        <p style="color: #334155; line-height: 1.6; font-size: 14px;">
+          This is an automated reminder that you have an interview scheduled for today.
+        </p>
+        
+        <div style="background-color: #fffbe6; border: 1px solid #fde68a; border-radius: 12px; padding: 20px; margin: 24px 0; font-size: 14px; color: #92400e;">
+          <p style="margin: 0 0 8px 0;"><strong>Candidate:</strong> ${candidateName}</p>
+          <p style="margin: 0 0 8px 0;"><strong>Job:</strong> ${jobTitle}</p>
+          <p style="margin: 0 0 8px 0;"><strong>Scheduled Time (IST):</strong> ${formattedDate}</p>
+          ${meetingLink ? `<p style="margin: 0;"><strong>Meeting Link:</strong> <a href="${meetingLink}" style="color: #d97706; font-weight: 700;">${meetingLink}</a></p>` : ''}
+        </div>
+
+        <p style="color: #64748b; font-size: 13px;">
+          Please be available at the scheduled time. Good luck!
+        </p>
+      </div>
+    </div>
+  `;
+
+  return await dispatchEmailToCandidate({
+    to: recipientEmail,
+    subject,
+    html,
+  });
+};
+
 export default {
   sendApplicationConfirmationEmail,
   sendInterviewScheduledEmail,
+  sendInterviewReminderEmail,
   sendOfferLetterEmail,
   sendRejectionEmail,
   sendWelcomeOnboardingEmail,

@@ -73,7 +73,7 @@ const Interviews = () => {
     setInterviews(list);
     try {
       localStorage.setItem('adyapan_interviews', JSON.stringify(list));
-    } catch (e) {}
+    } catch (e) { }
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new Event('adyapan_data_sync'));
     }
@@ -114,7 +114,7 @@ const Interviews = () => {
 
       try {
         localStorage.setItem('adyapan_interviews', JSON.stringify(merged));
-      } catch (e) {}
+      } catch (e) { }
     } catch (e) {
       const localList = getSavedLocalInterviews();
       setInterviews(localList.length > 0 ? localList : INITIAL_MOCK_INTERVIEWS);
@@ -196,58 +196,58 @@ const Interviews = () => {
     const candEmail = targetInt.candidateEmail || targetInt.application?.candidate?.email || targetInt.email || `${candName.toLowerCase().replace(/\s+/g, '.')}@example.com`;
     const jobTitle = targetInt.jobTitle || targetInt.application?.job?.title || 'Business Development Associate (BDA)';
 
-      const offerEntry = {
-        id: `off-${Date.now()}`,
-        candidateId: targetInt.candidateId || targetInt.application?.candidate?.id,
-        candidateName: candName,
-        email: candEmail,
-        jobTitle: jobTitle,
-        salary: 550000,
-        bonus: 100000,
-        joiningDate: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
-        expirationDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
-        status: 'READY_TO_SEND',
-        templateName: getGlobalOfferTemplate().templateName,
-        benefits: ['Health Insurance', 'Performance Incentives', 'Learning Allowance'],
-        customTerms: 'Probation period of 3 months. Interview cleared successfully.',
-      };
-
-      syncUpdateOffer(offerEntry);
-
-      // Update candidate status to INTERVIEWED in local storage candidates list
-      try {
-        const targetCandId = targetInt.candidateId || targetInt.application?.candidate?.id;
-        if (targetCandId) {
-          await candidateService.updateCandidate(targetCandId, { status: 'INTERVIEWED' }).catch(() => {});
-        }
-        const candKey = 'adyapan_candidates';
-        const existingCands = JSON.parse(localStorage.getItem(candKey) || '[]');
-        const updatedCands = existingCands.map((c) => {
-          if (
-            (targetCandId && String(c.id) === String(targetCandId)) ||
-            (c.email && candEmail && c.email.toLowerCase() === candEmail.toLowerCase())
-          ) {
-            return { ...c, status: 'INTERVIEWED' };
-          }
-          return c;
-        });
-        localStorage.setItem(candKey, JSON.stringify(updatedCands));
-      } catch (e) {}
-
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('adyapan_data_updated'));
-        window.dispatchEvent(new Event('adyapan_data_sync'));
-      }
-
-      toast.success('Interview marked as Completed & persisted to Database! Candidate added to Offers section! ');
+    const offerEntry = {
+      id: `off-${Date.now()}`,
+      candidateId: targetInt.candidateId || targetInt.application?.candidate?.id,
+      candidateName: candName,
+      email: candEmail,
+      jobTitle: jobTitle,
+      salary: 550000,
+      bonus: 100000,
+      joiningDate: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
+      expirationDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
+      status: 'READY_TO_SEND',
+      templateName: getGlobalOfferTemplate().templateName,
+      benefits: ['Health Insurance', 'Performance Incentives', 'Learning Allowance'],
+      customTerms: 'Probation period of 3 months. Interview cleared successfully.',
     };
+
+    syncUpdateOffer(offerEntry);
+
+    // Update candidate status to INTERVIEWED in local storage candidates list
+    try {
+      const targetCandId = targetInt.candidateId || targetInt.application?.candidate?.id;
+      if (targetCandId) {
+        await candidateService.updateCandidate(targetCandId, { status: 'INTERVIEWED' }).catch(() => { });
+      }
+      const candKey = 'adyapan_candidates';
+      const existingCands = JSON.parse(localStorage.getItem(candKey) || '[]');
+      const updatedCands = existingCands.map((c) => {
+        if (
+          (targetCandId && String(c.id) === String(targetCandId)) ||
+          (c.email && candEmail && c.email.toLowerCase() === candEmail.toLowerCase())
+        ) {
+          return { ...c, status: 'INTERVIEWED' };
+        }
+        return c;
+      });
+      localStorage.setItem(candKey, JSON.stringify(updatedCands));
+    } catch (e) { }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('adyapan_data_updated'));
+      window.dispatchEvent(new Event('adyapan_data_sync'));
+    }
+
+    toast.success('Interview marked as Completed & persisted to Database! Candidate added to Offers section! ');
+  };
 
   const handleDeleteInterview = async (id) => {
     const interview = interviews.find((i) => i.id === id);
     const name = interview?.candidateName
       || (interview?.application?.candidate ? `${interview.application.candidate.firstName} ${interview.application.candidate.lastName}` : 'this interview');
     if (!window.confirm(`Delete interview for "${name}" permanently from DB, backend & frontend?`)) return;
-    try { await interviewService.deleteInterview(id); } catch (e) {}
+    try { await interviewService.deleteInterview(id); } catch (e) { }
     const updated = interviews.filter((i) => i.id !== id);
     saveInterviewsToStore(updated);
     toast.success(`Interview for "${name}" deleted! `);
@@ -263,9 +263,8 @@ const Interviews = () => {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header Bar */}
-        <div className={`p-6 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden shadow-sm ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
-        }`}>
+        <div className={`p-6 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden shadow-sm ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+          }`}>
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
 
           <div className="space-y-1.5 pt-1">
@@ -289,43 +288,39 @@ const Interviews = () => {
         </div>
 
         {/* Filter Bar */}
-        <div className={`flex flex-wrap items-center gap-2 p-3 rounded-3xl border shadow-sm ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-amber-200/80'
-        }`}>
+        <div className={`flex flex-wrap items-center gap-2 p-3 rounded-3xl border shadow-sm ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-amber-200/80'
+          }`}>
           <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-2">Status:</span>
           <button
             onClick={() => setFilterStatus('ALL')}
-            className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all border ${
-              filterStatus === 'ALL'
+            className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all border ${filterStatus === 'ALL'
                 ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-sm'
                 : theme === 'dark'
-                ? 'bg-slate-950 text-slate-300 border-slate-800 hover:border-amber-400/50'
-                : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
-            }`}
+                  ? 'bg-slate-950 text-slate-300 border-slate-800 hover:border-amber-400/50'
+                  : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+              }`}
           >
             All Interviews ({interviews.length})
           </button>
           <button
             onClick={() => setFilterStatus('SCHEDULED')}
-            className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all border ${
-              filterStatus === 'SCHEDULED'
+            className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all border ${filterStatus === 'SCHEDULED'
                 ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-sm'
                 : theme === 'dark'
-                ? 'bg-slate-950 text-slate-300 border-slate-800 hover:border-amber-400/50'
-                : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
-            }`}
+                  ? 'bg-slate-950 text-slate-300 border-slate-800 hover:border-amber-400/50'
+                  : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+              }`}
           >
             Scheduled ({interviews.filter((i) => i.status === 'SCHEDULED').length})
           </button>
           <button
             onClick={() => setFilterStatus('COMPLETED')}
-            className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all border ${
-              filterStatus === 'COMPLETED'
+            className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all border ${filterStatus === 'COMPLETED'
                 ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-sm'
                 : theme === 'dark'
-                ? 'bg-slate-950 text-slate-300 border-slate-800 hover:border-amber-400/50'
-                : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
-            }`}
+                  ? 'bg-slate-950 text-slate-300 border-slate-800 hover:border-amber-400/50'
+                  : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+              }`}
           >
             Completed ({interviews.filter((i) => i.status === 'COMPLETED').length})
           </button>
@@ -334,9 +329,8 @@ const Interviews = () => {
         {/* Interviews Cards List */}
         <div className="space-y-4">
           {filteredInterviews.length === 0 ? (
-            <div className={`p-8 text-center rounded-3xl border text-xs font-medium ${
-              theme === 'dark' ? 'bg-slate-900 border-slate-800 text-slate-400' : 'bg-white border-amber-200/80 text-slate-500'
-            }`}>
+            <div className={`p-8 text-center rounded-3xl border text-xs font-medium ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-slate-400' : 'bg-white border-amber-200/80 text-slate-500'
+              }`}>
               No interviews found for this filter. Click "+ Schedule New Interview" to create one.
             </div>
           ) : (
@@ -349,10 +343,10 @@ const Interviews = () => {
 
               const targetCandidate = candidates.find(
                 (c) => c.id === interview.candidateId ||
-                       c.id === interview.application?.candidateId ||
-                       c.id === interview.application?.candidate?.id ||
-                       (c.email && c.email.toLowerCase() === emailDisplay.toLowerCase()) ||
-                       (`${c.firstName || ''} ${c.lastName || ''}`.trim().toLowerCase() === candidateFullName.toLowerCase())
+                  c.id === interview.application?.candidateId ||
+                  c.id === interview.application?.candidate?.id ||
+                  (c.email && c.email.toLowerCase() === emailDisplay.toLowerCase()) ||
+                  (`${c.firstName || ''} ${c.lastName || ''}`.trim().toLowerCase() === candidateFullName.toLowerCase())
               );
               const candidateProfileId = targetCandidate?.id || interview.candidateId || interview.application?.candidateId || interview.application?.candidate?.id;
               const profileLink = candidateProfileId ? `/candidates/${candidateProfileId}` : '/candidates';
@@ -360,9 +354,8 @@ const Interviews = () => {
               return (
                 <div
                   key={interview.id}
-                  className={`p-6 rounded-3xl border shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative overflow-hidden ${
-                    theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
-                  }`}
+                  className={`p-6 rounded-3xl border shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative overflow-hidden ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+                    }`}
                 >
                   <div className="space-y-2 flex-1">
                     {/* Round & Status Badges */}
@@ -371,11 +364,10 @@ const Interviews = () => {
                         {interview.type?.replace(/_/g, ' ') || 'SALES PITCH ROUND'}
                       </span>
                       <span
-                        className={`px-3 py-0.5 text-xs font-bold rounded-full border ${
-                          interview.status === 'COMPLETED'
+                        className={`px-3 py-0.5 text-xs font-bold rounded-full border ${interview.status === 'COMPLETED'
                             ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
                             : 'bg-orange-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-300 dark:border-amber-800'
-                        }`}
+                          }`}
                       >
                         ● Status: {interview.status}
                       </span>
@@ -452,9 +444,8 @@ const Interviews = () => {
       {/* Schedule Interview Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className={`rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl border ${
-            theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-800'
-          }`}>
+          <div className={`rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl border ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-800'
+            }`}>
             <h2 className="text-base font-bold border-b border-slate-100 dark:border-slate-800 pb-3">Schedule Candidate Interview</h2>
             <form onSubmit={handleAddInterview} className="space-y-3 text-xs">
               <div>
@@ -462,9 +453,8 @@ const Interviews = () => {
                 <select
                   value={formData.candidateId}
                   onChange={(e) => setFormData({ ...formData, candidateId: e.target.value })}
-                  className={`w-full p-2.5 rounded-xl font-medium border ${
-                    theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                  }`}
+                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                    }`}
                 >
                   {candidates.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -479,9 +469,8 @@ const Interviews = () => {
                 <select
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                  className={`w-full p-2.5 rounded-xl font-medium border ${
-                    theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                  }`}
+                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                    }`}
                 >
                   <option value="SALES_PITCH_ROUND">Sales Pitch Simulation</option>
                   <option value="COUNSELLING_SIMULATION">Student Counselling Scenario</option>
@@ -497,9 +486,8 @@ const Interviews = () => {
                   required
                   value={formData.scheduledAt}
                   onChange={(e) => setFormData({ ...formData, scheduledAt: e.target.value })}
-                  className={`w-full p-2.5 rounded-xl font-medium border ${
-                    theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                  }`}
+                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                    }`}
                 />
               </div>
 
@@ -510,9 +498,8 @@ const Interviews = () => {
                   value={formData.meetingLink}
                   onChange={(e) => setFormData({ ...formData, meetingLink: e.target.value })}
                   placeholder="https://meet.google.com/abc-defg-hij"
-                  className={`w-full p-2.5 rounded-xl font-medium border ${
-                    theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                  }`}
+                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+                    }`}
                 />
               </div>
 
@@ -523,9 +510,8 @@ const Interviews = () => {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className={`flex-1 py-2.5 font-medium rounded-xl border ${
-                    theme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
-                  }`}
+                  className={`flex-1 py-2.5 font-medium rounded-xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
+                    }`}
                 >
                   Cancel
                 </button>

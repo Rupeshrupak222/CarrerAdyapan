@@ -45,7 +45,7 @@ export const getDashboardStats = async (req, res) => {
       timeSaved
     });
   } catch (error) {
-    console.warn('Dashboard Stats Fallback Warning:', error.message);
+    console.warn('Dashboard Stats Error:', error.message);
     res.json({
       totalApplications: 0,
       aiScreened: 0,
@@ -96,7 +96,7 @@ export const getHiringFunnel = async (req, res) => {
 
     res.json({ data: funnel });
   } catch (error) {
-    console.warn('Hiring Funnel Fallback Warning:', error.message);
+    console.warn('Hiring Funnel Warning:', error.message);
     res.json({
       data: [
         { stage: 'Applied', count: 0 },
@@ -110,9 +110,44 @@ export const getHiringFunnel = async (req, res) => {
   }
 };
 
+export const getMonthlyVelocity = async (req, res) => {
+  try {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+
+    const [candidates, applications] = await Promise.all([
+      prisma.candidate.findMany({ select: { createdAt: true } }).catch(() => []),
+      prisma.application.findMany({ select: { createdAt: true } }).catch(() => []),
+    ]);
+
+    const monthsOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthCounts = {};
+    monthsOrder.forEach(m => monthCounts[m] = 0);
+
+    [...candidates, ...applications].forEach(item => {
+      if (item.createdAt) {
+        const m = new Date(item.createdAt).toLocaleString('en-US', { month: 'short' });
+        if (monthCounts[m] !== undefined) {
+          monthCounts[m] += 1;
+        }
+      }
+    });
+
+    const currentMonthIdx = new Date().getMonth();
+    const velocity = monthsOrder.slice(0, currentMonthIdx + 1).map(m => ({
+      month: m,
+      applications: monthCounts[m] || 0,
+    }));
+
+    res.json({ success: true, velocity });
+  } catch (error) {
+    console.warn('Monthly Velocity Error:', error.message);
+    res.json({ success: true, velocity: [] });
+  }
+};
+
 export const getRecentActivity = async (req, res) => {
   try {
-    res.setHeader('Cache-Control', 'private, max-age=10, stale-while-revalidate=20');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     const activities = await prisma.activity.findMany({
       include: {
         job: { select: { title: true } },

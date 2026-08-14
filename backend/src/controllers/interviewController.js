@@ -61,7 +61,7 @@ export const createInterview = async (req, res) => {
       await prisma.application.updateMany({
         where: { candidateId: targetCandId },
         data: { status: updatedCandStatus },
-      }).catch(() => {});
+      }).catch(() => { });
     }
 
     if (targetEmail && (interview.status === 'SCHEDULED' || status === 'SCHEDULED')) {
@@ -136,7 +136,7 @@ export const getInterviewById = async (req, res) => {
 export const updateInterview = async (req, res) => {
   try {
     const { status, feedback, rating, notes, scheduledAt, type, meetingLink, candidateName, candidateEmail, jobTitle, candidateId, jobId } = req.body;
-    
+
     const updateData = {};
     if (status !== undefined) updateData.status = status;
     if (feedback !== undefined) updateData.feedback = feedback;
@@ -203,7 +203,7 @@ export const updateInterviewFeedback = async (req, res) => {
       await prisma.application.updateMany({
         where: { candidateId: interview.candidateId },
         data: { status: 'INTERVIEWED' },
-      }).catch(() => {});
+      }).catch(() => { });
     }
 
     logger.info(`Interview ${req.params.id} marked as COMPLETED in PostgreSQL DB!`);

@@ -23,6 +23,8 @@ import offerRoutes from './src/routes/offerRoutes.js';
 import analyticsRoutes from './src/routes/analyticsRoutes.js';
 import aiRoutes from './src/routes/aiRoutes.js';
 import settingsRoutes from './src/routes/settingsRoutes.js';
+import notificationRoutes from './src/routes/notificationRoutes.js';
+import { todayReminderScheduler } from './src/services/todayReminderScheduler.js';
 
 // Middleware
 import { errorMiddleware } from './src/middleware/errorMiddleware.js';
@@ -77,6 +79,8 @@ app.use('/api/applications', applicationRoutes);
 app.use('/api/interviews', interviewRoutes);
 app.use('/api/offers', offerRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/notifications', notificationRoutes);
 import { sendContactUsSupportEmail } from './src/services/emailService.js';
 
 // Contact Us Form Submission API (Delivers to support@adyapan.com)
@@ -113,6 +117,7 @@ const server = app.listen(PORT, async () => {
   console.log(`http://localhost:${PORT}`);
   console.log(`CORS enabled for: http://localhost:5173`);
   await autoSeed();
+  todayReminderScheduler.startScheduler();
 });
 
 server.on('error', (err) => {

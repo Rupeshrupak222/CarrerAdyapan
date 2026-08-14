@@ -84,7 +84,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
           {/* Search Input */}
           <div className="relative flex-1 max-w-[140px] xs:max-w-[200px] sm:max-w-xs md:max-w-sm lg:max-w-md">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none" style={{ color: '#f59e0b' }}>
-              </span>
+            </span>
             <input
               type="text"
               value={searchQuery}
@@ -180,7 +180,9 @@ const Navbar = ({ toggleMobileSidebar }) => {
               style={{ color: theme === 'dark' ? '#94a3b8' : '#6b7280' }}
               title="Notifications"
             >
-              <span className="text-base"></span>
+              <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
               {unreadCount > 0 && (
                 <span
                   className="absolute top-0.5 right-0.5 px-1.5 py-0.2 font-bold text-[9px] rounded-full text-white"
@@ -207,7 +209,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
                   }
                 >
                   <span className="text-xs font-bold" style={{ color: theme === 'dark' ? '#f1f5f9' : '#1a1a2e' }}>
-                     Applicant Alerts
+                    Applicant Alerts
                   </span>
                   <span
                     className="text-[10px] font-bold px-2 py-0.5 rounded-full border"

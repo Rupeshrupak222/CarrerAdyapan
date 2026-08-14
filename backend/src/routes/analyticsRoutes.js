@@ -1,13 +1,12 @@
 import express from 'express';
+import { getDashboardStats, getHiringFunnel, getRecentActivity, getMonthlyVelocity } from '../controllers/analyticsController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
-import { getDashboardStats, getHiringFunnel, getRecentActivity } from '../controllers/analyticsController.js';
 
 const router = express.Router();
 
-router.use(authMiddleware);
-router.get('/stats', getDashboardStats);
-router.get('/dashboard', getDashboardStats);
-router.get('/funnel', getHiringFunnel);
-router.get('/activity', getRecentActivity);
+router.get('/stats', authMiddleware, getDashboardStats);
+router.get('/funnel', authMiddleware, getHiringFunnel);
+router.get('/velocity', authMiddleware, getMonthlyVelocity);
+router.get('/activity', authMiddleware, getRecentActivity);
 
 export default router;
