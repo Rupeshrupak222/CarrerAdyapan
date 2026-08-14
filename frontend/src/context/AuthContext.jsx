@@ -84,6 +84,46 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const register = async (formData) => {
+    try {
+      const response = await authService.register(formData);
+      return response;
+    } catch (error) {
+      console.error('AuthContext register error:', error);
+      return { success: false, error: error.response?.data?.message || error.message || 'Registration failed' };
+    }
+  };
+
+  const createHRUser = async (data) => {
+    try {
+      const response = await authService.createHRUser(data);
+      return response;
+    } catch (error) {
+      console.error('AuthContext createHRUser error:', error);
+      return { success: false, error: error.response?.data?.message || error.message || 'Failed to create HR account' };
+    }
+  };
+
+  const getAllUsers = async () => {
+    try {
+      const response = await authService.getAllUsers();
+      return response?.users || [];
+    } catch (error) {
+      console.error('AuthContext getAllUsers error:', error);
+      return [];
+    }
+  };
+
+  const deleteUser = async (id) => {
+    try {
+      const response = await authService.deleteUser(id);
+      return response;
+    } catch (error) {
+      console.error('AuthContext deleteUser error:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -92,7 +132,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, register, createHRUser, getAllUsers, deleteUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -7,10 +7,12 @@ import { authService } from '../../services/authService';
 import toast from 'react-hot-toast';
 
 const AdminProfile = () => {
-  const { user, login } = useAuth();
+  const { user, login, createHRUser, getAllUsers, deleteUser } = useAuth();
   const { theme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [creatingHR, setCreatingHR] = useState(false);
+  const [teamUsers, setTeamUsers] = useState([]);
 
   const [profileData, setProfileData] = useState({
     name: user?.name || 'Recruiter Lead (Admin)',
@@ -26,6 +28,8 @@ const AdminProfile = () => {
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showCreateHRModal, setShowCreateHRModal] = useState(false);
+  const [generatedCreds, setGeneratedCreds] = useState(null);
 
   const [editForm, setEditForm] = useState({ ...profileData });
   const [passwordForm, setPasswordForm] = useState({
@@ -34,9 +38,83 @@ const AdminProfile = () => {
     confirmPassword: '',
   });
 
+  const [hrForm, setHrForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+    company: 'Adyapan Edutech Pvt. Ltd.',
+    designation: 'Talent Acquisition HR',
+    department: 'HR & Recruitment',
+    phone: '',
+  });
+
   useEffect(() => {
     fetchLiveProfile();
+    fetchTeamUsers();
   }, []);
+
+  const fetchTeamUsers = async () => {
+    try {
+      const users = await getAllUsers();
+      setTeamUsers(users);
+    } catch (e) {
+      console.warn('Fetch team users notice:', e);
+    }
+  };
+
+  const handleGenerateRandomPassword = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789#@!';
+    let pass = '';
+    for (let i = 0; i < 10; i++) {
+      pass += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setHrForm((prev) => ({ ...prev, password: pass }));
+  };
+
+  const handleCreateHRSubmit = async (e) => {
+    e.preventDefault();
+    if (!hrForm.email || !hrForm.password || !hrForm.name) {
+      toast.error('Please enter HR Name, Email, and Password!');
+      return;
+    }
+    setCreatingHR(true);
+    try {
+      const res = await createHRUser(hrForm);
+      if (res?.success) {
+        toast.success(res.message || `HR Account generated for ${hrForm.email}!`);
+        setGeneratedCreds({ email: hrForm.email, password: hrForm.password });
+        fetchTeamUsers();
+        setHrForm({
+          name: '',
+          email: '',
+          password: '',
+          company: 'Adyapan Edutech Pvt. Ltd.',
+          designation: 'Talent Acquisition HR',
+          department: 'HR & Recruitment',
+          phone: '',
+        });
+      } else {
+        toast.error(res?.error || res?.message || 'Failed to create HR account');
+      }
+    } catch (err) {
+      toast.error('Error generating HR account');
+    } finally {
+      setCreatingHR(false);
+    }
+  };
+
+  const handleDeleteHRUser = async (id, name) => {
+    if (!window.confirm(`Are you sure you want to revoke access for ${name}?`)) return;
+    try {
+      const res = await deleteUser(id);
+      if (res?.success) {
+        toast.success(`Access revoked for ${name}`);
+        fetchTeamUsers();
+      }
+    } catch (err) {
+      toast.error('Failed to revoke access');
+    }
+  };
 
   const fetchLiveProfile = async () => {
     try {
@@ -249,9 +327,17 @@ const AdminProfile = () => {
           <div className="space-y-6">
             <div className={`p-6 rounded-3xl border shadow-sm space-y-4 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
               }`}>
-              <h2 className="text-base font-bold border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
-                <span> Security & Database Status</span>
-              </h2>
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <h2 className="text-base font-bold flex items-center gap-2">
+                  <span> Security & HR Accounts</span>
+                </h2>
+                <button
+                  onClick={() => setShowCreateHRModal(true)}
+                  className="px-3 py-1.5 text-xs font-black text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-xl transition-all shadow-md flex items-center gap-1 uppercase tracking-wider"
+                >
+                  + Generate HR Account
+                </button>
+              </div>
 
               <div className="space-y-2.5 text-xs font-semibold">
                 <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 flex items-center justify-between">
@@ -265,8 +351,8 @@ const AdminProfile = () => {
                 </div>
 
                 <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300 flex items-center justify-between">
-                  <span>ATS Match Engine</span>
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400">FULL ACCESS</span>
+                  <span>HR User Generation</span>
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400">ADMIN CONTROLLED </span>
                 </div>
 
                 <div className="p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-800 dark:text-indigo-300 flex items-center justify-between">
@@ -278,6 +364,53 @@ const AdminProfile = () => {
                   <span> PostgreSQL Database</span>
                   <span className="font-bold text-blue-600 dark:text-blue-400">NEON LIVE SYNC </span>
                 </div>
+              </div>
+            </div>
+
+            {/* Team HR Members Directory Card */}
+            <div className={`p-6 rounded-3xl border shadow-sm space-y-4 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+              }`}>
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <h3 className="text-sm font-bold flex items-center gap-2">
+                  <span> Registered HR Team Members ({teamUsers.length})</span>
+                </h3>
+              </div>
+
+              <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+                {teamUsers.length > 0 ? (
+                  teamUsers.map((u) => (
+                    <div
+                      key={u.id}
+                      className={`p-3 rounded-2xl border flex items-center justify-between gap-3 text-xs ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'
+                        }`}
+                    >
+                      <div className="space-y-0.5 min-w-0">
+                        <div className="font-bold text-slate-900 dark:text-white truncate flex items-center gap-2">
+                          <span>{u.name}</span>
+                          <span className={`px-2 py-0.5 text-[10px] font-black rounded-full uppercase ${u.role === 'ADMIN' ? 'bg-purple-500/20 text-purple-700 dark:text-purple-300' : 'bg-blue-500/20 text-blue-700 dark:text-blue-300'
+                            }`}>
+                            {u.role || 'HR'}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{u.email}</p>
+                      </div>
+
+                      {u.role !== 'ADMIN' && (
+                        <button
+                          onClick={() => handleDeleteHRUser(u.id, u.name)}
+                          className="px-2.5 py-1 text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all border border-rose-500/20 shrink-0"
+                          title="Revoke HR Access"
+                        >
+                          Revoke Access
+                        </button>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-4 text-xs text-slate-400">
+                    No HR accounts generated yet. Click "+ Generate HR Account" to issue credentials.
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -468,6 +601,151 @@ const AdminProfile = () => {
                     }`}
                 >
                   Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Generate HR User Account Modal */}
+      {showCreateHRModal && (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4 overflow-y-auto">
+          <div className={`rounded-3xl max-w-lg w-full p-5 sm:p-6 space-y-4 shadow-2xl border my-auto max-h-[90vh] overflow-y-auto ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+            }`}>
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div>
+                <h3 className="text-base font-bold flex items-center gap-2">
+                  <span> Generate HR Account Credentials</span>
+                </h3>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                  Directly issue login credentials for HR recruiters.
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowCreateHRModal(false);
+                  setGeneratedCreds(null);
+                }}
+                className="text-slate-400 hover:text-slate-600 font-bold p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Generated Credentials Success Snippet */}
+            {generatedCreds && (
+              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-2 text-xs">
+                <div className="font-extrabold text-emerald-700 dark:text-emerald-300 flex items-center justify-between">
+                  <span> Account Created & Ready to Issue!</span>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(`Work Email: ${generatedCreds.email}\nPassword: ${generatedCreds.password}`);
+                      toast.success('Credentials copied to clipboard! ');
+                    }}
+                    className="px-2.5 py-1 text-[10px] font-black bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 uppercase tracking-wider"
+                  >
+                    Copy Credentials
+                  </button>
+                </div>
+                <div className="font-mono bg-slate-950 text-emerald-400 p-2.5 rounded-xl text-[11px] space-y-1">
+                  <div><strong>Email:</strong> {generatedCreds.email}</div>
+                  <div><strong>Password:</strong> {generatedCreds.password}</div>
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handleCreateHRSubmit} className="space-y-3.5 text-xs font-semibold">
+              <div>
+                <label className="block mb-1 font-bold">HR Member Full Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Rohan Sharma"
+                  value={hrForm.name}
+                  onChange={(e) => setHrForm({ ...hrForm, name: e.target.value })}
+                  className={`w-full p-3 rounded-xl border focus:outline-none ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+                    }`}
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-bold">HR Work Email Address *</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="e.g. rohan.hr@adyapan.com"
+                  value={hrForm.email}
+                  onChange={(e) => setHrForm({ ...hrForm, email: e.target.value })}
+                  className={`w-full p-3 rounded-xl border focus:outline-none ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+                    }`}
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="font-bold">Account Password *</label>
+                  <button
+                    type="button"
+                    onClick={handleGenerateRandomPassword}
+                    className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline"
+                  >
+                    ⚡ Auto-Generate Password
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  required
+                  placeholder="Enter or auto-generate password"
+                  value={hrForm.password}
+                  onChange={(e) => setHrForm({ ...hrForm, password: e.target.value })}
+                  className={`w-full p-3 rounded-xl border font-mono focus:outline-none ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-amber-300' : 'bg-slate-50 border-slate-200 text-slate-900'
+                    }`}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block mb-1 font-bold">Designation</label>
+                  <input
+                    type="text"
+                    value={hrForm.designation}
+                    onChange={(e) => setHrForm({ ...hrForm, designation: e.target.value })}
+                    className={`w-full p-3 rounded-xl border focus:outline-none ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+                      }`}
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-1 font-bold">Department</label>
+                  <input
+                    type="text"
+                    value={hrForm.department}
+                    onChange={(e) => setHrForm({ ...hrForm, department: e.target.value })}
+                    className={`w-full p-3 rounded-xl border focus:outline-none ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+                      }`}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="submit"
+                  disabled={creatingHR}
+                  className="flex-1 py-3 text-xs font-black text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl shadow-lg transition-all uppercase tracking-wider"
+                >
+                  {creatingHR ? 'Generating HR Account...' : 'Generate & Issue HR Account →'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreateHRModal(false);
+                    setGeneratedCreds(null);
+                  }}
+                  className={`py-3 px-5 text-xs font-bold rounded-xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
+                    }`}
+                >
+                  Close
                 </button>
               </div>
             </form>

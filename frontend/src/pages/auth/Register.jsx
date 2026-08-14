@@ -85,108 +85,42 @@ const Register = () => {
 
       {/* Main Register Card Container */}
       <div className="flex-1 flex items-center justify-center py-8 sm:py-12 px-4 sm:px-6">
-        <div className={`w-full max-w-md p-5 sm:p-8 rounded-3xl space-y-5 sm:space-y-6 shadow-2xl border transition-all ${theme === 'dark'
+        <div className={`w-full max-w-md p-6 sm:p-8 rounded-3xl space-y-6 shadow-2xl border transition-all ${theme === 'dark'
             ? 'bg-slate-900 border-slate-800 shadow-slate-950'
             : 'bg-white border-slate-300 shadow-xl'
           }`}>
           {/* Header Title */}
-          <div className="text-center space-y-2">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 text-[11px] font-black bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30 rounded-full uppercase">
-               REQUEST RECRUITER HR ACCESS
+          <div className="text-center space-y-3">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 text-[11px] font-black bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 rounded-full uppercase tracking-wider">
+               ADMIN-ISSUED HR CREDENTIALS ONLY
             </div>
             <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-              Create HR Admin Account
+              HR Account Portal
             </h1>
-            <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
-              Set up your hiring team dashboard for Adyapan Edutech.
+            <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 leading-relaxed">
+              HR & Recruiter team accounts are created and issued directly by <strong>Platform Administrators</strong>.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-black mb-1.5 text-slate-900 dark:text-slate-100">
-                Full Name *
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                placeholder="e.g. Aniket Sharma"
-                className={`w-full px-4 py-3 rounded-xl text-xs font-bold focus:outline-none border transition-all ${theme === 'dark'
-                    ? 'bg-slate-950 border-slate-700 text-white focus:border-amber-400'
-                    : 'bg-white border-slate-300 text-slate-900 focus:border-blue-600 shadow-sm'
-                  }`}
-              />
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2 text-xs font-semibold text-amber-900 dark:text-amber-200">
+            <div className="font-extrabold flex items-center gap-1.5 uppercase text-[11px] tracking-wide">
+              <span> Direct Admin Issuance System</span>
             </div>
+            <p className="leading-relaxed text-[11px]">
+              To maintain platform security, self-service registration is disabled. If you are an HR team member, your Administrator generates your login ID and password directly from the Admin Dashboard.
+            </p>
+          </div>
 
-            <div>
-              <label className="block text-xs font-black mb-1.5 text-slate-900 dark:text-slate-100">
-                Work Email *
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                placeholder="hr@adyapan.com"
-                className={`w-full px-4 py-3 rounded-xl text-xs font-bold focus:outline-none border transition-all ${theme === 'dark'
-                    ? 'bg-slate-950 border-slate-700 text-white focus:border-amber-400'
-                    : 'bg-white border-slate-300 text-slate-900 focus:border-blue-600 shadow-sm'
-                  }`}
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-black mb-1.5 text-slate-900 dark:text-slate-100">
-                Company / Organization Name *
-              </label>
-              <input
-                type="text"
-                name="company"
-                value={formData.company}
-                onChange={handleChange}
-                required
-                placeholder="Adyapan Edutech Pvt. Ltd."
-                className={`w-full px-4 py-3 rounded-xl text-xs font-bold focus:outline-none border transition-all ${theme === 'dark'
-                    ? 'bg-slate-950 border-slate-700 text-white focus:border-amber-400'
-                    : 'bg-white border-slate-300 text-slate-900 focus:border-blue-600 shadow-sm'
-                  }`}
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-black mb-1.5 text-slate-900 dark:text-slate-100">
-                Account Password *
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                placeholder="••••••••"
-                className={`w-full px-4 py-3 rounded-xl text-xs font-bold focus:outline-none border transition-all ${theme === 'dark'
-                    ? 'bg-slate-950 border-slate-700 text-white focus:border-amber-400'
-                    : 'bg-white border-slate-300 text-slate-900 focus:border-blue-600 shadow-sm'
-                  }`}
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-4 text-xs font-black text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl transition-all shadow-xl shadow-amber-400/20 uppercase tracking-wider text-center"
+          <div className="space-y-3 pt-2">
+            <Link
+              to="/login"
+              className="w-full py-4 text-xs font-black text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl transition-all shadow-xl shadow-amber-400/20 uppercase tracking-wider flex items-center justify-center gap-2"
             >
-              {loading ? 'Creating Account...' : 'Create HR Admin Account →'}
-            </button>
-          </form>
+              Sign In to Dashboard with Admin Credentials →
+            </Link>
 
-          <div className="pt-2 border-t border-slate-200 dark:border-slate-800 text-center text-xs font-bold space-y-2">
-            <p className="text-slate-700 dark:text-slate-300">
-              Already have an account? <Link to="/login" className="text-blue-600 dark:text-amber-400 hover:underline font-black">Sign In to Dashboard</Link>
+            <p className="text-center text-xs text-slate-500 dark:text-slate-400 font-medium">
+              Need access? Contact your Senior HR Administrator or Admin at <strong>admin@adyapan.com</strong>
             </p>
           </div>
         </div>

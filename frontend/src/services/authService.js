@@ -60,4 +60,37 @@ export const authService = {
       throw error;
     }
   },
+
+  createHRUser: async (data) => {
+    try {
+      console.log(' Create HR User API call:', data.email);
+      const response = await api.post('/auth/create-hr-user', data);
+      return response.data;
+    } catch (error) {
+      console.error(' Create HR User Error:', error);
+      throw error;
+    }
+  },
+
+  getAllUsers: async () => {
+    try {
+      console.log(' Get All Users API call');
+      const response = await api.get('/auth/users');
+      return response.data;
+    } catch (error) {
+      console.error(' Get All Users Error:', error);
+      throw error;
+    }
+  },
+
+  deleteUser: async (id) => {
+    try {
+      console.log(' Delete User API call:', id);
+      const response = await api.delete(`/auth/users/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error(' Delete User Error:', error);
+      throw error;
+    }
+  },
 };
