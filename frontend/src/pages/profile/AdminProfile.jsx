@@ -323,23 +323,24 @@ const AdminProfile = () => {
             </div>
           </div>
 
-          {/* Column 3: Security Credentials & Database Connection */}
+          {/* Column 3: Security & HR Accounts Management */}
           <div className="space-y-6">
             <div className={`p-6 rounded-3xl border shadow-sm space-y-4 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
               }`}>
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 gap-2">
                 <h2 className="text-base font-bold flex items-center gap-2">
                   <span> Security & HR Accounts</span>
                 </h2>
                 <button
                   onClick={() => setShowCreateHRModal(true)}
-                  className="px-3 py-1.5 text-xs font-black text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-xl transition-all shadow-md flex items-center gap-1 uppercase tracking-wider"
+                  className="px-3 py-1.5 text-xs font-black text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-xl transition-all shadow-md flex items-center gap-1 uppercase tracking-wider shrink-0"
                 >
                   + Generate HR Account
                 </button>
               </div>
 
-              <div className="space-y-2.5 text-xs font-semibold">
+              <div className="space-y-3 text-xs font-semibold">
+                {/* Option 1: Account Security (Change Password) */}
                 <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 flex items-center justify-between">
                   <span> Account Security</span>
                   <button
@@ -350,67 +351,58 @@ const AdminProfile = () => {
                   </button>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300 flex items-center justify-between">
-                  <span>HR User Generation</span>
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400">ADMIN CONTROLLED </span>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-800 dark:text-indigo-300 flex items-center justify-between">
-                  <span>Candidate Cascade Delete</span>
-                  <span className="font-bold text-indigo-600 dark:text-indigo-400">SUPER ADMIN</span>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-800 dark:text-blue-300 flex items-center justify-between">
-                  <span> PostgreSQL Database</span>
-                  <span className="font-bold text-blue-600 dark:text-blue-400">NEON LIVE SYNC </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Team HR Members Directory Card */}
-            <div className={`p-6 rounded-3xl border shadow-sm space-y-4 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
-              }`}>
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-                <h3 className="text-sm font-bold flex items-center gap-2">
-                  <span> Registered HR Team Members ({teamUsers.length})</span>
-                </h3>
-              </div>
-
-              <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
-                {teamUsers.length > 0 ? (
-                  teamUsers.map((u) => (
-                    <div
-                      key={u.id}
-                      className={`p-3 rounded-2xl border flex items-center justify-between gap-3 text-xs ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'
-                        }`}
-                    >
-                      <div className="space-y-0.5 min-w-0">
-                        <div className="font-bold text-slate-900 dark:text-white truncate flex items-center gap-2">
-                          <span>{u.name}</span>
-                          <span className={`px-2 py-0.5 text-[10px] font-black rounded-full uppercase ${u.role === 'ADMIN' ? 'bg-purple-500/20 text-purple-700 dark:text-purple-300' : 'bg-blue-500/20 text-blue-700 dark:text-blue-300'
-                            }`}>
-                            {u.role || 'HR'}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{u.email}</p>
-                      </div>
-
-                      {u.role !== 'ADMIN' && (
-                        <button
-                          onClick={() => handleDeleteHRUser(u.id, u.name)}
-                          className="px-2.5 py-1 text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all border border-rose-500/20 shrink-0"
-                          title="Revoke HR Access"
-                        >
-                          Revoke Access
-                        </button>
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-4 text-xs text-slate-400">
-                    No HR accounts generated yet. Click "+ Generate HR Account" to issue credentials.
+                {/* Option 2: List of HR Accounts with Revoke Access */}
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-extrabold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                       List of HR Accounts ({teamUsers.length})
+                    </span>
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                      Admin Access Controls
+                    </span>
                   </div>
-                )}
+
+                  <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                    {teamUsers.length > 0 ? (
+                      teamUsers.map((u) => (
+                        <div
+                          key={u.id}
+                          className={`p-3 rounded-2xl border flex items-center justify-between gap-3 text-xs transition-all ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'
+                            }`}
+                        >
+                          <div className="space-y-0.5 min-w-0">
+                            <div className="font-bold text-slate-900 dark:text-white truncate flex items-center gap-2">
+                              <span>{u.name}</span>
+                              <span className={`px-2 py-0.5 text-[10px] font-black rounded-full uppercase ${u.role === 'ADMIN' ? 'bg-purple-500/20 text-purple-700 dark:text-purple-300' : 'bg-blue-500/20 text-blue-700 dark:text-blue-300'
+                                }`}>
+                                {u.role || 'HR'}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{u.email}</p>
+                          </div>
+
+                          {u.role !== 'ADMIN' ? (
+                            <button
+                              onClick={() => handleDeleteHRUser(u.id, u.name)}
+                              className="px-2.5 py-1.5 text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 bg-rose-500/10 rounded-xl transition-all border border-rose-500/30 shrink-0"
+                              title="Revoke HR Access"
+                            >
+                              Remove HR Access
+                            </button>
+                          ) : (
+                            <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-500/10 px-2 py-1 rounded-lg border border-purple-500/20">
+                              Primary Admin
+                            </span>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-6 text-xs text-slate-400 italic bg-slate-50 dark:bg-slate-950/50 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800">
+                        No HR accounts created yet. Click "+ GENERATE HR ACCOUNT" above to issue credentials.
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
