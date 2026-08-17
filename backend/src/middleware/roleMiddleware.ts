@@ -4,10 +4,13 @@ export const checkRole = (...roles) => {
       return res.status(401).json({ success: false, message: 'Not authorized' });
     }
 
-    if (!roles.includes(req.user.role)) {
+    const userRole = req.user.role || 'HR';
+    const isAllowed = userRole === 'ADMIN' || roles.includes(userRole);
+
+    if (!isAllowed) {
       return res.status(403).json({
         success: false,
-        message: `Role (${req.user.role}) is not allowed to access this resource`,
+        message: `Role (${userRole}) is not allowed to access this resource`,
       });
     }
 

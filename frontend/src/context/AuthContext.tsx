@@ -60,28 +60,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         toast.success('Welcome back! ');
         return { success: true };
       }
-      
-      const loggedUser: User = {
-        id: 'recruiter-admin-1',
-        name: email ? email.split('@')[0] : 'Recruiter Admin',
-        email: email || 'admin@company.com',
-        role: 'HR Lead',
-      };
-      setUser(loggedUser);
-      localStorage.setItem('user', JSON.stringify(loggedUser));
-      toast.success('Signed in successfully! ');
-      return { success: true };
-    } catch (error) {
-      const loggedUser: User = {
-        id: 'recruiter-admin-1',
-        name: email ? email.split('@')[0] : 'Recruiter Admin',
-        email: email || 'admin@company.com',
-        role: 'HR Lead',
-      };
-      setUser(loggedUser);
-      localStorage.setItem('user', JSON.stringify(loggedUser));
-      toast.success('Signed in successfully! ');
-      return { success: true };
+      return { success: false, error: response?.message || 'Invalid email or password' };
+    } catch (error: any) {
+      console.error('AuthContext login error:', error);
+      const errMsg = error.response?.data?.message || error.message || 'Login failed. Invalid credentials.';
+      return { success: false, error: errMsg };
     }
   };
 

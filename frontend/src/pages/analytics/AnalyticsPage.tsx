@@ -61,7 +61,7 @@ const AnalyticsPage = () => {
       if (statsRes.status === 'fulfilled' && statsRes.value) {
         const raw = statsRes.value;
         const totalApps = Math.max(raw.totalApplications || 0, local.totalCands);
-        const screened = Math.max(raw.aiScreened || 0, Math.round(totalApps * 0.85));
+        const screened = Math.max(raw.aiScreened || 0, local.totalCands);
         const sortlist = Math.max(raw.shortlisted || 0, local.shortlisted);
         const hireCount = Math.max(raw.hired || 0, local.hired);
 
@@ -73,10 +73,10 @@ const AnalyticsPage = () => {
         });
       } else {
         setStats({
-          totalApplications: local.totalCands || 12,
-          aiScreened: Math.round((local.totalCands || 12) * 0.85),
-          shortlisted: local.shortlisted || 4,
-          hired: local.hired || 2,
+          totalApplications: local.totalCands || 0,
+          aiScreened: local.totalCands || 0,
+          shortlisted: local.shortlisted || 0,
+          hired: local.hired || 0,
         });
       }
 
@@ -85,13 +85,13 @@ const AnalyticsPage = () => {
         const backendFunnel = funnelRes.value.data;
         setFunnelData(backendFunnel);
       } else {
-        const totalApps = local.totalCands || 12;
+        const totalApps = local.totalCands || 0;
         setFunnelData([
           { stage: 'Applied', count: totalApps },
-          { stage: 'AI Screened', count: Math.round(totalApps * 0.85) },
-          { stage: 'Shortlisted', count: local.shortlisted || 4 },
-          { stage: 'Interviewed', count: local.interviewed || 6 },
-          { stage: 'Hired', count: local.hired || 2 },
+          { stage: 'AI Screened', count: totalApps },
+          { stage: 'Shortlisted', count: local.shortlisted || 0 },
+          { stage: 'Interviewed', count: local.interviewed || 0 },
+          { stage: 'Hired', count: local.hired || 0 },
         ]);
       }
 
@@ -99,13 +99,13 @@ const AnalyticsPage = () => {
       if (velocityRes.status === 'fulfilled' && velocityRes.value?.velocity && Array.isArray(velocityRes.value.velocity) && velocityRes.value.velocity.length > 0) {
         setVelocityData(velocityRes.value.velocity);
       } else {
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'];
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         const currentMonthIdx = new Date().getMonth();
         const activeMonths = months.slice(0, currentMonthIdx + 1);
 
-        const calculatedVelocity = activeMonths.map((m, idx) => ({
+        const calculatedVelocity = activeMonths.map((m) => ({
           month: m,
-          applications: Math.max(4, (idx + 1) * 3 + (local.totalCands || 5)),
+          applications: local.totalCands || 0,
         }));
         setVelocityData(calculatedVelocity);
       }

@@ -50,26 +50,65 @@ export const createJob = async (req, res) => {
     }
     const targetUserId = userRecord.id;
 
-    const slug = generateSlug(title) + '-' + Math.floor(Math.random() * 10000);
-    
-    const job = await prisma.job.create({
-      data: {
-        title,
-        slug,
-        department,
-        description,
-        requirements,
-        responsibilities: responsibilities || '',
-        type: type || 'FULL_TIME',
-        experienceLevel: experienceLevel || 'MID',
-        salaryMin: salaryMin ? parseFloat(salaryMin) : null,
-        salaryMax: salaryMax ? parseFloat(salaryMax) : null,
-        location,
-        userId: targetUserId,
-        status: status || 'PUBLISHED',
-        publishedAt: status === 'PUBLISHED' ? new Date() : null,
-      }
+    // Check if default sample job or duplicate unedited job exists to prevent copy creation
+    const existingDefault = await prisma.job.findFirst({
+      where: {
+        OR: [
+          { id: 'business-development-associate-edtech' },
+          { title: { equals: title, mode: 'insensitive' } }
+        ]
+      },
+      include: { applications: true }
     });
+
+    let job;
+    if (existingDefault && existingDefault.applications.length === 0) {
+      // Overwrite/update existing job instead of creating a duplicate copy
+      job = await prisma.job.update({
+        where: { id: existingDefault.id },
+        data: {
+          title,
+          department,
+          description,
+          requirements,
+          responsibilities: responsibilities || '',
+          type: type || 'FULL_TIME',
+          experienceLevel: experienceLevel || 'MID',
+          salaryMin: salaryMin ? parseFloat(salaryMin) : null,
+          salaryMax: salaryMax ? parseFloat(salaryMax) : null,
+          location,
+          status: status || 'PUBLISHED',
+          publishedAt: status === 'PUBLISHED' ? new Date() : null,
+        }
+      });
+    } else {
+      const slug = generateSlug(title) + '-' + Math.floor(Math.random() * 10000);
+      job = await prisma.job.create({
+        data: {
+          title,
+          slug,
+          department,
+          description,
+          requirements,
+          responsibilities: responsibilities || '',
+          type: type || 'FULL_TIME',
+          experienceLevel: experienceLevel || 'MID',
+          salaryMin: salaryMin ? parseFloat(salaryMin) : null,
+          salaryMax: salaryMax ? parseFloat(salaryMax) : null,
+          location,
+          userId: targetUserId,
+          status: status || 'PUBLISHED',
+          publishedAt: status === 'PUBLISHED' ? new Date() : null,
+        }
+      });
+    }
+
+    // Clean up any remaining unneeded default sample jobs if new custom job created
+    if (job.id !== 'business-development-associate-edtech') {
+      await prisma.job.delete({
+        where: { id: 'business-development-associate-edtech' }
+      }).catch(() => null);
+    }
     
     res.status(201).json({ 
       success: true, 
@@ -87,7 +126,7 @@ export const createJob = async (req, res) => {
 export const getAllJobs = async (req, res) => {
   try {
     res.setHeader('Cache-Control', 'private, max-age=5, stale-while-revalidate=10');
-    let jobs = await prisma.job.findMany({
+    let rawJobs = await prisma.job.findMany({
       include: {
         applications: {
           select: { id: true, status: true }
@@ -96,64 +135,21 @@ export const getAllJobs = async (req, res) => {
       orderBy: { createdAt: 'desc' }
     });
 
-    if (jobs.length === 0) {
-      let defaultUser = await prisma.user.findFirst();
-      if (!defaultUser) {
-        defaultUser = await prisma.user.create({
-          data: {
-            id: 'demo-user-101',
-            name: 'Adyapan Recruiter Admin',
-            email: 'admin@adyapan.com',
-            password: '$2a$10$hashedpasswordplaceholder',
-            role: 'ADMIN',
-            company: 'Adyapan Edutech Pvt Ltd',
-          },
-        }).catch(() => null);
-      }
-      const userId = defaultUser?.id;
-      if (userId) {
-        const created = await prisma.job.create({
-          data: {
-            id: 'business-development-associate-edtech',
-            title: 'Business Development Associate (BDA)',
-            slug: 'business-development-associate-edtech',
-            department: 'Sales & Growth',
-            location: 'Mumbai / Hybrid',
-            type: 'FULL_TIME',
-            experienceLevel: 'ENTRY',
-            salaryMin: 350000,
-            salaryMax: 600000,
-            description: 'Drive student course enrolments and counselling.',
-            requirements: 'Sales communication skills, student counselling.',
-            responsibilities: 'Connect with prospective student leads.',
-            status: 'PUBLISHED',
-            userId: userId,
-          },
-        }).catch(() => null);
-        if (created) jobs = [created];
-      }
-    }
+    // Deduplicate jobs by normalized title so no duplicate copies appear
+    const seenTitles = new Set();
+    let jobs = rawJobs.filter((j) => {
+      const norm = (j.title || '').toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+      if (seenTitles.has(norm)) return false;
+      seenTitles.add(norm);
+      return true;
+    });
 
     res.json({ success: true, jobs });
   } catch (error) {
     console.error('Get Jobs Error:', error.message);
     res.json({
       success: true,
-      jobs: [
-        {
-          id: 'business-development-associate-edtech',
-          title: 'Business Development Associate (BDA)',
-          slug: 'business-development-associate-edtech',
-          department: 'Sales & Growth',
-          location: 'Mumbai / Hybrid',
-          type: 'FULL_TIME',
-          experienceLevel: 'ENTRY',
-          salaryMin: 350000,
-          salaryMax: 600000,
-          status: 'PUBLISHED',
-          applications: []
-        }
-      ]
+      jobs: []
     });
   }
 };
@@ -241,7 +237,7 @@ export const publishJob = async (req, res) => {
 
 export const getPublicJob = async (req, res) => {
   try {
-    const job = await prisma.job.findUnique({
+    const job = await prisma.job.findFirst({
       where: { 
         slug: req.params.slug, 
         status: 'PUBLISHED' 

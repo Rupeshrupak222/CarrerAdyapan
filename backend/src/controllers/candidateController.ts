@@ -193,7 +193,7 @@ export const publicApplyCandidate = async (req, res) => {
           requirements: 'Communication & sales skills.',
           responsibilities: 'Connect with prospective leads.',
           status: 'PUBLISHED',
-          postedBy: adminUser.id,
+          userId: adminUser.id,
         }
       });
     }
@@ -326,7 +326,7 @@ export const createCandidate = async (req, res) => {
 // Get All Candidates
 export const getAllCandidates = async (req, res) => {
   try {
-    const candidates = await prisma.candidate.findMany({
+    let rawCandidates = await prisma.candidate.findMany({
       include: {
         applications: {
           include: {
@@ -335,6 +335,16 @@ export const getAllCandidates = async (req, res) => {
         },
       },
       orderBy: { createdAt: 'desc' },
+    });
+
+    // Deduplicate candidate records by normalized email
+    const seenEmails = new Set();
+    const candidates = rawCandidates.filter((c) => {
+      if (!c) return false;
+      const emailKey = c.email ? String(c.email).trim().toLowerCase() : String(c.id);
+      if (seenEmails.has(emailKey)) return false;
+      seenEmails.add(emailKey);
+      return true;
     });
 
     res.json({ success: true, candidates });
@@ -516,7 +526,7 @@ export const deleteCandidate = async (req, res) => {
       where: {
         OR: [
           { candidateId: id },
-          ...(candEmail ? [{ email: candEmail }] : [])
+          ...(candEmail ? [{ candidateEmail: candEmail }] : [])
         ]
       }
     }).catch(() => null);

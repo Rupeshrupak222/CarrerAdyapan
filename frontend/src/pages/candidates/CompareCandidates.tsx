@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import BackButton from '../../components/common/BackButton';
 import { candidateService } from '../../services/candidateService';
+import { getCandidateAIScore } from '../../utils/applicationStore';
 import { useTheme } from '../../context/ThemeContext';
 
 const DEFAULT_COMPARE_CANDIDATES = [];
@@ -25,8 +26,9 @@ const CompareCandidates = () => {
           const name = `${c.firstName || ''} ${c.lastName || ''}`.trim() || 'Candidate';
           const avatar = `${c.firstName?.charAt(0) || 'C'}${c.lastName?.charAt(0) || 'A'}`;
           const skillsList = Array.isArray(c.skills) ? c.skills : ['EdTech Sales', 'Student Counselling'];
-          const aiScore = c.score || c.applications?.[0]?.aiScore || 88;
-          const matchReason = c.reason || c.applications?.[0]?.matchReason || 'Strong skill fit for sales & growth role.';
+          const evalAi = getCandidateAIScore(c);
+          const aiScore = evalAi.score;
+          const matchReason = evalAi.reason;
 
           return {
             id: c.id,

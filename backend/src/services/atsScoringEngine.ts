@@ -197,12 +197,28 @@ export const calculateAtsScore = (parsedResume: any, job: any = {}) => {
   const matchedSkills = [];
   const missingSkills = [];
 
+  const SKILL_SYNONYMS: Record<string, string[]> = {
+    'javascript': ['js', 'ecmascript', 'javascript'],
+    'typescript': ['ts', 'typescript'],
+    'react': ['react.js', 'reactjs', 'react'],
+    'react.js': ['react', 'reactjs', 'react.js'],
+    'node.js': ['node', 'nodejs', 'node.js'],
+    'node': ['node.js', 'nodejs', 'node'],
+    'postgresql': ['postgres', 'postgresql', 'psql'],
+    'postgres': ['postgresql', 'postgres', 'psql'],
+    'python': ['python programming', 'python3', 'python'],
+    'sales': ['edtech sales', 'inside sales', 'direct sales', 'b2b sales', 'b2c sales', 'telesales'],
+    'student counselling': ['student counseling', 'academic counselling', 'academic counseling', 'counselling', 'counseling'],
+    'lead generation': ['lead conversion', 'lead gen', 'lead generation'],
+  };
+
   jobRequiredSkills.forEach(reqSkill => {
-    const reqLower = reqSkill.toLowerCase();
-    const isExactMatch = extractedSkills.some(candSkill =>
-      candSkill.toLowerCase().includes(reqLower) ||
-      reqLower.includes(candSkill.toLowerCase()) ||
-      textLower.includes(reqLower)
+    const reqLower = reqSkill.toLowerCase().trim();
+    const synonyms = SKILL_SYNONYMS[reqLower] || [reqLower];
+
+    const isExactMatch = synonyms.some(syn =>
+      extractedSkills.some(candSkill => candSkill.toLowerCase().includes(syn) || syn.includes(candSkill.toLowerCase())) ||
+      textLower.includes(syn)
     );
 
     let isFuzzyMatch = false;
@@ -233,24 +249,35 @@ export const calculateAtsScore = (parsedResume: any, job: any = {}) => {
   }
 
   // 3. Job Title & Domain Relevance (Weight: 15 Points)
-  const titleTokens = jobTitle.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+  const genericPrefixes = ['senior', 'junior', 'lead', 'associate', 'executive', 'specialist', 'manager', 'intern', 'head', 'principal'];
+  const titleTokens = jobTitle.toLowerCase().split(/\s+/).filter(w => w.length > 2 && !genericPrefixes.includes(w));
   let matchedTitleTokens = 0;
   titleTokens.forEach(token => {
     if (textLower.includes(token)) matchedTitleTokens++;
   });
   const titleRatio = titleTokens.length > 0 ? matchedTitleTokens / titleTokens.length : 0;
-  const titleScore = Math.round(titleRatio * 15);
+  let titleScore = Math.round(titleRatio * 15);
+
+  // If candidate has 0 matching skills for the job, cap title and keyword bonus
+  if (matchedSkills.length === 0) {
+    titleScore = Math.min(titleScore, 2);
+  }
 
   // 4. Job Responsibilities & Keywords Density (Weight: 15 Points)
+  const stopWords = ['responsible', 'experience', 'description', 'requirements', 'responsibilities', 'prospects', 'converting', 'proven', 'record', 'track', 'using', 'admissions', 'working', 'ability', 'strong', 'candidate'];
   const reqText = `${(job as any).requirements || ''} ${(job as any).responsibilities || ''} ${(job as any).description || ''}`.toLowerCase();
-  const reqTokens = reqText.split(/\s+/).filter(w => w.length > 4);
+  const reqTokens = reqText.split(/\s+/).filter(w => w.length > 4 && !stopWords.includes(w));
   const uniqueReqTokens = Array.from(new Set(reqTokens)).slice(0, 20);
   let matchedReqTokens = 0;
   uniqueReqTokens.forEach(token => {
     if (textLower.includes(token)) matchedReqTokens++;
   });
   const keywordsRatio = uniqueReqTokens.length > 0 ? matchedReqTokens / uniqueReqTokens.length : 0;
-  const keywordsScore = Math.round(keywordsRatio * 15);
+  let keywordsScore = Math.round(keywordsRatio * 15);
+
+  if (matchedSkills.length === 0) {
+    keywordsScore = 0;
+  }
 
   // 5. Education & Qualification Match (Weight: 10 Points)
   let educationScore = 3;

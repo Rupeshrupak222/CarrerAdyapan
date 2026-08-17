@@ -291,9 +291,22 @@ const CreateJob = () => {
               name="description"
               value={formData.description}
               onChange={handleChange}
-              rows={4}
+              rows={3}
               className={inputClass}
-              placeholder="Describe the role responsibilities and company mission..."
+              placeholder="Describe the company mission and high-level role summary..."
+              required
+            />
+          </div>
+
+          <div>
+            <label className={labelClass}>Key Responsibilities & Daily Tasks *</label>
+            <textarea
+              name="responsibilities"
+              value={formData.responsibilities}
+              onChange={handleChange}
+              rows={3}
+              className={inputClass}
+              placeholder="List core daily responsibilities (e.g. Conduct student counselling sessions; Meet monthly enrolment targets; Maintain CRM leads)..."
               required
             />
           </div>

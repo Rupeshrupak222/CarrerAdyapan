@@ -6,18 +6,21 @@ export const authMiddleware = async (req: any, res: any, next: any) => {
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      req.user = {
-        id: 'recruiter-admin-1',
-        name: 'Recruiter Admin',
-        email: 'admin@company.com',
-        role: 'HR',
-        company: 'HireAI Platform'
-      };
-      return next();
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized - Missing or invalid Authorization header'
+      });
     }
 
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret_key_12345') as any;
+
+    if (!decoded || !decoded.id) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized - Invalid token payload'
+      });
+    }
     
     try {
       const user = await prisma.user.findUnique({
@@ -36,28 +39,24 @@ export const authMiddleware = async (req: any, res: any, next: any) => {
         return next();
       }
     } catch (dbError: any) {
-      console.warn('Prisma auth DB error, falling back to token payload:', dbError.message);
+      console.warn('Prisma auth DB warning, falling back to token payload:', dbError.message);
     }
 
     req.user = {
-      id: decoded.id || 'recruiter-admin-1',
-      name: decoded.email ? decoded.email.split('@')[0] : 'Recruiter Admin',
-      email: decoded.email || 'admin@company.com',
+      id: decoded.id,
+      name: decoded.name || (decoded.email ? decoded.email.split('@')[0] : 'Recruiter Admin'),
+      email: decoded.email || 'admin@adyapan.com',
       role: decoded.role || 'HR',
-      company: 'HireAI Platform'
+      company: decoded.company || 'Adyapan Edutech Pvt Ltd'
     };
 
     next();
   } catch (error: any) {
     console.error('Auth Middleware Error:', error.message);
-    req.user = {
-      id: 'recruiter-admin-1',
-      name: 'Recruiter Admin',
-      email: 'admin@company.com',
-      role: 'HR',
-      company: 'HireAI Platform'
-    };
-    next();
+    return res.status(401).json({
+      success: false,
+      message: 'Unauthorized - Token verification failed'
+    });
   }
 };
 

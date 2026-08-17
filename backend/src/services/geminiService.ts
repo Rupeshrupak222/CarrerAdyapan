@@ -136,7 +136,7 @@ export const queryGeminiCopilot = async ({ message, history = [] }) => {
   promptPayload += `User Message: "${message}"\n\nPlease provide a natural, contextually appropriate response:`;
 
   // Candidate models for automatic fallback during high demand spikes (503/429)
-  const candidateModels = ['gemini-flash-latest', 'gemini-2.5-flash-lite', 'gemini-pro-latest', 'gemini-3.5-flash'];
+  const candidateModels = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-1.5-pro', 'gemini-flash-latest'];
   let lastError = null;
 
   for (const mName of candidateModels) {

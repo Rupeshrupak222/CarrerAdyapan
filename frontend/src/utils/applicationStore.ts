@@ -64,7 +64,17 @@ export const getStoredCandidates = (): StoredCandidate[] => {
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
-      return Array.isArray(parsed) ? parsed : [];
+      if (Array.isArray(parsed)) {
+        // Deduplicate candidates by email or ID
+        const seen = new Set();
+        return parsed.filter((c) => {
+          if (!c) return false;
+          const key = c.email ? String(c.email).trim().toLowerCase() : String(c.id);
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+      }
     } catch (e) {
       return [];
     }
@@ -136,8 +146,8 @@ export const calculateRealAIScore = (
   // 6. Required Criteria Matching (10%)
   const requiredCriteriaScore = 10;
 
-  // Deterministic Score
-  const deterministicScore = Math.min(99, Math.max(50, keywordScore + skillsScore + experienceScore + educationScore + semanticScore + requiredCriteriaScore));
+  // Deterministic Score - Exact sum of 6 criteria
+  const deterministicScore = Math.min(99, Math.max(10, keywordScore + skillsScore + experienceScore + educationScore + semanticScore + requiredCriteriaScore));
 
   const matchedLabels = skillsList.length > 0 ? skillsList.join(', ') : 'Verified domain skills';
 
@@ -238,7 +248,25 @@ export const saveCandidateApplication = (formData: any, jobTitle: string = 'Busi
     },
   };
 
-  const updatedCandidates = [newCandidate, ...candidates];
+  const targetEmail = (formData.email || '').trim().toLowerCase();
+  const existingIndex = candidates.findIndex((c) => c.email && c.email.trim().toLowerCase() === targetEmail);
+
+  let updatedCandidates: StoredCandidate[];
+  let savedCandidate: StoredCandidate;
+
+  if (existingIndex >= 0) {
+    savedCandidate = {
+      ...candidates[existingIndex],
+      ...newCandidate,
+      id: candidates[existingIndex].id, // Maintain consistent candidate ID
+    };
+    updatedCandidates = [...candidates];
+    updatedCandidates[existingIndex] = savedCandidate;
+  } else {
+    savedCandidate = newCandidate;
+    updatedCandidates = [newCandidate, ...candidates];
+  }
+
   localStorage.setItem(CANDIDATES_KEY, JSON.stringify(updatedCandidates));
 
   // Add Notification to Recruiter Bell Dropdown
@@ -485,9 +513,101 @@ export const syncUpdateOffer = async (offerToSave: any) => {
   return offerEntry;
 };
 
+export const getCandidateAIScore = (candidate: any): {
+  score: number;
+  reason: string;
+  breakdown: {
+    kwPts: number;
+    skPts: number;
+    expPts: number;
+    eduPts: number;
+    semPts: number;
+    reqPts: number;
+  };
+} => {
+  if (!candidate) {
+    return {
+      score: 75,
+      reason: 'Candidate profile evaluation',
+      breakdown: { kwPts: 15, skPts: 23, expPts: 15, eduPts: 8, semPts: 7, reqPts: 7 }
+    };
+  }
+
+  // Extract candidate profile details
+  const skillsList = Array.isArray(candidate.skills)
+    ? candidate.skills
+    : (typeof candidate.skills === 'string' ? candidate.skills.split(',').map((s: string) => s.trim()).filter(Boolean) : []);
+
+  const isStudent = candidate.employmentStatus === 'STUDENT'
+    || Number(candidate.totalExperience || candidate.experience || 0) === 0
+    || String(candidate.currentPosition || '').toLowerCase().includes('student')
+    || String(candidate.currentPosition || '').toLowerCase().includes('fresher');
+
+  const expVal = isStudent ? 0 : Number(candidate.totalExperience || candidate.experience || 0);
+  const posVal = candidate.currentPosition || candidate.jobTitle || 'Business Development Associate (BDA)';
+
+  // Calculate real AI score breakdown
+  const calculated = calculateRealAIScore(skillsList, expVal, posVal);
+
+  // Check direct stored score
+  const existingRaw = candidate.score ?? candidate.aiScore ?? candidate.applications?.[0]?.aiScore ?? candidate.applications?.[0]?.score;
+  const existingReason = candidate.reason || candidate.matchReason || candidate.applications?.[0]?.matchReason;
+
+  let scoreNum = calculated.score;
+  if (typeof existingRaw === 'number' && existingRaw > 0) {
+    scoreNum = existingRaw;
+  } else if (typeof existingRaw === 'string' && !isNaN(parseInt(existingRaw, 10)) && parseInt(existingRaw, 10) > 0) {
+    scoreNum = parseInt(existingRaw, 10);
+  }
+
+  // Base raw breakdown points from calculation
+  let kwPts = calculated.breakdown?.keywordMatching?.score ?? 16;
+  let skPts = calculated.breakdown?.skillsMatching?.score ?? 24;
+  let expPts = calculated.breakdown?.experienceMatching?.score ?? 20;
+  let eduPts = calculated.breakdown?.educationMatching?.score ?? 10;
+  let semPts = calculated.breakdown?.semanticMatching?.score ?? 10;
+  let reqPts = calculated.breakdown?.requiredCriteria?.score ?? 10;
+
+  const calcSum = kwPts + skPts + expPts + eduPts + semPts + reqPts;
+
+  // If candidate has a custom score or calcSum differs, scale breakdown points proportionally so sum(pts) === scoreNum
+  if (scoreNum !== calcSum && calcSum > 0) {
+    const ratio = scoreNum / calcSum;
+    kwPts = Math.min(20, Math.round(kwPts * ratio));
+    skPts = Math.min(30, Math.round(skPts * ratio));
+    expPts = Math.min(20, Math.round(expPts * ratio));
+    eduPts = Math.min(10, Math.round(eduPts * ratio));
+    semPts = Math.min(10, Math.round(semPts * ratio));
+
+    const subSum = kwPts + skPts + expPts + eduPts + semPts;
+    reqPts = Math.max(0, Math.min(10, scoreNum - subSum));
+  }
+
+  // Construct explicit detailed explanation for why this score was awarded
+  const skillsStr = skillsList.length > 0 ? skillsList.slice(0, 3).join(', ') : 'general qualifications';
+  let detailedReason = existingReason;
+
+  if (!detailedReason || detailedReason.includes('Verified skill evaluation') || detailedReason.includes('Application profile under evaluation')) {
+    if (scoreNum >= 80) {
+      detailedReason = `Candidate achieved ${scoreNum}% score due to strong target keyword match (${kwPts}/20 pts), verified core skills (${skillsStr} - ${skPts}/30 pts), and ${isStudent ? 'high academic foundation' : `${expVal} years domain experience (${expPts}/20 pts)`}.`;
+    } else if (scoreNum >= 60) {
+      detailedReason = `Candidate achieved ${scoreNum}% score based on baseline skill overlap (${skillsStr} - ${skPts}/30 pts), with minor deductions for ${isStudent ? '0 years industry experience (Fresher)' : 'shorter domain experience'} (${expPts}/20 pts).`;
+    } else {
+      detailedReason = `Candidate achieved ${scoreNum}% score due to missing target keywords (${kwPts}/20 pts), ${isStudent ? '0 years industry experience (Fresher)' : 'limited domain experience'} (${expPts}/20 pts), and gaps in verified core skills (${skPts}/30 pts).`;
+    }
+  }
+
+  return {
+    score: scoreNum,
+    reason: detailedReason,
+    breakdown: { kwPts, skPts, expPts, eduPts, semPts, reqPts }
+  };
+};
+
 export default {
   getStoredCandidates,
   calculateRealAIScore,
+  getCandidateAIScore,
   saveCandidateApplication,
   getStoredNotifications,
   markNotificationsRead,

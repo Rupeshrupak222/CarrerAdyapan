@@ -40,7 +40,9 @@ api.interceptors.response.use(
     console.error(' Response Error:', error.response?.status, error.response?.data);
 
     if (error.response?.status === 401) {
-      console.log(' Unauthorized - Token expired or invalid');
+      console.log(' Unauthorized - Token expired or invalid, clearing local session');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
     }
 
     return Promise.reject(error);

@@ -1,4 +1,5 @@
 import prisma from '../config/db.js';
+import bcrypt from 'bcryptjs';
 import { logger } from './logger.js';
 
 export const autoSeed = async () => {
@@ -6,48 +7,49 @@ export const autoSeed = async () => {
     console.log('Checking PostgreSQL Database Seeding Status...');
 
     // 1. Ensure Default Admin User
-    let defaultUser = await prisma.user.findFirst();
+    let defaultUser = await prisma.user.findFirst({ where: { email: 'admin@adyapan.com' } });
+    const salt = await bcrypt.genSalt(10);
+    const validHash = await bcrypt.hash('password123', salt);
     if (!defaultUser) {
       defaultUser = await prisma.user.create({
         data: {
           id: 'demo-user-101',
           name: 'Adyapan Recruiter Admin',
           email: 'admin@adyapan.com',
-          password: '$2a$10$hashedpasswordplaceholder',
+          password: validHash,
           role: 'ADMIN',
           company: 'Adyapan Edutech Pvt Ltd',
         },
       });
       console.log('Default User Created in PostgreSQL DB');
+    } else if (defaultUser.password === '$2a$10$hashedpasswordplaceholder') {
+      await prisma.user.update({
+        where: { id: defaultUser.id },
+        data: { password: validHash },
+      });
+      console.log('Default User Password Hash Updated in PostgreSQL DB');
     }
 
     const userId = defaultUser.id;
 
-    // 2. Ensure Default Published Job
-    let defaultJob = await prisma.job.findFirst();
-    if (!defaultJob) {
-      defaultJob = await prisma.job.create({
-        data: {
-          id: 'business-development-associate-edtech',
-          title: 'Business Development Associate (BDA)',
-          slug: 'business-development-associate-edtech',
-          department: 'Sales & Growth',
-          location: 'Mumbai / Hybrid',
-          type: 'FULL_TIME',
-          experienceLevel: 'ENTRY',
-          salaryMin: 350000,
-          salaryMax: 600000,
-          description: 'Drive student course enrolments and counselling.',
-          requirements: 'Sales communication skills, student counselling.',
-          responsibilities: 'Connect with prospective student leads.',
-          status: 'PUBLISHED',
-          userId: userId,
-        },
-      });
-      console.log('Default Published Job Created in PostgreSQL DB');
+    // 2. Ensure Database Cleanliness (No hardcoded fake jobs)
+
+    // 3. Deduplicate Any Existing Duplicate Candidate Records in PostgreSQL DB
+    const allDbCandidates = await prisma.candidate.findMany({ orderBy: { createdAt: 'desc' } });
+    const seenCandEmails = new Set();
+    for (const cand of allDbCandidates) {
+      if (cand.email) {
+        const normEmail = cand.email.toLowerCase().trim();
+        if (seenCandEmails.has(normEmail)) {
+          console.log(`Removing duplicate DB candidate ID ${cand.id} for ${cand.email}`);
+          await prisma.candidate.delete({ where: { id: cand.id } }).catch(() => null);
+        } else {
+          seenCandEmails.add(normEmail);
+        }
+      }
     }
 
-    // 3. Deduplicate Any Existing Duplicate Offers in PostgreSQL DB
+    // 4. Deduplicate Any Existing Duplicate Offers in PostgreSQL DB
     const allDbOffers = await prisma.offer.findMany({ orderBy: { createdAt: 'desc' } });
     const seenOfferKeys = new Set();
     for (const off of allDbOffers) {

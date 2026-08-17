@@ -15,9 +15,9 @@ export const register = async (req, res) => {
     const { name, email, password, company } = req.body;
 
     if (!name || !email || !password || !company) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'All fields are required' 
+      return res.status(400).json({
+        success: false,
+        message: 'All fields are required'
       });
     }
 
@@ -29,7 +29,7 @@ export const register = async (req, res) => {
 
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
-      
+
       const user = await prisma.user.create({
         data: { name, email, password: hashedPassword, company, role: 'HR' }
       });
@@ -61,15 +61,19 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Email and password are required' 
+      return res.status(400).json({
+        success: false,
+        message: 'Email and password are required'
       });
     }
 
+    const normEmail = String(email).trim().toLowerCase();
+
     try {
-      const user = await prisma.user.findUnique({ where: { email } });
-      
+      const user = await prisma.user.findFirst({
+        where: { email: { equals: normEmail, mode: 'insensitive' } }
+      });
+
       if (user) {
         const isValidPassword = await bcrypt.compare(password, user.password);
         if (isValidPassword) {
@@ -78,25 +82,13 @@ export const login = async (req, res) => {
           return res.json({ success: true, user: userWithoutPassword, token });
         }
       }
-    } catch (dbErr) {
-      console.warn('Prisma DB connection issue during login, using fallback token:', dbErr.message);
+    } catch (dbErr: any) {
+      console.warn('Prisma DB error during login:', dbErr.message);
     }
 
-    // Fallback user session for development
-    const fallbackUser = {
-      id: 'recruiter-admin-1',
-      name: email ? email.split('@')[0] : 'Admin User',
-      email: email || 'admin@company.com',
-      company: 'HireAI Platform',
-      role: 'HR Lead'
-    };
-
-    const token = generateToken(fallbackUser);
-
-    res.json({
-      success: true,
-      user: fallbackUser,
-      token
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid email or password'
     });
   } catch (error) {
     console.error('Login Error:', error);
@@ -107,9 +99,9 @@ export const login = async (req, res) => {
 export const getCurrentUser = async (req, res) => {
   try {
     if (!req.user) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Unauthorized' 
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized'
       });
     }
 
@@ -124,7 +116,7 @@ export const getCurrentUser = async (req, res) => {
     } catch (e) {
       console.warn('DB find user warning:', e.message);
     }
-    
+
     res.json({
       success: true,
       user: req.user

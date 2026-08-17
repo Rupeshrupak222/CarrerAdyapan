@@ -154,7 +154,16 @@ const ApplyJob = () => {
       if (selectedFile) {
         formPayload.append('resumeFile', selectedFile);
       }
+
       Object.keys(submissionData).forEach((key) => {
+        if (key === 'resumeDataUrl') {
+          // Skip sending huge base64 string in text fields if binary file is attached
+          if (!selectedFile && submissionData.resumeDataUrl) {
+            formPayload.append('resumeDataUrl', submissionData.resumeDataUrl);
+          }
+          return;
+        }
+
         if (key === 'skills' && Array.isArray(submissionData[key])) {
           formPayload.append(key, submissionData[key].join(','));
         } else if (typeof submissionData[key] === 'object' && submissionData[key] !== null) {

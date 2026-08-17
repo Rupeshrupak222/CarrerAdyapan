@@ -1,6 +1,7 @@
 import prisma from '../config/db.js';
 import { logger } from '../utils/logger.js';
 import { queryGeminiCopilot } from '../services/geminiService.js';
+import { parseResumeText, calculateAtsScore } from '../services/atsScoringEngine.js';
 
 // AI Score Candidate
 export const scoreCandidate = async (req, res) => {
@@ -19,40 +20,26 @@ export const scoreCandidate = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Application not found' });
     }
 
-    // AI Scoring Logic
-    const skillMatch = Math.min(Math.floor(Math.random() * 30) + 70, 100);
-    const experienceFit = Math.min(Math.floor(Math.random() * 30) + 65, 100);
-    const educationFit = Math.min(Math.floor(Math.random() * 30) + 70, 100);
-    const industryExperience = Math.min(Math.floor(Math.random() * 30) + 60, 100);
-    const achievements = Math.min(Math.floor(Math.random() * 30) + 65, 100);
+    // Real Deterministic ATS Scoring Engine calculation
+    const cand = application.candidate;
+    const skillsText = Array.isArray(cand.skills) ? cand.skills.join(' ') : (cand.skills || '');
+    const textToParse = `${cand.firstName} ${cand.lastName} ${skillsText} ${cand.currentPosition || ''} ${cand.currentCompany || ''} ${cand.totalExperience || 0} years experience`;
 
-    const overallScore = Math.round((skillMatch + experienceFit + educationFit + industryExperience + achievements) / 5);
+    const parsedResume = parseResumeText(textToParse);
+    const atsResult = calculateAtsScore(parsedResume, application.job);
 
-    const scoreBreakdown = {
-      skillMatch,
-      experienceFit,
-      educationFit,
-      industryExperience,
-      achievements
-    };
-
-    const matchReasons = [
-      'Candidate shows strong alignment with job requirements',
-      'Excellent skills match for this position',
-      'Relevant experience and qualifications',
-      'Strong communication and technical skills',
-      'Good cultural fit and relevant background'
-    ];
+    const overallScore = atsResult.aiScore;
+    const matchReason = atsResult.matchReason;
 
     const updated = await prisma.application.update({
       where: { id: applicationId },
       data: {
         aiScore: overallScore,
-        scoreBreakdown,
-        matchReason: matchReasons[Math.floor(Math.random() * matchReasons.length)],
-        strengths: ['Communication Skills', 'Relevant Experience', 'Technical Skills', 'Problem Solving'],
-        missingSkills: ['Leadership Experience', 'Advanced Certifications'],
-        status: 'AI_SCREENED'
+        scoreBreakdown: atsResult.breakdown || null,
+        matchReason: matchReason,
+        strengths: (atsResult.matchedSkills && atsResult.matchedSkills.length > 0) ? atsResult.matchedSkills : ['Relevant Experience', 'Verified Skills'],
+        missingSkills: atsResult.missingSkills || [],
+        status: overallScore >= 88 ? 'SHORTLISTED' : 'AI_SCREENED'
       }
     });
 
@@ -180,6 +167,7 @@ export const getHiringAssistant = async (req, res) => {
 
     res.json({
       success: true,
+      reply: reply,
       response: {
         message: reply,
         text: reply

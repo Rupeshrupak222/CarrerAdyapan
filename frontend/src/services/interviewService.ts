@@ -14,6 +14,18 @@ export const interviewService = {
     }
   },
 
+  bulkScheduleInterviews: async (data: any) => {
+    try {
+      const response = await api.post('/interviews/bulk', data);
+      cacheService.invalidate('all_interviews');
+      cacheService.invalidate('dashboard_stats');
+      return response.data;
+    } catch (error) {
+      console.error(' Bulk Schedule Interview Error:', error);
+      throw error;
+    }
+  },
+
   getAllInterviews: async (forceRefresh: boolean = false) => {
     const cacheKey = 'all_interviews';
     if (!forceRefresh) {

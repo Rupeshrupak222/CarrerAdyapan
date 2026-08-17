@@ -53,7 +53,10 @@ const PublicJob = () => {
   const parseToList = (text) => {
     if (!text) return [];
     if (Array.isArray(text)) return text;
-    return text.split('\n').map((s) => s.trim()).filter((s) => s.length > 0);
+    return String(text)
+      .split(/[\n;•]+/)
+      .map((s) => s.trim().replace(/^[-•*]\s*/, ''))
+      .filter((s) => s.length > 2);
   };
 
   const formatSalary = (min, max) => {

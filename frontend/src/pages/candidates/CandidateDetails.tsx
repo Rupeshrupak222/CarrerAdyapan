@@ -8,6 +8,7 @@ import { interviewService } from '../../services/interviewService';
 import {
   getStoredCandidates,
   calculateRealAIScore,
+  getCandidateAIScore,
   getGlobalOfferTemplate,
   getStoredOffers,
   syncUpdateOffer
@@ -579,8 +580,9 @@ const CandidateDetails = () => {
   const currentCtc = candidate.currentCtc ? (String(candidate.currentCtc).includes('₹') ? candidate.currentCtc : `₹${candidate.currentCtc} LPA`) : (extra.currentCtc ? `₹${extra.currentCtc} LPA` : 'N/A');
   const expectedCtc = candidate.expectedCtc ? (String(candidate.expectedCtc).includes('₹') ? candidate.expectedCtc : `₹${candidate.expectedCtc} LPA`) : (extra.expectedCtc ? `₹${extra.expectedCtc} LPA` : 'N/A');
   const skills = Array.isArray(candidate.skills) ? candidate.skills : [];
-  const aiScore = candidate.aiScore ?? candidate.score ?? candidate.applications?.[0]?.aiScore ?? 75;
-  const aiReason = candidate.matchReason || candidate.reason || candidate.applications?.[0]?.matchReason || 'Verified skill evaluation & domain experience.';
+  const evaluatedAi = getCandidateAIScore(candidate);
+  const aiScore = evaluatedAi.score;
+  const aiReason = evaluatedAi.reason;
 
   const globalTemplateInfo = getGlobalOfferTemplate();
   const offerSalary = candidate.offerDetails?.salary || 550000;
@@ -621,7 +623,7 @@ const CandidateDetails = () => {
           }`}>
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-500" />
 
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pt-1">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pt-1">
             <div className="flex items-start gap-4">
               <div className="w-14 h-14 rounded-2xl bg-amber-500 text-white font-bold text-xl flex items-center justify-center shrink-0 shadow-md">
                 {firstName.charAt(0)}
@@ -651,44 +653,61 @@ const CandidateDetails = () => {
                   {currentPosition} {currentCompany ? (isStudent ? `(${currentCompany})` : `• ${currentCompany}`) : ''}
                 </p>
                 <div className="flex flex-wrap gap-4 pt-1 text-xs font-normal text-slate-500 dark:text-slate-400">
-                  <span> {email}</span>
-                  <span> {phone}</span>
+                  <span>{email}</span>
+                  <span>{phone}</span>
                   <span>{location}</span>
                 </div>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap items-center gap-2.5">
+            {/* Action Buttons - Strictly Single Row */}
+            <div className="flex flex-row items-center gap-1.5 sm:gap-2 flex-nowrap shrink-0 overflow-x-auto pb-1 lg:pb-0">
               <button
                 onClick={handleDownloadResume}
-                className={`px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all flex items-center gap-1.5 ${theme === 'dark' ? 'bg-slate-950 text-slate-200 border-slate-800' : 'bg-slate-100 text-slate-700 border-slate-200'
+                className={`py-2 px-2.5 text-[11px] sm:text-xs font-semibold rounded-xl border transition-all flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 shadow-sm hover:shadow hover:-translate-y-0.5 active:translate-y-0 cursor-pointer ${theme === 'dark'
+                  ? 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700'
+                  : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200 hover:text-slate-900'
                   }`}
+                title="Download candidate resume document"
               >
-                Download Resume
+                <svg className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>Download Resume</span>
               </button>
 
               <button
                 onClick={handleRunAIScreening}
                 disabled={aiScoring}
-                className="px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-md transition-all flex items-center gap-1.5"
+                className="py-2 px-2.5 sm:px-3 text-[11px] sm:text-xs font-bold text-white bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 rounded-xl shadow-md hover:shadow-amber-500/25 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
+                title="Run instant AI resume screening & skill audit"
               >
-                {aiScoring ? 'Auditing Resume...' : 'Auto AI ATS Audit'}
+                <svg className="w-3.5 h-3.5 text-amber-100 shrink-0 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <span>{aiScoring ? 'Auditing Resume...' : 'Auto AI ATS Audit'}</span>
               </button>
 
               <button
                 onClick={handleOpenScheduleModal}
-                className="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+                className="py-2 px-2.5 sm:px-3 text-[11px] sm:text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl shadow-md hover:shadow-emerald-600/25 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+                title="Schedule interview round with this candidate"
               >
-                Schedule Interview
+                <svg className="w-3.5 h-3.5 text-emerald-100 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span>Schedule Interview</span>
               </button>
 
               <button
                 onClick={handleDeleteCandidate}
-                className="px-3.5 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 hover:bg-rose-100 rounded-xl transition-all flex items-center gap-1.5"
-                title="Delete candidate permanently from PostgreSQL DB and local store"
+                className="py-2 px-2.5 text-[11px] sm:text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 border border-rose-200 dark:border-rose-900/80 rounded-xl hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+                title="Delete candidate permanently from DB and local store"
               >
-                Delete Candidate
+                <svg className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                <span>Delete Candidate</span>
               </button>
             </div>
           </div>
@@ -787,44 +806,20 @@ const CandidateDetails = () => {
 
           {/* 6-Dimensional Criteria Grid */}
           {(() => {
-            let kwPts = 16;
-            let skPts = 24;
-            let expPts = 20;
-            let eduPts = 8;
-            let semPts = 10;
-            let reqPts = 10;
-
-            if (aiReason && typeof aiReason === 'string') {
-              const kwM = aiReason.match(/Keyword Matching \((\d+)\/20\)/i);
-              const skM = aiReason.match(/Skills Matching \((\d+)\/30\)/i);
-              const expM = aiReason.match(/Experience Matching \((\d+)\/20\)/i);
-              const eduM = aiReason.match(/Education Matching \((\d+)\/10\)/i);
-              const semM = aiReason.match(/Semantic Matching \((\d+)\/10\)/i);
-              const reqM = aiReason.match(/Required Criteria \((\d+)\/10\)/i);
-
-              if (kwM) kwPts = parseInt(kwM[1], 10);
-              if (skM) skPts = parseInt(skM[1], 10);
-              if (expM) expPts = parseInt(expM[1], 10);
-              if (eduM) eduPts = parseInt(eduM[1], 10);
-              if (semM) semPts = parseInt(semM[1], 10);
-              if (reqM) reqPts = parseInt(reqM[1], 10);
-            } else if (candidate?.aiBreakdown?.breakdown) {
-              const b = candidate.aiBreakdown.breakdown;
-              if (b.keywordMatching?.score !== undefined) kwPts = b.keywordMatching.score;
-              if (b.skillsMatching?.score !== undefined) skPts = b.skillsMatching.score;
-              if (b.experienceMatching?.score !== undefined) expPts = b.experienceMatching.score;
-              if (b.educationMatching?.score !== undefined) eduPts = b.educationMatching.score;
-              if (b.semanticMatching?.score !== undefined) semPts = b.semanticMatching.score;
-              if (b.requiredCriteria?.score !== undefined) reqPts = b.requiredCriteria.score;
-            } else {
-              const r = (aiScore || 72) / 100;
-              kwPts = Math.round(20 * r);
-              skPts = Math.round(30 * r);
-              expPts = Math.round(20 * Math.min(r * 1.1, 1.0));
-              eduPts = Math.round(10 * Math.min(r * 1.05, 1.0));
-              semPts = Math.round(10 * Math.min(r * 1.05, 1.0));
-              reqPts = 10;
-            }
+            const bd = evaluatedAi.breakdown || {
+              kwPts: 16,
+              skPts: 24,
+              expPts: 20,
+              eduPts: 8,
+              semPts: 10,
+              reqPts: 10
+            };
+            const kwPts = bd.kwPts;
+            const skPts = bd.skPts;
+            const expPts = bd.expPts;
+            const eduPts = bd.eduPts;
+            const semPts = bd.semPts;
+            const reqPts = bd.reqPts;
 
             return (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs font-semibold">
@@ -879,16 +874,23 @@ const CandidateDetails = () => {
             );
           })()}
 
-          {/* AI Explanation Box */}
+          {/* AI Explanation Box - Detailed Justification */}
           {aiReason && (
-            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-normal text-slate-700 dark:text-slate-300 space-y-1">
-              <div className="font-bold text-slate-900 dark:text-white flex items-center justify-between">
-                <span className="flex items-center gap-1.5">Personalized AI Audit Explanation:</span>
-                <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30">
-                  Recommendation: {candidate.atsBreakdown?.finalRecommendation || candidate.atsBreakdown?.evaluationDetails?.finalRecommendation || (aiScore >= 85 ? 'Strong Match' : (aiScore >= 70 ? 'Good Match' : (aiScore >= 50 ? 'Moderate Match' : 'Weak Match')))}
+            <div className="p-5 rounded-2xl bg-amber-500/10 dark:bg-amber-950/40 border border-amber-500/30 text-xs font-normal text-slate-800 dark:text-slate-200 space-y-2.5">
+              <div className="font-extrabold text-slate-900 dark:text-white flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-500/20 pb-2">
+                <span className="flex items-center gap-2 text-amber-700 dark:text-amber-300 font-extrabold text-xs uppercase tracking-wide">
+                  <svg className="w-4 h-4 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                  <span>Personalized AI ATS Audit Justification & Score Reason</span>
+                </span>
+                <span className="px-3 py-0.5 text-xs font-bold rounded-full bg-amber-500/20 text-amber-900 dark:text-amber-200 border border-amber-500/40 self-start sm:self-auto">
+                  Verdict: {candidate.atsBreakdown?.finalRecommendation || candidate.atsBreakdown?.evaluationDetails?.finalRecommendation || (aiScore >= 85 ? 'Strong Match (High Priority)' : (aiScore >= 70 ? 'Good Match (Recommended)' : (aiScore >= 50 ? 'Moderate Fit (Needs Review)' : 'Low Fit (Skill Gaps)')))}
                 </span>
               </div>
-              <p className="leading-relaxed pt-1">{aiReason}</p>
+              <p className="leading-relaxed font-medium text-slate-800 dark:text-amber-100 text-xs sm:text-sm">
+                <strong className="font-bold text-amber-800 dark:text-amber-300">Score Evaluation Reason:</strong> {aiReason}
+              </p>
             </div>
           )}
 
