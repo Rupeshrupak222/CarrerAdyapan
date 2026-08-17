@@ -12,6 +12,7 @@ interface AuthContextType {
   createHRUser: (data: any) => Promise<any>;
   getAllUsers: () => Promise<User[]>;
   deleteUser: (id: string) => Promise<any>;
+  updateHRPassword: (id: string, newPassword: string) => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -108,6 +109,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const updateHRPassword = async (id: string, newPassword: string) => {
+    try {
+      const response = await authService.updateHRPassword(id, newPassword);
+      return response;
+    } catch (error: any) {
+      console.error('AuthContext updateHRPassword error:', error);
+      return { success: false, error: error.response?.data?.message || error.message || 'Failed to update HR password' };
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -116,7 +127,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, register, createHRUser, getAllUsers, deleteUser }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, register, createHRUser, getAllUsers, deleteUser, updateHRPassword }}>
       {children}
     </AuthContext.Provider>
   );

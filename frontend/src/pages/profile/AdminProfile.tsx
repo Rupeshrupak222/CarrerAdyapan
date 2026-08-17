@@ -7,12 +7,16 @@ import { authService } from '../../services/authService';
 import toast from 'react-hot-toast';
 
 const AdminProfile = () => {
-  const { user, login, createHRUser, getAllUsers, deleteUser } = useAuth();
+  const { user, login, createHRUser, getAllUsers, deleteUser, updateHRPassword } = useAuth();
   const { theme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [creatingHR, setCreatingHR] = useState(false);
   const [teamUsers, setTeamUsers] = useState<any[]>([]);
+
+  const [editingHRPasswordUser, setEditingHRPasswordUser] = useState<any | null>(null);
+  const [newHRPasswordInput, setNewHRPasswordInput] = useState('');
+  const [updatingHRPassword, setUpdatingHRPassword] = useState(false);
 
   const [profileData, setProfileData] = useState({
     name: user?.name || 'Recruiter Lead (Admin)',
@@ -30,6 +34,44 @@ const AdminProfile = () => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showCreateHRModal, setShowCreateHRModal] = useState(false);
   const [generatedCreds, setGeneratedCreds] = useState<{ email?: string; password?: string } | null>(null);
+
+  const handleRandomizeHRPasswordInput = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789#@!';
+    let pass = '';
+    for (let i = 0; i < 10; i++) {
+      pass += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setNewHRPasswordInput(pass);
+  };
+
+  const handleSaveHRPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingHRPasswordUser || !newHRPasswordInput) {
+      toast.error('Please enter a new password!');
+      return;
+    }
+    if (newHRPasswordInput.length < 6) {
+      toast.error('Password must be at least 6 characters long!');
+      return;
+    }
+
+    setUpdatingHRPassword(true);
+    try {
+      const res = await updateHRPassword(editingHRPasswordUser.id, newHRPasswordInput);
+      if (res?.success) {
+        toast.success(res.message || `Password updated for ${editingHRPasswordUser.email}!`);
+        setEditingHRPasswordUser(null);
+        setNewHRPasswordInput('');
+        fetchTeamUsers();
+      } else {
+        toast.error(res?.error || res?.message || 'Failed to update password');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update HR password');
+    } finally {
+      setUpdatingHRPassword(false);
+    }
+  };
 
   const [editForm, setEditForm] = useState({ ...profileData });
   const [passwordForm, setPasswordForm] = useState({
@@ -106,13 +148,18 @@ const AdminProfile = () => {
   const handleDeleteHRUser = async (id: string, name: string) => {
     if (!window.confirm(`Are you sure you want to revoke access for ${name}?`)) return;
     try {
+      setTeamUsers((prev) => prev.filter((u) => u.id !== id));
       const res = await deleteUser(id);
       if (res?.success) {
         toast.success(`Access revoked for ${name}`);
         fetchTeamUsers();
+      } else {
+        toast.error(res?.error || res?.message || 'Failed to revoke access');
+        fetchTeamUsers();
       }
-    } catch (err) {
-      toast.error('Failed to revoke access');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to revoke access');
+      fetchTeamUsers();
     }
   };
 
@@ -211,7 +258,7 @@ const AdminProfile = () => {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <BackButton label="Back to Dashboard" to="/dashboard" />
           <span className="px-2.5 sm:px-3.5 py-1 text-[10px] sm:text-xs font-extrabold rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-             Super HR Admin Profile & Security
+             Recruiter Profile & Security
           </span>
         </div>
 
@@ -255,13 +302,19 @@ const AdminProfile = () => {
                 Edit Profile
               </button>
 
-              <button
-                onClick={() => setShowPasswordModal(true)}
-                className={`px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs font-bold rounded-xl border transition-all flex items-center gap-1.5 ${theme === 'dark' ? 'bg-slate-950 text-slate-200 border-slate-800 hover:bg-slate-800' : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
-                  }`}
-              >
-                Change Password
-              </button>
+              {(user?.role === 'ADMIN' || user?.email === 'admin@adyapan.com') ? (
+                <button
+                  onClick={() => setShowPasswordModal(true)}
+                  className={`px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs font-bold rounded-xl border transition-all flex items-center gap-1.5 ${theme === 'dark' ? 'bg-slate-950 text-slate-200 border-slate-800 hover:bg-slate-800' : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+                    }`}
+                >
+                  Change Password
+                </button>
+              ) : (
+                <span className="px-3 py-2 text-[11px] font-bold text-amber-700 dark:text-amber-300 bg-amber-500/10 rounded-xl border border-amber-500/20">
+                  🔒 Password Managed by Admin
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -289,7 +342,7 @@ const AdminProfile = () => {
                 </div>
 
                 <div className={`p-4 rounded-2xl border space-y-1 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Admin Email Address</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Email Address</span>
                   <span className="text-sm font-bold text-slate-900 dark:text-white">{profileData.email}</span>
                 </div>
 
@@ -331,78 +384,100 @@ const AdminProfile = () => {
                 <h2 className="text-base font-bold flex items-center gap-2">
                   <span> Security & HR Accounts</span>
                 </h2>
-                <button
-                  onClick={() => setShowCreateHRModal(true)}
-                  className="px-3 py-1.5 text-xs font-black text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-xl transition-all shadow-md flex items-center gap-1 uppercase tracking-wider shrink-0"
-                >
-                  + Generate HR Account
-                </button>
+                {(user?.role === 'ADMIN' || user?.email === 'admin@adyapan.com') && (
+                  <button
+                    onClick={() => setShowCreateHRModal(true)}
+                    className="px-3 py-1.5 text-xs font-black text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-xl transition-all shadow-md flex items-center gap-1 uppercase tracking-wider shrink-0"
+                  >
+                    + Generate HR Account
+                  </button>
+                )}
               </div>
 
               <div className="space-y-3 text-xs font-semibold">
                 {/* Option 1: Account Security (Change Password) */}
                 <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 flex items-center justify-between">
                   <span> Account Security</span>
-                  <button
-                    onClick={() => setShowPasswordModal(true)}
-                    className="font-bold text-xs text-amber-600 dark:text-amber-400 hover:underline"
-                  >
-                    Change Password →
-                  </button>
+                  {(user?.role === 'ADMIN' || user?.email === 'admin@adyapan.com') ? (
+                    <button
+                      onClick={() => setShowPasswordModal(true)}
+                      className="font-bold text-xs text-amber-600 dark:text-amber-400 hover:underline"
+                    >
+                      Change Password →
+                    </button>
+                  ) : (
+                    <span className="font-bold text-xs text-slate-500 dark:text-slate-400">
+                      Password Managed by Admin
+                    </span>
+                  )}
                 </div>
 
-                {/* Option 2: List of HR Accounts with Revoke Access */}
-                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-extrabold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                       List of HR Accounts ({teamUsers.length})
-                    </span>
-                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
-                      Admin Access Controls
-                    </span>
-                  </div>
-
-                  <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                    {teamUsers.length > 0 ? (
-                      teamUsers.map((u) => (
-                        <div
-                          key={u.id}
-                          className={`p-3 rounded-2xl border flex items-center justify-between gap-3 text-xs transition-all ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'
-                            }`}
-                        >
-                          <div className="space-y-0.5 min-w-0">
-                            <div className="font-bold text-slate-900 dark:text-white truncate flex items-center gap-2">
-                              <span>{u.name}</span>
-                              <span className={`px-2 py-0.5 text-[10px] font-black rounded-full uppercase ${u.role === 'ADMIN' ? 'bg-purple-500/20 text-purple-700 dark:text-purple-300' : 'bg-blue-500/20 text-blue-700 dark:text-blue-300'
-                                }`}>
-                                {u.role || 'HR'}
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{u.email}</p>
+                {/* Option 2: List of HR Accounts with Revoke Access & Password Edit (SUPER ADMIN ONLY) */}
+                {(user?.role === 'ADMIN' || user?.email === 'admin@adyapan.com') && (
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                    {(() => {
+                      const hrOnlyUsers = teamUsers.filter((u) => u.role !== 'ADMIN' && u.email !== 'admin@adyapan.com');
+                      return (
+                        <>
+                          <div className="flex items-center justify-between">
+                            <span className="font-extrabold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                               List of HR Accounts ({hrOnlyUsers.length})
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                              Admin Access Controls
+                            </span>
                           </div>
 
-                          {u.role !== 'ADMIN' ? (
-                            <button
-                              onClick={() => handleDeleteHRUser(u.id, u.name)}
-                              className="px-2.5 py-1.5 text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 bg-rose-500/10 rounded-xl transition-all border border-rose-500/30 shrink-0"
-                              title="Revoke HR Access"
-                            >
-                              Remove HR Access
-                            </button>
-                          ) : (
-                            <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-500/10 px-2 py-1 rounded-lg border border-purple-500/20">
-                              Primary Admin
-                            </span>
-                          )}
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-6 text-xs text-slate-400 italic bg-slate-50 dark:bg-slate-950/50 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800">
-                        No HR accounts created yet. Click "+ GENERATE HR ACCOUNT" above to issue credentials.
-                      </div>
-                    )}
+                          <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                            {hrOnlyUsers.length > 0 ? (
+                              hrOnlyUsers.map((u) => (
+                                <div
+                                  key={u.id}
+                                  className={`p-3 rounded-2xl border flex items-center justify-between gap-3 text-xs transition-all ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'
+                                    }`}
+                                >
+                                  <div className="space-y-0.5 min-w-0">
+                                    <div className="font-bold text-slate-900 dark:text-white truncate flex items-center gap-2">
+                                      <span>{u.name}</span>
+                                      <span className="px-2 py-0.5 text-[10px] font-black rounded-full uppercase bg-blue-500/20 text-blue-700 dark:text-blue-300">
+                                        HR
+                                      </span>
+                                    </div>
+                                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{u.email}</p>
+                                  </div>
+
+                                  <div className="flex items-center gap-1.5 shrink-0">
+                                    <button
+                                      onClick={() => {
+                                        setEditingHRPasswordUser(u);
+                                        setNewHRPasswordInput('');
+                                      }}
+                                      className="px-2.5 py-1.5 text-[11px] font-bold text-amber-700 dark:text-amber-300 hover:bg-amber-500/20 bg-amber-500/10 rounded-xl transition-all border border-amber-500/30 shrink-0"
+                                      title="Edit HR Account Password"
+                                    >
+                                      Edit Password
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteHRUser(u.id, u.name)}
+                                      className="px-2.5 py-1.5 text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 bg-rose-500/10 rounded-xl transition-all border border-rose-500/30 shrink-0"
+                                      title="Revoke HR Access"
+                                    >
+                                      Remove HR Access
+                                    </button>
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="text-center py-6 text-xs text-slate-400 italic bg-slate-50 dark:bg-slate-950/50 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800">
+                                No HR accounts created yet. Click "+ GENERATE HR ACCOUNT" above to issue credentials.
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
@@ -416,7 +491,7 @@ const AdminProfile = () => {
             }`}>
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <h3 className="text-sm sm:text-base font-bold flex items-center gap-2">
-                <span>Edit Admin Profile</span>
+                <span>Edit Profile</span>
               </h3>
               <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-slate-600 font-bold p-1"></button>
             </div>
@@ -738,6 +813,73 @@ const AdminProfile = () => {
                     }`}
                 >
                   Close
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal 4: Edit HR Account Password Modal */}
+      {editingHRPasswordUser && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className={`w-full max-w-md p-6 rounded-3xl border shadow-2xl space-y-4 relative ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200 text-slate-900'
+            }`}>
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div>
+                <h3 className="text-base font-extrabold text-amber-600 dark:text-amber-400">🔑 Reset HR Account Password</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Update login credentials for {editingHRPasswordUser.name}</p>
+              </div>
+              <button
+                onClick={() => setEditingHRPasswordUser(null)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold text-lg"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs font-semibold text-amber-800 dark:text-amber-300">
+              Account Email: <strong className="font-bold">{editingHRPasswordUser.email}</strong>
+            </div>
+
+            <form onSubmit={handleSaveHRPasswordSubmit} className="space-y-4 text-xs font-medium">
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="font-bold">New Password *</label>
+                  <button
+                    type="button"
+                    onClick={handleRandomizeHRPasswordInput}
+                    className="text-[10px] font-extrabold text-amber-600 dark:text-amber-400 hover:underline"
+                  >
+                    🎲 Auto-Generate Random
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  required
+                  placeholder="Enter new password (min 6 chars)"
+                  value={newHRPasswordInput}
+                  onChange={(e) => setNewHRPasswordInput(e.target.value)}
+                  className={`w-full p-3 rounded-xl border focus:outline-none ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+                    }`}
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="submit"
+                  disabled={updatingHRPassword}
+                  className="flex-1 py-3 text-xs font-black text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl shadow-lg transition-all uppercase tracking-wider"
+                >
+                  {updatingHRPassword ? 'Updating Password...' : 'Save New HR Password'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingHRPasswordUser(null)}
+                  className={`py-3 px-4 text-xs font-bold rounded-xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
+                    }`}
+                >
+                  Cancel
                 </button>
               </div>
             </form>

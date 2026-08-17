@@ -197,6 +197,15 @@ export const updateProfile = async (req, res) => {
 export const changePassword = async (req, res) => {
   try {
     const userEmail = req.user?.email || req.body?.email || 'admin@adyapan.com';
+    const isSuperAdmin = req.user?.role === 'ADMIN' || userEmail === 'admin@adyapan.com';
+
+    if (!isSuperAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: 'HR accounts cannot change passwords directly. Password access is managed by Super Admin.'
+      });
+    }
+
     const { currentPassword, newPassword } = req.body;
 
     if (!newPassword || newPassword.length < 6) {
@@ -364,14 +373,67 @@ export const getAllUsers = async (req, res) => {
 export const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
+    const targetUser = await prisma.user.findUnique({ where: { id } }).catch(() => null);
+    if (targetUser && (targetUser.email === 'admin@adyapan.com' || targetUser.role === 'ADMIN')) {
+      return res.status(400).json({ success: false, message: 'Primary Admin account cannot be deleted.' });
+    }
+
     try {
+      const adminFallback = await prisma.user.findFirst({ where: { role: 'ADMIN' } }).catch(() => null);
+      if (adminFallback && adminFallback.id !== id) {
+        await prisma.job.updateMany({ where: { userId: id }, data: { userId: adminFallback.id } }).catch(() => null);
+      }
+      await prisma.activity.deleteMany({ where: { userId: id } }).catch(() => null);
+      await prisma.aIConversation.deleteMany({ where: { userId: id } }).catch(() => null);
+
       await prisma.user.delete({ where: { id } });
       return res.json({ success: true, message: 'HR account revoked and deleted successfully!' });
-    } catch (dbErr) {
-      return res.json({ success: true, message: 'HR account access revoked from session store!' });
+    } catch (dbErr: any) {
+      console.error('Delete User DB Error:', dbErr.message);
+      return res.status(400).json({ success: false, message: 'Database deletion failed: ' + dbErr.message });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Delete User Error:', error);
     res.status(500).json({ success: false, message: 'Failed to delete user account' });
+  }
+};
+
+// Admin: Reset/Edit HR Account Password
+export const updateHRPassword = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { newPassword } = req.body;
+
+    if (!newPassword || newPassword.trim().length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be at least 6 characters long'
+      });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword.trim(), salt);
+
+    try {
+      const updatedUser = await prisma.user.update({
+        where: { id },
+        data: { password: hashedPassword }
+      });
+
+      return res.json({
+        success: true,
+        message: `Password updated & hashed in database for ${updatedUser.email}!`,
+        user: { id: updatedUser.id, email: updatedUser.email, name: updatedUser.name }
+      });
+    } catch (dbErr: any) {
+      console.error('Update HR Password DB error:', dbErr.message);
+      return res.status(400).json({
+        success: false,
+        message: 'Failed to update user password in database: ' + dbErr.message
+      });
+    }
+  } catch (error: any) {
+    console.error('Update HR Password Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to update HR password' });
   }
 };

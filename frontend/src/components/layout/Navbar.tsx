@@ -302,7 +302,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
                   onMouseEnter={(e) => { e.currentTarget.style.background = theme === 'dark' ? 'rgba(245, 158, 11,0.12)' : '#fdfaf6'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                 >
-                  View Admin Profile
+                  View Profile
                 </Link>
                 <Link
                   to="/careers"

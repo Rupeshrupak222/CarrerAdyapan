@@ -93,4 +93,15 @@ export const authService = {
       throw error;
     }
   },
+
+  updateHRPassword: async (id: string, newPassword: string) => {
+    try {
+      console.log(' Update HR Password API call:', id);
+      const response = await api.put(`/auth/users/${id}/password`, { newPassword });
+      return response.data;
+    } catch (error) {
+      console.error(' Update HR Password Error:', error);
+      throw error;
+    }
+  },
 };

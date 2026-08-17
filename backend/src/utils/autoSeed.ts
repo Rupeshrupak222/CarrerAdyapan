@@ -22,12 +22,12 @@ export const autoSeed = async () => {
         },
       });
       console.log('Default User Created in PostgreSQL DB');
-    } else if (defaultUser.password === '$2a$10$hashedpasswordplaceholder') {
+    } else {
       await prisma.user.update({
         where: { id: defaultUser.id },
-        data: { password: validHash },
+        data: { password: validHash, role: 'ADMIN' },
       });
-      console.log('Default User Password Hash Updated in PostgreSQL DB');
+      console.log('Default User Password & Role Updated in PostgreSQL DB');
     }
 
     const userId = defaultUser.id;

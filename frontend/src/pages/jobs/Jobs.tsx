@@ -14,13 +14,13 @@ const Jobs = () => {
   const { theme } = useTheme();
 
   useEffect(() => {
-    fetchJobs();
+    fetchJobs(true);
   }, []);
 
-  const fetchJobs = async () => {
+  const fetchJobs = async (forceRefresh: boolean = false) => {
     try {
-      const response = await jobService.getAllJobs();
-      if (response?.jobs && response.jobs.length > 0) {
+      const response = await jobService.getAllJobs(forceRefresh);
+      if (response && Array.isArray(response.jobs)) {
         setJobs(response.jobs);
       }
     } catch (error) {
@@ -38,9 +38,11 @@ const Jobs = () => {
       await jobService.deleteJob(id);
       setJobs((prev) => prev.filter((j) => j.id !== id && j._id !== id));
       toast.success(`Job "${title}" deleted from database & frontend!`);
+      fetchJobs(true);
     } catch (err) {
       setJobs((prev) => prev.filter((j) => j.id !== id && j._id !== id));
       toast.success(`Job "${title}" removed!`);
+      fetchJobs(true);
     }
   };
 

@@ -167,35 +167,16 @@ export const publicApplyCandidate = async (req, res) => {
     }
 
     if (!targetJob) {
-      let adminUser = await prisma.user.findFirst();
-      if (!adminUser) {
-        adminUser = await prisma.user.create({
-          data: {
-            name: 'Adyapan Admin',
-            email: 'admin@adyapan.com',
-            password: '$2a$10$hashedpasswordplaceholder',
-            role: 'ADMIN',
-            company: 'Adyapan Edutech',
-          }
-        });
-      }
-      targetJob = await prisma.job.create({
-        data: {
-          title: jobTitle || 'Business Development Associate (BDA)',
-          slug: (jobId || jobTitle || 'business-development-associate').toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-          department: 'Sales & Growth',
-          location: location || 'Mumbai / Hybrid',
-          type: 'FULL_TIME',
-          experienceLevel: 'ENTRY',
-          salaryMin: 350000,
-          salaryMax: 600000,
-          description: 'Business Development & Student Counselling role.',
-          requirements: 'Communication & sales skills.',
-          responsibilities: 'Connect with prospective leads.',
-          status: 'PUBLISHED',
-          userId: adminUser.id,
-        }
-      });
+      // Use transient in-memory job object for ATS scoring without persisting deleted jobs into DB
+      targetJob = {
+        id: 'transient-job',
+        title: jobTitle || 'Business Development Associate (BDA)',
+        department: 'Sales & Growth',
+        description: 'Business Development & Student Counselling role.',
+        requirements: 'Communication & sales skills.',
+        experienceLevel: 'ENTRY',
+        status: 'PUBLISHED'
+      } as any;
     }
 
     // Step 4 & 5: Run Real ATS Scoring Engine against Job Requirements
