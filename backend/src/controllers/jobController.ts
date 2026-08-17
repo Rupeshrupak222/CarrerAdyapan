@@ -204,14 +204,18 @@ export const updateJob = async (req, res) => {
 export const deleteJob = async (req, res) => {
   try {
     const { id } = req.params;
+    
+    // Clean up all foreign key dependencies before deleting job
+    await prisma.activity.deleteMany({ where: { jobId: id } }).catch(() => null);
+    await prisma.interview.deleteMany({ where: { jobId: id } }).catch(() => null);
     await prisma.application.deleteMany({ where: { jobId: id } }).catch(() => null);
-    await prisma.job.delete({ where: { id } }).catch(async () => {
-      await prisma.job.deleteMany({ where: { id } });
-    });
+    
+    await prisma.job.delete({ where: { id } });
+
     res.json({ success: true, message: 'Job deleted successfully' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Delete Job Error:', error);
-    res.json({ success: true, message: 'Job deleted successfully' });
+    res.status(500).json({ success: false, message: error.message || 'Failed to delete job' });
   }
 };
 

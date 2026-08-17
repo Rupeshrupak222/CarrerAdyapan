@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import AdyapanLogo from '../../components/common/AdyapanLogo';
 import Footer from '../../components/layout/Footer';
 import { useTheme } from '../../context/ThemeContext';
-import api from '../../services/api';
 import toast from 'react-hot-toast';
 
 const AdminContactUs = () => {
@@ -28,10 +27,15 @@ const AdminContactUs = () => {
     const toastId = toast.loading('Sending message to support@adyapan.com...');
 
     try {
-      const response = await api.post('/contact', formData);
-      const data = response.data;
+      const response = await fetch('http://localhost:5000/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
 
-      if (response.status === 200 && data.success) {
+      const data = await response.json();
+
+      if (response.ok && data.success) {
         toast.success(`Thank you, ${formData.fullName}! Your message has been delivered to support@adyapan.com`, { id: toastId });
         setFormData({
           fullName: '',
@@ -62,8 +66,8 @@ const AdminContactUs = () => {
       }`}>
       {/* Admin Dedicated Glassmorphic Navbar */}
       <nav className={`sticky top-0 z-50 px-4 sm:px-8 py-3.5 backdrop-blur-xl border-b transition-all ${theme === 'dark'
-          ? 'bg-slate-950/90 border-slate-800 shadow-2xl'
-          : 'bg-white/95 border-amber-200/80 shadow-md'
+        ? 'bg-slate-950/90 border-slate-800 shadow-2xl'
+        : 'bg-white/95 border-amber-200/80 shadow-md'
         }`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <Link to="/dashboard" className="flex items-center gap-2">
@@ -81,8 +85,8 @@ const AdminContactUs = () => {
             <button
               onClick={toggleTheme}
               className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all ${theme === 'dark'
-                  ? 'bg-slate-900 text-amber-400 border-slate-800'
-                  : 'bg-white text-slate-900 border-slate-200 shadow-sm'
+                ? 'bg-slate-900 text-amber-400 border-slate-800'
+                : 'bg-white text-slate-900 border-slate-200 shadow-sm'
                 }`}
             >
               {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
@@ -179,8 +183,8 @@ const AdminContactUs = () => {
                     onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                     placeholder="John Doe"
                     className={`w-full p-3 rounded-2xl border font-medium outline-none transition-all ${theme === 'dark'
-                        ? 'bg-slate-950 border-slate-800 text-white focus:border-amber-500'
-                        : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-amber-500 focus:bg-white'
+                      ? 'bg-slate-950 border-slate-800 text-white focus:border-amber-500'
+                      : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-amber-500 focus:bg-white'
                       }`}
                   />
                 </div>
@@ -194,8 +198,8 @@ const AdminContactUs = () => {
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="john@example.com"
                     className={`w-full p-3 rounded-2xl border font-medium outline-none transition-all ${theme === 'dark'
-                        ? 'bg-slate-950 border-slate-800 text-white focus:border-amber-500'
-                        : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-amber-500 focus:bg-white'
+                      ? 'bg-slate-950 border-slate-800 text-white focus:border-amber-500'
+                      : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-amber-500 focus:bg-white'
                       }`}
                   />
                 </div>
@@ -211,8 +215,8 @@ const AdminContactUs = () => {
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="+91 98765 43210"
                     className={`w-full p-3 rounded-2xl border font-medium outline-none transition-all ${theme === 'dark'
-                        ? 'bg-slate-950 border-slate-800 text-white focus:border-amber-500'
-                        : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-amber-500 focus:bg-white'
+                      ? 'bg-slate-950 border-slate-800 text-white focus:border-amber-500'
+                      : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-amber-500 focus:bg-white'
                       }`}
                   />
                 </div>
@@ -223,8 +227,8 @@ const AdminContactUs = () => {
                     value={formData.subject}
                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                     className={`w-full p-3 rounded-2xl border font-medium outline-none transition-all ${theme === 'dark'
-                        ? 'bg-slate-950 border-slate-800 text-white focus:border-amber-500'
-                        : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-amber-500 focus:bg-white'
+                      ? 'bg-slate-950 border-slate-800 text-white focus:border-amber-500'
+                      : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-amber-500 focus:bg-white'
                       }`}
                   >
                     <option value="General Inquiry">General Inquiry</option>
@@ -244,8 +248,8 @@ const AdminContactUs = () => {
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   placeholder="Tell us how we can help you..."
                   className={`w-full p-3.5 rounded-2xl border font-medium outline-none transition-all ${theme === 'dark'
-                      ? 'bg-slate-950 border-slate-800 text-white focus:border-amber-500'
-                      : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-amber-500 focus:bg-white'
+                    ? 'bg-slate-950 border-slate-800 text-white focus:border-amber-500'
+                    : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-amber-500 focus:bg-white'
                     }`}
                 />
               </div>
