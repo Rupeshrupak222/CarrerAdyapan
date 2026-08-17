@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import { getApiBaseUrl } from './api';
 
 const getAuthToken = () => {
   return localStorage.getItem('token') || '';
@@ -18,6 +18,7 @@ export const aiService = {
    */
   async streamQuery({ message, history = [], onChunk, onError, onComplete }: StreamQueryOptions) {
     const token = getAuthToken();
+    const API_BASE_URL = getApiBaseUrl();
 
     try {
       const response = await fetch(`${API_BASE_URL}/ai/assistant/stream`, {
@@ -85,6 +86,7 @@ export const aiService = {
    */
   async sendQuery({ message, history = [] }: { message: string; history?: any[] }) {
     const token = getAuthToken();
+    const API_BASE_URL = getApiBaseUrl();
     const response = await fetch(`${API_BASE_URL}/ai/assistant`, {
       method: 'POST',
       headers: {
@@ -106,6 +108,7 @@ export const aiService = {
    */
   async clearHistory() {
     const token = getAuthToken();
+    const API_BASE_URL = getApiBaseUrl();
     const response = await fetch(`${API_BASE_URL}/ai/assistant/clear`, {
       method: 'DELETE',
       headers: {
