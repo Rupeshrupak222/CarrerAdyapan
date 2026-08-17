@@ -65,31 +65,33 @@ const AdminContactUs = () => {
     <div className={`min-h-screen font-sans antialiased flex flex-col transition-colors ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'
       }`}>
       {/* Admin Dedicated Glassmorphic Navbar */}
-      <nav className={`sticky top-0 z-50 px-4 sm:px-8 py-3.5 backdrop-blur-xl border-b transition-all ${theme === 'dark'
+      <nav className={`sticky top-0 z-50 px-3 sm:px-8 py-2.5 sm:py-3.5 backdrop-blur-xl border-b transition-all ${theme === 'dark'
         ? 'bg-slate-950/90 border-slate-800 shadow-2xl'
         : 'bg-white/95 border-amber-200/80 shadow-md'
         }`}>
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
           <Link to="/dashboard" className="flex items-center gap-2">
             <AdyapanLogo variant={theme === 'dark' ? 'dark' : 'light'} size="normal" />
           </Link>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link
               to="/dashboard"
-              className="px-4 py-2 text-xs font-black text-slate-950 bg-amber-400 hover:bg-amber-500 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+              className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-black text-slate-950 bg-amber-400 hover:bg-amber-500 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer shrink-0"
             >
-              <span>← Back to Dashboard</span>
+              <span className="hidden sm:inline">← Back to Dashboard</span>
+              <span className="sm:hidden">← Dashboard</span>
             </Link>
 
             <button
               onClick={toggleTheme}
-              className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all ${theme === 'dark'
+              className={`p-1.5 sm:px-3 sm:py-2 rounded-xl text-xs font-bold border transition-all shrink-0 ${theme === 'dark'
                 ? 'bg-slate-900 text-amber-400 border-slate-800'
                 : 'bg-white text-slate-900 border-slate-200 shadow-sm'
                 }`}
             >
-              {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+              <span className="hidden sm:inline">{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
+              <span className="sm:hidden">{theme === 'dark' ? '🌙' : '☀️'}</span>
             </button>
           </div>
         </div>

@@ -107,6 +107,14 @@ const AIAssistant = () => {
     }
   };
 
+  const formatMessageText = (text: string) => {
+    if (!text) return '';
+    return text
+      .replace(/^```(json|markdown|code|javascript)?/gi, '')
+      .replace(/```$/g, '')
+      .trim();
+  };
+
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto space-y-6">
@@ -188,7 +196,7 @@ const AIAssistant = () => {
                 >
                   {/* Markdown Renderer Simple Parser */}
                   <div className="prose dark:prose-invert max-w-none text-xs sm:text-sm whitespace-pre-wrap leading-relaxed">
-                    {msg.text || (loading && index === messages.length - 1 ? 'Thinking...' : '')}
+                    {formatMessageText(msg.text) || (loading && index === messages.length - 1 ? 'Thinking...' : '')}
                   </div>
                 </div>
               </div>

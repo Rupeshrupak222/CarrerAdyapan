@@ -63,13 +63,13 @@ const Navbar = ({ toggleMobileSidebar }) => {
       className="sticky top-0 z-50 border-b transition-all backdrop-blur-xl shadow-md"
       style={navStyle}
     >
-      <div className="flex items-center justify-between px-3 py-2.5 sm:px-6 sm:py-3 gap-2">
+      <div className="flex items-center justify-between px-2.5 py-2 sm:px-6 sm:py-3 gap-1.5 sm:gap-3 max-w-full overflow-hidden">
 
-        {/* Left: Mobile Sidebar Toggle & Search */}
-        <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+        {/* Left: Mobile Sidebar Toggle, Compact Mobile Logo & Search */}
+        <div className="flex items-center gap-1.5 sm:gap-2.5 flex-1 min-w-0">
           <button
             onClick={toggleMobileSidebar}
-            className="p-2 rounded-xl lg:hidden transition-colors border shadow-sm shrink-0"
+            className="p-1.5 sm:p-2 rounded-xl lg:hidden transition-colors border shadow-sm shrink-0"
             style={theme === 'dark'
               ? { background: 'rgba(245, 158, 11,0.15)', borderColor: 'rgba(245, 158, 11,0.3)', color: '#f59e0b' }
               : { background: '#fdfaf6', borderColor: '#e0d8d0', color: '#f59e0b' }
@@ -81,16 +81,24 @@ const Navbar = ({ toggleMobileSidebar }) => {
             </svg>
           </button>
 
+          {/* Compact Mobile Brand Logo (Icon only on mobile to prevent text overflow) */}
+          <Link to="/dashboard" className="lg:hidden shrink-0 flex items-center">
+            <AdyapanLogo variant={theme === 'dark' ? 'dark' : 'light'} size="small" showText={false} />
+          </Link>
+
           {/* Search Input */}
-          <div className="relative flex-1 max-w-[140px] xs:max-w-[200px] sm:max-w-xs md:max-w-sm lg:max-w-md">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none" style={{ color: '#f59e0b' }}>
+          <div className="relative flex-1 min-w-[80px] max-w-[130px] sm:max-w-xs md:max-w-sm lg:max-w-md">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none" style={{ color: '#f59e0b' }}>
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
             </span>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search..."
-              className="w-full pl-8 sm:pl-9 pr-3 py-1.5 sm:py-2 text-xs rounded-xl focus:outline-none transition-all font-semibold"
+              className="w-full pl-7 sm:pl-9 pr-2 sm:pr-3 py-1.5 sm:py-2 text-xs rounded-xl focus:outline-none transition-all font-semibold"
               style={theme === 'dark'
                 ? {
                   background: 'rgba(245, 158, 11,0.08)',
@@ -116,40 +124,48 @@ const Navbar = ({ toggleMobileSidebar }) => {
         </div>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
 
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className="px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 border"
+            className="p-1.5 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 border shrink-0"
             style={theme === 'dark'
               ? { background: 'rgba(245, 158, 11,0.15)', color: '#f59e0b', borderColor: 'rgba(245, 158, 11,0.3)' }
               : { background: '#fdfaf6', color: '#1a1a2e', borderColor: '#e0d8d0' }
             }
             title="Switch Theme"
           >
+            {theme === 'dark' ? (
+              <svg className="w-4 h-4 sm:hidden text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4 sm:hidden text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            )}
             <span className="hidden sm:inline">{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
-            <span className="sm:hidden">{theme === 'dark' ? 'Dark' : 'Light'}</span>
           </button>
 
           {/* AI Copilot Button */}
           <Link
             to="/assistant"
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-all shadow-md hover:scale-105 active:scale-95"
+            className="flex items-center gap-1 px-2 py-1.5 sm:px-3 sm:py-1.5 text-xs font-bold rounded-xl transition-all shadow-md hover:scale-105 active:scale-95 shrink-0"
             style={{
               background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
               color: '#ffffff',
               boxShadow: '0 3px 12px rgba(245, 158, 11, 0.4)',
             }}
           >
-            <span>AI Copilot</span>
+            <span className="hidden sm:inline">AI Copilot</span>
             <span className="px-1.5 py-0.5 text-[9px] font-extrabold rounded-full bg-white/25 text-white">AI</span>
           </Link>
 
           {/* Contact Us Button */}
           <Link
             to="/admin-contact"
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-all border hover:border-amber-400 cursor-pointer"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-all border hover:border-amber-400 cursor-pointer shrink-0"
             style={theme === 'dark'
               ? { background: 'rgba(245, 158, 11,0.15)', color: '#f59e0b', borderColor: 'rgba(245, 158, 11,0.3)' }
               : { background: '#fdfaf6', color: '#1a1a2e', borderColor: '#e0d8d0' }
@@ -162,7 +178,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
           <Link
             to="/careers"
             target="_blank"
-            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-all border"
+            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-all border shrink-0"
             style={{
               background: 'linear-gradient(135deg, rgba(245, 158, 11,0.15), rgba(234,88,12,0.1))',
               color: '#f59e0b',
@@ -195,7 +211,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
 
             {showNotifMenu && (
               <div
-                className="absolute right-0 mt-2 w-72 sm:w-80 rounded-2xl shadow-xl border py-2 z-50"
+                className="absolute right-0 mt-2 w-72 sm:w-80 max-w-[calc(100vw-1.5rem)] rounded-2xl shadow-xl border py-2 z-50"
                 style={theme === 'dark'
                   ? { background: '#14162a', borderColor: 'rgba(245, 158, 11,0.25)', color: '#f1f5f9' }
                   : { background: '#ffffff', borderColor: '#e8e0d8', boxShadow: '0 8px 32px rgba(26,26,46,0.12)' }
@@ -277,7 +293,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
 
             {showProfileMenu && (
               <div
-                className="absolute right-0 mt-2 w-56 rounded-2xl shadow-xl border py-2 z-50"
+                className="absolute right-0 mt-2 w-56 max-w-[calc(100vw-1.5rem)] rounded-2xl shadow-xl border py-2 z-50"
                 style={theme === 'dark'
                   ? { background: '#14162a', borderColor: 'rgba(245, 158, 11,0.25)', color: '#f1f5f9' }
                   : { background: '#ffffff', borderColor: '#e8e0d8', boxShadow: '0 8px 32px rgba(26,26,46,0.12)' }

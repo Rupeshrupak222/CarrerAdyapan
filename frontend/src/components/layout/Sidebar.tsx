@@ -98,10 +98,13 @@ const Sidebar = ({ isOpen, onClose }) => {
             </Link>
             <button
               onClick={onClose}
-              className="p-1 lg:hidden transition-colors font-bold text-sm"
+              className="p-1.5 rounded-lg lg:hidden transition-colors font-bold text-sm"
               style={{ color: theme === 'dark' ? '#94a3b8' : '#6b7280' }}
+              aria-label="Close sidebar"
             >
-              
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
           </div>
 
