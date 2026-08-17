@@ -16,7 +16,6 @@ import { useTheme } from '../../context/ThemeContext';
 const DEFAULT_FUNNEL = [
   { stage: 'Applied', count: 0 },
   { stage: 'AI Screened', count: 0 },
-  { stage: 'Shortlisted', count: 0 },
   { stage: 'Interviewed', count: 0 },
   { stage: 'Offer Extended', count: 0 },
   { stage: 'Hired', count: 0 }
@@ -180,11 +179,10 @@ const Dashboard = () => {
       setStats(computedStats);
 
       const dynamicFunnel = (funnelRes.status === 'fulfilled' && Array.isArray(funnelRes.value?.data) && funnelRes.value.data.length > 0)
-        ? funnelRes.value.data
+        ? funnelRes.value.data.filter((f: any) => f.stage !== 'Shortlisted')
         : [
           { stage: 'Applied', count: computedStats.totalApplications },
           { stage: 'AI Screened', count: computedStats.aiScreened },
-          { stage: 'Shortlisted', count: computedStats.shortlisted },
           { stage: 'Interviewed', count: computedStats.interviewed },
           { stage: 'Offer Extended', count: computedStats.offersSent },
           { stage: 'Hired', count: computedStats.hired },

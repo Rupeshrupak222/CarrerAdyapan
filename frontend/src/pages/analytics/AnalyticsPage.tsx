@@ -62,34 +62,33 @@ const AnalyticsPage = () => {
         const raw = statsRes.value;
         const totalApps = Math.max(raw.totalApplications || 0, local.totalCands);
         const screened = Math.max(raw.aiScreened || 0, local.totalCands);
-        const sortlist = Math.max(raw.shortlisted || 0, local.shortlisted);
+        const interviewedCount = Math.max(raw.interviewed ?? raw.interviewsScheduled ?? 0, local.interviewed);
         const hireCount = Math.max(raw.hired || 0, local.hired);
 
         setStats({
           totalApplications: totalApps,
           aiScreened: screened,
-          shortlisted: sortlist,
+          interviewed: interviewedCount,
           hired: hireCount,
         });
       } else {
         setStats({
           totalApplications: local.totalCands || 0,
           aiScreened: local.totalCands || 0,
-          shortlisted: local.shortlisted || 0,
+          interviewed: local.interviewed || 0,
           hired: local.hired || 0,
         });
       }
 
       // 2. Process Hiring Funnel Chart Data
       if (funnelRes.status === 'fulfilled' && funnelRes.value?.data && Array.isArray(funnelRes.value.data)) {
-        const backendFunnel = funnelRes.value.data;
+        const backendFunnel = funnelRes.value.data.filter((f: any) => f.stage !== 'Shortlisted');
         setFunnelData(backendFunnel);
       } else {
         const totalApps = local.totalCands || 0;
         setFunnelData([
           { stage: 'Applied', count: totalApps },
           { stage: 'AI Screened', count: totalApps },
-          { stage: 'Shortlisted', count: local.shortlisted || 0 },
           { stage: 'Interviewed', count: local.interviewed || 0 },
           { stage: 'Hired', count: local.hired || 0 },
         ]);
@@ -170,8 +169,8 @@ const AnalyticsPage = () => {
               theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-amber-200/80'
             }`}>
               <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500" />
-              <p className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">{stats?.shortlisted || 0}</p>
-              <p className="text-xs font-bold text-slate-600 dark:text-slate-300 mt-1 uppercase tracking-wider">Shortlisted</p>
+              <p className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">{stats?.interviewed || 0}</p>
+              <p className="text-xs font-bold text-slate-600 dark:text-slate-300 mt-1 uppercase tracking-wider">Interviewed</p>
             </div>
             <div className={`p-5 rounded-3xl border text-center shadow-sm relative overflow-hidden ${
               theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-amber-200/80'

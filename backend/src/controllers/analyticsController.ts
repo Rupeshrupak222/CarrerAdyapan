@@ -88,7 +88,6 @@ export const getHiringFunnel = async (req, res) => {
     const funnel = [
       { stage: 'Applied', count: realApplications },
       { stage: 'AI Screened', count: realScreened },
-      { stage: 'Shortlisted', count: shortlisted },
       { stage: 'Interviewed', count: interviewsCount },
       { stage: 'Offer Extended', count: totalOffers },
       { stage: 'Hired', count: hiredCount }
@@ -101,7 +100,6 @@ export const getHiringFunnel = async (req, res) => {
       data: [
         { stage: 'Applied', count: 0 },
         { stage: 'AI Screened', count: 0 },
-        { stage: 'Shortlisted', count: 0 },
         { stage: 'Interviewed', count: 0 },
         { stage: 'Offer Extended', count: 0 },
         { stage: 'Hired', count: 0 }
