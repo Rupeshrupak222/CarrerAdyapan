@@ -3,26 +3,23 @@ import { logger } from '../utils/logger.js';
 import { generateOfferLetterPdfBuffer } from './pdfGeneratorService.js';
 
 // Gmail / Google Workspace SMTP Credentials
-const SMTP_HOST = process.env.SMTP_HOST || 'smtp.gmail.com';
-const SMTP_PORT = parseInt(process.env.SMTP_PORT || '587');
-const SMTP_SECURE = process.env.SMTP_SECURE === 'true';
-const SMTP_USER = process.env.SMTP_USER || 'eclipse@adyapan.com';
-const SMTP_PASS = process.env.SMTP_PASS || 'ampw vxhm ussx vczc';
-const SMTP_FROM = process.env.SMTP_FROM || process.env.SENDER_EMAIL || '"Adyapan Academy" <eclipse@adyapan.com>';
+const getSmtpCredentials = () => {
+  const user = (process.env.SMTP_USER || 'eclipse@adyapan.com').trim();
+  const rawPass = process.env.SMTP_PASS || 'ampw vxhm ussx vczc';
+  const pass = rawPass.replace(/\s+/g, '');
+  const from = process.env.SMTP_FROM || process.env.SENDER_EMAIL || `"Adyapan Academy" <${user}>`;
+  return { user, pass, from };
+};
 
 // Create Gmail Nodemailer Transporter
 const createTransporter = () => {
+  const { user, pass } = getSmtpCredentials();
   return nodemailer.createTransport({
-    host: SMTP_HOST,
-    port: SMTP_PORT,
-    secure: SMTP_SECURE,
+    service: 'gmail',
     auth: {
-      user: SMTP_USER,
-      pass: SMTP_PASS,
+      user,
+      pass,
     },
-    pool: true,
-    maxConnections: 5,
-    maxMessages: 100,
     tls: {
       rejectUnauthorized: false,
     },
@@ -40,7 +37,8 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
     return { success: false, message: 'Invalid recipient email address' };
   }
 
-  logger.info(`Dispatching email with ${attachments.length} attachment(s) to candidate ${to} via Gmail SMTP (${SMTP_USER})...`);
+  const { user, from } = getSmtpCredentials();
+  logger.info(`Dispatching email with ${attachments.length} attachment(s) to candidate ${to} via Gmail SMTP (${user})...`);
 
   // Format attachments for Nodemailer (requires Buffer or Base64 decoded Buffer)
   const nodemailerAttachments = attachments.map((att) => ({
@@ -51,8 +49,9 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
   }));
 
   try {
-    const info = await transporter.sendMail({
-      from: SMTP_FROM,
+    const activeTransporter = createTransporter();
+    const info = await activeTransporter.sendMail({
+      from,
       to,
       subject,
       html,
@@ -62,24 +61,8 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
     logger.info(`REAL GMAIL SMTP EMAIL DELIVERED to candidate ${to}! MessageID: ${info.messageId}`);
     return { success: true, method: 'Gmail_SMTP', messageId: info.messageId };
   } catch (smtpErr: any) {
-    logger.error(`Gmail SMTP delivery error for recipient ${to}: ${smtpErr.message}`);
-
-    // Dynamic retry with fresh transporter if connection closed
-    try {
-      const freshTransporter = createTransporter();
-      const retryInfo = await freshTransporter.sendMail({
-        from: SMTP_FROM,
-        to,
-        subject,
-        html,
-        attachments: nodemailerAttachments,
-      });
-      logger.info(`Retry successful! Email delivered to ${to} via Gmail SMTP. MessageID: ${retryInfo.messageId}`);
-      return { success: true, method: 'Gmail_SMTP_Retry', messageId: retryInfo.messageId };
-    } catch (retryErr: any) {
-      logger.error(`Fatal Gmail SMTP error for ${to}: ${retryErr.message}`);
-      return { success: false, error: retryErr.message };
-    }
+    logger.error(`Gmail SMTP delivery error for recipient ${to}:`, smtpErr?.message || smtpErr);
+    return { success: false, error: smtpErr?.message || String(smtpErr) };
   }
 };
 
