@@ -1,50 +1,48 @@
 import nodemailer from 'nodemailer';
-import { Resend } from 'resend';
 import { logger } from '../utils/logger.js';
 import { generateOfferLetterPdfBuffer } from './pdfGeneratorService.js';
 
-const resendApiKey = process.env.RESEND_API_KEY || '';
-const resend = new Resend(resendApiKey);
+// Gmail / Google Workspace SMTP Credentials
+const SMTP_HOST = process.env.SMTP_HOST || 'smtp.gmail.com';
+const SMTP_PORT = parseInt(process.env.SMTP_PORT || '587');
+const SMTP_SECURE = process.env.SMTP_SECURE === 'true';
+const SMTP_USER = process.env.SMTP_USER || 'eclipse@adyapan.com';
+const SMTP_PASS = process.env.SMTP_PASS || 'ampw vxhm ussx vczc';
+const SMTP_FROM = process.env.SMTP_FROM || process.env.SENDER_EMAIL || '"Adyapan Academy" <eclipse@adyapan.com>';
 
-// Sender email
-const SENDER_EMAIL = process.env.SMTP_FROM || process.env.SENDER_EMAIL || process.env.RESEND_FROM_EMAIL || 'Adyapan Academy <eclipse@adyapan.com>';
-
-// Configurable SMTP Transporter (via Nodemailer)
-const createSmtpTransporter = () => {
-  if (process.env.SMTP_HOST && process.env.SMTP_USER) {
-    return nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT) || 587,
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
-  } else if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
-    return nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD,
-      },
-    });
-  }
-  return null;
+// Create Gmail Nodemailer Transporter
+const createTransporter = () => {
+  return nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: SMTP_PORT,
+    secure: SMTP_SECURE,
+    auth: {
+      user: SMTP_USER,
+      pass: SMTP_PASS,
+    },
+    pool: true,
+    maxConnections: 5,
+    maxMessages: 100,
+    tls: {
+      rejectUnauthorized: false,
+    },
+  });
 };
 
+const transporter = createTransporter();
+
 /**
- * Dispatch Email to Candidate Target Email Address
+ * Dispatch Real Email to Candidate Email Address via Gmail SMTP
  */
-const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }) => {
+const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }: { to: string; subject: string; html: string; attachments?: any[] }) => {
   if (!to || typeof to !== 'string' || !to.includes('@')) {
     logger.warn(`Invalid or missing recipient email address: "${to}"`);
     return { success: false, message: 'Invalid recipient email address' };
   }
 
-  logger.info(`Dispatching email with ${attachments.length} attachment(s) to candidate: ${to}...`);
+  logger.info(`Dispatching email with ${attachments.length} attachment(s) to candidate ${to} via Gmail SMTP (${SMTP_USER})...`);
 
-  // Format attachments for Nodemailer (requires Buffer)
+  // Format attachments for Nodemailer (requires Buffer or Base64 decoded Buffer)
   const nodemailerAttachments = attachments.map((att) => ({
     filename: att.filename,
     content: Buffer.isBuffer(att.content)
@@ -52,90 +50,43 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] })
       : (typeof att.content === 'string' ? Buffer.from(att.content, 'base64') : Buffer.from(att.content)),
   }));
 
-  // Format attachments for Resend API (requires Base64 string or Buffer)
-  const resendAttachments = attachments.map((att) => ({
-    filename: att.filename,
-    content: Buffer.isBuffer(att.content)
-      ? att.content.toString('base64')
-      : (typeof att.content === 'string' ? att.content : Buffer.from(att.content).toString('base64')),
-  }));
+  try {
+    const info = await transporter.sendMail({
+      from: SMTP_FROM,
+      to,
+      subject,
+      html,
+      attachments: nodemailerAttachments,
+    });
 
-  // 1. Try SMTP Transporter if configured in .env
-  const smtpTransporter = createSmtpTransporter();
-  if (smtpTransporter) {
+    logger.info(`REAL GMAIL SMTP EMAIL DELIVERED to candidate ${to}! MessageID: ${info.messageId}`);
+    return { success: true, method: 'Gmail_SMTP', messageId: info.messageId };
+  } catch (smtpErr: any) {
+    logger.error(`Gmail SMTP delivery error for recipient ${to}: ${smtpErr.message}`);
+
+    // Dynamic retry with fresh transporter if connection closed
     try {
-      const fromAddress = process.env.SMTP_FROM || (process.env.GMAIL_USER
-        ? `Adyapan Hiring Team <${process.env.GMAIL_USER}>`
-        : SENDER_EMAIL);
-
-      const info = await smtpTransporter.sendMail({
-        from: fromAddress,
+      const freshTransporter = createTransporter();
+      const retryInfo = await freshTransporter.sendMail({
+        from: SMTP_FROM,
         to,
         subject,
         html,
         attachments: nodemailerAttachments,
       });
-      logger.info(`REAL EMAIL WITH PDF ATTACHMENT DELIVERED to candidate ${to} via SMTP! MessageID: ${info.messageId}`);
-      return { success: true, method: 'SMTP', messageId: info.messageId };
-    } catch (smtpErr) {
-      logger.warn(`SMTP delivery error for ${to}: ${smtpErr.message}. Trying Resend API...`);
+      logger.info(`Retry successful! Email delivered to ${to} via Gmail SMTP. MessageID: ${retryInfo.messageId}`);
+      return { success: true, method: 'Gmail_SMTP_Retry', messageId: retryInfo.messageId };
+    } catch (retryErr: any) {
+      logger.error(`Fatal Gmail SMTP error for ${to}: ${retryErr.message}`);
+      return { success: false, error: retryErr.message };
     }
-  }
-
-  // 2. Send via Resend API
-  try {
-    const resendResponse = await resend.emails.send({
-      from: SENDER_EMAIL,
-      to: [to],
-      subject,
-      html,
-      attachments: resendAttachments,
-    });
-
-    if (resendResponse.error) {
-      logger.warn(`Resend API notice for recipient ${to}: ${resendResponse.error.message}`);
-
-      // Fallback: try test SMTP transport to guarantee candidate email dispatch
-      try {
-        const testAccount = await nodemailer.createTestAccount();
-        const testTransporter = nodemailer.createTransport({
-          host: testAccount.smtp.host,
-          port: testAccount.smtp.port,
-          secure: testAccount.smtp.secure,
-          auth: {
-            user: testAccount.user,
-            pass: testAccount.pass,
-          },
-        });
-
-        const testInfo = await testTransporter.sendMail({
-          from: SENDER_EMAIL,
-          to,
-          subject,
-          html,
-          attachments: nodemailerAttachments,
-        });
-
-        const previewUrl = nodemailer.getTestMessageUrl(testInfo);
-        logger.info(`Email with PDF attachment dispatched to candidate ${to} via Ethereal Mail! Preview URL: ${previewUrl}`);
-        return { success: true, method: 'Ethereal', previewUrl, data: resendResponse.data };
-      } catch (testErr) {
-        return { success: true, message: `Dispatched to ${to}`, note: resendResponse.error.message };
-      }
-    }
-
-    logger.info(`Email with PDF attachment successfully delivered to candidate ${to} via Resend! ID: ${resendResponse.data?.id}`);
-    return { success: true, method: 'Resend', data: resendResponse.data };
-  } catch (err) {
-    logger.error(`Email delivery exception for ${to}:`, err.message);
-    return { success: false, error: err.message };
   }
 };
 
 /**
  * Send Application Confirmation Email to Candidate
  */
-export const sendApplicationConfirmationEmail = async ({ candidateName, candidateEmail, jobTitle, aiScore }) => {
+export const sendApplicationConfirmationEmail = async ({ candidateName, candidateEmail, jobTitle, aiScore }: any) => {
   const targetEmail = candidateEmail;
   const targetName = candidateName || 'Candidate';
 
@@ -179,7 +130,7 @@ export const sendApplicationConfirmationEmail = async ({ candidateName, candidat
 /**
  * Send Interview Invitation Email to Candidate
  */
-export const sendInterviewScheduledEmail = async ({ candidateName, candidateEmail, jobTitle, scheduledAt, meetingLink }) => {
+export const sendInterviewScheduledEmail = async ({ candidateName, candidateEmail, jobTitle, scheduledAt, meetingLink }: any) => {
   const targetEmail = candidateEmail;
   const targetName = candidateName || 'Candidate';
   const targetRole = jobTitle || 'Business Development Associate (BDA)';
@@ -225,7 +176,7 @@ export const sendInterviewScheduledEmail = async ({ candidateName, candidateEmai
 };
 
 /**
- * Send Official Offer Letter Email via Resend with PDF Attachment
+ * Send Official Offer Letter Email via Gmail SMTP with PDF Attachment
  */
 export const sendOfferLetterEmail = async (offerPayload: any = {}) => {
   const {
@@ -272,7 +223,7 @@ export const sendOfferLetterEmail = async (offerPayload: any = {}) => {
       companyTemplateName,
     });
     logger.info(`Generated ${pdfBuffer ? pdfBuffer.length : 0} bytes PDF offer letter buffer for ${candidateName}`);
-  } catch (pdfErr) {
+  } catch (pdfErr: any) {
     logger.error('PDF Buffer generation error:', pdfErr.message);
   }
 
@@ -324,7 +275,7 @@ export const sendOfferLetterEmail = async (offerPayload: any = {}) => {
 /**
  * Send Professional Candidate Rejection Email
  */
-export const sendRejectionEmail = async ({ candidateName, candidateEmail, jobTitle }) => {
+export const sendRejectionEmail = async ({ candidateName, candidateEmail, jobTitle }: any) => {
   const targetEmail = candidateEmail;
   const targetName = candidateName || 'Candidate';
   const targetRole = jobTitle || 'Business Development Associate (BDA)';
@@ -374,7 +325,7 @@ export const sendRejectionEmail = async ({ candidateName, candidateEmail, jobTit
 /**
  * Send Welcome Onboarding Email
  */
-export const sendWelcomeOnboardingEmail = async ({ candidateName, candidateEmail, jobTitle, joiningDate }) => {
+export const sendWelcomeOnboardingEmail = async ({ candidateName, candidateEmail, jobTitle, joiningDate }: any) => {
   const targetEmail = candidateEmail;
   const targetName = candidateName || 'Selected Candidate';
   const targetRole = jobTitle || 'Business Development Associate (BDA)';
@@ -423,7 +374,7 @@ export const sendWelcomeOnboardingEmail = async ({ candidateName, candidateEmail
 /**
  * Send Contact Us Form Submission Email to Support (support@adyapan.com)
  */
-export const sendContactUsSupportEmail = async ({ fullName, email, phone, subject, message }) => {
+export const sendContactUsSupportEmail = async ({ fullName, email, phone, subject, message }: any) => {
   const targetSupportEmail = 'support@adyapan.com';
 
   const emailHtml = `
@@ -469,7 +420,7 @@ export const sendContactUsSupportEmail = async ({ fullName, email, phone, subjec
 /**
  * Send Today's Interview Reminder Email
  */
-export const sendInterviewReminderEmail = async ({ recipientEmail, recipientName, candidateName, jobTitle, scheduledAt, meetingLink, isHR = false }) => {
+export const sendInterviewReminderEmail = async ({ recipientEmail, recipientName, candidateName, jobTitle, scheduledAt, meetingLink, isHR = false }: any) => {
   const formattedDate = new Date(scheduledAt || Date.now()).toLocaleString('en-IN', {
     timeZone: 'Asia/Kolkata',
     dateStyle: 'full',
