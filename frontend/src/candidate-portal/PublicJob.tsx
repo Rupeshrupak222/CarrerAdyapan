@@ -86,7 +86,7 @@ const PublicJob = () => {
       <div className={`min-h-screen flex items-center justify-center p-6 ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'}`}>
         <div className="text-center space-y-4 max-w-md">
           <div className="w-14 h-14 bg-amber-500/20 text-amber-500 rounded-2xl flex items-center justify-center text-2xl mx-auto">
-            </div>
+          </div>
           <h2 className="text-xl font-black">Role Posting Not Found</h2>
           <p className="text-xs font-medium text-slate-500">This job opening may have been closed or fulfilled.</p>
           <Link to="/careers" className="px-6 py-2.5 text-xs font-extrabold text-white bg-amber-500 hover:bg-amber-600 rounded-xl inline-block shadow-md">
@@ -118,8 +118,8 @@ const PublicJob = () => {
               target="_blank"
               rel="noreferrer"
               className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all items-center gap-1.5 hidden sm:flex ${theme === 'dark'
-                  ? 'bg-slate-900 border-slate-700 text-slate-200 hover:border-amber-400'
-                  : 'bg-white border-slate-200 text-slate-700 hover:border-amber-400 shadow-sm'
+                ? 'bg-slate-900 border-slate-700 text-slate-200 hover:border-amber-400'
+                : 'bg-white border-slate-200 text-slate-700 hover:border-amber-400 shadow-sm'
                 }`}
             >
               <span>adyapan.com</span>
@@ -129,8 +129,8 @@ const PublicJob = () => {
             <button
               onClick={toggleTheme}
               className={`px-2.5 sm:px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all border ${theme === 'dark'
-                  ? 'bg-slate-900 text-amber-300 border-slate-800'
-                  : 'bg-white text-slate-800 border-slate-200'
+                ? 'bg-slate-900 text-amber-300 border-slate-800'
+                : 'bg-white text-slate-800 border-slate-200'
                 }`}
             >
               <span className="hidden sm:inline">{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
@@ -155,7 +155,7 @@ const PublicJob = () => {
             <div className="space-y-3">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="px-3 py-1 text-xs font-extrabold bg-amber-500/15 text-amber-700 dark:text-amber-300 rounded-full border border-amber-500/30">
-                   {job.department || 'EdTech Growth'}
+                  {job.department || 'EdTech Growth'}
                 </span>
                 <span className="px-3 py-1 text-xs font-extrabold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 rounded-full border border-emerald-500/30">
                   ● Verified Official Position
@@ -174,7 +174,7 @@ const PublicJob = () => {
                   {job.type === 'FULL_TIME' ? 'Full Time' : job.type || 'Full Time'}
                 </span>
                 <span className="px-3 py-1 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-                   {salaryRange}
+                  {salaryRange}
                 </span>
               </div>
             </div>

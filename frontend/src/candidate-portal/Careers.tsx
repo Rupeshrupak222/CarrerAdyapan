@@ -58,16 +58,14 @@ const Careers = () => {
   };
 
   return (
-    <div className={`min-h-screen font-sans antialiased transition-colors ${
-      theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-slate-100 text-slate-900'
-    }`}>
-      
+    <div className={`min-h-screen font-sans antialiased transition-colors ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-slate-100 text-slate-900'
+      }`}>
+
       {/* 1. Fully Transparent Glassmorphic Navbar */}
-      <nav className={`sticky top-0 z-50 px-3.5 sm:px-6 py-2.5 sm:py-3.5 backdrop-blur-xl border-b transition-all ${
-        theme === 'dark'
+      <nav className={`sticky top-0 z-50 px-3.5 sm:px-6 py-2.5 sm:py-3.5 backdrop-blur-xl border-b transition-all ${theme === 'dark'
           ? 'bg-slate-950/40 border-white/10 shadow-2xl'
           : 'bg-white/30 border-white/40 shadow-sm'
-      }`}>
+        }`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
           {/* Logo & Brand Identity */}
           <Link to="/careers" className="flex items-center gap-2 group shrink-0">
@@ -78,22 +76,20 @@ const Careers = () => {
           <div className="hidden md:flex items-center gap-3 text-xs font-bold">
             <a
               href="#openings"
-              className={`px-3.5 py-1.5 rounded-xl border backdrop-blur-md transition-all flex items-center gap-1.5 ${
-                theme === 'dark'
+              className={`px-3.5 py-1.5 rounded-xl border backdrop-blur-md transition-all flex items-center gap-1.5 ${theme === 'dark'
                   ? 'bg-slate-900/50 border-white/20 text-slate-200 hover:border-amber-400'
                   : 'bg-white/40 border-white/40 text-slate-800 hover:bg-white/60 shadow-sm'
-              }`}
+                }`}
             >
               <span>Active Roles</span>
             </a>
 
             <Link
               to="/contact"
-              className={`px-3.5 py-1.5 rounded-xl border backdrop-blur-md transition-all flex items-center gap-1.5 ${
-                theme === 'dark'
+              className={`px-3.5 py-1.5 rounded-xl border backdrop-blur-md transition-all flex items-center gap-1.5 ${theme === 'dark'
                   ? 'bg-slate-900/50 border-white/20 text-slate-200 hover:border-amber-400'
                   : 'bg-white/40 border-white/40 text-slate-800 hover:border-amber-400 shadow-sm'
-              }`}
+                }`}
             >
               <span>Contact Us</span>
             </Link>
@@ -102,11 +98,10 @@ const Careers = () => {
               href="https://www.adyapan.com"
               target="_blank"
               rel="noreferrer"
-              className={`px-3.5 py-1.5 rounded-xl border backdrop-blur-md transition-all flex items-center gap-1.5 ${
-                theme === 'dark'
+              className={`px-3.5 py-1.5 rounded-xl border backdrop-blur-md transition-all flex items-center gap-1.5 ${theme === 'dark'
                   ? 'bg-slate-900/50 border-white/20 text-slate-200 hover:border-amber-400'
                   : 'bg-white/40 border-white/40 text-slate-800 hover:border-amber-400 shadow-sm'
-              }`}
+                }`}
             >
               <span>adyapan.com</span>
               <span className="text-amber-500 font-extrabold">↗</span>
@@ -117,11 +112,10 @@ const Careers = () => {
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               onClick={toggleTheme}
-              className={`px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 border backdrop-blur-md shadow-sm ${
-                theme === 'dark'
+              className={`px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 border backdrop-blur-md shadow-sm ${theme === 'dark'
                   ? 'bg-slate-900/60 text-amber-300 border-white/20 hover:bg-slate-800/80'
                   : 'bg-white/50 text-slate-800 border-white/40 hover:bg-white/70'
-              }`}
+                }`}
             >
               <span className="hidden sm:inline">{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
             </button>
@@ -200,13 +194,12 @@ const Careers = () => {
 
       {/* 3. Main Content Area with Transparent Search Box & Job Cards */}
       <main id="openings" className="max-w-6xl mx-auto px-6 py-12 space-y-8">
-        
+
         {/* Transparent Search & Department Filter Card */}
-        <div className={`p-5 rounded-3xl border backdrop-blur-xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 ${
-          theme === 'dark'
+        <div className={`p-5 rounded-3xl border backdrop-blur-xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 ${theme === 'dark'
             ? 'bg-slate-900/50 border-white/10'
             : 'bg-white/40 border-white/60 shadow-amber-500/5'
-        }`}>
+          }`}>
           <div className="relative w-full md:w-80">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-500 font-bold"></span>
             <input
@@ -214,11 +207,10 @@ const Careers = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search BDA, Counsellor, Telecaller, Tech..."
-              className={`w-full pl-10 pr-4 py-2.5 rounded-2xl text-xs font-bold focus:outline-none border backdrop-blur-md transition-all ${
-                theme === 'dark'
+              className={`w-full pl-10 pr-4 py-2.5 rounded-2xl text-xs font-bold focus:outline-none border backdrop-blur-md transition-all ${theme === 'dark'
                   ? 'bg-slate-950/60 border-white/20 text-white focus:border-amber-400'
                   : 'bg-white/60 border-white/60 text-slate-900 focus:border-amber-500'
-              }`}
+                }`}
             />
           </div>
 
@@ -227,13 +219,12 @@ const Careers = () => {
               <button
                 key={dept}
                 onClick={() => setDepartment(dept)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-extrabold backdrop-blur-md transition-all border ${
-                  department === dept
+                className={`px-3.5 py-2 rounded-xl text-xs font-extrabold backdrop-blur-md transition-all border ${department === dept
                     ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md'
                     : theme === 'dark'
                       ? 'bg-slate-900/60 border-white/15 text-slate-200 hover:border-amber-400'
                       : 'bg-white/50 border-white/50 text-slate-800 hover:bg-white/80'
-                }`}
+                  }`}
               >
                 {dept === 'ALL' ? 'All Roles' : dept}
               </button>
@@ -250,11 +241,10 @@ const Careers = () => {
           </div>
         ) : filteredJobs.length === 0 ? (
           /* Empty State */
-          <div className={`p-12 rounded-3xl border backdrop-blur-xl text-center space-y-4 shadow-xl ${
-            theme === 'dark'
+          <div className={`p-12 rounded-3xl border backdrop-blur-xl text-center space-y-4 shadow-xl ${theme === 'dark'
               ? 'bg-slate-900/50 border-white/10 text-white'
               : 'bg-white/50 border-white/60 text-slate-900'
-          }`}>
+            }`}>
             <h3 className="text-lg font-black">No Roles Currently Match Your Search</h3>
             <p className="text-xs font-medium text-slate-600 dark:text-slate-300 max-w-md mx-auto">
               Try adjusting your search terms or selecting "All Roles" above. New opportunities are published daily!
@@ -272,11 +262,10 @@ const Careers = () => {
             {filteredJobs.map((job) => (
               <div
                 key={job.id || job._id}
-                className={`rounded-3xl p-7 transition-all duration-300 flex flex-col justify-between space-y-5 border backdrop-blur-xl shadow-xl hover:shadow-2xl hover:-translate-y-1.5 relative overflow-hidden group ${
-                  theme === 'dark'
+                className={`rounded-3xl p-7 transition-all duration-300 flex flex-col justify-between space-y-5 border backdrop-blur-xl shadow-xl hover:shadow-2xl hover:-translate-y-1.5 relative overflow-hidden group ${theme === 'dark'
                     ? 'bg-slate-900/40 border-white/10 hover:border-amber-400'
                     : 'bg-white/50 border-white/60 hover:border-amber-500 shadow-amber-500/5'
-                }`}
+                  }`}
               >
                 {/* Accent Top Strip */}
                 <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
@@ -299,18 +288,16 @@ const Careers = () => {
 
                   {/* Detail Badges */}
                   <div className="flex flex-wrap gap-2 text-xs font-bold">
-                    <span className={`px-3 py-1.5 rounded-xl border backdrop-blur-md ${
-                      theme === 'dark'
+                    <span className={`px-3 py-1.5 rounded-xl border backdrop-blur-md ${theme === 'dark'
                         ? 'bg-slate-950/40 border-white/10 text-slate-300'
                         : 'bg-white/60 border-white/40 text-slate-800'
-                    }`}>
+                      }`}>
                       {job.location || 'India'}
                     </span>
-                    <span className={`px-3 py-1.5 rounded-xl border backdrop-blur-md ${
-                      theme === 'dark'
+                    <span className={`px-3 py-1.5 rounded-xl border backdrop-blur-md ${theme === 'dark'
                         ? 'bg-slate-950/40 border-white/10 text-slate-300'
                         : 'bg-white/60 border-white/40 text-slate-800'
-                    }`}>
+                      }`}>
                       {job.type === 'FULL_TIME' ? 'Full Time' : job.type || 'Full Time'}
                     </span>
                     <span className="px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30 font-extrabold backdrop-blur-md">
