@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import axios from 'axios';
 import { logger } from '../utils/logger.js';
 import { generateOfferLetterPdfBuffer } from './pdfGeneratorService.js';
 
@@ -9,6 +10,48 @@ const getSmtpCredentials = () => {
   const pass = rawPass.replace(/\s+/g, '');
   const from = process.env.SMTP_FROM || process.env.SENDER_EMAIL || `"Adyapan Academy" <${user}>`;
   return { user, pass, from };
+};
+
+// Brevo (Sendinblue) HTTPS REST API Dispatcher (Port 443 - Cloud Firewall Proof)
+const sendViaBrevoApi = async ({ to, subject, html, attachments = [] }: any) => {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) return null;
+
+  const { user } = getSmtpCredentials();
+  const brevoAttachments = attachments.map((att: any) => ({
+    name: att.filename,
+    content: Buffer.isBuffer(att.content)
+      ? att.content.toString('base64')
+      : (typeof att.content === 'string' ? Buffer.from(att.content).toString('base64') : att.content),
+  }));
+
+  try {
+    const response = await axios.post(
+      'https://api.brevo.com/v3/smtp/email',
+      {
+        sender: { name: 'Adyapan Academy', email: user || 'eclipse@adyapan.com' },
+        to: [{ email: to }],
+        subject,
+        htmlContent: html,
+        attachment: brevoAttachments.length > 0 ? brevoAttachments : undefined,
+      },
+      {
+        headers: {
+          'api-key': apiKey,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        timeout: 10000,
+      }
+    );
+
+    const messageId = response.data?.messageId || (Array.isArray(response.data?.messageIds) ? response.data.messageIds[0] : 'brevo-sent');
+    logger.info(`REAL BREVO HTTPS EMAIL DELIVERED to candidate ${to}! MessageID: ${messageId}`);
+    return { success: true, method: 'Brevo_HTTPS', messageId };
+  } catch (err: any) {
+    logger.warn(`Brevo HTTPS API Error for ${to}:`, err?.response?.data?.message || err.message);
+    return null;
+  }
 };
 
 // Create Gmail Nodemailer Transporter with dual-port fallback & strict timeouts
@@ -42,12 +85,18 @@ const createTransporter = (useSsl = false) => {
 };
 
 /**
- * Dispatch Real Email to Candidate Email Address via Gmail SMTP
+ * Dispatch Real Email to Candidate Email Address via Gmail SMTP or Brevo HTTPS
  */
 const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }: { to: string; subject: string; html: string; attachments?: any[] }) => {
   if (!to || typeof to !== 'string' || !to.includes('@')) {
     logger.warn(`Invalid or missing recipient email address: "${to}"`);
     return { success: false, message: 'Invalid recipient email address' };
+  }
+
+  // 1. Try Brevo HTTPS REST API first if BREVO_API_KEY is configured in Render
+  if (process.env.BREVO_API_KEY) {
+    const brevoRes = await sendViaBrevoApi({ to, subject, html, attachments });
+    if (brevoRes && brevoRes.success) return brevoRes;
   }
 
   const { user, from } = getSmtpCredentials();
