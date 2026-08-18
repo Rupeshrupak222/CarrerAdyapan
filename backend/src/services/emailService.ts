@@ -178,9 +178,11 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
 /**
  * Send Application Confirmation Email to Candidate
  */
-export const sendApplicationConfirmationEmail = async ({ candidateName, candidateEmail, jobTitle, aiScore }: any) => {
-  const targetEmail = candidateEmail;
-  const targetName = candidateName || 'Candidate';
+export const sendApplicationConfirmationEmail = async (payload: any) => {
+  const targetEmail = payload?.candidateEmail || payload?.email || payload?.candidate?.email;
+  const targetName = payload?.candidateName || payload?.name || (payload?.candidate ? `${payload.candidate.firstName} ${payload.candidate.lastName}` : 'Candidate');
+  const jobTitle = payload?.jobTitle || payload?.job?.title || 'Business Development Associate';
+  const aiScore = payload?.aiScore;
 
   const emailHtml = `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
@@ -222,10 +224,12 @@ export const sendApplicationConfirmationEmail = async ({ candidateName, candidat
 /**
  * Send Interview Invitation Email to Candidate
  */
-export const sendInterviewScheduledEmail = async ({ candidateName, candidateEmail, jobTitle, scheduledAt, meetingLink }: any) => {
-  const targetEmail = candidateEmail;
-  const targetName = candidateName || 'Candidate';
-  const targetRole = jobTitle || 'Business Development Associate (BDA)';
+export const sendInterviewScheduledEmail = async (payload: any) => {
+  const targetEmail = payload?.candidateEmail || payload?.email || payload?.candidate?.email;
+  const targetName = payload?.candidateName || payload?.name || (payload?.candidate ? `${payload.candidate.firstName} ${payload.candidate.lastName}` : 'Candidate');
+  const targetRole = payload?.jobTitle || payload?.job?.title || 'Business Development Associate (BDA)';
+  const scheduledAt = payload?.scheduledAt;
+  const meetingLink = payload?.meetingLink;
 
   const formattedDate = new Date(scheduledAt || Date.now()).toLocaleString('en-US', {
     dateStyle: 'full',
@@ -271,17 +275,14 @@ export const sendInterviewScheduledEmail = async ({ candidateName, candidateEmai
  * Send Official Offer Letter Email via Gmail SMTP with PDF Attachment
  */
 export const sendOfferLetterEmail = async (offerPayload: any = {}) => {
-  const {
-    candidateName = 'Candidate',
-    candidateEmail,
-    jobTitle = 'Business Development Associate (BDA)',
-    salary = 550000,
-    bonus = 100000,
-    joiningDate = '2026-09-01',
-    expirationDate = '2026-08-30',
-    customTerms,
-    companyTemplateName,
-  } = offerPayload;
+  const candidateEmail = offerPayload.candidateEmail || offerPayload.email || offerPayload.candidate?.email || offerPayload.application?.candidate?.email;
+  const candidateName = offerPayload.candidateName || offerPayload.name || 'Candidate';
+  const jobTitle = offerPayload.jobTitle || 'Business Development Associate (BDA)';
+  const salary = offerPayload.salary || 550000;
+  const bonus = offerPayload.bonus || 100000;
+  const joiningDate = offerPayload.joiningDate || '2026-09-01';
+  const customTerms = offerPayload.customTerms;
+  const companyTemplateName = offerPayload.companyTemplateName;
 
   const targetEmail = candidateEmail;
 
