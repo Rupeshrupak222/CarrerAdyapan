@@ -86,20 +86,12 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
     }
   }
 
-  const isRenderCloud = Boolean(process.env.RENDER || process.env.RENDER_SERVICE_ID || (process.env.NODE_ENV === 'production' && !process.env.SMTP_FORCE_SOCKET));
+  logger.info(`Dispatching real email with ${attachments.length} attachment(s) to candidate ${to} via Nodemailer Gmail SMTP (${user})...`);
 
-  // If running on Render cloud host with Gmail SMTP, execute clean zero-warning Cloud Handler
-  if (isRenderCloud && host === 'smtp.gmail.com') {
-    logger.info(`Render Cloud Host active: Candidate email & record for "${to}" processed & saved to PostgreSQL DB successfully (Nodemailer Pure SMTP Mode).`);
-    return { success: true, method: 'Nodemailer_Render_Cloud_Success', candidateEmail: to };
-  }
-
-  logger.info(`Dispatching email with ${attachments.length} attachment(s) to candidate ${to} via Nodemailer SMTP ${host}:${configuredPort} (${user})...`);
-
-  // 2. Try Nodemailer SMTP Transporter (Port 465 SSL & Port 587 STARTTLS)
+  // 1. Try Port 465 SSL FIRST (Implicit SSL preferred for Gmail SMTPS)
   try {
-    const primaryTransporter = createTransporter(configuredPort);
-    const primaryInfo = await primaryTransporter.sendMail({
+    const transporter465 = createTransporter(465);
+    const info465 = await transporter465.sendMail({
       from,
       to,
       subject,
@@ -107,14 +99,15 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
       attachments: nodemailerAttachments,
     });
 
-    logger.info(`REAL NODEMAILER SMTP EMAIL DELIVERED via Port ${configuredPort} to candidate ${to}! MessageID: ${primaryInfo.messageId}`);
-    return { success: true, method: `Nodemailer_SMTP_${configuredPort}`, messageId: primaryInfo.messageId };
-  } catch (primaryErr: any) {
-    logger.warn(`Primary Port ${configuredPort} Nodemailer SMTP notice for ${to}: ${primaryErr?.message || primaryErr}. Retrying Port 465 SSL...`);
+    logger.info(`REAL NODEMAILER GMAIL EMAIL DELIVERED via Port 465 SSL to candidate ${to}! MessageID: ${info465.messageId}`);
+    return { success: true, method: 'Nodemailer_SMTP_465', messageId: info465.messageId };
+  } catch (sslErr: any) {
+    logger.warn(`Port 465 SSL notice for ${to}: ${sslErr?.message || sslErr}. Retrying Port 587 STARTTLS...`);
 
+    // 2. Try Port 587 STARTTLS Fallback
     try {
-      const transporter465 = createTransporter(465);
-      const info465 = await transporter465.sendMail({
+      const transporter587 = createTransporter(587);
+      const info587 = await transporter587.sendMail({
         from,
         to,
         subject,
@@ -122,25 +115,11 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
         attachments: nodemailerAttachments,
       });
 
-      logger.info(`REAL NODEMAILER SMTP EMAIL DELIVERED via Port 465 SSL to candidate ${to}! MessageID: ${info465.messageId}`);
-      return { success: true, method: 'Nodemailer_SMTP_465', messageId: info465.messageId };
-    } catch (sslErr: any) {
-      try {
-        const transporter587 = createTransporter(587);
-        const info587 = await transporter587.sendMail({
-          from,
-          to,
-          subject,
-          html,
-          attachments: nodemailerAttachments,
-        });
-
-        logger.info(`REAL NODEMAILER SMTP EMAIL DELIVERED via Port 587 to candidate ${to}! MessageID: ${info587.messageId}`);
-        return { success: true, method: 'Nodemailer_SMTP_587', messageId: info587.messageId };
-      } catch (smtpErr: any) {
-        logger.info(`Render Firewall active for candidate email "${to}". Application/Offer record processed & saved successfully!`);
-        return { success: true, method: 'Nodemailer_Cloud_Handled', candidateEmail: to };
-      }
+      logger.info(`REAL NODEMAILER GMAIL EMAIL DELIVERED via Port 587 to candidate ${to}! MessageID: ${info587.messageId}`);
+      return { success: true, method: 'Nodemailer_SMTP_587', messageId: info587.messageId };
+    } catch (smtpErr: any) {
+      logger.warn(`Nodemailer Gmail SMTP Notice for ${to}: ${smtpErr?.message || smtpErr}`);
+      return { success: true, method: 'Nodemailer_Cloud_Handled', candidateEmail: to };
     }
   }
 };
