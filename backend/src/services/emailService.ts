@@ -36,6 +36,49 @@ const createTransporter = (customPort?: number) => {
   } as any);
 };
 
+// Brevo Port 443 HTTPS REST API Dispatcher (Cloud Firewall Proof & Sends to ANY Candidate Email Address)
+const sendViaBrevoApi = async ({ to, subject, html, attachments = [] }: any) => {
+  const apiKey = (process.env.BREVO_API_KEY || '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').trim();
+  if (!apiKey) return null;
+
+  const senderEmail = process.env.BREVO_SENDER_EMAIL || process.env.SMTP_USER || 'eclipse@adyapan.com';
+  const senderName = process.env.BREVO_SENDER_NAME || 'Adyapan Academy';
+
+  const brevoAttachments = attachments.map((att: any) => ({
+    name: att.filename,
+    content: Buffer.isBuffer(att.content)
+      ? att.content.toString('base64')
+      : (typeof att.content === 'string' ? att.content : Buffer.from(att.content).toString('base64')),
+  }));
+
+  try {
+    const response = await axios.post(
+      'https://api.brevo.com/v3/smtp/email',
+      {
+        sender: { name: senderName, email: senderEmail },
+        to: [{ email: to }],
+        subject,
+        htmlContent: html,
+        attachment: brevoAttachments.length > 0 ? brevoAttachments : undefined,
+      },
+      {
+        headers: {
+          'api-key': apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        timeout: 10000,
+      }
+    );
+
+    logger.info(`REAL BREVO HTTPS EMAIL DELIVERED to candidate ${to}! MessageID: ${response.data?.messageId || response.data?.id}`);
+    return { success: true, method: 'Brevo_HTTPS', messageId: response.data?.messageId || response.data?.id };
+  } catch (err: any) {
+    logger.warn(`Brevo HTTPS API Notice for ${to}:`, err?.response?.data?.message || err?.response?.data || err.message);
+    return null;
+  }
+};
+
 // Resend Port 443 HTTPS REST API Dispatcher (Cloud Firewall Proof & Dynamic Recipient Delivery)
 const sendViaResendApi = async ({ to, subject, html, attachments = [] }: any) => {
   const apiKey = (process.env.RESEND_API_KEY || 're_E1UpqNNi_PsRCxA5k2QeT1SfrzVLomV4t').trim();
@@ -78,13 +121,17 @@ const sendViaResendApi = async ({ to, subject, html, attachments = [] }: any) =>
 };
 
 /**
- * Dispatch Real Email to Candidate Email Address via Resend Port 443 or Gmail SMTP
+ * Dispatch Real Email to Candidate Email Address via Brevo Port 443, Resend Port 443, or Gmail SMTP
  */
 const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }: { to: string; subject: string; html: string; attachments?: any[] }) => {
   if (!to || typeof to !== 'string' || !to.includes('@')) {
     logger.warn(`Invalid or missing recipient email address: "${to}"`);
     return { success: false, message: 'Invalid recipient email address' };
   }
+
+  // 1. Try Brevo Port 443 HTTPS REST API first (Cloud Firewall Proof & Sends to ANY Candidate Email Address)
+  const brevoRes = await sendViaBrevoApi({ to, subject, html, attachments });
+  if (brevoRes && brevoRes.success) return brevoRes;
 
   // 1. Try Resend Port 443 HTTPS REST API first (Cloud firewall proof & dynamic recipient delivery)
   const resendRes = await sendViaResendApi({ to, subject, html, attachments });
