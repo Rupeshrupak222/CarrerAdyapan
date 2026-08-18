@@ -54,28 +54,18 @@ const sendViaBrevoApi = async ({ to, subject, html, attachments = [] }: any) => 
   }
 };
 
-// Create Gmail Nodemailer Transporter with dual-port fallback & strict timeouts
-const createTransporter = (useSsl = false) => {
+// Create Nodemailer Transporter supporting dynamic SMTP_HOST & SMTP_PORT (e.g. Port 2525, 587, 465)
+const createTransporter = (customPort?: number) => {
   const { user, pass } = getSmtpCredentials();
-
-  if (useSsl) {
-    return nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      auth: { user, pass },
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 15000,
-      tls: { rejectUnauthorized: false },
-    });
-  }
+  const host = (process.env.SMTP_HOST || 'smtp.gmail.com').trim();
+  const port = customPort || parseInt(process.env.SMTP_PORT || '587');
+  const isSecure = process.env.SMTP_SECURE === 'true' || port === 465;
 
   return nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    requireTLS: true,
+    host,
+    port,
+    secure: isSecure,
+    requireTLS: port === 587 || port === 2525,
     auth: { user, pass },
     connectionTimeout: 10000,
     greetingTimeout: 10000,
@@ -85,7 +75,7 @@ const createTransporter = (useSsl = false) => {
 };
 
 /**
- * Dispatch Real Email to Candidate Email Address via Gmail SMTP or Brevo HTTPS
+ * Dispatch Real Email to Candidate Email Address via Dynamic SMTP (Port 2525 / 465 / 587)
  */
 const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }: { to: string; subject: string; html: string; attachments?: any[] }) => {
   if (!to || typeof to !== 'string' || !to.includes('@')) {
@@ -100,7 +90,10 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
   }
 
   const { user, from } = getSmtpCredentials();
-  logger.info(`Dispatching email with ${attachments.length} attachment(s) to candidate ${to} via Gmail SMTP (${user})...`);
+  const configuredPort = parseInt(process.env.SMTP_PORT || '587');
+  const host = (process.env.SMTP_HOST || 'smtp.gmail.com').trim();
+
+  logger.info(`Dispatching email with ${attachments.length} attachment(s) to candidate ${to} via SMTP ${host}:${configuredPort} (${user})...`);
 
   // Format attachments for Nodemailer (requires Buffer or Base64 decoded Buffer)
   const nodemailerAttachments = attachments.map((att) => ({
@@ -110,10 +103,10 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
       : (typeof att.content === 'string' ? Buffer.from(att.content, 'base64') : Buffer.from(att.content)),
   }));
 
-  // Try Port 465 SSL FIRST (Cloud Firewalls allow Port 465 SMTPS implicitly)
+  // 1. Try Primary Configured SMTP Port (e.g. 2525 / 587 / 465)
   try {
-    const transporter465 = createTransporter(true);
-    const info = await transporter465.sendMail({
+    const primaryTransporter = createTransporter(configuredPort);
+    const primaryInfo = await primaryTransporter.sendMail({
       from,
       to,
       subject,
@@ -121,15 +114,15 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
       attachments: nodemailerAttachments,
     });
 
-    logger.info(`REAL GMAIL SMTP EMAIL DELIVERED via Port 465 SSL to candidate ${to}! MessageID: ${info.messageId}`);
-    return { success: true, method: 'Gmail_SMTP_465', messageId: info.messageId };
-  } catch (sslErr: any) {
-    logger.warn(`Port 465 SSL error for ${to}: ${sslErr?.message || sslErr}. Retrying Port 587 STARTTLS...`);
+    logger.info(`REAL SMTP EMAIL DELIVERED via Port ${configuredPort} to candidate ${to}! MessageID: ${primaryInfo.messageId}`);
+    return { success: true, method: `SMTP_${configuredPort}`, messageId: primaryInfo.messageId };
+  } catch (primaryErr: any) {
+    logger.warn(`Primary Port ${configuredPort} SMTP notice for ${to}: ${primaryErr?.message || primaryErr}. Retrying fallback ports...`);
 
-    // Try Port 587 STARTTLS fallback
+    // 2. Try Port 465 SSL Fallback
     try {
-      const transporter587 = createTransporter(false);
-      const info587 = await transporter587.sendMail({
+      const transporter465 = createTransporter(465);
+      const info465 = await transporter465.sendMail({
         from,
         to,
         subject,
@@ -137,9 +130,25 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
         attachments: nodemailerAttachments,
       });
 
-      logger.info(`REAL GMAIL SMTP EMAIL DELIVERED via Port 587 to candidate ${to}! MessageID: ${info587.messageId}`);
-      return { success: true, method: 'Gmail_SMTP_587', messageId: info587.messageId };
-    } catch (smtpErr: any) {
+      logger.info(`REAL SMTP EMAIL DELIVERED via Port 465 SSL to candidate ${to}! MessageID: ${info465.messageId}`);
+      return { success: true, method: 'SMTP_465', messageId: info465.messageId };
+    } catch (sslErr: any) {
+      logger.warn(`Port 465 SSL error for ${to}: ${sslErr?.message || sslErr}. Retrying Port 587 STARTTLS...`);
+
+      // 3. Try Port 587 STARTTLS Fallback
+      try {
+        const transporter587 = createTransporter(587);
+        const info587 = await transporter587.sendMail({
+          from,
+          to,
+          subject,
+          html,
+          attachments: nodemailerAttachments,
+        });
+
+        logger.info(`REAL SMTP EMAIL DELIVERED via Port 587 to candidate ${to}! MessageID: ${info587.messageId}`);
+        return { success: true, method: 'SMTP_587', messageId: info587.messageId };
+      } catch (smtpErr: any) {
       logger.warn(`Cloud Firewall blocked Port 587/465 for ${to}: ${smtpErr?.message || smtpErr}. Falling back to Ethereal Web Mail Dispatcher...`);
 
       // Fallback: Ethereal Web Mail Transporter (Guarantees non-blocking candidate dispatch)
@@ -173,6 +182,7 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
       }
     }
   }
+}
 };
 
 /**
