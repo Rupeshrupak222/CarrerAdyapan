@@ -2,6 +2,7 @@ import api from './api';
 import { cacheService } from './cacheService';
 
 const CUSTOM_JOBS_KEY = 'adyapan_custom_published_jobs';
+const DELETED_JOBS_KEY = 'adyapan_deleted_job_ids';
 
 export const DEFAULT_PUBLISHED_JOBS: any[] = [
   {
@@ -70,6 +71,39 @@ export const DEFAULT_PUBLISHED_JOBS: any[] = [
   },
 ];
 
+const getDeletedJobIds = (): Set<string> => {
+  if (typeof window === 'undefined') return new Set();
+  try {
+    const saved = localStorage.getItem(DELETED_JOBS_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        return new Set(parsed.map((s) => String(s).toLowerCase().trim()));
+      }
+    }
+  } catch (e) { }
+  return new Set();
+};
+
+const markJobAsDeleted = (id: string, slug?: string, title?: string) => {
+  if (typeof window === 'undefined') return;
+  try {
+    const current = Array.from(getDeletedJobIds());
+    if (id) current.push(String(id).toLowerCase().trim());
+    if (slug) current.push(String(slug).toLowerCase().trim());
+    if (title) current.push(String(title).toLowerCase().trim());
+    localStorage.setItem(DELETED_JOBS_KEY, JSON.stringify(Array.from(new Set(current))));
+  } catch (e) { }
+};
+
+const isJobDeleted = (j: any, deletedIds: Set<string>): boolean => {
+  if (!j) return true;
+  const idKey = j.id ? String(j.id).toLowerCase().trim() : '';
+  const slugKey = j.slug ? String(j.slug).toLowerCase().trim() : '';
+  const titleKey = j.title ? String(j.title).toLowerCase().trim() : '';
+  return deletedIds.has(idKey) || deletedIds.has(slugKey) || deletedIds.has(titleKey);
+};
+
 const getCustomLocalJobs = (): any[] => {
   if (typeof window === 'undefined') return [];
   try {
@@ -94,6 +128,12 @@ const saveCustomLocalJob = (job: any) => {
       status: job.status || 'PUBLISHED',
       publishedAt: job.publishedAt || new Date().toISOString(),
     };
+
+    // Remove from deleted set if newly created or edited
+    const deletedIds = getDeletedJobIds();
+    if (normalizedJob.id) deletedIds.delete(normalizedJob.id.toLowerCase());
+    if (normalizedJob.slug) deletedIds.delete(normalizedJob.slug.toLowerCase());
+    localStorage.setItem(DELETED_JOBS_KEY, JSON.stringify(Array.from(deletedIds)));
 
     const index = current.findIndex((j) => j.id === normalizedJob.id || j.slug === normalizedJob.slug);
     let updated: any[];
@@ -127,16 +167,14 @@ export const jobService = {
       if (response.data?.job) {
         saveCustomLocalJob(response.data.job);
       }
-      cacheService.invalidate('all_jobs');
-      cacheService.invalidate('dashboard_stats');
-      cacheService.invalidate('hiring_funnel');
+      cacheService.invalidate();
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('adyapan_data_updated'));
       }
       return response.data;
     } catch (error) {
       console.warn(' Create Job Error (using local store fallback):', error);
-      cacheService.invalidate('all_jobs');
+      cacheService.invalidate();
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('adyapan_data_updated'));
       }
@@ -146,9 +184,14 @@ export const jobService = {
 
   getAllJobs: async (forceRefresh: boolean = false) => {
     const cacheKey = 'all_jobs';
+    const deletedIds = getDeletedJobIds();
+
     if (!forceRefresh) {
       const cached = cacheService.get<any>(cacheKey);
-      if (cached && Array.isArray(cached.jobs) && cached.jobs.length > 0) return cached;
+      if (cached && Array.isArray(cached.jobs) && cached.jobs.length > 0) {
+        const filteredCached = cached.jobs.filter((j: any) => !isJobDeleted(j, deletedIds));
+        return { ...cached, jobs: filteredCached };
+      }
     }
 
     let apiJobs: any[] = [];
@@ -166,13 +209,14 @@ export const jobService = {
     const combined = [...apiJobs, ...localCustom, ...DEFAULT_PUBLISHED_JOBS];
 
     const seen = new Set();
-    const jobs = combined.filter((j) => {
-      if (!j) return false;
-      const key = (j.slug || j.id || j.title || '').toLowerCase().trim();
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+    const jobs = combined
+      .filter((j) => !isJobDeleted(j, deletedIds))
+      .filter((j) => {
+        const key = (j.slug || j.id || j.title || '').toLowerCase().trim();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
 
     const result = { success: true, jobs };
     cacheService.set(cacheKey, result);
@@ -180,18 +224,26 @@ export const jobService = {
   },
 
   getJobById: async (id: string) => {
+    const deletedIds = getDeletedJobIds();
+    if (deletedIds.has(String(id).toLowerCase().trim())) {
+      return { success: false, message: 'Job deleted' };
+    }
+
     try {
       console.log('Fetching job by id:', id);
       const response = await api.get(`/jobs/${id}`);
-      if (response.data?.job) return response.data;
+      if (response.data?.job && !isJobDeleted(response.data.job, deletedIds)) {
+        return response.data;
+      }
     } catch (error) {
       console.warn(' Get Job Error, checking local stores:', error);
     }
 
     const localCustom = getCustomLocalJobs();
-    const found = [...localCustom, ...DEFAULT_PUBLISHED_JOBS].find(
-      (j) => j.id === id || j.slug === id || (id && j.slug?.includes(id))
-    );
+    const found = [...localCustom, ...DEFAULT_PUBLISHED_JOBS]
+      .filter((j) => !isJobDeleted(j, deletedIds))
+      .find((j) => j.id === id || j.slug === id || (id && j.slug?.includes(id)));
+
     return { success: true, job: found || DEFAULT_PUBLISHED_JOBS[0] };
   },
 
@@ -203,16 +255,14 @@ export const jobService = {
       if (response.data?.job) {
         saveCustomLocalJob(response.data.job);
       }
-      cacheService.invalidate('all_jobs');
-      cacheService.invalidate('dashboard_stats');
-      cacheService.invalidate('hiring_funnel');
+      cacheService.invalidate();
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('adyapan_data_updated'));
       }
       return response.data;
     } catch (error) {
       console.warn(' Update Job Error (saved locally):', error);
-      cacheService.invalidate('all_jobs');
+      cacheService.invalidate();
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('adyapan_data_updated'));
       }
@@ -220,21 +270,20 @@ export const jobService = {
     }
   },
 
-  deleteJob: async (id: string) => {
+  deleteJob: async (id: string, slug?: string, title?: string) => {
+    markJobAsDeleted(id, slug, title);
     deleteCustomLocalJob(id);
 
     try {
       const response = await api.delete(`/jobs/${id}`);
-      cacheService.invalidate('all_jobs');
-      cacheService.invalidate('dashboard_stats');
-      cacheService.invalidate('hiring_funnel');
+      cacheService.invalidate();
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('adyapan_data_updated'));
       }
       return response.data;
     } catch (error) {
-      console.warn(' Delete Job Error (deleted locally):', error);
-      cacheService.invalidate('all_jobs');
+      console.warn(' Delete Job Error (deleted locally & permanently excluded):', error);
+      cacheService.invalidate();
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('adyapan_data_updated'));
       }
@@ -250,17 +299,19 @@ export const jobService = {
       if (response.data?.job) {
         saveCustomLocalJob(response.data.job);
       }
-      cacheService.invalidate('all_jobs');
+      cacheService.invalidate();
       return response.data;
     } catch (error) {
       console.warn(' Publish Job Error (published locally):', error);
-      cacheService.invalidate('all_jobs');
+      cacheService.invalidate();
       return { success: true, job: { id, status: 'PUBLISHED' } };
     }
   },
 
   getPublicJobs: async () => {
+    const deletedIds = getDeletedJobIds();
     let apiJobs: any[] = [];
+
     try {
       console.log('Fetching public published jobs');
       const response = await api.get('/jobs/public');
@@ -282,6 +333,7 @@ export const jobService = {
 
     const seen = new Set();
     const jobs = combined
+      .filter((j) => !isJobDeleted(j, deletedIds))
       .filter((j) => j && (j.status === 'PUBLISHED' || !j.status))
       .filter((j) => {
         const key = (j.slug || j.id || j.title || '').toLowerCase().trim();
@@ -294,18 +346,33 @@ export const jobService = {
   },
 
   getPublicJob: async (slug: string) => {
+    const deletedIds = getDeletedJobIds();
+    if (deletedIds.has(String(slug).toLowerCase().trim())) {
+      return { success: false, message: 'Job not found' };
+    }
+
     try {
       const response = await api.get(`/jobs/public/${slug}`);
-      if (response.data?.job) return response.data;
+      if (response.data?.job && !isJobDeleted(response.data.job, deletedIds)) {
+        return response.data;
+      }
     } catch (error) {
       console.warn(' Get Public Job Error, checking local stores:', error);
     }
 
     const localCustom = getCustomLocalJobs();
     const combined = [...localCustom, ...DEFAULT_PUBLISHED_JOBS];
-    const found = combined.find(
-      (j) => j.slug === slug || j.id === slug || (slug && j.slug?.includes(slug)) || (slug && slug?.includes(j.slug))
-    );
-    return { success: true, job: found || DEFAULT_PUBLISHED_JOBS[0] };
+    const found = combined
+      .filter((j) => !isJobDeleted(j, deletedIds))
+      .find(
+        (j) => j.slug === slug || j.id === slug || (slug && j.slug?.includes(slug)) || (slug && slug?.includes(j.slug))
+      );
+
+    if (found) {
+      return { success: true, job: found };
+    }
+
+    const firstAvailable = combined.find((j) => !isJobDeleted(j, deletedIds));
+    return { success: true, job: firstAvailable || null };
   },
 };

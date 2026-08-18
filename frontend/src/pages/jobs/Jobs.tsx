@@ -30,17 +30,21 @@ const Jobs = () => {
     }
   };
 
-  const handleDeleteJob = async (id, title) => {
+  const handleDeleteJob = async (jobOrId: any, jobTitle?: string) => {
+    const id = typeof jobOrId === 'string' ? jobOrId : jobOrId?.id || jobOrId?._id;
+    const title = typeof jobOrId === 'object' ? jobOrId.title : (jobTitle || 'Job Opening');
+    const slug = typeof jobOrId === 'object' ? jobOrId.slug : undefined;
+
     if (!window.confirm(`Are you sure you want to delete the job opening "${title}"? This will permanently remove it from database and frontend.`)) {
       return;
     }
     try {
-      await jobService.deleteJob(id);
-      setJobs((prev) => prev.filter((j) => j.id !== id && j._id !== id));
+      await jobService.deleteJob(id, slug, title);
+      setJobs((prev) => prev.filter((j) => j.id !== id && j._id !== id && j.slug !== slug));
       toast.success(`Job "${title}" deleted from database & frontend!`);
       fetchJobs(true);
     } catch (err) {
-      setJobs((prev) => prev.filter((j) => j.id !== id && j._id !== id));
+      setJobs((prev) => prev.filter((j) => j.id !== id && j._id !== id && j.slug !== slug));
       toast.success(`Job "${title}" removed!`);
       fetchJobs(true);
     }
