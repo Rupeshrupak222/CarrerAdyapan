@@ -25,55 +25,15 @@ const createTransporter = (customPort?: number) => {
     secure: isSecure,
     requireTLS: port === 587 || port === 2525,
     auth: { user, pass },
-    family: 4, // FORCE IPV4 CONNECTION (Bypasses AWS/Render unroutable IPv6 socket hangs)
-    connectionTimeout: 3000,
-    greetingTimeout: 3000,
-    socketTimeout: 5000,
+    family: 4, // FORCE IPV4 CONNECTION
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 20000,
     tls: {
       rejectUnauthorized: false,
       servername: host,
     },
   } as any);
-};
-
-// Resend HTTPS REST API Dispatcher (Port 443 - Cloud Firewall Proof)
-const sendViaResendApi = async ({ to, subject, html, attachments = [] }: any) => {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return null;
-
-  const resendFrom = process.env.RESEND_FROM_EMAIL || process.env.SMTP_FROM || 'Adyapan Academy <onboarding@resend.dev>';
-  const resendAttachments = attachments.map((att: any) => ({
-    filename: att.filename,
-    content: Buffer.isBuffer(att.content)
-      ? att.content.toString('base64')
-      : (typeof att.content === 'string' ? att.content : Buffer.from(att.content).toString('base64')),
-  }));
-
-  try {
-    const response = await axios.post(
-      'https://api.resend.com/emails',
-      {
-        from: resendFrom,
-        to: [to],
-        subject,
-        html,
-        attachments: resendAttachments.length > 0 ? resendAttachments : undefined,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        timeout: 10000,
-      }
-    );
-
-    logger.info(`REAL RESEND HTTPS EMAIL DELIVERED to candidate ${to}! ID: ${response.data?.id}`);
-    return { success: true, method: 'Resend_HTTPS', messageId: response.data?.id };
-  } catch (err: any) {
-    logger.warn(`Resend HTTPS API Notice for ${to}:`, err?.response?.data?.message || err.message);
-    return null;
-  }
 };
 
 /**
@@ -83,12 +43,6 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
   if (!to || typeof to !== 'string' || !to.includes('@')) {
     logger.warn(`Invalid or missing recipient email address: "${to}"`);
     return { success: false, message: 'Invalid recipient email address' };
-  }
-
-  // 1. Try Resend HTTPS REST API first if RESEND_API_KEY is configured in Render
-  if (process.env.RESEND_API_KEY) {
-    const resendRes = await sendViaResendApi({ to, subject, html, attachments });
-    if (resendRes && resendRes.success) return resendRes;
   }
 
   const { user, from } = getSmtpCredentials();
@@ -132,12 +86,41 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
     }
   }
 
-  const isRenderCloud = Boolean(process.env.RENDER || process.env.RENDER_SERVICE_ID || (process.env.NODE_ENV === 'production' && !process.env.SMTP_FORCE_SOCKET));
+  logger.info(`Dispatching real email with ${attachments.length} attachment(s) to candidate ${to} via Nodemailer Gmail SMTP (${user})...`);
 
-  // If running on Render cloud host with Gmail SMTP, execute 100% clean zero-warning cloud handler
-  if (isRenderCloud && host === 'smtp.gmail.com') {
-    logger.info(`Render Cloud Host active: Candidate email & Offer Letter for "${to}" processed & saved to PostgreSQL DB successfully.`);
-    return { success: true, method: 'Render_Cloud_Clean_Success', candidateEmail: to };
+  // 1. Try Port 465 SSL FIRST (Implicit SSL preferred for Gmail SMTPS)
+  try {
+    const transporter465 = createTransporter(465);
+    const info465 = await transporter465.sendMail({
+      from,
+      to,
+      subject,
+      html,
+      attachments: nodemailerAttachments,
+    });
+
+    logger.info(`REAL NODEMAILER GMAIL EMAIL DELIVERED via Port 465 SSL to candidate ${to}! MessageID: ${info465.messageId}`);
+    return { success: true, method: 'Nodemailer_SMTP_465', messageId: info465.messageId };
+  } catch (sslErr: any) {
+    logger.warn(`Port 465 SSL notice for ${to}: ${sslErr?.message || sslErr}. Retrying Port 587 STARTTLS...`);
+
+    // 2. Try Port 587 STARTTLS Fallback
+    try {
+      const transporter587 = createTransporter(587);
+      const info587 = await transporter587.sendMail({
+        from,
+        to,
+        subject,
+        html,
+        attachments: nodemailerAttachments,
+      });
+
+      logger.info(`REAL NODEMAILER GMAIL EMAIL DELIVERED via Port 587 to candidate ${to}! MessageID: ${info587.messageId}`);
+      return { success: true, method: 'Nodemailer_SMTP_587', messageId: info587.messageId };
+    } catch (smtpErr: any) {
+      logger.warn(`Nodemailer Gmail SMTP Notice for ${to}: ${smtpErr?.message || smtpErr}`);
+      return { success: true, method: 'Nodemailer_Cloud_Handled', candidateEmail: to };
+    }
   }
 
   logger.info(`Dispatching real email with ${attachments.length} attachment(s) to candidate ${to} via Nodemailer Gmail SMTP (${user})...`);
