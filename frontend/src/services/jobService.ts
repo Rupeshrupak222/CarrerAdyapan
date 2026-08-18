@@ -195,18 +195,36 @@ export const jobService = {
     }
 
     let apiJobs: any[] = [];
+    let hasApiJobs = false;
     try {
       console.log('Fetching all jobs from backend');
       const response = await api.get('/jobs');
       if (response.data && Array.isArray(response.data.jobs)) {
         apiJobs = response.data.jobs;
+        hasApiJobs = true;
       }
     } catch (error) {
       console.warn(' Get Jobs API error, combining local stores:', error);
     }
 
+    if (hasApiJobs) {
+      const seen = new Set();
+      const jobs = apiJobs
+        .filter((j) => !isJobDeleted(j, deletedIds))
+        .filter((j) => {
+          const key = (j.slug || j.id || j.title || '').toLowerCase().trim();
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+
+      const result = { success: true, jobs };
+      cacheService.set(cacheKey, result);
+      return result;
+    }
+
     const localCustom = getCustomLocalJobs();
-    const combined = [...apiJobs, ...localCustom, ...DEFAULT_PUBLISHED_JOBS];
+    const combined = [...localCustom, ...DEFAULT_PUBLISHED_JOBS];
 
     const seen = new Set();
     const jobs = combined
@@ -311,12 +329,14 @@ export const jobService = {
   getPublicJobs: async () => {
     const deletedIds = getDeletedJobIds();
     let apiJobs: any[] = [];
+    let hasApiJobs = false;
 
     try {
       console.log('Fetching public published jobs');
       const response = await api.get('/jobs/public');
       if (response.data && Array.isArray(response.data.jobs)) {
         apiJobs = response.data.jobs;
+        hasApiJobs = true;
       }
     } catch (error) {
       console.warn(' Get Public Jobs Error, trying protected list:', error);
@@ -324,12 +344,28 @@ export const jobService = {
         const fallback = await api.get('/jobs');
         if (fallback.data && Array.isArray(fallback.data.jobs)) {
           apiJobs = fallback.data.jobs;
+          hasApiJobs = true;
         }
       } catch (fbErr) { }
     }
 
+    if (hasApiJobs) {
+      const seen = new Set();
+      const jobs = apiJobs
+        .filter((j) => !isJobDeleted(j, deletedIds))
+        .filter((j) => j && (j.status === 'PUBLISHED' || !j.status))
+        .filter((j) => {
+          const key = (j.slug || j.id || j.title || '').toLowerCase().trim();
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+
+      return { success: true, jobs };
+    }
+
     const localCustom = getCustomLocalJobs();
-    const combined = [...apiJobs, ...localCustom, ...DEFAULT_PUBLISHED_JOBS];
+    const combined = [...localCustom, ...DEFAULT_PUBLISHED_JOBS];
 
     const seen = new Set();
     const jobs = combined

@@ -32,7 +32,48 @@ export const autoSeed = async () => {
 
     const userId = defaultUser.id;
 
-    // 2. Ensure Database Cleanliness (No hardcoded fake jobs)
+    // 2. Seed initial jobs if database is empty
+    const jobCount = await prisma.job.count();
+    if (jobCount === 0) {
+      console.log('Seeding initial jobs into PostgreSQL DB...');
+      await prisma.job.createMany({
+        data: [
+          {
+            id: 'business-development-associate-edtech',
+            slug: 'business-development-associate-edtech',
+            title: 'Business Development Associate (EdTech Sales)',
+            department: 'Sales & Growth',
+            location: 'Mumbai / Hybrid',
+            type: 'FULL_TIME',
+            experienceLevel: 'ENTRY',
+            salaryMin: 350000,
+            salaryMax: 600000,
+            status: 'PUBLISHED',
+            description: 'We are seeking an energetic Business Development Associate to drive student course enrolments, manage sales pipelines, conduct counselling calls, and achieve monthly revenue targets for Adyapan Edutech.',
+            requirements: '1-3 years sales or telesales experience in EdTech or education; excellent English & Hindi communication; strong target achievement mindset; negotiation skills.',
+            responsibilities: 'Connect with prospective student leads; conduct detailed course counselling sessions; meet monthly enrolment targets; maintain CRM lead status.',
+            userId,
+          },
+          {
+            id: 'academic-counsellor-student-advisor',
+            slug: 'academic-counsellor-student-advisor',
+            title: 'Academic Counsellor / Student Advisor',
+            department: 'Student Admissions',
+            location: 'Delhi NCR / Remote',
+            type: 'FULL_TIME',
+            experienceLevel: 'MID',
+            salaryMin: 300000,
+            salaryMax: 500000,
+            status: 'PUBLISHED',
+            description: 'Provide personalized academic guidance to prospective students and parents, understand their career goals, recommend suitable learning programs, and assist with enrolment.',
+            requirements: '2+ years experience in academic counselling, student advisement, or education sales; empathetic active listening; objection handling skills; CRM knowledge.',
+            responsibilities: 'Guide students on career choices and course curricula; follow up on inbound leads; resolve parent queries; achieve monthly student admissions goals.',
+            userId,
+          },
+        ]
+      });
+      console.log('Initial jobs seeded into DB!');
+    }
 
     // 3. Deduplicate Any Existing Duplicate Candidate Records in PostgreSQL DB
     const allDbCandidates = await prisma.candidate.findMany({ orderBy: { createdAt: 'desc' } });
