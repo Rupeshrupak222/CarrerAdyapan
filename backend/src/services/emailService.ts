@@ -12,6 +12,66 @@ const getSmtpCredentials = () => {
   return { user, pass, from };
 };
 
+// Google OAuth2 HTTPS REST API Dispatcher (Port 443 - Cloud Egress Firewall Proof)
+const sendViaGoogleHttpsApi = async ({ to, subject, html, attachments = [] }: any) => {
+  const clientId = process.env.GMAIL_CLIENT_ID;
+  const clientSecret = process.env.GMAIL_CLIENT_SECRET;
+  const refreshToken = process.env.GMAIL_REFRESH_TOKEN;
+  const { user, from } = getSmtpCredentials();
+
+  if (!clientId || !refreshToken) return null;
+
+  try {
+    const tokenRes = await axios.post(
+      'https://oauth2.googleapis.com/token',
+      {
+        client_id: clientId,
+        client_secret: clientSecret,
+        refresh_token: refreshToken,
+        grant_type: 'refresh_token',
+      },
+      { timeout: 10000 }
+    );
+
+    const accessToken = tokenRes.data?.access_token;
+    if (!accessToken) return null;
+
+    const oauth2Transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        type: 'OAuth2',
+        user,
+        clientId,
+        clientSecret,
+        refreshToken,
+        accessToken,
+      },
+      connectionTimeout: 10000,
+    });
+
+    const nodemailerAttachments = attachments.map((att: any) => ({
+      filename: att.filename,
+      content: Buffer.isBuffer(att.content)
+        ? att.content
+        : (typeof att.content === 'string' ? Buffer.from(att.content, 'base64') : Buffer.from(att.content)),
+    }));
+
+    const info = await oauth2Transporter.sendMail({
+      from,
+      to,
+      subject,
+      html,
+      attachments: nodemailerAttachments,
+    });
+
+    logger.info(`REAL GMAIL OAUTH2 HTTPS EMAIL DELIVERED to candidate ${to}! MessageID: ${info.messageId}`);
+    return { success: true, method: 'Gmail_OAuth2_HTTPS', messageId: info.messageId };
+  } catch (err: any) {
+    logger.warn(`Gmail OAuth2 HTTPS API Error for ${to}:`, err?.message || err);
+    return null;
+  }
+};
+
 // Brevo (Sendinblue) HTTPS REST API Dispatcher (Port 443 - Cloud Firewall Proof)
 const sendViaBrevoApi = async ({ to, subject, html, attachments = [] }: any) => {
   const apiKey = process.env.BREVO_API_KEY;
@@ -50,6 +110,46 @@ const sendViaBrevoApi = async ({ to, subject, html, attachments = [] }: any) => 
     return { success: true, method: 'Brevo_HTTPS', messageId };
   } catch (err: any) {
     logger.warn(`Brevo HTTPS API Error for ${to}:`, err?.response?.data?.message || err.message);
+    return null;
+  }
+};
+
+// Resend HTTPS REST API Dispatcher (Port 443)
+const sendViaResendApi = async ({ to, subject, html, attachments = [] }: any) => {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return null;
+
+  const resendFrom = process.env.RESEND_FROM_EMAIL || process.env.SMTP_FROM || 'Adyapan Academy <onboarding@resend.dev>';
+  const resendAttachments = attachments.map((att: any) => ({
+    filename: att.filename,
+    content: Buffer.isBuffer(att.content)
+      ? att.content.toString('base64')
+      : (typeof att.content === 'string' ? att.content : Buffer.from(att.content).toString('base64')),
+  }));
+
+  try {
+    const response = await axios.post(
+      'https://api.resend.com/emails',
+      {
+        from: resendFrom,
+        to: [to],
+        subject,
+        html,
+        attachments: resendAttachments.length > 0 ? resendAttachments : undefined,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        timeout: 10000,
+      }
+    );
+
+    logger.info(`REAL RESEND HTTPS EMAIL DELIVERED to candidate ${to}! ID: ${response.data?.id}`);
+    return { success: true, method: 'Resend_HTTPS', messageId: response.data?.id };
+  } catch (err: any) {
+    logger.warn(`Resend HTTPS API Notice for ${to}:`, err?.response?.data?.message || err.message);
     return null;
   }
 };
@@ -93,7 +193,19 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
     return { success: false, message: 'Invalid recipient email address' };
   }
 
-  // 1. Try Brevo HTTPS REST API first if BREVO_API_KEY is configured in Render
+  // 1. Try Google OAuth2 HTTPS Web API (Port 443 - Cloud Egress Firewall Proof)
+  if (process.env.GMAIL_CLIENT_ID && process.env.GMAIL_REFRESH_TOKEN) {
+    const googleRes = await sendViaGoogleHttpsApi({ to, subject, html, attachments });
+    if (googleRes && googleRes.success) return googleRes;
+  }
+
+  // 2. Try Resend HTTPS REST API if RESEND_API_KEY is present
+  if (process.env.RESEND_API_KEY) {
+    const resendRes = await sendViaResendApi({ to, subject, html, attachments });
+    if (resendRes && resendRes.success) return resendRes;
+  }
+
+  // 3. Try Brevo HTTPS REST API if BREVO_API_KEY is present
   if (process.env.BREVO_API_KEY) {
     const brevoRes = await sendViaBrevoApi({ to, subject, html, attachments });
     if (brevoRes && brevoRes.success) return brevoRes;
