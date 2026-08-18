@@ -39,6 +39,7 @@
     "qrcode": "^1.5.3",
     "resend": "^6.19.0",
     "string-similarity": "^4.0.4",
+    "tsx": "^4.23.12",
     "winston": "^3.10.0",
     "xss": "^1.0.14"
   },
@@ -53,7 +54,6 @@
     "@types/node": "^26.2.0",
     "@types/nodemailer": "^8.0.1",
     "nodemon": "^3.0.1",
-    "tsx": "^4.23.12",
     "typescript": "^7.0.2"
   }
 }
