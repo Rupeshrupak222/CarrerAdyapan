@@ -126,7 +126,7 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
 
   return (
     <header
-      className="sticky top-0 z-40 border-b transition-all backdrop-blur-xl shadow-md select-none"
+      className="sticky top-0 z-[9999] border-b transition-all backdrop-blur-xl shadow-md select-none"
       style={navStyle}
     >
       <div className="flex items-center justify-between px-3 py-2.5 sm:px-6 sm:py-3 gap-2 max-w-7xl mx-auto relative">
