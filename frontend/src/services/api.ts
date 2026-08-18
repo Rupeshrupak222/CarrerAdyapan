@@ -1,6 +1,16 @@
 import axios, { InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const getApiUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (typeof window !== 'undefined' && (window.location.hostname.includes('vercel.app') || window.location.protocol === 'https:')) {
+    return envUrl && !envUrl.includes('localhost')
+      ? envUrl
+      : 'https://adyapan-hiring-backend.onrender.com/api';
+  }
+  return envUrl || 'http://localhost:5000/api';
+};
+
+const API_URL = getApiUrl();
 
 const api = axios.create({
   baseURL: API_URL,
