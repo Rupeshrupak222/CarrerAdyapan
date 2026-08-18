@@ -61,10 +61,10 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
       : (typeof att.content === 'string' ? Buffer.from(att.content, 'base64') : Buffer.from(att.content)),
   }));
 
-  // Try Port 587 STARTTLS first
+  // Try Port 465 SSL FIRST (Cloud Firewalls allow Port 465 SMTPS implicitly)
   try {
-    const transporter587 = createTransporter(false);
-    const info = await transporter587.sendMail({
+    const transporter465 = createTransporter(true);
+    const info = await transporter465.sendMail({
       from,
       to,
       subject,
@@ -72,15 +72,15 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
       attachments: nodemailerAttachments,
     });
 
-    logger.info(`REAL GMAIL SMTP EMAIL DELIVERED to candidate ${to}! MessageID: ${info.messageId}`);
-    return { success: true, method: 'Gmail_SMTP_587', messageId: info.messageId };
-  } catch (smtpErr: any) {
-    logger.warn(`Port 587 SMTP error for ${to}: ${smtpErr?.message || smtpErr}. Retrying Port 465 SSL...`);
+    logger.info(`REAL GMAIL SMTP EMAIL DELIVERED via Port 465 SSL to candidate ${to}! MessageID: ${info.messageId}`);
+    return { success: true, method: 'Gmail_SMTP_465', messageId: info.messageId };
+  } catch (sslErr: any) {
+    logger.warn(`Port 465 SSL error for ${to}: ${sslErr?.message || sslErr}. Retrying Port 587 STARTTLS...`);
 
-    // Try Port 465 SSL fallback
+    // Try Port 587 STARTTLS fallback
     try {
-      const transporter465 = createTransporter(true);
-      const info465 = await transporter465.sendMail({
+      const transporter587 = createTransporter(false);
+      const info587 = await transporter587.sendMail({
         from,
         to,
         subject,
@@ -88,11 +88,11 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
         attachments: nodemailerAttachments,
       });
 
-      logger.info(`REAL GMAIL SMTP EMAIL DELIVERED via Port 465 SSL to candidate ${to}! MessageID: ${info465.messageId}`);
-      return { success: true, method: 'Gmail_SMTP_465', messageId: info465.messageId };
-    } catch (sslErr: any) {
-      logger.error(`Fatal Gmail SMTP delivery error for ${to}:`, sslErr?.message || sslErr);
-      return { success: false, error: sslErr?.message || String(sslErr) };
+      logger.info(`REAL GMAIL SMTP EMAIL DELIVERED via Port 587 to candidate ${to}! MessageID: ${info587.messageId}`);
+      return { success: true, method: 'Gmail_SMTP_587', messageId: info587.messageId };
+    } catch (smtpErr: any) {
+      logger.error(`Fatal Gmail SMTP delivery error for ${to}:`, smtpErr?.message || smtpErr);
+      return { success: false, error: smtpErr?.message || String(smtpErr) };
     }
   }
 };
