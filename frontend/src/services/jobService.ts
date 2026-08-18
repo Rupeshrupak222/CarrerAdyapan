@@ -95,6 +95,23 @@ export const jobService = {
     }
   },
 
+  getPublicJobs: async () => {
+    try {
+      console.log('Fetching public published jobs');
+      const response = await api.get('/jobs/public');
+      return response.data;
+    } catch (error) {
+      console.error(' Get Public Jobs Error:', error);
+      // Fallback attempt to getAllJobs if available
+      try {
+        const fallback = await api.get('/jobs');
+        return fallback.data;
+      } catch (fbErr) {
+        throw error;
+      }
+    }
+  },
+
   getPublicJob: async (slug: string) => {
     try {
       const response = await api.get(`/jobs/public/${slug}`);

@@ -18,12 +18,20 @@ const Careers = () => {
 
   const fetchLiveJobs = async () => {
     try {
-      const res = await jobService.getAllJobs();
+      const res = await jobService.getPublicJobs();
       if (res?.jobs) {
-        setJobs(res.jobs.filter((j) => j.status === 'PUBLISHED'));
+        setJobs(res.jobs.filter((j: any) => j.status === 'PUBLISHED'));
       }
     } catch (e) {
-      console.warn('Failed to load published jobs:', e);
+      console.warn('Failed to load published jobs via public API, trying getAllJobs:', e);
+      try {
+        const res = await jobService.getAllJobs();
+        if (res?.jobs) {
+          setJobs(res.jobs.filter((j: any) => j.status === 'PUBLISHED'));
+        }
+      } catch (e2) {
+        console.error('Failed to load jobs:', e2);
+      }
     } finally {
       setLoading(false);
     }

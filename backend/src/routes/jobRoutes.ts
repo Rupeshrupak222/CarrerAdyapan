@@ -7,15 +7,17 @@ import {
   updateJob,
   deleteJob,
   publishJob,
-  getPublicJob
+  getPublicJob,
+  getPublicJobs
 } from '../controllers/jobController.js';
 
 const router = express.Router();
 
-// Public route
+// Public routes (accessible without login)
+router.get('/public', getPublicJobs);
 router.get('/public/:slug', getPublicJob);
 
-// Protected routes
+// Protected routes (require HR/Admin login)
 router.use(authMiddleware);
 router.post('/', createJob);
 router.get('/', getAllJobs);

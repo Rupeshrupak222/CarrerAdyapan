@@ -22,15 +22,15 @@ const PublicJob = () => {
       if (res?.job) {
         setJob(res.job);
       } else {
-        const allRes = await jobService.getAllJobs();
-        const found = allRes?.jobs?.find((j) => j.slug === slug || j.id === slug);
+        const allRes = await jobService.getPublicJobs();
+        const found = allRes?.jobs?.find((j: any) => j.slug === slug || j.id === slug);
         if (found) setJob(found);
       }
     } catch (e) {
-      console.warn('Failed to fetch job by slug, trying all jobs:', e);
+      console.warn('Failed to fetch job by slug, trying public jobs list:', e);
       try {
-        const allRes = await jobService.getAllJobs();
-        const found = allRes?.jobs?.find((j) => j.slug === slug || j.id === slug);
+        const allRes = await jobService.getPublicJobs();
+        const found = allRes?.jobs?.find((j: any) => j.slug === slug || j.id === slug);
         if (found) setJob(found);
       } catch (e2) {
         console.error('Failed to load job:', e2);

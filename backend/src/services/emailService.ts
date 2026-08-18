@@ -7,7 +7,7 @@ const resendApiKey = process.env.RESEND_API_KEY || '';
 const resend = new Resend(resendApiKey);
 
 // Sender email
-const SENDER_EMAIL = process.env.SENDER_EMAIL || process.env.RESEND_FROM_EMAIL || 'Adyapan Hiring Team <onboarding@resend.dev>';
+const SENDER_EMAIL = process.env.SMTP_FROM || process.env.SENDER_EMAIL || process.env.RESEND_FROM_EMAIL || 'Adyapan Academy <eclipse@adyapan.com>';
 
 // Configurable SMTP Transporter (via Nodemailer)
 const createSmtpTransporter = () => {
@@ -64,9 +64,9 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] })
   const smtpTransporter = createSmtpTransporter();
   if (smtpTransporter) {
     try {
-      const fromAddress = process.env.GMAIL_USER
+      const fromAddress = process.env.SMTP_FROM || (process.env.GMAIL_USER
         ? `Adyapan Hiring Team <${process.env.GMAIL_USER}>`
-        : SENDER_EMAIL;
+        : SENDER_EMAIL);
 
       const info = await smtpTransporter.sendMail({
         from: fromAddress,

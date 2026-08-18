@@ -239,11 +239,39 @@ export const publishJob = async (req, res) => {
   }
 };
 
+export const getPublicJobs = async (req, res) => {
+  try {
+    res.setHeader('Cache-Control', 'public, max-age=5, stale-while-revalidate=10');
+    let rawJobs = await prisma.job.findMany({
+      where: { status: 'PUBLISHED' },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    // Deduplicate jobs by normalized title
+    const seenTitles = new Set();
+    let jobs = rawJobs.filter((j) => {
+      const norm = (j.title || '').toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+      if (seenTitles.has(norm)) return false;
+      seenTitles.add(norm);
+      return true;
+    });
+
+    res.json({ success: true, jobs });
+  } catch (error: any) {
+    console.error('Get Public Jobs Error:', error.message);
+    res.json({ success: true, jobs: [] });
+  }
+};
+
 export const getPublicJob = async (req, res) => {
   try {
+    const param = req.params.slug;
     const job = await prisma.job.findFirst({
       where: { 
-        slug: req.params.slug, 
+        OR: [
+          { slug: param },
+          { id: param }
+        ],
         status: 'PUBLISHED' 
       }
     });
