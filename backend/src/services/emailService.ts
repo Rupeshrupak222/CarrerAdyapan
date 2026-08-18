@@ -54,7 +54,7 @@ const sendViaBrevoApi = async ({ to, subject, html, attachments = [] }: any) => 
   }
 };
 
-// Create Nodemailer Transporter supporting dynamic SMTP_HOST & SMTP_PORT (e.g. Port 2525, 587, 465)
+// Create Nodemailer Transporter supporting dynamic SMTP_HOST & SMTP_PORT (with family: 4 Force IPv4 for Render)
 const createTransporter = (customPort?: number) => {
   const { user, pass } = getSmtpCredentials();
   const host = (process.env.SMTP_HOST || 'smtp.gmail.com').trim();
@@ -67,11 +67,15 @@ const createTransporter = (customPort?: number) => {
     secure: isSecure,
     requireTLS: port === 587 || port === 2525,
     auth: { user, pass },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
-    tls: { rejectUnauthorized: false },
-  });
+    family: 4, // FORCE IPV4 CONNECTION (Bypasses AWS/Render unroutable IPv6 socket hangs)
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 20000,
+    tls: {
+      rejectUnauthorized: false,
+      servername: host,
+    },
+  } as any);
 };
 
 /**
