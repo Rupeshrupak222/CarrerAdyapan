@@ -86,14 +86,6 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
     }
   }
 
-  const isRenderCloud = Boolean(process.env.RENDER || process.env.RENDER_SERVICE_ID || (process.env.NODE_ENV === 'production' && !process.env.SMTP_FORCE_SOCKET));
-
-  // If running on Render cloud host with standard Gmail SMTP, execute 100% clean zero-warning cloud handler
-  if (isRenderCloud && host === 'smtp.gmail.com') {
-    logger.info(`Render Cloud Host active: Candidate email & Offer Letter for "${to}" processed & saved to PostgreSQL DB successfully.`);
-    return { success: true, method: 'Render_Cloud_Clean_Success', candidateEmail: to };
-  }
-
   logger.info(`Dispatching real email with ${attachments.length} attachment(s) to candidate ${to} via Nodemailer Gmail SMTP (${user})...`);
 
   // 1. Try Port 465 SSL FIRST (Implicit SSL preferred for Gmail SMTPS)
