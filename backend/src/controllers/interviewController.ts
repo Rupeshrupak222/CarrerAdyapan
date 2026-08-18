@@ -65,13 +65,17 @@ export const createInterview = async (req, res) => {
     }
 
     if (targetEmail && (interview.status === 'SCHEDULED' || status === 'SCHEDULED')) {
-      sendInterviewScheduledEmail({
-        candidateName: targetName,
-        candidateEmail: targetEmail,
-        jobTitle: targetJob,
-        scheduledAt: scheduledAt || new Date().toISOString(),
-        meetingLink: meetingLink || 'https://meet.google.com/adyapan-interview',
-      }).catch((err) => logger.error('Async Resend Interview Email Error:', err));
+      try {
+        await sendInterviewScheduledEmail({
+          candidateName: targetName,
+          candidateEmail: targetEmail,
+          jobTitle: targetJob,
+          scheduledAt: scheduledAt || new Date().toISOString(),
+          meetingLink: meetingLink || 'https://meet.google.com/adyapan-interview',
+        });
+      } catch (emailErr: any) {
+        logger.error('Interview Schedule Email Error:', emailErr?.message || emailErr);
+      }
     }
 
     res.status(201).json({ success: true, interview });

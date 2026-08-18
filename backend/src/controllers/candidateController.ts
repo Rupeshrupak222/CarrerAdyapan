@@ -218,13 +218,17 @@ export const publicApplyCandidate = async (req, res) => {
       }
     }
 
-    // Trigger Resend Transactional Email Notification
-    sendApplicationConfirmationEmail({
-      candidateName: `${candidate.firstName} ${candidate.lastName}`,
-      candidateEmail: candidate.email,
-      jobTitle: targetJob?.title || jobTitle || 'Business Development Associate',
-      aiScore: calculatedAiScore,
-    }).catch((err) => logger.error('Async Resend Email Error:', err));
+    // Trigger Transactional Email Notification via Gmail SMTP
+    try {
+      await sendApplicationConfirmationEmail({
+        candidateName: `${candidate.firstName} ${candidate.lastName}`,
+        candidateEmail: candidate.email,
+        jobTitle: targetJob?.title || jobTitle || 'Business Development Associate',
+        aiScore: calculatedAiScore,
+      });
+    } catch (emailErr: any) {
+      logger.error('Application Confirmation Email Error:', emailErr?.message || emailErr);
+    }
 
     res.status(201).json({
       success: true,
