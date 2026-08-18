@@ -41,8 +41,8 @@ const sendViaBrevoApi = async ({ to, subject, html, attachments = [] }: any) => 
   const apiKey = (process.env.BREVO_API_KEY || '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').trim();
   if (!apiKey) return null;
 
-  const senderEmail = process.env.BREVO_SENDER_EMAIL || process.env.SMTP_USER || 'eclipse@adyapan.com';
-  const senderName = process.env.BREVO_SENDER_NAME || 'Adyapan Academy';
+  const senderEmail = process.env.BREVO_SENDER_EMAIL || 'dks241655@gmail.com';
+  const senderName = process.env.BREVO_SENDER_NAME || 'Adyapan Edutech';
 
   const brevoAttachments = attachments.map((att: any) => ({
     name: att.filename,
