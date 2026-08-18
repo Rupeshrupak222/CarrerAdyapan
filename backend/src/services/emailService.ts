@@ -79,49 +79,8 @@ const sendViaBrevoApi = async ({ to, subject, html, attachments = [] }: any) => 
   }
 };
 
-// Resend Port 443 HTTPS REST API Dispatcher (Cloud Firewall Proof & Dynamic Recipient Delivery)
-const sendViaResendApi = async ({ to, subject, html, attachments = [] }: any) => {
-  const apiKey = (process.env.RESEND_API_KEY || 're_E1UpqNNi_PsRCxA5k2QeT1SfrzVLomV4t').trim();
-  if (!apiKey) return null;
-
-  // Unverified free accounts must send strictly from onboarding@resend.dev
-  const resendFrom = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
-  const resendAttachments = attachments.map((att: any) => ({
-    filename: att.filename,
-    content: Buffer.isBuffer(att.content)
-      ? att.content.toString('base64')
-      : (typeof att.content === 'string' ? att.content : Buffer.from(att.content).toString('base64')),
-  }));
-
-  try {
-    const response = await axios.post(
-      'https://api.resend.com/emails',
-      {
-        from: resendFrom,
-        to: [to], // Dynamic candidate email address!
-        subject,
-        html,
-        attachments: resendAttachments.length > 0 ? resendAttachments : undefined,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        timeout: 10000,
-      }
-    );
-
-    logger.info(`REAL RESEND HTTPS EMAIL DELIVERED to candidate ${to}! ID: ${response.data?.id}`);
-    return { success: true, method: 'Resend_HTTPS', messageId: response.data?.id };
-  } catch (err: any) {
-    logger.warn(`Resend HTTPS API Notice for ${to}:`, err?.response?.data?.message || err?.response?.data || err.message);
-    return null;
-  }
-};
-
 /**
- * Dispatch Real Email to Candidate Email Address via Brevo Port 443, Resend Port 443, or Gmail SMTP
+ * Dispatch Real Email to Candidate Email Address via Brevo Port 443 or Gmail SMTP
  */
 const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }: { to: string; subject: string; html: string; attachments?: any[] }) => {
   if (!to || typeof to !== 'string' || !to.includes('@')) {
@@ -132,10 +91,6 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
   // 1. Try Brevo Port 443 HTTPS REST API first (Cloud Firewall Proof & Sends to ANY Candidate Email Address)
   const brevoRes = await sendViaBrevoApi({ to, subject, html, attachments });
   if (brevoRes && brevoRes.success) return brevoRes;
-
-  // 1. Try Resend Port 443 HTTPS REST API first (Cloud firewall proof & dynamic recipient delivery)
-  const resendRes = await sendViaResendApi({ to, subject, html, attachments });
-  if (resendRes && resendRes.success) return resendRes;
 
   const { user, from } = getSmtpCredentials();
   const configuredPort = parseInt(process.env.SMTP_PORT || '587');
