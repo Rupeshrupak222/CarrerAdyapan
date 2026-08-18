@@ -458,7 +458,7 @@ export const updateCandidate = async (req, res) => {
     if (candidate && candidate.id && (score !== undefined || reason !== undefined || status !== undefined)) {
       const app = await prisma.application.findFirst({
         where: { candidateId: candidate.id },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { appliedAt: 'desc' },
       }).catch(() => null);
       if (app) {
         const appUpdate: any = {};
