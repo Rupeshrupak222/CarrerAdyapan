@@ -103,57 +103,57 @@ const Jobs = () => {
   };
 
   const formatFullJobPosting = (job) => {
-    const shareUrl = `${window.location.origin}/careers/${job.slug || job.id}`;
+    const publicCareersUrl = `${window.location.origin}/careers?jobId=${job.id || job._id || ''}`;
     const salaryText = job.salaryMin && job.salaryMax
       ? `₹${(job.salaryMin / 100000).toFixed(job.salaryMin % 100000 === 0 ? 0 : 1)}L - ₹${(job.salaryMax / 100000).toFixed(job.salaryMax % 100000 === 0 ? 0 : 1)}L PA`
-      : 'Best in Industry';
+      : (job.salary || 'Best in Industry');
+
+    const cleanReqs = job.requirements ? job.requirements.replace(/\n+/g, ' • ') : 'Strong Communication, B2C Sales, Client Onboarding, Lead Conversion';
+    const cleanResp = job.responsibilities ? job.responsibilities.replace(/\n+/g, ' • ') : 'Drive EdTech sales growth, candidate counseling, revenue targets';
 
     let text = `🚀 WE ARE HIRING AT ADYAPAN EDUTECH PVT. LTD.! 🎓\n\n`;
     text += `📌 Position: ${job.title}\n`;
-    text += `🏢 Department: ${job.department || 'EdTech Growth'}\n`;
-    text += `💼 Employment Type: ${job.type === 'FULL_TIME' ? 'Full Time' : job.type || 'Full Time'}\n`;
-    text += `🎯 Experience Level: ${job.experienceLevel || 'Fresher / Experienced'}\n`;
-    text += `📍 Location: ${job.location || 'India'}\n`;
-    text += `💰 Offered Compensation: ${salaryText}\n\n`;
+    text += `🏢 Department: ${job.department || 'EdTech Sales'}\n`;
+    text += `💼 Type: ${job.type === 'FULL_TIME' ? 'Full Time' : job.type || 'Full Time'}\n`;
+    text += `🎯 Experience: ${job.experienceLevel || 'Fresher / Experienced'}\n`;
+    text += `📍 Location: ${job.location || 'Hyderabad / Pan-India'}\n`;
+    text += `💰 Compensation: ${salaryText}\n\n`;
 
     if (job.description) {
-      text += `📖 Role Overview:\n${job.description}\n\n`;
+      text += `📖 Overview:\n${job.description}\n\n`;
     }
 
-    if (job.responsibilities) {
-      text += `🔑 Key Responsibilities:\n${job.responsibilities}\n\n`;
-    }
+    text += `🔑 Key Responsibilities:\n${cleanResp}\n\n`;
+    text += ` Requirements & Qualifications:\n${cleanReqs}\n\n`;
+    text += `⚡ FAST-TRACK CANDIDATE APPLICATION LINK:\nApply directly on our Official Public Careers Portal:\n👉 ${publicCareersUrl}\n\n`;
+    text += `#Hiring #EdTechJobs #JobOpening #AdyapanEdutech #Careers #Jobs`;
 
-    if (job.requirements) {
-      text += ` Requirements & Qualifications:\n${job.requirements}\n\n`;
-    }
-
-    text += `⚡ Fast-Track Application Link:\nApply directly through our Official Careers Portal:\n👉 ${shareUrl}\n\n#Hiring #EdTechJobs #JobOpening #AdyapanEdutech #CareerOpportunity`;
-    return text;
+    return { text, publicCareersUrl };
   };
 
-  const copyShareLink = (slug) => {
-    const shareUrl = `${window.location.origin}/careers/${slug || 'bda-role'}`;
-    navigator.clipboard.writeText(shareUrl);
-    toast.success('Public Job Link copied to clipboard!');
+  const copyShareLink = (job) => {
+    const publicCareersUrl = `${window.location.origin}/careers?jobId=${job?.id || job?._id || ''}`;
+    navigator.clipboard.writeText(publicCareersUrl);
+    toast.success('Direct Public Careers Link copied to clipboard!');
   };
 
   const shareWhatsApp = (job) => {
-    const fullText = formatFullJobPosting(job);
-    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(fullText)}`, '_blank');
+    const { text } = formatFullJobPosting(job);
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
 
   const shareLinkedIn = (job) => {
-    const fullText = formatFullJobPosting(job);
+    const { text, publicCareersUrl } = formatFullJobPosting(job);
 
     try {
-      navigator.clipboard.writeText(fullText);
-      toast.success(`Complete Job Post with all requirements copied to clipboard! Opening LinkedIn...`);
+      navigator.clipboard.writeText(text);
+      toast.success('Complete Job Description with all Requirements & Direct Public Careers Link copied to clipboard!');
     } catch (e) {
-      toast.success(`Opening LinkedIn Job Post...`);
+      toast.success('Opening LinkedIn Job Share...');
     }
 
-    const linkedInUrl = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(fullText)}`;
+    // Official LinkedIn Share URL with Public Careers Portal Link & Post Text
+    const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(publicCareersUrl)}&text=${encodeURIComponent(text)}`;
     window.open(linkedInUrl, '_blank');
   };
 
@@ -268,7 +268,7 @@ const Jobs = () => {
                       LinkedIn
                     </button>
                     <button
-                      onClick={() => copyShareLink(job.slug)}
+                      onClick={() => copyShareLink(job)}
                       className={`py-1.5 text-[11px] font-semibold rounded-xl border transition-colors text-center cursor-pointer ${
                         theme === 'dark' ? 'bg-slate-950 text-slate-300 border-slate-800' : 'bg-slate-100 text-slate-700 border-slate-200'
                       }`}
