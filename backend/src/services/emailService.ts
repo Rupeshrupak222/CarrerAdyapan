@@ -11,22 +11,35 @@ const getSmtpCredentials = () => {
   return { user, pass, from };
 };
 
-// Create Gmail Nodemailer Transporter
-const createTransporter = () => {
+// Create Gmail Nodemailer Transporter with dual-port fallback & strict timeouts
+const createTransporter = (useSsl = false) => {
   const { user, pass } = getSmtpCredentials();
+
+  if (useSsl) {
+    return nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: { user, pass },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
+      tls: { rejectUnauthorized: false },
+    });
+  }
+
   return nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user,
-      pass,
-    },
-    tls: {
-      rejectUnauthorized: false,
-    },
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    requireTLS: true,
+    auth: { user, pass },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
+    tls: { rejectUnauthorized: false },
   });
 };
-
-const transporter = createTransporter();
 
 /**
  * Dispatch Real Email to Candidate Email Address via Gmail SMTP
@@ -48,9 +61,10 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
       : (typeof att.content === 'string' ? Buffer.from(att.content, 'base64') : Buffer.from(att.content)),
   }));
 
+  // Try Port 587 STARTTLS first
   try {
-    const activeTransporter = createTransporter();
-    const info = await activeTransporter.sendMail({
+    const transporter587 = createTransporter(false);
+    const info = await transporter587.sendMail({
       from,
       to,
       subject,
@@ -59,10 +73,27 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
     });
 
     logger.info(`REAL GMAIL SMTP EMAIL DELIVERED to candidate ${to}! MessageID: ${info.messageId}`);
-    return { success: true, method: 'Gmail_SMTP', messageId: info.messageId };
+    return { success: true, method: 'Gmail_SMTP_587', messageId: info.messageId };
   } catch (smtpErr: any) {
-    logger.error(`Gmail SMTP delivery error for recipient ${to}:`, smtpErr?.message || smtpErr);
-    return { success: false, error: smtpErr?.message || String(smtpErr) };
+    logger.warn(`Port 587 SMTP error for ${to}: ${smtpErr?.message || smtpErr}. Retrying Port 465 SSL...`);
+
+    // Try Port 465 SSL fallback
+    try {
+      const transporter465 = createTransporter(true);
+      const info465 = await transporter465.sendMail({
+        from,
+        to,
+        subject,
+        html,
+        attachments: nodemailerAttachments,
+      });
+
+      logger.info(`REAL GMAIL SMTP EMAIL DELIVERED via Port 465 SSL to candidate ${to}! MessageID: ${info465.messageId}`);
+      return { success: true, method: 'Gmail_SMTP_465', messageId: info465.messageId };
+    } catch (sslErr: any) {
+      logger.error(`Fatal Gmail SMTP delivery error for ${to}:`, sslErr?.message || sslErr);
+      return { success: false, error: sslErr?.message || String(sslErr) };
+    }
   }
 };
 
