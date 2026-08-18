@@ -11,6 +11,7 @@ const ThemeAwareToaster: React.FC = () => {
   return (
     <Toaster
       position="top-right"
+      containerStyle={{ zIndex: 99999, top: 16, right: 16 }}
       toastOptions={{
         duration: 4000,
         style: {
