@@ -54,7 +54,7 @@ const sendViaBrevoApi = async ({ to, subject, html, attachments = [] }: any) => 
   }
 };
 
-// Create Nodemailer Transporter supporting dynamic SMTP_HOST & SMTP_PORT (with family: 4 Force IPv4 for Render)
+// Create Nodemailer Transporter with fast 3s strict connection timeouts for cloud hosts
 const createTransporter = (customPort?: number) => {
   const { user, pass } = getSmtpCredentials();
   const host = (process.env.SMTP_HOST || 'smtp.gmail.com').trim();
@@ -68,9 +68,9 @@ const createTransporter = (customPort?: number) => {
     requireTLS: port === 587 || port === 2525,
     auth: { user, pass },
     family: 4, // FORCE IPV4 CONNECTION (Bypasses AWS/Render unroutable IPv6 socket hangs)
-    connectionTimeout: 15000,
-    greetingTimeout: 15000,
-    socketTimeout: 20000,
+    connectionTimeout: 3000,
+    greetingTimeout: 3000,
+    socketTimeout: 5000,
     tls: {
       rejectUnauthorized: false,
       servername: host,
