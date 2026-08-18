@@ -36,59 +36,13 @@ const createTransporter = (customPort?: number) => {
   } as any);
 };
 
-// Port 443 HTTPS REST API Dispatcher (Cloud Firewall Proof)
-const sendViaHttpsPort443 = async ({ to, subject, html, attachments = [] }: any) => {
-  const apiKey = process.env.RESEND_API_KEY || process.env.EMAIL_API_KEY;
-  if (!apiKey) return null;
-
-  const fromEmail = process.env.RESEND_FROM_EMAIL || process.env.SMTP_FROM || 'Adyapan Academy <onboarding@resend.dev>';
-  const formattedAttachments = attachments.map((att: any) => ({
-    filename: att.filename,
-    content: Buffer.isBuffer(att.content)
-      ? att.content.toString('base64')
-      : (typeof att.content === 'string' ? att.content : Buffer.from(att.content).toString('base64')),
-  }));
-
-  try {
-    const response = await axios.post(
-      'https://api.resend.com/emails',
-      {
-        from: fromEmail,
-        to: [to],
-        subject,
-        html,
-        attachments: formattedAttachments.length > 0 ? formattedAttachments : undefined,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        timeout: 10000,
-      }
-    );
-
-    logger.info(`REAL PORT 443 HTTPS EMAIL DELIVERED to candidate ${to}! ID: ${response.data?.id}`);
-    return { success: true, method: 'HTTPS_Port_443', messageId: response.data?.id };
-  } catch (err: any) {
-    logger.warn(`Port 443 HTTPS API Notice for ${to}:`, err?.response?.data?.message || err.message);
-    return null;
-  }
-};
-
 /**
- * Dispatch Real Email to Candidate Email Address via Port 443 HTTPS or Gmail SMTP
+ * Dispatch Real Email to Candidate Email Address via Pure Nodemailer Gmail SMTP
  */
 const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }: { to: string; subject: string; html: string; attachments?: any[] }) => {
   if (!to || typeof to !== 'string' || !to.includes('@')) {
     logger.warn(`Invalid or missing recipient email address: "${to}"`);
     return { success: false, message: 'Invalid recipient email address' };
-  }
-
-  // 1. Try Port 443 HTTPS Web API Transport if RESEND_API_KEY / EMAIL_API_KEY is present
-  if (process.env.RESEND_API_KEY || process.env.EMAIL_API_KEY) {
-    const httpsRes = await sendViaHttpsPort443({ to, subject, html, attachments });
-    if (httpsRes && httpsRes.success) return httpsRes;
   }
 
   const { user, from } = getSmtpCredentials();
