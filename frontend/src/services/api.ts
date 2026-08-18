@@ -1,13 +1,16 @@
 import axios, { InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 
-const getApiUrl = () => {
+export const RENDER_BACKEND_API_URL = 'https://adyapan-hiring-backend.onrender.com/api';
+
+const getApiUrl = (): string => {
   const envUrl = import.meta.env.VITE_API_URL;
-  if (typeof window !== 'undefined' && (window.location.hostname.includes('vercel.app') || window.location.protocol === 'https:')) {
-    return envUrl && !envUrl.includes('localhost')
-      ? envUrl
-      : 'https://adyapan-hiring-backend.onrender.com/api';
+  if (envUrl && typeof envUrl === 'string' && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
+    return envUrl;
   }
-  return envUrl || 'http://localhost:5000/api';
+  if (import.meta.env.PROD || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1')) {
+    return RENDER_BACKEND_API_URL;
+  }
+  return RENDER_BACKEND_API_URL;
 };
 
 const API_URL = getApiUrl();

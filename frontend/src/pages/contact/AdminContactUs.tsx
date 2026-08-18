@@ -4,6 +4,7 @@ import AdyapanLogo from '../../components/common/AdyapanLogo';
 import Footer from '../../components/layout/Footer';
 import { useTheme } from '../../context/ThemeContext';
 import toast from 'react-hot-toast';
+import api from '../../services/api';
 
 const AdminContactUs = () => {
   const { theme, toggleTheme } = useTheme();
@@ -27,15 +28,10 @@ const AdminContactUs = () => {
     const toastId = toast.loading('Sending message to support@adyapan.com...');
 
     try {
-      const response = await fetch('http://localhost:5000/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+      const response = await api.post('/contact', formData);
+      const data = response.data;
 
-      const data = await response.json();
-
-      if (response.ok && data.success) {
+      if (data && data.success) {
         toast.success(`Thank you, ${formData.fullName}! Your message has been delivered to support@adyapan.com`, { id: toastId });
         setFormData({
           fullName: '',
