@@ -103,34 +103,39 @@ const Jobs = () => {
   };
 
   const formatFullJobPosting = (job) => {
-    const publicCareersUrl = `${window.location.origin}/careers?jobId=${job.id || job._id || ''}`;
+    const directJobSlugOrId = job.slug || job.id || job._id || '';
+    const publicCareersUrl = `${window.location.origin}/careers/${directJobSlugOrId}`;
     const salaryText = job.salaryMin && job.salaryMax
       ? `₹${(job.salaryMin / 100000).toFixed(job.salaryMin % 100000 === 0 ? 0 : 1)}L - ₹${(job.salaryMax / 100000).toFixed(job.salaryMax % 100000 === 0 ? 0 : 1)}L PA`
-      : (job.salary || 'Best in Industry');
+      : (job.salary || 'Competitive / Best in Industry');
 
-    const cleanResp = job.responsibilities ? job.responsibilities.replace(/\n+/g, ' • ') : 'Drive EdTech sales growth, candidate counseling, revenue targets';
+    const cleanResp = job.responsibilities ? job.responsibilities.replace(/\n+/g, ' • ') : '';
 
     let text = `🚀 WE ARE HIRING AT ADYAPAN EDUTECH PVT. LTD.! 🎓\n\n`;
     text += `📌 Position: ${job.title}\n`;
-    text += `🏢 Department: ${job.department || 'EdTech Sales'}\n`;
-    text += `💼 Type: ${job.type === 'FULL_TIME' ? 'Full Time' : job.type || 'Full Time'}\n`;
+    text += `🏢 Department: ${job.department || 'EdTech Sales & Growth'}\n`;
+    text += `💼 Job Type: ${job.type === 'FULL_TIME' ? 'Full Time' : job.type || 'Full Time'}\n`;
     text += `🎯 Experience: ${job.experienceLevel || 'Fresher / Experienced'}\n`;
     text += `📍 Location: ${job.location || 'Hyderabad / Pan-India'}\n`;
     text += `💰 Compensation: ${salaryText}\n\n`;
 
     if (job.description) {
-      text += `📖 Overview:\n${job.description}\n\n`;
+      text += `📖 Role Overview:\n${job.description}\n\n`;
     }
 
-    text += `🔑 Key Responsibilities:\n${cleanResp}\n\n`;
-    text += `⚡ FAST-TRACK CANDIDATE APPLICATION LINK:\nApply directly on our Official Public Careers Portal:\n👉 ${publicCareersUrl}\n\n`;
-    text += `#Hiring #EdTechJobs #JobOpening #AdyapanEdutech #Careers #Jobs`;
+    if (cleanResp) {
+      text += `🔑 Key Responsibilities:\n• ${cleanResp}\n\n`;
+    }
+
+    text += `⚡ DIRECT CANDIDATE APPLICATION LINK:\nApply directly on our Official Public Careers Portal:\n👉 ${publicCareersUrl}\n\n`;
+    text += `#Hiring #JobOpening #AdyapanEdutech #Careers #Jobs #Recruitment`;
 
     return { text, publicCareersUrl };
   };
 
   const copyShareLink = (job) => {
-    const publicCareersUrl = `${window.location.origin}/careers?jobId=${job?.id || job?._id || ''}`;
+    const directJobSlugOrId = job?.slug || job?.id || job?._id || '';
+    const publicCareersUrl = `${window.location.origin}/careers/${directJobSlugOrId}`;
     navigator.clipboard.writeText(publicCareersUrl);
     toast.success('Direct Public Careers Link copied to clipboard!');
   };
@@ -141,17 +146,17 @@ const Jobs = () => {
   };
 
   const shareLinkedIn = (job) => {
-    const { text, publicCareersUrl } = formatFullJobPosting(job);
+    const { text } = formatFullJobPosting(job);
 
     try {
       navigator.clipboard.writeText(text);
-      toast.success('Complete Job Description with all Requirements & Direct Public Careers Link copied to clipboard!');
+      toast.success('Complete Job Description & Direct Careers Link copied to clipboard!');
     } catch (e) {
       toast.success('Opening LinkedIn Job Share...');
     }
 
-    // Official LinkedIn Share URL with Public Careers Portal Link & Post Text
-    const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(publicCareersUrl)}&text=${encodeURIComponent(text)}`;
+    // Official LinkedIn Post Creation Web Intent with complete text
+    const linkedInUrl = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(text)}`;
     window.open(linkedInUrl, '_blank');
   };
 
