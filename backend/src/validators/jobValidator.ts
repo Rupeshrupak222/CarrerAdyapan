@@ -4,7 +4,7 @@ export const createJobSchema = Joi.object({
   title: Joi.string().required().min(3).max(150),
   department: Joi.string().required(),
   description: Joi.string().required().min(20),
-  requirements: Joi.string().required().min(10),
+  requirements: Joi.string().allow('', null).optional(),
   responsibilities: Joi.string().allow('', null),
   type: Joi.string().valid('FULL_TIME', 'PART_TIME', 'CONTRACT', 'INTERNSHIP', 'REMOTE').default('FULL_TIME'),
   experienceLevel: Joi.string().required(),

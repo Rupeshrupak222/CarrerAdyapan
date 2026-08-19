@@ -101,7 +101,9 @@ const JobDetails = () => {
               </div>
 
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{job.title}</h1>
-              <p className="text-xs text-slate-600 dark:text-slate-300">{job.location} • {job.type}</p>
+              <p className="text-xs text-slate-600 dark:text-slate-300">
+                📍 {job.location} • 💼 {job.type === 'FULL_TIME' ? 'Full Time' : job.type} • 🎯 Experience: <span className="font-semibold text-amber-600 dark:text-amber-400">{job.experienceLevel || 'Fresher / Experienced'}</span>
+              </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2.5">

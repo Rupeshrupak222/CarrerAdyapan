@@ -14,7 +14,7 @@ const EDTECH_TEMPLATES = [
     department: 'Sales & Growth',
     location: 'Mumbai / Hybrid',
     type: 'FULL_TIME',
-    experienceLevel: 'ENTRY',
+    experienceLevel: '1-3 Years',
     salaryMin: 350000,
     salaryMax: 600000,
     description: 'We are seeking an energetic Business Development Associate to drive student course enrolments, manage sales pipelines, conduct counselling calls, and achieve monthly revenue targets.',
@@ -28,7 +28,7 @@ const EDTECH_TEMPLATES = [
     department: 'Student Admissions',
     location: 'Delhi NCR / Remote',
     type: 'FULL_TIME',
-    experienceLevel: 'MID',
+    experienceLevel: '2+ Years',
     salaryMin: 300000,
     salaryMax: 500000,
     description: 'Provide personalized academic guidance to prospective students and parents, understand their career goals, recommend suitable learning programs, and assist with enrolment.',
@@ -42,7 +42,7 @@ const EDTECH_TEMPLATES = [
     department: 'Inside Sales',
     location: 'Bangalore / On-site',
     type: 'FULL_TIME',
-    experienceLevel: 'ENTRY',
+    experienceLevel: '0-2 Years',
     salaryMin: 250000,
     salaryMax: 400000,
     description: 'Responsible for high-volume outbound calling to verified student leads, introducing course programs, scheduling counselling webinars, and closing course admissions.',
@@ -50,19 +50,29 @@ const EDTECH_TEMPLATES = [
     responsibilities: 'Make 80-100 calls daily to inbound leads; pitch course offerings; book product demos for Senior Counsellors; maintain daily call logs.',
   },
   {
-    name: ' Full Stack Software Engineer',
+    name: 'Full Stack Software Engineer',
     role: 'Tech',
     title: 'Senior Full Stack Developer (React & Node.js)',
     department: 'Engineering',
     location: 'Remote',
     type: 'FULL_TIME',
-    experienceLevel: 'SENIOR',
+    experienceLevel: '3+ Years',
     salaryMin: 1200000,
     salaryMax: 1800000,
     description: 'Build and scale our next-gen AI-powered learning management and recruitment platform using React, Node.js, Express, and PostgreSQL.',
     requirements: '3+ years experience with React.js, Node.js, REST APIs, and SQL; experience integrating LLM APIs or AI algorithms; strong problem solving skills.',
     responsibilities: 'Develop reusable React UI components; build secure Node.js microservices; integrate AI resume screening APIs; write unit tests.',
   },
+];
+
+const EXPERIENCE_PRESETS = [
+  'Fresher / 0 Yrs',
+  '0 - 1 Year',
+  '1 - 2 Years',
+  '1 - 3 Years',
+  '2 - 4 Years',
+  '3 - 5 Years',
+  '5+ Years',
 ];
 
 const CreateJob = () => {
@@ -76,7 +86,7 @@ const CreateJob = () => {
     requirements: '',
     responsibilities: '',
     type: 'FULL_TIME',
-    experienceLevel: 'MID',
+    experienceLevel: '0-2 Years',
     salaryMin: '',
     salaryMax: '',
     location: '',
@@ -107,13 +117,18 @@ const CreateJob = () => {
     setLoading(true);
 
     try {
-      if (!formData.title || !formData.department || !formData.description || !formData.requirements || !formData.location) {
+      if (!formData.title || !formData.department || !formData.description || !formData.location) {
         toast.error('Please fill all required fields');
         setLoading(false);
         return;
       }
 
-      const response = await jobService.createJob(formData);
+      const payload = {
+        ...formData,
+        requirements: formData.requirements || formData.responsibilities || formData.description || '',
+      };
+
+      const response = await jobService.createJob(payload);
 
       if (response.success) {
         toast.success('Job created successfully! ');
@@ -245,18 +260,37 @@ const CreateJob = () => {
               </select>
             </div>
             <div>
-              <label className={labelClass}>Experience Level</label>
-              <select
+              <div className="flex items-center justify-between mb-1">
+                <label className={labelClass}>Required Experience *</label>
+                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Type manually or select below</span>
+              </div>
+              <input
+                type="text"
                 name="experienceLevel"
                 value={formData.experienceLevel}
                 onChange={handleChange}
                 className={inputClass}
-              >
-                <option value="ENTRY">Entry Level (0-2 Yrs)</option>
-                <option value="MID">Mid Level (2-4 Yrs)</option>
-                <option value="SENIOR">Senior Level (4+ Yrs)</option>
-                <option value="LEAD">Team Lead</option>
-              </select>
+                placeholder="e.g., 0-1 Years, 2+ Years, Fresher, 3-5 Years"
+                required
+              />
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {EXPERIENCE_PRESETS.map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, experienceLevel: preset })}
+                    className={`px-2 py-0.5 text-[11px] font-medium rounded-lg border transition-all ${
+                      formData.experienceLevel === preset
+                        ? 'bg-amber-500 text-white border-amber-500 shadow-sm'
+                        : theme === 'dark'
+                        ? 'bg-slate-950 text-slate-300 border-slate-800 hover:border-amber-400'
+                        : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-amber-50 hover:border-amber-300'
+                    }`}
+                  >
+                    {preset}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -307,19 +341,6 @@ const CreateJob = () => {
               rows={3}
               className={inputClass}
               placeholder="List core daily responsibilities (e.g. Conduct student counselling sessions; Meet monthly enrolment targets; Maintain CRM leads)..."
-              required
-            />
-          </div>
-
-          <div>
-            <label className={labelClass}>Key Requirements & Scoring Criteria *</label>
-            <textarea
-              name="requirements"
-              value={formData.requirements}
-              onChange={handleChange}
-              rows={3}
-              className={inputClass}
-              placeholder="List specific skill requirements (e.g. Sales targets, Student counselling, Telesales)..."
               required
             />
           </div>

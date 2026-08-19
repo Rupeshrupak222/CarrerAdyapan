@@ -18,10 +18,10 @@ export const createJob = async (req, res) => {
     } = req.body;
 
     // Validation
-    if (!title || !department || !description || !requirements || !location) {
+    if (!title || !department || !description || !location) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Required fields: title, department, description, requirements, location' 
+        message: 'Required fields: title, department, description, location' 
       });
     }
 
@@ -50,6 +50,8 @@ export const createJob = async (req, res) => {
     }
     const targetUserId = userRecord.id;
 
+    const safeRequirements = requirements || responsibilities || description || 'Strong communication, relevant domain skills, and target orientation.';
+
     // Check if default sample job or duplicate unedited job exists to prevent copy creation
     const existingDefault = await prisma.job.findFirst({
       where: {
@@ -70,7 +72,7 @@ export const createJob = async (req, res) => {
           title,
           department,
           description,
-          requirements,
+          requirements: safeRequirements,
           responsibilities: responsibilities || '',
           type: type || 'FULL_TIME',
           experienceLevel: experienceLevel || 'MID',
@@ -89,7 +91,7 @@ export const createJob = async (req, res) => {
           slug,
           department,
           description,
-          requirements,
+          requirements: safeRequirements,
           responsibilities: responsibilities || '',
           type: type || 'FULL_TIME',
           experienceLevel: experienceLevel || 'MID',

@@ -56,7 +56,7 @@ const Jobs = () => {
       title: job.title || '',
       department: job.department || '',
       type: job.type || 'FULL_TIME',
-      experienceLevel: job.experienceLevel || 'MID',
+      experienceLevel: job.experienceLevel || '0-2 Years',
       location: job.location || '',
       salaryMin: job.salaryMin || '',
       salaryMax: job.salaryMax || '',
@@ -227,12 +227,17 @@ const Jobs = () => {
                     <span className={`px-2.5 py-1 rounded-xl border ${
                       theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
                     }`}>
-                      {job.location || 'India'}
+                      📍 {job.location || 'India'}
                     </span>
                     <span className={`px-2.5 py-1 rounded-xl border ${
                       theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
                     }`}>
-                      {job.type === 'FULL_TIME' ? 'Full Time' : job.type || 'Full Time'}
+                      💼 {job.type === 'FULL_TIME' ? 'Full Time' : job.type || 'Full Time'}
+                    </span>
+                    <span className={`px-2.5 py-1 rounded-xl border ${
+                      theme === 'dark' ? 'bg-slate-950 border-slate-800 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-800'
+                    }`}>
+                      🎯 {job.experienceLevel || 'Fresher / Exp'}
                     </span>
                   </div>
 
@@ -375,18 +380,37 @@ const Jobs = () => {
                   </div>
 
                   <div>
-                    <label className="block mb-1 text-slate-500 uppercase text-[10px] tracking-wider font-bold">EXPERIENCE LEVEL</label>
-                    <select
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider font-bold">EXPERIENCE REQUIRED</label>
+                      <span className="text-[9px] text-amber-600 dark:text-amber-400 font-medium">Manual or click preset</span>
+                    </div>
+                    <input
+                      type="text"
                       value={editFormData.experienceLevel}
                       onChange={(e) => setEditFormData({ ...editFormData, experienceLevel: e.target.value })}
-                      className={`w-full p-3 rounded-2xl border outline-none font-medium ${
+                      placeholder="e.g., 0-1 Years, 2+ Years, Fresher, 3-5 Years"
+                      className={`w-full p-3 rounded-2xl border outline-none font-medium text-xs ${
                         theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                       }`}
-                    >
-                      <option value="ENTRY">Entry Level / Fresher</option>
-                      <option value="MID">Mid Level (1-3 Yrs)</option>
-                      <option value="SENIOR">Senior Level (3+ Yrs)</option>
-                    </select>
+                    />
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {['Fresher', '0-1 Yr', '1-3 Yrs', '2-4 Yrs', '3-5 Yrs', '5+ Yrs'].map((p) => (
+                        <button
+                          key={p}
+                          type="button"
+                          onClick={() => setEditFormData({ ...editFormData, experienceLevel: p })}
+                          className={`px-1.5 py-0.5 text-[10px] rounded-md border font-medium transition-all ${
+                            editFormData.experienceLevel === p
+                              ? 'bg-amber-500 text-white border-amber-500'
+                              : theme === 'dark'
+                              ? 'bg-slate-900 text-slate-300 border-slate-800 hover:border-amber-400'
+                              : 'bg-white text-slate-600 border-slate-200 hover:bg-amber-50'
+                          }`}
+                        >
+                          {p}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   <div>

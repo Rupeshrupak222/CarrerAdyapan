@@ -171,8 +171,18 @@ export const calculateAtsScore = (parsedResume: any, job: any = {}) => {
 
   // Extract Specific Job Requirements
   const jobTitle = job.title || job.jobTitle || 'Business Development Associate (BDA)';
-  const parsedExpInput = parseFloat(job.experience ?? job.experienceRequired ?? job.experienceLevel ?? 1);
-  const jobReqExp = isNaN(parsedExpInput) ? 1 : parsedExpInput;
+  const rawExpVal = String(job.experience ?? job.experienceRequired ?? job.experienceLevel ?? '1');
+  let jobReqExp = 1;
+  const numMatch = rawExpVal.match(/\d+(\.\d+)?/);
+  if (numMatch) {
+    jobReqExp = parseFloat(numMatch[0]);
+  } else if (/fresh|entry|student|intern/i.test(rawExpVal)) {
+    jobReqExp = 0;
+  } else if (/mid/i.test(rawExpVal)) {
+    jobReqExp = 2;
+  } else if (/senior|lead/i.test(rawExpVal)) {
+    jobReqExp = 4;
+  }
 
   // Normalize Job Required Skills
   let jobRequiredSkills = [];
