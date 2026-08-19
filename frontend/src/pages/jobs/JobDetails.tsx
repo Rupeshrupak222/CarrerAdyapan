@@ -59,8 +59,46 @@ const JobDetails = () => {
 
   const shareWhatsApp = () => {
     const shareUrl = `${window.location.origin}/careers/${job?.slug || 'bda-role'}`;
-    const text = encodeURIComponent(`We are hiring! Check out the ${job?.title} position at Adyapan Edutech and apply here: ${shareUrl}`);
+    const text = encodeURIComponent(`🚀 We are hiring at Adyapan Edutech! Check out the ${job?.title} position and apply directly here: ${shareUrl}`);
     window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+  };
+
+  const shareLinkedIn = () => {
+    const publicCareersUrl = `${window.location.origin}/careers/${job?.slug || 'bda-role'}`;
+    const salaryText = job?.salaryMin && job?.salaryMax
+      ? `₹${(job.salaryMin / 100000).toFixed(job.salaryMin % 100000 === 0 ? 0 : 1)}L - ₹${(job.salaryMax / 100000).toFixed(job.salaryMax % 100000 === 0 ? 0 : 1)}L PA`
+      : 'Competitive / Best in Industry';
+
+    const cleanResp = job?.responsibilities ? job.responsibilities.replace(/\n+/g, ' • ') : '';
+
+    let text = `🚀 WE ARE HIRING AT ADYAPAN EDUTECH PVT. LTD.! 🎓\n\n`;
+    text += `📌 Position: ${job?.title || 'Job Opening'}\n`;
+    text += `🏢 Department: ${job?.department || 'EdTech Sales & Growth'}\n`;
+    text += `💼 Job Type: ${job?.type === 'FULL_TIME' ? 'Full Time' : job?.type || 'Full Time'}\n`;
+    text += `🎯 Experience Required: ${job?.experienceLevel || 'Fresher / Experienced'}\n`;
+    text += `📍 Location: ${job?.location || 'Hyderabad / Pan-India'}\n`;
+    text += `💰 Compensation: ${salaryText}\n\n`;
+
+    if (job?.description) {
+      text += `📖 Role Overview:\n${job.description}\n\n`;
+    }
+
+    if (cleanResp) {
+      text += `🔑 Key Responsibilities:\n• ${cleanResp}\n\n`;
+    }
+
+    text += `⚡ DIRECT CANDIDATE APPLICATION LINK:\nApply directly on our Official Public Careers Portal:\n👉 ${publicCareersUrl}\n\n`;
+    text += `#Hiring #JobOpening #AdyapanEdutech #Careers #Jobs #Recruitment`;
+
+    try {
+      navigator.clipboard.writeText(text);
+      toast.success('Complete Job Description & Direct Careers Link copied to clipboard!');
+    } catch (e) {
+      toast.success('Opening LinkedIn Job Share...');
+    }
+
+    const linkedInUrl = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(text)}`;
+    window.open(linkedInUrl, '_blank');
   };
 
   if (loading) {
@@ -109,14 +147,20 @@ const JobDetails = () => {
             <div className="flex flex-wrap items-center gap-2.5">
               <button
                 onClick={shareWhatsApp}
-                className="px-3.5 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-xl transition-all flex items-center gap-1.5"
+                className="px-3.5 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 WhatsApp
               </button>
               <button
+                onClick={shareLinkedIn}
+                className="px-3.5 py-2 text-xs font-semibold text-sky-700 dark:text-sky-300 bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                LinkedIn
+              </button>
+              <button
                 onClick={copyShareLink}
-                className={`px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all flex items-center gap-1.5 ${
-                  theme === 'dark' ? 'bg-slate-950 text-slate-200 border-slate-800' : 'bg-slate-100 text-slate-700 border-slate-200'
+                className={`px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all flex items-center gap-1.5 cursor-pointer ${
+                  theme === 'dark' ? 'bg-slate-950 text-slate-200 border-slate-800 hover:border-amber-400' : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-amber-50'
                 }`}
               >
                 Copy Link
