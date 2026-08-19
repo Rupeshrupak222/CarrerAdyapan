@@ -135,12 +135,12 @@ const Login = () => {
 
           {/* Footer Links */}
           <div className="pt-4 border-t border-slate-200 dark:border-slate-800 text-center text-xs font-semibold space-y-2">
-            <p className="text-slate-600 dark:text-slate-300">
-              Need HR access? <Link to="/register" className="text-amber-600 dark:text-amber-400 hover:underline font-bold">Request Admin Account</Link>
+            <p className="text-slate-500 dark:text-slate-400 text-[11px]">
+              Admin access only. Contact your Super Admin for credentials.
             </p>
             <p>
-              <Link to="/careers" className="text-slate-500 dark:text-slate-400 hover:underline text-[11px]">
-                Are you a job candidate? Go to Adyapan Careers Portal →
+              <Link to="/careers" className="text-amber-600 dark:text-amber-400 hover:underline text-[11px]">
+                ← Back to Careers Page
               </Link>
             </p>
           </div>

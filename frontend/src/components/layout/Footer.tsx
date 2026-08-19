@@ -107,78 +107,67 @@ const Footer = ({ isPublic = false }: { isPublic?: boolean }) => {
           {/* Col 2: Candidate Portal Links */}
           <div className="space-y-3 text-xs font-medium">
             <h3 className="text-xs font-bold uppercase tracking-wider text-amber-500 flex items-center gap-1.5">
-              <span>Candidate Portal</span>
+              <span>For Candidates</span>
             </h3>
             <ul className="space-y-2">
               <li>
                 <Link to="/careers" className="hover:text-amber-500 transition-all hover:translate-x-1 inline-block">
-                  → Public Job Openings
+                  → Browse Open Positions
                 </Link>
               </li>
               <li>
-                <Link to="/careers" className="hover:text-amber-500 transition-all hover:translate-x-1 inline-block">
-                  → Submit Candidate Application
-                </Link>
-              </li>
-              <li>
-                <Link to={isPublicPage ? "/contact" : "/admin-contact"} className="hover:text-amber-500 transition-all hover:translate-x-1 inline-block">
-                  → Candidate Help & Contact
-                </Link>
-              </li>
-              <li>
-                <Link to="/login" className="hover:text-amber-500 transition-all hover:translate-x-1 inline-block font-semibold text-amber-600 dark:text-amber-400">
-                  → HR Recruiter Login
+                <Link to="/login" className="hover:text-amber-500 transition-all hover:translate-x-1 inline-block">
+                  → Sign In / Track Applications
                 </Link>
               </li>
               <li>
                 <Link to="/register" className="hover:text-amber-500 transition-all hover:translate-x-1 inline-block">
-                  → Create Recruiter Account
+                  → Create Account
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="hover:text-amber-500 transition-all hover:translate-x-1 inline-block">
+                  → Contact & Support
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Col 3: HR Operations Modules */}
+          {/* Col 3: Company Links */}
           <div className="space-y-3 text-xs font-medium">
             <h3 className="text-xs font-bold uppercase tracking-wider text-amber-500 flex items-center gap-1.5">
-              <span>HR Operations</span>
+              <span>Company</span>
             </h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/dashboard" className="hover:text-amber-500 transition-all hover:translate-x-1 inline-block">
-                  → Control Dashboard
+                <a href="https://www.adyapan.com" target="_blank" rel="noreferrer" className="hover:text-amber-500 transition-all hover:translate-x-1 inline-block">
+                  → About Adyapan
+                </a>
+              </li>
+              <li>
+                <Link to="/privacy" className="hover:text-amber-500 transition-all hover:translate-x-1 inline-block">
+                  → Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link to="/jobs" className="hover:text-amber-500 transition-all hover:translate-x-1 inline-block">
-                  → Job Openings & Pipeline
+                <Link to="/terms" className="hover:text-amber-500 transition-all hover:translate-x-1 inline-block">
+                  → Terms of Service
                 </Link>
               </li>
-              <li>
-                <Link to="/candidates" className="hover:text-amber-500 transition-all hover:translate-x-1 inline-block">
-                  → Candidate Directory & ATS Ratings
-                </Link>
-              </li>
-              <li>
-                <Link to="/interviews" className="hover:text-amber-500 transition-all hover:translate-x-1 inline-block">
-                  → Interview Schedules
-                </Link>
-              </li>
-              <li>
-                <Link to="/offers" className="hover:text-amber-500 transition-all hover:translate-x-1 inline-block">
-                  → Offer Letter PDF Generator
-                </Link>
-              </li>
-              <li>
-                <Link to="/analytics" className="hover:text-amber-500 transition-all hover:translate-x-1 inline-block">
-                  → Recruitment Analytics
-                </Link>
-              </li>
-              <li>
-                <Link to="/assistant" className="hover:text-amber-500 transition-all hover:translate-x-1 inline-block">
-                  → AI Hiring Copilot Assistant
-                </Link>
-              </li>
+              {!isPublicPage && (
+                <>
+                  <li>
+                    <Link to="/dashboard" className="hover:text-amber-500 transition-all hover:translate-x-1 inline-block">
+                      → Admin Dashboard
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/analytics" className="hover:text-amber-500 transition-all hover:translate-x-1 inline-block">
+                      → Recruitment Analytics
+                    </Link>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
 
@@ -257,7 +246,7 @@ const Footer = ({ isPublic = false }: { isPublic?: boolean }) => {
               Terms of Service
             </Link>
             <span>•</span>
-            <Link to={isPublicPage ? "/contact" : "/admin-contact"} className="hover:text-amber-500 transition-colors font-semibold">
+            <Link to="/contact" className="hover:text-amber-500 transition-colors font-semibold">
               Contact Us
             </Link>
             <span>•</span>

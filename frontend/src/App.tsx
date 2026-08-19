@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
+import { CandidateAuthProvider } from './context/CandidateAuthContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import AppRoutes from './routes/AppRoutes';
 
@@ -48,8 +49,10 @@ function App() {
     <BrowserRouter>
       <ThemeProvider>
         <AuthProvider>
-          <ThemeAwareToaster />
-          <AppRoutes />
+          <CandidateAuthProvider>
+            <ThemeAwareToaster />
+            <AppRoutes />
+          </CandidateAuthProvider>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>

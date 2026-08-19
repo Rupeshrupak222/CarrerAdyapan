@@ -1,10 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-
-// Auth Pages
-import Login from '../pages/auth/Login';
-import Register from '../pages/auth/Register';
+import { useCandidateAuth } from '../context/CandidateAuthContext';
 
 // Recruiter Dashboard Pages
 import Dashboard from '../pages/dashboard/Dashboard';
@@ -25,22 +22,27 @@ import AdminContactUs from '../pages/contact/AdminContactUs';
 
 // Public Candidate Portal Pages
 import Careers from '../candidate-portal/Careers';
+import PublicJobs from '../candidate-portal/PublicJobs';
 import PublicJob from '../candidate-portal/PublicJob';
 import ApplyJob from '../candidate-portal/ApplyJob';
 import ApplicationSuccess from '../candidate-portal/ApplicationSuccess';
+import CandidateLogin from '../candidate-portal/CandidateLogin';
+import CandidateRegister from '../candidate-portal/CandidateRegister';
+import MyApplications from '../candidate-portal/MyApplications';
 import ContactUs from '../pages/contact/ContactUs';
 import LegalPrivacy from '../pages/legal/LegalPrivacy';
 import LegalTerms from '../pages/legal/LegalTerms';
 
+// Admin Protected Route
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-sm font-medium text-slate-600">Loading HireAI Platform...</p>
+          <div className="w-10 h-10 border-3 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-sm font-medium text-slate-500">Loading...</p>
         </div>
       </div>
     );
@@ -53,180 +55,26 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return children;
 };
 
-const RootRedirect = () => {
-  const { user, loading } = useAuth();
+// Candidate Protected Route
+const CandidateProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { candidate } = useCandidateAuth();
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-sm font-medium text-slate-600">Loading HireAI Platform...</p>
-        </div>
-      </div>
-    );
+  if (!candidate) {
+    return <Navigate to="/login" replace />;
   }
 
-  if (user) {
-    return <Dashboard />;
-  }
-
-  return <Navigate to="/careers" replace />;
-};
-
-const FallbackRedirect = () => {
-  const { user, loading } = useAuth();
-
-  if (loading) return null;
-
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  return <Navigate to="/careers" replace />;
+  return children;
 };
 
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* Auth Routes */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      {/* Root → Careers */}
+      <Route path="/" element={<Navigate to="/careers" replace />} />
 
-      {/* Root Route - Dashboard for HR, Careers for Candidate */}
-      <Route path="/" element={<RootRedirect />} />
-
-      {/* Recruiter Protected Routes */}
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/jobs"
-        element={
-          <ProtectedRoute>
-            <Jobs />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/jobs/new"
-        element={
-          <ProtectedRoute>
-            <CreateJob />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/jobs/create"
-        element={
-          <ProtectedRoute>
-            <CreateJob />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/jobs/:id"
-        element={
-          <ProtectedRoute>
-            <JobDetails />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/candidates"
-        element={
-          <ProtectedRoute>
-            <Candidates />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/candidates/compare"
-        element={
-          <ProtectedRoute>
-            <CompareCandidates />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/candidates/:id"
-        element={
-          <ProtectedRoute>
-            <CandidateDetails />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/interviews"
-        element={
-          <ProtectedRoute>
-            <Interviews />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/interviews/:id"
-        element={
-          <ProtectedRoute>
-            <InterviewDetails />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/offers"
-        element={
-          <ProtectedRoute>
-            <Offers />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/offers/:id"
-        element={
-          <ProtectedRoute>
-            <OfferDetails />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/analytics"
-        element={
-          <ProtectedRoute>
-            <AnalyticsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/assistant"
-        element={
-          <ProtectedRoute>
-            <AIAssistant />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-            <AdminProfile />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin-contact"
-        element={
-          <ProtectedRoute>
-            <AdminContactUs />
-          </ProtectedRoute>
-        }
-      />
-      {/* Public Candidate Portal Routes */}
+      {/* ===== PUBLIC ===== */}
       <Route path="/careers" element={<Careers />} />
+      <Route path="/open-positions" element={<PublicJobs />} />
       <Route path="/careers/:slug" element={<PublicJob />} />
       <Route path="/careers/:slug/apply" element={<ApplyJob />} />
       <Route path="/application-success" element={<ApplicationSuccess />} />
@@ -234,8 +82,40 @@ const AppRoutes = () => {
       <Route path="/privacy" element={<LegalPrivacy />} />
       <Route path="/terms" element={<LegalTerms />} />
 
-      {/* Fallback Redirect */}
-      <Route path="*" element={<FallbackRedirect />} />
+      {/* ===== UNIVERSAL AUTH (one page for all) ===== */}
+      <Route path="/login" element={<CandidateLogin />} />
+      <Route path="/register" element={<CandidateRegister />} />
+
+      {/* ===== CANDIDATE PROTECTED ===== */}
+      <Route
+        path="/my-applications"
+        element={
+          <CandidateProtectedRoute>
+            <MyApplications />
+          </CandidateProtectedRoute>
+        }
+      />
+
+      {/* ===== ADMIN PROTECTED ===== */}
+      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
+      <Route path="/jobs/new" element={<ProtectedRoute><CreateJob /></ProtectedRoute>} />
+      <Route path="/jobs/create" element={<ProtectedRoute><CreateJob /></ProtectedRoute>} />
+      <Route path="/jobs/:id" element={<ProtectedRoute><JobDetails /></ProtectedRoute>} />
+      <Route path="/candidates" element={<ProtectedRoute><Candidates /></ProtectedRoute>} />
+      <Route path="/candidates/compare" element={<ProtectedRoute><CompareCandidates /></ProtectedRoute>} />
+      <Route path="/candidates/:id" element={<ProtectedRoute><CandidateDetails /></ProtectedRoute>} />
+      <Route path="/interviews" element={<ProtectedRoute><Interviews /></ProtectedRoute>} />
+      <Route path="/interviews/:id" element={<ProtectedRoute><InterviewDetails /></ProtectedRoute>} />
+      <Route path="/offers" element={<ProtectedRoute><Offers /></ProtectedRoute>} />
+      <Route path="/offers/:id" element={<ProtectedRoute><OfferDetails /></ProtectedRoute>} />
+      <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
+      <Route path="/assistant" element={<ProtectedRoute><AIAssistant /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><AdminProfile /></ProtectedRoute>} />
+      <Route path="/admin-contact" element={<ProtectedRoute><AdminContactUs /></ProtectedRoute>} />
+
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/careers" replace />} />
     </Routes>
   );
 };

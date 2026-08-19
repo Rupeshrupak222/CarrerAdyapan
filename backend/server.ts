@@ -17,6 +17,7 @@ const __dirname = path.dirname(__filename);
 import authRoutes from './src/routes/authRoutes.js';
 import jobRoutes from './src/routes/jobRoutes.js';
 import candidateRoutes from './src/routes/candidateRoutes.js';
+import candidateAuthRoutes from './src/routes/candidateAuthRoutes.js';
 import applicationRoutes from './src/routes/applicationRoutes.js';
 import interviewRoutes from './src/routes/interviewRoutes.js';
 import offerRoutes from './src/routes/offerRoutes.js';
@@ -88,6 +89,7 @@ app.get('/api/test', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/candidates', candidateRoutes);
+app.use('/api/candidate-auth', candidateAuthRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/interviews', interviewRoutes);
 app.use('/api/offers', offerRoutes);

@@ -62,8 +62,9 @@ model Candidate {
   firstName       String
   lastName        String
   email           String        @unique
+  password        String?
   phone           String?
-  resumeUrl       String
+  resumeUrl       String        @default("")
   parsedResume    Json?         
   totalExperience Float?        
   education       Json?         
@@ -77,6 +78,7 @@ model Candidate {
   aiScore         Float?        @default(75)
   matchReason     String?
   atsBreakdown    Json?
+  isRegistered    Boolean       @default(false)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   

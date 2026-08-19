@@ -64,16 +64,17 @@ export const publicApplyCandidate = async (req, res) => {
       cgpa: cgpa || ''
     };
 
-    // 1. Original PDF file storage on backend disk
+    // 1. Upload resume to Cloudinary (with local fallback)
     let savedFileUrl = null;
     const host = req.get('host') || 'localhost:5000';
     const baseUrl = `http://${host}`;
 
     if (req.file) {
-      // Saved to backend/uploads/resumes via Multer diskStorage
-      savedFileUrl = `${baseUrl}/uploads/resumes/${req.file.filename}`;
+      // File uploaded via Multer - upload to Cloudinary
+      const { uploadToCloudinaryOrDisk } = await import('../middleware/uploadMiddleware.js');
+      savedFileUrl = await uploadToCloudinaryOrDisk(req.file.path, req.file.filename);
     } else if (resumeDataUrl && typeof resumeDataUrl === 'string' && resumeDataUrl.startsWith('data:')) {
-      // Base64 string saved directly to disk file
+      // Base64 string - save to temp disk then upload to Cloudinary
       try {
         const uploadDir = path.join(__dirname, '../../uploads/resumes');
         if (!fs.existsSync(uploadDir)) {
@@ -87,9 +88,10 @@ export const publicApplyCandidate = async (req, res) => {
         const filePath = path.join(uploadDir, filename);
 
         fs.writeFileSync(filePath, Buffer.from(base64Data, 'base64'));
-        savedFileUrl = `${baseUrl}/uploads/resumes/${filename}`;
+        const { uploadToCloudinaryOrDisk } = await import('../middleware/uploadMiddleware.js');
+        savedFileUrl = await uploadToCloudinaryOrDisk(filePath, filename);
       } catch (e) {
-        logger.error('Base64 disk save error:', e);
+        logger.error('Resume upload error:', e);
       }
     }
 

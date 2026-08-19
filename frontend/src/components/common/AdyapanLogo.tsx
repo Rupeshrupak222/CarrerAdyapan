@@ -27,20 +27,15 @@ const AdyapanLogo = ({ size = 'normal', variant = 'dark', showText = true }) => 
 
       {showText && (
         <div className="flex flex-col">
-          <div className="flex items-center gap-1.5 leading-none">
-            <span className={`font-extrabold tracking-tight ${
-              textSizes[size] || textSizes.normal
-            } ${isDark ? 'text-white' : 'text-slate-900'}`}>
-              ADYAPAN
-            </span>
-            <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-amber-500 text-slate-950 rounded-md shadow-sm">
-              EDUTECH
-            </span>
-          </div>
-          <span className={`text-[9px] font-bold tracking-widest uppercase mt-0.5 ${
+          <span className={`font-extrabold tracking-tight ${
+            textSizes[size] || textSizes.normal
+          } ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            ADYAPAN
+          </span>
+          <span className={`text-[9px] font-bold tracking-widest uppercase -mt-0.5 ${
             isDark ? 'text-amber-400/90' : 'text-amber-600'
           }`}>
-            AI Hiring Platform
+            Careers
           </span>
         </div>
       )}
