@@ -1,13 +1,34 @@
 import prisma from '../config/db.js';
 import { logger } from '../utils/logger.js';
 
+export interface CreateNotificationParams {
+  recipientUserId?: string | null;
+  type?: string;
+  title: string;
+  message: string;
+  link?: string;
+  relatedInterviewId?: string | null;
+  relatedJobId?: string | null;
+}
+
 export const notificationService = {
   /**
    * Create and persist notification in PostgreSQL database using existing Activity model
    */
-  createNotification: async ({ recipientUserId, type = 'GENERAL', title, message, link = '/candidates', relatedInterviewId = null, relatedJobId = null }) => {
+  createNotification: async ({
+    recipientUserId = null,
+    type = 'GENERAL',
+    title,
+    message,
+    link = '/candidates',
+    relatedInterviewId = null,
+    relatedJobId = null,
+  }: CreateNotificationParams) => {
     try {
-      let targetUser = await prisma.user.findFirst({ where: { id: recipientUserId } }).catch(() => null);
+      let targetUser = recipientUserId
+        ? await prisma.user.findFirst({ where: { id: recipientUserId } }).catch(() => null)
+        : null;
+
       if (!targetUser) {
         targetUser = await prisma.user.findFirst().catch(() => null);
       }
@@ -43,9 +64,12 @@ export const notificationService = {
   /**
    * Get user notifications from PostgreSQL database Activity table
    */
-  getUserNotifications: async (userId) => {
+  getUserNotifications: async (userId?: string) => {
     try {
-      let targetUser = await prisma.user.findFirst({ where: { id: userId } }).catch(() => null);
+      let targetUser = userId
+        ? await prisma.user.findFirst({ where: { id: userId } }).catch(() => null)
+        : null;
+
       if (!targetUser) {
         targetUser = await prisma.user.findFirst().catch(() => null);
       }
@@ -59,7 +83,7 @@ export const notificationService = {
       }).catch(() => []);
 
       const notifications = activities.map((a) => {
-        const detailsObj = typeof a.details === 'object' && a.details !== null ? a.details : {};
+        const detailsObj = typeof a.details === 'object' && a.details !== null ? (a.details as any) : {};
         return {
           id: a.id,
           type: a.action,
@@ -88,12 +112,12 @@ export const notificationService = {
   /**
    * Mark single notification as read
    */
-  markAsRead: async (notificationId) => {
+  markAsRead: async (notificationId: string) => {
     try {
       const activity = await prisma.activity.findUnique({ where: { id: notificationId } });
       if (!activity) return { success: false, message: 'Notification not found' };
 
-      const existingDetails = typeof activity.details === 'object' && activity.details !== null ? activity.details : {};
+      const existingDetails = typeof activity.details === 'object' && activity.details !== null ? (activity.details as any) : {};
       const updatedActivity = await prisma.activity.update({
         where: { id: notificationId },
         data: {
@@ -114,9 +138,12 @@ export const notificationService = {
   /**
    * Mark all notifications as read for user
    */
-  markAllAsRead: async (userId) => {
+  markAllAsRead: async (userId?: string) => {
     try {
-      let targetUser = await prisma.user.findFirst({ where: { id: userId } }).catch(() => null);
+      let targetUser = userId
+        ? await prisma.user.findFirst({ where: { id: userId } }).catch(() => null)
+        : null;
+
       if (!targetUser) targetUser = await prisma.user.findFirst().catch(() => null);
       if (!targetUser) return { success: true };
 
@@ -125,7 +152,7 @@ export const notificationService = {
       });
 
       for (const act of activities) {
-        const detailsObj = typeof act.details === 'object' && act.details !== null ? act.details : {};
+        const detailsObj = typeof act.details === 'object' && act.details !== null ? (act.details as any) : {};
         if (!detailsObj.isRead) {
           await prisma.activity.update({
             where: { id: act.id },
