@@ -290,13 +290,19 @@ export const getStoredNotifications = (): StoredNotification[] => {
   const saved = localStorage.getItem(NOTIFICATIONS_KEY);
   if (saved) {
     try {
-      return JSON.parse(saved);
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        // Filter out old legacy mock items
+        return parsed.filter(
+          (n) => n && n.id !== 'notif-1' && n.id !== 'notif-2' && n.id !== 'notif-3' && n.id !== 'notif-4'
+        );
+      }
+      return [];
     } catch (e) {
-      return DEFAULT_NOTIFICATIONS;
+      return [];
     }
   }
-  localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(DEFAULT_NOTIFICATIONS));
-  return DEFAULT_NOTIFICATIONS;
+  return [];
 };
 
 export const addCandidateNotification = (candidateName: string, jobTitle: string, score?: number) => {

@@ -1,6 +1,7 @@
 import prisma from '../config/db.js';
 import { logger } from '../utils/logger.js';
 import { sendInterviewScheduledEmail } from '../services/emailService.js';
+import { notificationService } from '../services/notificationService.js';
 
 // Create Interview
 export const createInterview = async (req, res) => {
@@ -75,6 +76,18 @@ export const createInterview = async (req, res) => {
         });
       } catch (emailErr: any) {
         logger.error('Interview Schedule Email Error:', emailErr?.message || emailErr);
+      }
+
+      try {
+        await notificationService.createNotification({
+          type: 'INTERVIEW_SCHEDULED',
+          title: 'Interview Scheduled',
+          message: `Interview scheduled with ${targetName} for ${targetJob}`,
+          link: '/interviews',
+          relatedInterviewId: interview.id,
+        });
+      } catch (notifErr: any) {
+        logger.warn('Failed to record interview notification:', notifErr?.message || notifErr);
       }
     }
 

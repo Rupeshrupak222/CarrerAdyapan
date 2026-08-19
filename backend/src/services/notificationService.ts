@@ -5,7 +5,7 @@ export const notificationService = {
   /**
    * Create and persist notification in PostgreSQL database using existing Activity model
    */
-  createNotification: async ({ recipientUserId, type = 'INTERVIEW_REMINDER_TODAY', title, message, relatedInterviewId = null }) => {
+  createNotification: async ({ recipientUserId, type = 'GENERAL', title, message, link = '/candidates', relatedInterviewId = null, relatedJobId = null }) => {
     try {
       let targetUser = await prisma.user.findFirst({ where: { id: recipientUserId } }).catch(() => null);
       if (!targetUser) {
@@ -23,7 +23,9 @@ export const notificationService = {
           details: {
             title,
             message,
+            link,
             relatedInterviewId,
+            relatedJobId,
             isRead: false,
           },
           userId: targetUser.id,
@@ -32,8 +34,8 @@ export const notificationService = {
 
       logger.info(`Notification saved in DB Activity table for user ${targetUser.email || targetUser.id}: ${title}`);
       return activity;
-    } catch (error) {
-      logger.error('Failed to create notification in DB Activity table:', error.message);
+    } catch (error: any) {
+      logger.error('Failed to create notification in DB Activity table:', error?.message || error);
       return null;
     }
   },
@@ -51,10 +53,7 @@ export const notificationService = {
       const whereCondition = targetUser ? { userId: targetUser.id } : {};
 
       const activities = await prisma.activity.findMany({
-        where: {
-          ...whereCondition,
-          action: { startsWith: 'INTERVIEW' },
-        },
+        where: whereCondition,
         orderBy: { createdAt: 'desc' },
         take: 30,
       }).catch(() => []);
@@ -66,6 +65,7 @@ export const notificationService = {
           type: a.action,
           title: detailsObj.title || 'Notification',
           message: detailsObj.message || '',
+          link: detailsObj.link || '/candidates',
           relatedInterviewId: detailsObj.relatedInterviewId || null,
           isRead: !!detailsObj.isRead,
           createdAt: a.createdAt,
@@ -79,8 +79,8 @@ export const notificationService = {
         notifications,
         unreadCount,
       };
-    } catch (error) {
-      logger.error('getUserNotifications Error:', error.message);
+    } catch (error: any) {
+      logger.error('getUserNotifications Error:', error?.message || error);
       return { success: true, notifications: [], unreadCount: 0 };
     }
   },
@@ -105,9 +105,9 @@ export const notificationService = {
       });
 
       return { success: true, notification: updatedActivity };
-    } catch (error) {
-      logger.error('markAsRead Error:', error.message);
-      return { success: false, message: error.message };
+    } catch (error: any) {
+      logger.error('markAsRead Error:', error?.message || error);
+      return { success: false, message: error?.message || 'Failed to update' };
     }
   },
 
@@ -121,26 +121,28 @@ export const notificationService = {
       if (!targetUser) return { success: true };
 
       const activities = await prisma.activity.findMany({
-        where: { userId: targetUser.id, action: { startsWith: 'INTERVIEW' } },
+        where: { userId: targetUser.id },
       });
 
       for (const act of activities) {
         const detailsObj = typeof act.details === 'object' && act.details !== null ? act.details : {};
-        await prisma.activity.update({
-          where: { id: act.id },
-          data: {
-            details: {
-              ...detailsObj,
-              isRead: true,
+        if (!detailsObj.isRead) {
+          await prisma.activity.update({
+            where: { id: act.id },
+            data: {
+              details: {
+                ...detailsObj,
+                isRead: true,
+              },
             },
-          },
-        }).catch(() => {});
+          }).catch(() => {});
+        }
       }
 
       return { success: true };
-    } catch (error) {
-      logger.error('markAllAsRead Error:', error.message);
-      return { success: false, message: error.message };
+    } catch (error: any) {
+      logger.error('markAllAsRead Error:', error?.message || error);
+      return { success: false, message: error?.message || 'Failed to update' };
     }
   },
 };

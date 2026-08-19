@@ -5,6 +5,7 @@ import prisma from '../config/db.js';
 import { logger } from '../utils/logger.js';
 import { sendApplicationConfirmationEmail, sendRejectionEmail } from '../services/emailService.js';
 import { extractTextFromBuffer, parseResumeText, calculateAtsScore } from '../services/atsScoringEngine.js';
+import { notificationService } from '../services/notificationService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -228,6 +229,19 @@ export const publicApplyCandidate = async (req, res) => {
       });
     } catch (emailErr: any) {
       logger.error('Application Confirmation Email Error:', emailErr?.message || emailErr);
+    }
+
+    // Save Real Notification in Database Activity Table
+    try {
+      await notificationService.createNotification({
+        type: 'NEW_CANDIDATE_APPLICATION',
+        title: 'New Applicant Received',
+        message: `${candidate.firstName} ${candidate.lastName} applied for ${targetJob?.title || jobTitle || 'Job Opening'} (AI Score: ${Math.round(calculatedAiScore)}%)`,
+        link: `/candidates/${candidate.id}`,
+        relatedJobId: targetJob?.id,
+      });
+    } catch (notifErr: any) {
+      logger.warn('Failed to record new applicant notification:', notifErr?.message || notifErr);
     }
 
     res.status(201).json({

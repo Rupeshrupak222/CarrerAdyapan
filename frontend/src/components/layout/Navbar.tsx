@@ -3,7 +3,30 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { Link, useNavigate } from 'react-router-dom';
 import AdyapanLogo from '../common/AdyapanLogo';
+import { notificationService, NotificationItem } from '../../services/notificationService';
 import { getStoredNotifications, markNotificationsRead } from '../../utils/applicationStore';
+
+const formatRelativeTime = (isoString?: string) => {
+  if (!isoString) return 'Just now';
+  try {
+    const date = new Date(isoString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    if (diffMs < 0) return 'Just now';
+    const diffSec = Math.floor(diffMs / 1000);
+    if (diffSec < 60) return 'Just now';
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin}m ago`;
+    const diffHours = Math.floor(diffMin / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
+  } catch {
+    return 'Just now';
+  }
+};
 
 const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) => {
   const { user, logout } = useAuth();
@@ -20,45 +43,9 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
   const profileRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
-  // Default fallback notifications if store is empty
-  const defaultNotifs = [
-    {
-      id: 'notif-1',
-      title: 'New Applicant Received',
-      message: 'Candidate applied for Business Development Associate (AI Match: 94%)',
-      time: 'Just now',
-      unread: true,
-      link: '/candidates',
-    },
-    {
-      id: 'notif-2',
-      title: 'Interview Scheduled',
-      message: 'Technical round scheduled for Today at 4:00 PM',
-      time: '25m ago',
-      unread: true,
-      link: '/interviews',
-    },
-    {
-      id: 'notif-3',
-      title: 'Offer Letter Generated',
-      message: 'Official 4-Page Offer Letter PDF created & saved to DB',
-      time: '1h ago',
-      unread: false,
-      link: '/offers',
-    },
-    {
-      id: 'notif-4',
-      title: 'New Contact Inquiry',
-      message: 'Candidate submitted inquiry via Contact Us portal',
-      time: '2h ago',
-      unread: false,
-      link: '/admin-contact',
-    },
-  ];
-
   useEffect(() => {
     fetchNotifs();
-    const interval = setInterval(fetchNotifs, 4000);
+    const interval = setInterval(fetchNotifs, 5000);
 
     const handleClickOutside = (event: MouseEvent | TouchEvent) => {
       if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
@@ -82,16 +69,26 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
     };
   }, []);
 
-  const fetchNotifs = () => {
+  const fetchNotifs = async () => {
     try {
-      const list = getStoredNotifications();
-      if (list && Array.isArray(list) && list.length > 0) {
-        setNotifications(list);
+      const res = await notificationService.getNotifications();
+      if (res.success && Array.isArray(res.notifications)) {
+        const mapped = res.notifications.map((n) => ({
+          ...n,
+          time: formatRelativeTime(n.createdAt),
+          unread: !n.isRead,
+        }));
+        setNotifications(mapped);
       } else {
-        setNotifications(defaultNotifs);
+        const list = getStoredNotifications();
+        if (list && Array.isArray(list)) {
+          setNotifications(list.map((n: any) => ({ ...n, unread: n.unread ?? !n.isRead })));
+        } else {
+          setNotifications([]);
+        }
       }
     } catch {
-      setNotifications(defaultNotifs);
+      setNotifications([]);
     }
   };
 
@@ -100,12 +97,9 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
   const handleToggleNotifs = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!showNotifMenu && unreadCount > 0) {
-      try {
-        const updated = markNotificationsRead();
-        setNotifications(updated && updated.length > 0 ? updated : defaultNotifs.map(n => ({ ...n, unread: false })));
-      } catch {
-        setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
-      }
+      notificationService.markAllAsRead().catch(() => {});
+      markNotificationsRead();
+      setNotifications((prev) => prev.map((n) => ({ ...n, unread: false, isRead: true })));
     }
     setShowNotifMenu(!showNotifMenu);
     setShowProfileMenu(false);
