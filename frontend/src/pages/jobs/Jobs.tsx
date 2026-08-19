@@ -108,7 +108,6 @@ const Jobs = () => {
       ? `₹${(job.salaryMin / 100000).toFixed(job.salaryMin % 100000 === 0 ? 0 : 1)}L - ₹${(job.salaryMax / 100000).toFixed(job.salaryMax % 100000 === 0 ? 0 : 1)}L PA`
       : (job.salary || 'Best in Industry');
 
-    const cleanReqs = job.requirements ? job.requirements.replace(/\n+/g, ' • ') : 'Strong Communication, B2C Sales, Client Onboarding, Lead Conversion';
     const cleanResp = job.responsibilities ? job.responsibilities.replace(/\n+/g, ' • ') : 'Drive EdTech sales growth, candidate counseling, revenue targets';
 
     let text = `🚀 WE ARE HIRING AT ADYAPAN EDUTECH PVT. LTD.! 🎓\n\n`;
@@ -124,7 +123,6 @@ const Jobs = () => {
     }
 
     text += `🔑 Key Responsibilities:\n${cleanResp}\n\n`;
-    text += ` Requirements & Qualifications:\n${cleanReqs}\n\n`;
     text += `⚡ FAST-TRACK CANDIDATE APPLICATION LINK:\nApply directly on our Official Public Careers Portal:\n👉 ${publicCareersUrl}\n\n`;
     text += `#Hiring #EdTechJobs #JobOpening #AdyapanEdutech #Careers #Jobs`;
 
@@ -487,19 +485,6 @@ const Jobs = () => {
                     rows={3}
                     value={editFormData.responsibilities}
                     onChange={(e) => setEditFormData({ ...editFormData, responsibilities: e.target.value })}
-                    className={`w-full p-3 rounded-2xl border outline-none font-medium ${
-                      theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
-                    }`}
-                  />
-                </div>
-
-                <div>
-                  <label className="block mb-1 text-slate-500 uppercase text-[10px] tracking-wider font-bold">REQUIREMENTS & QUALIFICATIONS *</label>
-                  <textarea
-                    rows={3}
-                    required
-                    value={editFormData.requirements}
-                    onChange={(e) => setEditFormData({ ...editFormData, requirements: e.target.value })}
                     className={`w-full p-3 rounded-2xl border outline-none font-medium ${
                       theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                     }`}

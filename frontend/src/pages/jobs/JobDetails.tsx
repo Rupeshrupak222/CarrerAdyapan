@@ -132,20 +132,23 @@ const JobDetails = () => {
           </div>
         </div>
 
-        {/* Details & Requirements */}
+        {/* Details & Description */}
         <div className={`rounded-3xl border p-6 shadow-sm space-y-4 ${
           theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
         }`}>
           <h2 className="text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
-            <span className="text-amber-500"></span> Job Overview & Requirements
+            <span className="text-amber-500"></span> Job Overview & Role Details
           </h2>
           <p className="text-xs font-normal text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-line">{job.description}</p>
           
-          <div className={`p-4 rounded-2xl border text-xs leading-relaxed ${
-            theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-white border-amber-200/60 text-slate-800'
-          }`}>
-            <strong className="text-amber-600 dark:text-amber-400 font-bold">Key Requirements:</strong> {job.requirements}
-          </div>
+          {job.responsibilities && (
+            <div className={`p-4 rounded-2xl border text-xs leading-relaxed space-y-1.5 ${
+              theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-white border-amber-200/60 text-slate-800'
+            }`}>
+              <strong className="text-amber-600 dark:text-amber-400 font-bold block mb-1">Key Responsibilities:</strong>
+              <p className="whitespace-pre-line">{job.responsibilities}</p>
+            </div>
+          )}
         </div>
 
         {/* Applicants */}

@@ -98,7 +98,6 @@ const PublicJob = () => {
   }
 
   const responsibilities = parseToList(job.responsibilities);
-  const requirements = parseToList(job.requirements);
   const salaryRange = formatSalary(job.salaryMin, job.salaryMax);
 
   return (
@@ -218,23 +217,6 @@ const PublicJob = () => {
                   <div key={idx} className={`p-3.5 rounded-2xl border flex items-start gap-3 text-xs font-semibold ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-white border-amber-200/60 text-slate-800'
                     }`}>
                     <span className="text-amber-500 font-extrabold text-sm">•</span>
-                    <span className="leading-relaxed">{r}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {requirements.length > 0 && (
-            <div className="space-y-3">
-              <h2 className="text-base font-black flex items-center gap-2 text-slate-900 dark:text-white">
-                <span className="text-emerald-500"></span> Key Requirements & Skills
-              </h2>
-              <div className="space-y-2.5">
-                {requirements.map((r, idx) => (
-                  <div key={idx} className={`p-3.5 rounded-2xl border flex items-start gap-3 text-xs font-semibold ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-slate-50 border-slate-200 text-slate-800'
-                    }`}>
-                    <span className="text-emerald-500 font-extrabold text-sm"></span>
                     <span className="leading-relaxed">{r}</span>
                   </div>
                 ))}
