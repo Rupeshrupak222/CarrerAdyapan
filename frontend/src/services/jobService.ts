@@ -78,20 +78,22 @@ const getDeletedJobIds = (): Set<string> => {
     if (saved) {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed)) {
-        return new Set(parsed.map((s) => String(s).toLowerCase().trim()));
+        const validIds = parsed
+          .map((s) => String(s).toLowerCase().trim())
+          .filter((s) => !s.includes(' ') && s.length < 60);
+        return new Set(validIds);
       }
     }
   } catch (e) { }
   return new Set();
 };
 
-const markJobAsDeleted = (id: string, slug?: string, title?: string) => {
+const markJobAsDeleted = (id: string, slug?: string) => {
   if (typeof window === 'undefined') return;
   try {
     const current = Array.from(getDeletedJobIds());
     if (id) current.push(String(id).toLowerCase().trim());
     if (slug) current.push(String(slug).toLowerCase().trim());
-    if (title) current.push(String(title).toLowerCase().trim());
     localStorage.setItem(DELETED_JOBS_KEY, JSON.stringify(Array.from(new Set(current))));
   } catch (e) { }
 };
@@ -100,8 +102,7 @@ const isJobDeleted = (j: any, deletedIds: Set<string>): boolean => {
   if (!j) return true;
   const idKey = j.id ? String(j.id).toLowerCase().trim() : '';
   const slugKey = j.slug ? String(j.slug).toLowerCase().trim() : '';
-  const titleKey = j.title ? String(j.title).toLowerCase().trim() : '';
-  return deletedIds.has(idKey) || deletedIds.has(slugKey) || deletedIds.has(titleKey);
+  return (idKey && deletedIds.has(idKey)) || (slugKey && deletedIds.has(slugKey));
 };
 
 const getCustomLocalJobs = (): any[] => {
@@ -133,6 +134,9 @@ const saveCustomLocalJob = (job: any) => {
     const deletedIds = getDeletedJobIds();
     if (normalizedJob.id) deletedIds.delete(normalizedJob.id.toLowerCase());
     if (normalizedJob.slug) deletedIds.delete(normalizedJob.slug.toLowerCase());
+    if (job.id) deletedIds.delete(String(job.id).toLowerCase());
+    if (job.slug) deletedIds.delete(String(job.slug).toLowerCase());
+    if (job.title) deletedIds.delete(String(job.title).toLowerCase());
     localStorage.setItem(DELETED_JOBS_KEY, JSON.stringify(Array.from(deletedIds)));
 
     const index = current.findIndex((j) => j.id === normalizedJob.id || j.slug === normalizedJob.slug);
@@ -207,30 +211,14 @@ export const jobService = {
       console.warn(' Get Jobs API error, combining local stores:', error);
     }
 
-    if (hasApiJobs) {
-      const seen = new Set();
-      const jobs = apiJobs
-        .filter((j) => !isJobDeleted(j, deletedIds))
-        .filter((j) => {
-          const key = (j.slug || j.id || j.title || '').toLowerCase().trim();
-          if (seen.has(key)) return false;
-          seen.add(key);
-          return true;
-        });
-
-      const result = { success: true, jobs };
-      cacheService.set(cacheKey, result);
-      return result;
-    }
-
     const localCustom = getCustomLocalJobs();
-    const combined = [...localCustom, ...DEFAULT_PUBLISHED_JOBS];
+    const combined = hasApiJobs ? [...apiJobs, ...localCustom] : [...localCustom, ...DEFAULT_PUBLISHED_JOBS];
 
     const seen = new Set();
     const jobs = combined
       .filter((j) => !isJobDeleted(j, deletedIds))
       .filter((j) => {
-        const key = (j.slug || j.id || j.title || '').toLowerCase().trim();
+        const key = (j.id || j.slug || j.title || '').toLowerCase().trim();
         if (seen.has(key)) return false;
         seen.add(key);
         return true;
@@ -288,8 +276,8 @@ export const jobService = {
     }
   },
 
-  deleteJob: async (id: string, slug?: string, title?: string) => {
-    markJobAsDeleted(id, slug, title);
+  deleteJob: async (id: string, slug?: string, _title?: string) => {
+    markJobAsDeleted(id, slug);
     deleteCustomLocalJob(id);
 
     try {
