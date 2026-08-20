@@ -10,6 +10,7 @@ interface CandidateAuthContextType {
   logout: () => void;
   getMyApplications: () => Promise<CandidateApplication[]>;
   updateProfile: (data: Partial<CandidateUser>) => Promise<{ success: boolean; error?: string }>;
+  setCandidateSession: (candidate: CandidateUser, token?: string) => void;
 }
 
 const CandidateAuthContext = createContext<CandidateAuthContextType | undefined>(undefined);
@@ -127,8 +128,17 @@ export const CandidateAuthProvider: React.FC<{ children: ReactNode }> = ({ child
     }
   };
 
+  const setCandidateSession = (candidateUser: CandidateUser, token?: string) => {
+    if (token) {
+      localStorage.setItem('candidateToken', token);
+      localStorage.setItem('token', token);
+    }
+    setCandidate(candidateUser);
+    localStorage.setItem('candidate', JSON.stringify(candidateUser));
+  };
+
   return (
-    <CandidateAuthContext.Provider value={{ candidate, loading, login, register, logout, getMyApplications, updateProfile }}>
+    <CandidateAuthContext.Provider value={{ candidate, loading, login, register, logout, getMyApplications, updateProfile, setCandidateSession }}>
       {children}
     </CandidateAuthContext.Provider>
   );

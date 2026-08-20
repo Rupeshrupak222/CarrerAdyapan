@@ -715,10 +715,10 @@ const CandidateDetails = () => {
 
         {/* Interview Status Banner Card */}
         <div className={`p-5 rounded-3xl border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${isCompleted
-            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-950 dark:text-emerald-200'
-            : isScheduled
-              ? 'bg-blue-500/10 border-blue-500/20 text-blue-950 dark:text-blue-200'
-              : 'bg-amber-500/10 border-amber-500/20 text-amber-950 dark:text-amber-200'
+          ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-950 dark:text-emerald-200'
+          : isScheduled
+            ? 'bg-blue-500/10 border-blue-500/20 text-blue-950 dark:text-blue-200'
+            : 'bg-amber-500/10 border-amber-500/20 text-amber-950 dark:text-amber-200'
           }`}>
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">

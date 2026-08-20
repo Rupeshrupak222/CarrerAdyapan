@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useCandidateAuth } from '../context/CandidateAuthContext';
 import { useTheme } from '../context/ThemeContext';
-import AdyapanLogo from '../components/common/AdyapanLogo';
+import CandidateNavbar from '../components/layout/CandidateNavbar';
+import Footer from '../components/layout/Footer';
 
 const CandidateRegister = () => {
   const { register, loading } = useCandidateAuth();
-  const { theme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectUrl = searchParams.get('redirect') || '';
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -15,7 +18,7 @@ const CandidateRegister = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    phone: ''
+    phone: '',
   });
   const [error, setError] = useState('');
 
@@ -28,8 +31,8 @@ const CandidateRegister = () => {
     e.preventDefault();
     setError('');
 
-    if (!formData.firstName || !formData.email || !formData.password) {
-      setError('Please fill in all required fields');
+    if (!formData.firstName.trim() || !formData.email.trim() || !formData.password.trim()) {
+      setError('Please fill in all required fields (First Name, Email, Password)');
       return;
     }
 
@@ -44,161 +47,195 @@ const CandidateRegister = () => {
     }
 
     const result = await register({
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
+      firstName: formData.firstName.trim(),
+      lastName: formData.lastName.trim(),
+      email: formData.email.trim().toLowerCase(),
       password: formData.password,
-      phone: formData.phone
+      phone: formData.phone.trim(),
     });
 
     if (result.success) {
-      navigate('/my-applications');
+      if (redirectUrl) {
+        navigate(redirectUrl);
+      } else {
+        navigate('/my-applications');
+      }
     } else {
-      setError(result.error || 'Registration failed');
+      setError(result.error || 'Registration failed. Please check your details.');
     }
   };
 
-  return (
-    <div className={`min-h-screen flex flex-col font-sans antialiased transition-colors ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'}`}>
-      
-      {/* Minimal Header */}
-      <nav className={`px-6 py-4 border-b ${theme === 'dark' ? 'border-slate-800 bg-slate-950' : 'border-slate-200 bg-white'}`}>
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link to="/careers" className="flex items-center gap-2">
-            <AdyapanLogo variant={theme === 'dark' ? 'dark' : 'light'} size="small" />
-          </Link>
-          <Link to="/careers" className={`text-sm font-medium hover:text-amber-500 transition-colors ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
-            ← Back to Careers
-          </Link>
-        </div>
-      </nav>
+  const inputClass = theme === 'dark'
+    ? 'w-full px-4 py-3 rounded-xl text-sm font-semibold bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 transition-all'
+    : 'w-full px-4 py-3 rounded-xl text-sm font-semibold bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all';
 
-      {/* Registration Form */}
-      <div className="flex-1 flex items-center justify-center px-4 py-12">
-        <div className={`w-full max-w-md p-8 rounded-2xl border shadow-xl ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
+  const labelClass = theme === 'dark'
+    ? 'block text-xs font-bold text-slate-200 mb-1.5'
+    : 'block text-xs font-bold text-slate-700 mb-1.5';
+
+  return (
+    <div className={`min-h-screen flex flex-col font-sans antialiased transition-colors relative overflow-x-hidden ${
+      theme === 'dark' ? 'bg-[#0a0a1a] text-slate-100' : 'bg-slate-50/50 text-slate-900'
+    }`}>
+      
+      {/* Glow */}
+      <div className="fixed top-0 right-0 w-[50vw] h-full pointer-events-none bg-gradient-to-l from-orange-400/15 via-amber-200/10 to-transparent dark:from-amber-500/10 dark:to-transparent blur-3xl z-0" />
+
+      {/* Header */}
+      <CandidateNavbar activePage="register" />
+
+      {/* Registration Container */}
+      <main className="flex-1 flex items-center justify-center px-4 py-12 relative z-10">
+        <div className={`w-full max-w-md p-8 sm:p-10 rounded-3xl border shadow-2xl space-y-6 ${
+          theme === 'dark' ? 'bg-slate-900/90 border-slate-800' : 'bg-white border-amber-200/80 shadow-amber-500/10'
+        }`}>
           
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold mb-2">Create Your Account</h1>
-            <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-              Sign up to apply for jobs and track your applications
+          {/* Header Title & Switch Tabs */}
+          <div className="text-center space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 rounded-full text-[10px] font-black uppercase tracking-wider">
+              ● CANDIDATE PORTAL ACCESS
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+              Create Candidate Account
+            </h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {redirectUrl
+                ? 'Create your account to proceed directly with your job application'
+                : 'Sign up to apply for open roles and track your hiring status'}
             </p>
           </div>
 
+          {/* Toggle Tab */}
+          <div className="grid grid-cols-2 p-1 rounded-2xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-black">
+            <span className="py-2.5 text-center rounded-xl bg-amber-500 text-slate-950 shadow-md">
+              Create Account
+            </span>
+            <Link
+              to={`/login${redirectUrl ? `?redirect=${encodeURIComponent(redirectUrl)}` : ''}`}
+              className="py-2.5 text-center text-slate-600 dark:text-slate-400 hover:text-amber-500 transition-colors rounded-xl flex items-center justify-center"
+            >
+              Sign In
+            </Link>
+          </div>
+
           {error && (
-            <div className="mb-6 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm">
-              {error}
+            <div className="p-3.5 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs font-bold flex items-center gap-2">
+              <span>⚠️</span>
+              <span>{error}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className={`block text-xs font-semibold mb-1.5 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-                  First Name <span className="text-red-500">*</span>
-                </label>
+                <label className={labelClass}>First Name *</label>
                 <input
                   type="text"
                   name="firstName"
+                  required
                   value={formData.firstName}
                   onChange={handleChange}
-                  placeholder="John"
-                  className={`w-full px-4 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'}`}
-                  required
+                  placeholder="e.g. Rahul"
+                  className={inputClass}
                 />
               </div>
               <div>
-                <label className={`block text-xs font-semibold mb-1.5 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-                  Last Name
-                </label>
+                <label className={labelClass}>Last Name</label>
                 <input
                   type="text"
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleChange}
-                  placeholder="Doe"
-                  className={`w-full px-4 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'}`}
+                  placeholder="e.g. Sharma"
+                  className={inputClass}
                 />
               </div>
             </div>
 
             <div>
-              <label className={`block text-xs font-semibold mb-1.5 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-                Email Address <span className="text-red-500">*</span>
-              </label>
+              <label className={labelClass}>Email Address *</label>
               <input
                 type="email"
                 name="email"
+                required
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="john@example.com"
-                className={`w-full px-4 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'}`}
-                required
+                placeholder="rahul.sharma@example.com"
+                className={inputClass}
               />
             </div>
 
             <div>
-              <label className={`block text-xs font-semibold mb-1.5 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-                Phone Number
-              </label>
+              <label className={labelClass}>Mobile Number</label>
               <input
                 type="tel"
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                placeholder="+91 98765-43210"
-                className={`w-full px-4 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'}`}
+                placeholder="+91 98765 43210"
+                className={inputClass}
               />
             </div>
 
             <div>
-              <label className={`block text-xs font-semibold mb-1.5 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-                Password <span className="text-red-500">*</span>
-              </label>
+              <label className={labelClass}>Create Password *</label>
               <input
                 type="password"
                 name="password"
+                required
+                minLength={6}
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Min. 6 characters"
-                className={`w-full px-4 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'}`}
-                required
+                className={inputClass}
               />
             </div>
 
             <div>
-              <label className={`block text-xs font-semibold mb-1.5 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-                Confirm Password <span className="text-red-500">*</span>
-              </label>
+              <label className={labelClass}>Confirm Password *</label>
               <input
                 type="password"
                 name="confirmPassword"
+                required
+                minLength={6}
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="Re-enter password"
-                className={`w-full px-4 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'}`}
-                required
+                className={inputClass}
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 mt-2 rounded-xl text-sm font-bold text-white bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-amber-500/20"
+              className="w-full py-4 rounded-2xl text-xs font-black text-slate-950 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:from-amber-300 hover:to-orange-400 transition-all shadow-xl shadow-amber-500/25 uppercase tracking-wider cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99]"
             >
-              {loading ? 'Creating Account...' : 'Create Account'}
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                  <span>Creating Account...</span>
+                </>
+              ) : (
+                <>
+                  <span>
+                    {redirectUrl ? 'Create Account & Continue to Apply →' : 'Register Candidate Account →'}
+                  </span>
+                </>
+              )}
             </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-              Already have an account?{' '}
-              <Link to="/login" className="text-amber-500 font-semibold hover:text-amber-600 transition-colors">
-                Sign In
-              </Link>
-            </p>
-          </div>
+          <p className="text-[11px] text-center text-slate-500 dark:text-slate-400">
+            By signing up, you agree to Adyapan’s{' '}
+            <Link to="/terms" className="underline hover:text-amber-500">Terms of Service</Link>{' '}
+            and{' '}
+            <Link to="/privacy" className="underline hover:text-amber-500">Privacy Policy</Link>.
+          </p>
         </div>
-      </div>
+      </main>
+
+      <Footer isPublic={true} />
+
     </div>
   );
 };
