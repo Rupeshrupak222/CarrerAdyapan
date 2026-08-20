@@ -187,8 +187,8 @@ const PublicJob = () => {
 
   return (
     <div className={`min-h-screen font-sans antialiased transition-colors relative overflow-x-hidden ${theme === 'dark'
-        ? 'bg-gradient-to-l from-amber-950/40 via-amber-950/15 via-30% to-[#0a0a1a] text-white'
-        : 'bg-gradient-to-l from-orange-300/40 via-amber-100/30 via-40% to-white text-slate-900'
+      ? 'bg-gradient-to-l from-amber-950/40 via-amber-950/15 via-30% to-[#0a0a1a] text-white'
+      : 'bg-gradient-to-l from-orange-300/40 via-amber-100/30 via-40% to-white text-slate-900'
       }`}>
 
       {/* Persistent Full-Page Right-to-Left Orange Gradient Glow */}
@@ -367,10 +367,10 @@ const PublicJob = () => {
               <button
                 onClick={toggleSaveJob}
                 className={`p-3.5 rounded-full border transition-all flex items-center justify-center shrink-0 cursor-pointer ${isSaved
-                    ? 'bg-red-500/15 border-red-500 text-red-500'
-                    : theme === 'dark'
-                      ? 'border-slate-700 text-slate-300 hover:border-amber-400 bg-slate-900'
-                      : 'border-slate-300 text-slate-600 hover:border-amber-500 bg-white shadow-sm'
+                  ? 'bg-red-500/15 border-red-500 text-red-500'
+                  : theme === 'dark'
+                    ? 'border-slate-700 text-slate-300 hover:border-amber-400 bg-slate-900'
+                    : 'border-slate-300 text-slate-600 hover:border-amber-500 bg-white shadow-sm'
                   }`}
                 title={isSaved ? 'Job Saved' : 'Save Job'}
                 aria-label="Save Job"

@@ -94,7 +94,8 @@ const createTransporter = (customPort?: number) => {
   } as any);
 };
 
-// Brevo Port 443 HTTPS REST API Dispatcher
+/*
+// Brevo Port 443 HTTPS REST API Dispatcher (Commented out - using SMTP directly)
 const sendViaBrevoApi = async ({ to, subject, html, attachments = [] }: any) => {
   const apiKey = (process.env.BREVO_API_KEY || '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').trim();
   if (!apiKey) return null;
@@ -136,9 +137,10 @@ const sendViaBrevoApi = async ({ to, subject, html, attachments = [] }: any) => 
     return null;
   }
 };
+*/
 
 /**
- * Dispatch Real Email to Candidate Email Address via Brevo Port 443 or Gmail SMTP
+ * Dispatch Real Email to Candidate Email Address via Gmail SMTP
  */
 const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }: { to: string; subject: string; html: string; attachments?: any[] }) => {
   if (!to || typeof to !== 'string' || !to.includes('@')) {
@@ -149,9 +151,11 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
   // Only pass explicit user attachments (e.g. PDF Offer Letter) - do NOT attach logo file to prevent bottom download box
   const allAttachments = [...attachments];
 
-  // 1. Try Brevo Port 443 HTTPS REST API first
+  /*
+  // 1. Try Brevo Port 443 HTTPS REST API first (Disabled per user request)
   const brevoRes = await sendViaBrevoApi({ to, subject, html, attachments: allAttachments });
   if (brevoRes && brevoRes.success) return brevoRes;
+  */
 
   const { user, from } = getSmtpCredentials();
   const configuredPort = parseInt(process.env.SMTP_PORT || '587');
@@ -460,7 +464,10 @@ export const sendOfferLetterEmail = async (offerPayload: any = {}) => {
 export const sendRejectionEmail = async ({ candidateName, candidateEmail, jobTitle }: any) => {
   const targetEmail = candidateEmail;
   const targetName = candidateName || 'Candidate';
-  const targetRole = jobTitle || 'Business Development Associate (BDA)';
+  let targetRole = (jobTitle || '').trim();
+  if (!targetRole || targetRole.toLowerCase().includes('student') || targetRole.toLowerCase().includes('fresher') || targetRole.toLowerCase().includes('applicant')) {
+    targetRole = 'Business Development Associate (BDA)';
+  }
   const companyName = 'Adyapan Edutech Pvt. Ltd.';
 
   const emailHtml = `
@@ -471,21 +478,23 @@ export const sendRejectionEmail = async ({ candidateName, candidateEmail, jobTit
         <p style="margin: 0 0 16px 0;">Dear <strong>${targetName}</strong>,</p>
         
         <p style="margin: 0 0 16px 0;">
-          Thank you for taking the time to apply for the <strong>${targetRole}</strong> position at <strong>${companyName}</strong> and participating in our evaluation process.
+          Thank you for your interest in the <strong>${targetRole}</strong> position at <strong>${companyName}</strong> and for taking the time to participate in our recruitment process.
         </p>
         
         <p style="margin: 0 0 16px 0;">
-          After careful consideration of all applicants and current team requirements, we regret to inform you that we have decided to move forward with other candidates whose experience aligns more closely with the immediate requirements of this role.
+          After carefully reviewing your application and considering the requirements of the position, we regret to inform you that we have decided not to proceed with your application at this time.
         </p>
 
-        <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 8px; padding: 16px; margin: 20px 0;">
-          <p style="margin: 0; color: #92400e; font-size: 13px; font-style: italic;">
-            We genuinely appreciate your interest in joining Adyapan. We will keep your profile in our candidate directory for future openings that match your skills.
-          </p>
-        </div>
+        <p style="margin: 0 0 16px 0;">
+          This decision was made after careful consideration of the qualifications and requirements for the current role and does not diminish the value of your skills and experience.
+        </p>
+
+        <p style="margin: 0 0 16px 0;">
+          We sincerely appreciate the time and effort you invested in the application process and encourage you to explore future opportunities with <strong>${companyName}</strong> that may be a better match for your profile.
+        </p>
 
         <p style="margin: 0 0 24px 0;">
-          We wish you the very best in your job search and professional journey.
+          We wish you continued success in your career and all the very best for your future endeavors.
         </p>
 
         <div style="border-top: 1px solid #e2e8f0; margin-top: 28px; padding-top: 20px; font-size: 14px; color: #475569;">

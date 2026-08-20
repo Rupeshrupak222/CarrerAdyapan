@@ -128,6 +128,7 @@ export const publicApplyCandidate = async (req, res) => {
     }
 
     let candidate = await prisma.candidate.findUnique({ where: { email } });
+    const isRegistered = Boolean(password || authenticatedCandidate || candidate?.isRegistered);
 
     const candidatePayload = {
       firstName,
