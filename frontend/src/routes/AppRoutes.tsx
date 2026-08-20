@@ -20,6 +20,9 @@ import AIAssistant from '../pages/assistant/AIAssistant';
 import AdminProfile from '../pages/profile/AdminProfile';
 import AdminContactUs from '../pages/contact/AdminContactUs';
 
+// Auth Pages
+import Login from '../pages/auth/Login';
+
 // Public Candidate Portal Pages
 import Careers from '../candidate-portal/Careers';
 import PublicJobs from '../candidate-portal/PublicJobs';
@@ -29,6 +32,7 @@ import ApplicationSuccess from '../candidate-portal/ApplicationSuccess';
 import CandidateLogin from '../candidate-portal/CandidateLogin';
 import CandidateRegister from '../candidate-portal/CandidateRegister';
 import MyApplications from '../candidate-portal/MyApplications';
+import AboutUs from '../candidate-portal/AboutUs';
 import ContactUs from '../pages/contact/ContactUs';
 import LegalPrivacy from '../pages/legal/LegalPrivacy';
 import LegalTerms from '../pages/legal/LegalTerms';
@@ -78,12 +82,15 @@ const AppRoutes = () => {
       <Route path="/careers/:slug" element={<PublicJob />} />
       <Route path="/careers/:slug/apply" element={<ApplyJob />} />
       <Route path="/application-success" element={<ApplicationSuccess />} />
+      <Route path="/about" element={<AboutUs />} />
       <Route path="/contact" element={<ContactUs />} />
       <Route path="/privacy" element={<LegalPrivacy />} />
       <Route path="/terms" element={<LegalTerms />} />
 
-      {/* ===== UNIVERSAL AUTH (one page for all) ===== */}
-      <Route path="/login" element={<CandidateLogin />} />
+      {/* ===== AUTH (Original Simple Login) ===== */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/admin/login" element={<Login />} />
+      <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
       <Route path="/register" element={<CandidateRegister />} />
 
       {/* ===== CANDIDATE PROTECTED ===== */}

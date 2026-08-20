@@ -6,29 +6,47 @@ export const autoSeed = async () => {
   try {
     console.log('Checking PostgreSQL Database Seeding Status...');
 
-    // 1. Ensure Default Admin User
+    // 1. Ensure Default Admin User (admin@adyapan.com / Admin@123)
     let defaultUser = await prisma.user.findFirst({ where: { email: 'admin@adyapan.com' } });
     const salt = await bcrypt.genSalt(10);
-    const validHash = await bcrypt.hash('password123', salt);
+    const adminHash = await bcrypt.hash('Admin@123', salt);
     if (!defaultUser) {
       defaultUser = await prisma.user.create({
         data: {
           id: 'demo-user-101',
           name: 'Adyapan Recruiter Admin',
           email: 'admin@adyapan.com',
-          password: validHash,
+          password: adminHash,
           role: 'ADMIN',
           company: 'Adyapan Edutech Pvt Ltd',
         },
       });
-      console.log('Default User Created in PostgreSQL DB');
+      console.log('Default Admin User Created in PostgreSQL DB (admin@adyapan.com / Admin@123)');
     } else {
       await prisma.user.update({
         where: { id: defaultUser.id },
-        data: { password: validHash, role: 'ADMIN' },
+        data: { password: adminHash, role: 'ADMIN' },
       });
-      console.log('Default User Password & Role Updated in PostgreSQL DB');
+      console.log('Default Admin Password & Role Updated in PostgreSQL DB (admin@adyapan.com / Admin@123)');
     }
+
+    // 1.1 Ensure Default Candidate User (user@adyapan.com / User@123)
+    const userPass = await bcrypt.hash('User@123', salt);
+    await prisma.candidate.upsert({
+      where: { email: 'user@adyapan.com' },
+      update: { password: userPass, isRegistered: true },
+      create: {
+        firstName: 'Adyapan',
+        lastName: 'Candidate',
+        email: 'user@adyapan.com',
+        password: userPass,
+        phone: '+91 9876543210',
+        isRegistered: true,
+        resumeUrl: '',
+        skills: ['Communication', 'Sales', 'EdTech'],
+        location: 'Hyderabad',
+      },
+    }).catch(() => null);
 
     const userId = defaultUser.id;
 

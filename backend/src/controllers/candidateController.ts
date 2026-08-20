@@ -1,6 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import prisma from '../config/db.js';
 import { logger } from '../utils/logger.js';
 import { sendApplicationConfirmationEmail, sendRejectionEmail } from '../services/emailService.js';
@@ -17,6 +19,7 @@ export const publicApplyCandidate = async (req, res) => {
       firstName,
       lastName,
       email,
+      password,
       phone,
       resumeUrl,
       resumeDataUrl,
@@ -44,6 +47,8 @@ export const publicApplyCandidate = async (req, res) => {
     if (!firstName || !email) {
       return res.status(400).json({ success: false, message: 'First name and email are required' });
     }
+
+    const cleanEmail = email.trim().toLowerCase();
 
     const skillsArray = Array.isArray(skills)
       ? skills
@@ -99,12 +104,21 @@ export const publicApplyCandidate = async (req, res) => {
     const isDummyUrl = (url) => typeof url === 'string' && url.includes('example.com');
     const safeResumeUrl = savedFileUrl || ((resumeUrl && !isDataUrl(resumeUrl) && !isDummyUrl(resumeUrl)) ? resumeUrl : `${baseUrl}/uploads/resumes/default_resume.pdf`);
 
-    let candidate = await prisma.candidate.findUnique({ where: { email } });
+    let candidate = await prisma.candidate.findUnique({ where: { email: cleanEmail } });
 
-    const candidatePayload = {
+    let hashedPassword = candidate?.password || null;
+    let isRegistered = candidate?.isRegistered || false;
+
+    if (password && typeof password === 'string' && password.trim().length >= 6) {
+      const salt = await bcrypt.genSalt(10);
+      hashedPassword = await bcrypt.hash(password.trim(), salt);
+      isRegistered = true;
+    }
+
+    const candidatePayload: any = {
       firstName,
       lastName: lastName || '',
-      email,
+      email: cleanEmail,
       phone: phone || '',
       resumeUrl: safeResumeUrl, // ONLY FILE URL / PATH STORED IN POSTGRESQL DB!
       skills: skillsArray,
@@ -116,6 +130,7 @@ export const publicApplyCandidate = async (req, res) => {
       location: location || '',
       linkedin: linkedin || '',
       portfolio: portfolio || '',
+      isRegistered,
       parsedResume: {
         resumeUrl: safeResumeUrl,
         resumeFileName: req.file ? req.file.originalname : (req.body.resumeFileName || `${firstName}_${lastName || ''}_Resume.pdf`),
@@ -132,6 +147,10 @@ export const publicApplyCandidate = async (req, res) => {
         currentRoleDescription: req.body.currentRoleDescription || '',
       },
     };
+
+    if (hashedPassword) {
+      candidatePayload.password = hashedPassword;
+    }
 
     if (!candidate) {
       candidate = await prisma.candidate.create({
@@ -246,10 +265,20 @@ export const publicApplyCandidate = async (req, res) => {
       logger.warn('Failed to record new applicant notification:', notifErr?.message || notifErr);
     }
 
+    // Generate candidate authentication token for instant dashboard access
+    const candidateToken = jwt.sign(
+      { id: candidate.id, email: candidate.email, role: 'CANDIDATE' },
+      process.env.JWT_SECRET || 'fallback_secret_key_12345',
+      { expiresIn: '30d' }
+    );
+
+    const { password: _, ...candidateWithoutPassword } = candidate;
+
     res.status(201).json({
       success: true,
       message: 'Application submitted & saved to database successfully! Confirmation email dispatched.',
-      candidate,
+      candidate: candidateWithoutPassword,
+      token: candidateToken,
       application,
     });
   } catch (error) {
