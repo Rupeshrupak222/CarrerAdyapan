@@ -568,10 +568,10 @@ const Offers = () => {
                         setActiveDropdownId(isMenuOpen ? null : offer.id);
                       }}
                       className={`px-3 py-1 text-xs font-bold rounded-xl border transition-all flex items-center gap-1.5 shadow-sm cursor-pointer ${isMenuOpen
-                          ? 'bg-amber-500 text-slate-950 border-amber-600'
-                          : theme === 'dark'
-                            ? 'bg-slate-950 text-slate-200 border-slate-800 hover:border-amber-400'
-                            : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                        ? 'bg-amber-500 text-slate-950 border-amber-600'
+                        : theme === 'dark'
+                          ? 'bg-slate-950 text-slate-200 border-slate-800 hover:border-amber-400'
+                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
                         }`}
                     >
                       <span>Options</span>

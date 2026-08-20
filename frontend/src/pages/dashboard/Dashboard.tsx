@@ -213,7 +213,8 @@ const Dashboard = () => {
               ADYAPAN EDUTECH RECRUITMENT CONTROL CENTER
             </div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Welcome back, {user?.name || 'Recruiter'}! </h1>
+              Welcome back, {user?.name ? (user.name.toLowerCase() === 'admin' ? 'Admin' : user.name.charAt(0).toUpperCase() + user.name.slice(1)) : 'Admin'}!
+            </h1>
             <p className="text-xs text-slate-600 dark:text-slate-300 font-normal">
               AI Screening, Automated Interview Schedules, and Offer Letter Pipeline is fully operational.
             </p>

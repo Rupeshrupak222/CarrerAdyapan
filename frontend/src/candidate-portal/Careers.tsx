@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import CandidateNavbar from '../components/layout/CandidateNavbar';
 import Footer from '../components/layout/Footer';
@@ -276,9 +276,8 @@ const Careers = () => {
       {/* ===== 1. HERO SECTION ===== */}
       <section className="relative overflow-hidden">
         {/* Right-to-Left Orange Fade Gradient Background Layers */}
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-l from-orange-400/30 via-amber-200/15 via-45% to-transparent dark:from-amber-600/20 dark:via-amber-900/10 dark:to-transparent" />
-        <div className="absolute top-0 right-0 w-[650px] h-[650px] rounded-full blur-[120px] pointer-events-none bg-gradient-to-l from-orange-500/40 via-amber-400/25 to-transparent dark:from-amber-500/20 dark:via-amber-800/10" />
-        <div className="absolute bottom-0 right-10 w-[450px] h-[450px] rounded-full blur-[100px] pointer-events-none bg-gradient-to-l from-amber-400/30 via-orange-300/15 to-transparent dark:from-amber-600/15 dark:via-amber-950/10" />
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-l from-orange-400/25 via-amber-200/10 to-transparent dark:from-amber-600/15 dark:via-amber-900/5 dark:to-transparent" />
+        <div className="absolute top-0 right-0 w-[550px] h-[550px] rounded-full blur-3xl pointer-events-none bg-gradient-to-l from-orange-500/20 via-amber-400/10 to-transparent" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-8 py-20 sm:py-28 lg:py-32">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -289,14 +288,14 @@ const Careers = () => {
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1]">
-                Shape India's Education. Elevate Your{' '}
+                Empowering Ambition.{' '}
                 <span className="bg-gradient-to-r from-amber-500 via-amber-400 to-orange-500 bg-clip-text text-transparent">
-                  Career Velocity.
+                  Accelerating Careers.
                 </span>
               </h1>
 
               <p className={`text-base sm:text-lg leading-relaxed max-w-xl ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
-                Join one of India’s fastest-growing talent platforms. Collaborate with visionary educators, build AI-driven recruitment engines, and accelerate your growth with uncapped performance rewards.
+                Whether you are a student launching your first career breakthrough or an experienced professional driving industry innovation, explore high-impact opportunities designed to elevate your future with Adyapan Edutech.
               </p>
 
               {/* Search Box Form */}
@@ -306,7 +305,7 @@ const Careers = () => {
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search jobs (e.g. Sales, React, Telecaller)"
+                    placeholder="Search roles, skills, or keywords (e.g. BDA, Sales, Tech)"
                     className={`w-full px-5 py-4 text-sm font-medium border-0 focus:outline-none ${theme === 'dark' ? 'bg-slate-900 text-white placeholder-slate-500' : 'bg-white text-slate-900 placeholder-slate-400'}`}
                   />
                 </div>
@@ -316,7 +315,7 @@ const Careers = () => {
                     type="text"
                     value={locationTerm}
                     onChange={(e) => setLocationTerm(e.target.value)}
-                    placeholder="Location (e.g. Hyderabad, Remote)"
+                    placeholder="Location (e.g. Hyderabad, Remote, Hybrid)"
                     className={`w-full px-5 py-4 text-sm font-medium border-0 focus:outline-none ${theme === 'dark' ? 'bg-slate-900 text-white placeholder-slate-500' : 'bg-white text-slate-900 placeholder-slate-400'}`}
                   />
                 </div>
@@ -324,7 +323,7 @@ const Careers = () => {
                   type="submit"
                   className="px-7 py-4 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:from-amber-300 hover:to-orange-400 transition-all flex items-center justify-center cursor-pointer font-black text-slate-950 rounded-xl"
                 >
-                  <span>Search Jobs</span>
+                  <span>Explore Jobs</span>
                 </button>
               </form>
             </div>

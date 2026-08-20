@@ -615,6 +615,39 @@ const CandidateDetails = () => {
     return false;
   });
 
+  const getAppliedRole = (cand: any) => {
+    if (!cand) return 'Business Development Associate (BDA)';
+    if (cand.appliedRole && !cand.appliedRole.toLowerCase().includes('student') && !cand.appliedRole.toLowerCase().includes('fresher')) {
+      return cand.appliedRole;
+    }
+    if (cand.jobTitle && !cand.jobTitle.toLowerCase().includes('student') && !cand.jobTitle.toLowerCase().includes('fresher')) {
+      return cand.jobTitle;
+    }
+    if (cand.applications?.[0]?.job?.title) {
+      return cand.applications[0].job.title;
+    }
+    if (cand.applications?.[0]?.jobTitle) {
+      return cand.applications[0].jobTitle;
+    }
+    if (cand.parsedResume?.jobTitle) {
+      return cand.parsedResume.jobTitle;
+    }
+    if (cand.parsedResume?.appliedRole) {
+      return cand.parsedResume.appliedRole;
+    }
+    const skillsList = Array.isArray(cand.skills) ? cand.skills : (typeof cand.skills === 'string' ? cand.skills.split(',') : []);
+    const skillsStr = skillsList.join(' ').toLowerCase();
+    if (skillsStr.includes('react') || skillsStr.includes('node') || skillsStr.includes('full stack') || skillsStr.includes('developer')) {
+      return 'Senior Full Stack Developer';
+    }
+    if (skillsStr.includes('counsel') || skillsStr.includes('academic') || skillsStr.includes('advisor')) {
+      return 'Academic Counsellor / Student Advisor';
+    }
+    return 'Business Development Associate (BDA)';
+  };
+
+  const appliedRole = getAppliedRole(candidate);
+
   const isCompleted = candInterview?.status === 'COMPLETED' || candidate?.status === 'INTERVIEWED' || candidate?.status === 'COMPLETED';
   const isScheduled = candInterview?.status === 'SCHEDULED' || candidate?.status === 'SCHEDULED' || candidate?.status === 'INTERVIEW_SCHEDULED';
 
@@ -639,7 +672,10 @@ const CandidateDetails = () => {
               <div className="space-y-1">
                 <div className="flex flex-wrap items-center gap-2.5">
                   <h1 className="text-2xl font-bold">{firstName} {lastName}</h1>
-                  <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                  <span className="px-3 py-0.5 text-xs font-extrabold rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/40 shadow-sm">
+                    🎯 Applied: {appliedRole}
+                  </span>
+                  <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                     ● {isStudent ? 'Student / Fresher' : `Working (${currentCompanyTenure})`}
                   </span>
                   {isCompleted ? (
@@ -657,7 +693,7 @@ const CandidateDetails = () => {
                   )}
                 </div>
                 <p className="text-xs font-normal text-slate-600 dark:text-slate-300">
-                  {currentPosition} {currentCompany ? (isStudent ? `(${currentCompany})` : `• ${currentCompany}`) : ''}
+                  Applied Role: <strong className="text-amber-600 dark:text-amber-400 font-extrabold">{appliedRole}</strong> • Current Status: <strong className="text-slate-900 dark:text-white font-semibold">{currentPosition}</strong> {currentCompany ? (isStudent ? `(${currentCompany})` : `• ${currentCompany}`) : ''}
                 </p>
                 <div className="flex flex-wrap gap-4 pt-1 text-xs font-normal text-slate-500 dark:text-slate-400">
                   <span>{email}</span>

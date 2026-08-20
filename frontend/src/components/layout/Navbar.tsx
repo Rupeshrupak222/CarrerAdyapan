@@ -382,7 +382,7 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
               </div>
               <div className="hidden sm:block text-left">
                 <p className="text-xs font-extrabold leading-tight" style={{ color: theme === 'dark' ? '#f1f5f9' : '#1a1a2e' }}>
-                  {user?.name || 'Recruiter Lead'}
+                  {user?.name ? (user.name.toLowerCase() === 'admin' ? 'Admin' : user.name.charAt(0).toUpperCase() + user.name.slice(1)) : 'Admin'}
                 </p>
                 <p className="text-[10px] font-semibold" style={{ color: '#f59e0b' }}>
                   {user?.company || 'Adyapan Edutech'}
@@ -404,7 +404,7 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
                   style={theme === 'dark' ? { borderColor: 'rgba(245, 158, 11,0.15)' } : { borderColor: '#f0e8df' }}
                 >
                   <p className="text-xs font-extrabold" style={{ color: theme === 'dark' ? '#f1f5f9' : '#1a1a2e' }}>
-                    {user?.name || 'Recruiter Lead'}
+                    {user?.name ? (user.name.toLowerCase() === 'admin' ? 'Admin' : user.name.charAt(0).toUpperCase() + user.name.slice(1)) : 'Admin'}
                   </p>
                   <p className="text-xs truncate font-medium mt-0.5" style={{ color: '#94a3b8' }}>
                     {user?.email || 'admin@adyapan.com'}
