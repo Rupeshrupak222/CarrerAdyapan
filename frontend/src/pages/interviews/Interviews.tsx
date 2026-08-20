@@ -128,12 +128,18 @@ const Interviews = () => {
 
     const selectedCandidate = candidates.find((c) => c.id === formData.candidateId) || candidates[0];
     const fullCandName = selectedCandidate ? `${selectedCandidate.firstName || ''} ${selectedCandidate.lastName || ''}`.trim() : 'Candidate';
+    const isGeneric = (p: any) => !p || ['student / fresher', 'student', 'fresher', 'applicant'].includes(String(p).toLowerCase().trim());
+    const appliedRole = selectedCandidate?.jobTitle 
+      || selectedCandidate?.appliedRole 
+      || selectedCandidate?.applications?.[0]?.job?.title 
+      || (!isGeneric(selectedCandidate?.currentPosition) ? selectedCandidate?.currentPosition : '') 
+      || 'Business Development Associate';
 
     const newInterviewData = {
       id: `int-${Date.now()}`,
       candidateName: fullCandName,
       candidateEmail: selectedCandidate?.email || 'candidate@example.com',
-      jobTitle: selectedCandidate?.currentPosition || 'Business Development Associate (BDA)',
+      jobTitle: appliedRole,
       candidateId: selectedCandidate?.id,
       applicationId: selectedCandidate?.applications?.[0]?.id || null,
       type: formData.type || 'SALES_PITCH_ROUND',
@@ -157,7 +163,7 @@ const Interviews = () => {
         ...newInterviewData,
         application: {
           candidate: selectedCandidate || { firstName: 'Applicant', lastName: '' },
-          job: { title: selectedCandidate?.currentPosition || 'BDA' },
+          job: { title: appliedRole },
         },
       };
     }

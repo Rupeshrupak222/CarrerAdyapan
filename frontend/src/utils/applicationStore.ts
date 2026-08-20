@@ -48,6 +48,9 @@ export interface StoredCandidate {
   parsedResume?: any;
   aiBreakdown?: any;
   offerDetails?: any;
+  jobTitle?: string;
+  appliedRole?: string;
+  applications?: any[];
 }
 
 export interface StoredNotification {
@@ -199,6 +202,8 @@ export const saveCandidateApplication = (formData: any, jobTitle: string = 'Busi
     email: formData.email,
     phone: formData.phone || '',
     employmentStatus: isStudent ? 'STUDENT' : (formData.employmentStatus || 'EMPLOYED'),
+    jobTitle: jobTitle || 'Business Development Associate (BDA)',
+    appliedRole: jobTitle || 'Business Development Associate (BDA)',
     currentPosition: isStudent ? 'Student / Fresher' : (formData.currentPosition || jobTitle),
     currentCompany: isStudent ? (formData.collegeName || 'University Student') : (formData.currentCompany || 'Independent Candidate'),
     currentCompanyTenure: isStudent ? 'N/A (Student)' : (formData.currentCompanyTenure || 'N/A'),

@@ -139,7 +139,7 @@ const Offers = () => {
               candidateName: `${cand.firstName} ${cand.lastName}`,
               email: cand.email,
               phone: cand.phone,
-              jobTitle: cand.currentPosition || 'Business Development Associate (BDA)',
+              jobTitle: cand.jobTitle || cand.appliedRole || cand.applications?.[0]?.job?.title || (!['student / fresher', 'student', 'fresher', 'applicant'].includes(String(cand.currentPosition || '').toLowerCase().trim()) ? cand.currentPosition : '') || 'Business Development Associate (BDA)',
               salary: cand.offerDetails?.salary || 550000,
               bonus: cand.offerDetails?.bonus || 100000,
               joiningDate: cand.offerDetails?.joiningDate || '2026-09-01',

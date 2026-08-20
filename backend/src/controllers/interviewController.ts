@@ -52,9 +52,31 @@ export const createInterview = async (req, res) => {
       },
     });
 
+    const isGenericJob = (t: any) => !t || ['student / fresher', 'student', 'fresher', 'applicant', 'entry level', 'student applicant'].includes(String(t).toLowerCase().trim());
+
+    let targetJob = !isGenericJob(jobTitle) ? jobTitle : null;
+
+    if (!targetJob && interview?.application?.job?.title) {
+      targetJob = interview.application.job.title;
+    }
+
+    if (!targetJob && (candidateId || applicationId)) {
+      const candidateApp = await prisma.application.findFirst({
+        where: candidateId ? { candidateId } : { id: applicationId },
+        include: { job: true },
+        orderBy: { createdAt: 'desc' },
+      }).catch(() => null);
+      if (candidateApp?.job?.title && !isGenericJob(candidateApp.job.title)) {
+        targetJob = candidateApp.job.title;
+      }
+    }
+
+    if (!targetJob) {
+      targetJob = 'Business Development Associate';
+    }
+
     const targetEmail = candidateEmail || interview?.application?.candidate?.email;
     const targetName = candidateName || (interview?.application?.candidate ? `${interview.application.candidate.firstName} ${interview.application.candidate.lastName}` : 'Candidate');
-    const targetJob = jobTitle || interview?.application?.job?.title || 'Business Development Associate (BDA)';
     const targetCandId = candidateId || interview?.candidateId || interview?.application?.candidateId;
 
     if (targetCandId) {

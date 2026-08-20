@@ -301,11 +301,18 @@ const CandidateDetails = () => {
     if (!candidate) return;
 
     const fullCandName = `${candidate.firstName || ''} ${candidate.lastName || ''}`.trim() || 'Candidate';
+    const isGeneric = (p: any) => !p || ['student / fresher', 'student', 'fresher', 'applicant'].includes(String(p).toLowerCase().trim());
+    const appliedRole = candidate.jobTitle 
+      || candidate.appliedRole 
+      || candidate.applications?.[0]?.job?.title 
+      || (!isGeneric(candidate.currentPosition) ? candidate.currentPosition : '') 
+      || 'Business Development Associate';
+
     const newInterviewData = {
       id: `int-${Date.now()}`,
       candidateName: fullCandName,
       candidateEmail: candidate.email || 'candidate@example.com',
-      jobTitle: candidate.currentPosition || 'Business Development Associate (BDA)',
+      jobTitle: appliedRole,
       candidateId: candidate.id,
       applicationId: candidate.applications?.[0]?.id || null,
       type: scheduleFormData.type || 'SALES_PITCH_ROUND',

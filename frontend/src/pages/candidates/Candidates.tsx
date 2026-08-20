@@ -419,11 +419,18 @@ const Candidates = () => {
     if (!schedulingCandidate) return;
 
     const fullCandName = `${schedulingCandidate.firstName || ''} ${schedulingCandidate.lastName || ''}`.trim() || 'Candidate';
+    const isGeneric = (p: any) => !p || ['student / fresher', 'student', 'fresher', 'applicant'].includes(String(p).toLowerCase().trim());
+    const appliedRole = schedulingCandidate.jobTitle 
+      || schedulingCandidate.appliedRole 
+      || schedulingCandidate.applications?.[0]?.job?.title 
+      || (!isGeneric(schedulingCandidate.currentPosition) ? schedulingCandidate.currentPosition : '') 
+      || 'Business Development Associate';
+
     const newInterviewData = {
       id: `int-${Date.now()}`,
       candidateName: fullCandName,
       candidateEmail: schedulingCandidate.email || 'candidate@example.com',
-      jobTitle: schedulingCandidate.currentPosition || 'Business Development Associate (BDA)',
+      jobTitle: appliedRole,
       candidateId: schedulingCandidate.id,
       applicationId: schedulingCandidate.applications?.[0]?.id || null,
       type: scheduleFormData.type || 'SALES_PITCH_ROUND',
