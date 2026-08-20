@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import AdyapanLogo from '../components/common/AdyapanLogo';
 import Footer from '../components/layout/Footer';
 import { candidateService } from '../services/candidateService';
 import { calculateRealAIScore, addCandidateNotification, saveCandidateApplication } from '../utils/applicationStore';
 import { useTheme } from '../context/ThemeContext';
+import { useCandidateAuth } from '../context/CandidateAuthContext';
 import { toast } from 'react-hot-toast';
 
 const SUGGESTED_SKILLS = [
@@ -25,6 +26,7 @@ const ApplyJob = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { candidate: loggedInCandidate } = useCandidateAuth();
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -63,6 +65,19 @@ const ApplyJob = () => {
     resumeDataUrl: null,
     resumeText: '',
   });
+
+  // Pre-fill form with logged-in candidate's details
+  useEffect(() => {
+    if (loggedInCandidate) {
+      setFormData((prev) => ({
+        ...prev,
+        firstName: loggedInCandidate.firstName || prev.firstName,
+        lastName: loggedInCandidate.lastName || prev.lastName,
+        email: loggedInCandidate.email || prev.email,
+        phone: loggedInCandidate.phone || prev.phone,
+      }));
+    }
+  }, [loggedInCandidate]);
 
   const [customSkill, setCustomSkill] = useState('');
   const [submitting, setSubmitting] = useState(false);

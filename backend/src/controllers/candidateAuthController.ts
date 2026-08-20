@@ -219,13 +219,28 @@ export const updateCandidateProfile = async (req: any, res: any) => {
 export const getMyApplications = async (req: any, res: any) => {
   try {
     const candidateId = req.candidate?.id;
+    const candidateEmail = req.candidate?.email;
 
     if (!candidateId) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
 
+    // Find all candidate records that share the same email (handles pre-registration applications)
+    const candidateIds = [candidateId];
+    if (candidateEmail) {
+      const matchingCandidates = await prisma.candidate.findMany({
+        where: { email: candidateEmail },
+        select: { id: true }
+      });
+      for (const c of matchingCandidates) {
+        if (!candidateIds.includes(c.id)) {
+          candidateIds.push(c.id);
+        }
+      }
+    }
+
     const applications = await prisma.application.findMany({
-      where: { candidateId },
+      where: { candidateId: { in: candidateIds } },
       include: {
         job: {
           select: {

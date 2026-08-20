@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import jwt from 'jsonwebtoken';
 import prisma from '../config/db.js';
 import { logger } from '../utils/logger.js';
 import { sendApplicationConfirmationEmail, sendRejectionEmail } from '../services/emailService.js';
@@ -9,6 +10,22 @@ import { notificationService } from '../services/notificationService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Helper: Extract logged-in candidate from JWT (optional, does not block if absent)
+const getAuthenticatedCandidateId = (req: any): string | null => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret_key_12345') as any;
+    if (decoded && decoded.id && decoded.role === 'CANDIDATE') {
+      return decoded.id;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
 
 // Public Candidate Application (No Auth Required)
 export const publicApplyCandidate = async (req, res) => {
@@ -99,6 +116,14 @@ export const publicApplyCandidate = async (req, res) => {
     const isDummyUrl = (url) => typeof url === 'string' && url.includes('example.com');
     const safeResumeUrl = savedFileUrl || ((resumeUrl && !isDataUrl(resumeUrl) && !isDummyUrl(resumeUrl)) ? resumeUrl : `${baseUrl}/uploads/resumes/default_resume.pdf`);
 
+    // Check if the user is logged in as a candidate (optional auth)
+    const authenticatedCandidateId = getAuthenticatedCandidateId(req);
+    let authenticatedCandidate: any = null;
+
+    if (authenticatedCandidateId) {
+      authenticatedCandidate = await prisma.candidate.findUnique({ where: { id: authenticatedCandidateId } });
+    }
+
     let candidate = await prisma.candidate.findUnique({ where: { email } });
 
     const candidatePayload = {
@@ -133,11 +158,28 @@ export const publicApplyCandidate = async (req, res) => {
       },
     };
 
-    if (!candidate) {
+    // If logged-in candidate is applying with their OWN email, use their record directly
+    if (authenticatedCandidate && authenticatedCandidate.email === email) {
+      candidate = await prisma.candidate.update({
+        where: { id: authenticatedCandidate.id },
+        data: candidatePayload,
+      });
+    } else if (authenticatedCandidate && authenticatedCandidate.email !== email) {
+      // Logged-in candidate applying with a DIFFERENT email:
+      // Update the authenticated candidate's profile with the new application data
+      // so the application appears in their dashboard
+      const { email: _formEmail, ...payloadWithoutEmail } = candidatePayload;
+      candidate = await prisma.candidate.update({
+        where: { id: authenticatedCandidate.id },
+        data: payloadWithoutEmail,
+      });
+    } else if (!candidate) {
+      // No logged-in candidate, no existing record — create new
       candidate = await prisma.candidate.create({
         data: candidatePayload,
       });
     } else {
+      // No logged-in candidate, but record exists by email — update existing
       candidate = await prisma.candidate.update({
         where: { id: candidate.id },
         data: candidatePayload,
