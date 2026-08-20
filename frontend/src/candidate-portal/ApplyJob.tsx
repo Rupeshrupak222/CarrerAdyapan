@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import CandidateNavbar from '../components/layout/CandidateNavbar';
 import Footer from '../components/layout/Footer';
@@ -7,7 +6,6 @@ import { candidateService } from '../services/candidateService';
 import { jobService } from '../services/jobService';
 import { calculateRealAIScore, addCandidateNotification, saveCandidateApplication } from '../utils/applicationStore';
 import { useTheme } from '../context/ThemeContext';
-import { useCandidateAuth } from '../context/CandidateAuthContext';
 import { useCandidateAuth } from '../context/CandidateAuthContext';
 import { toast } from 'react-hot-toast';
 
