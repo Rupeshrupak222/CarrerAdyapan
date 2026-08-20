@@ -29,22 +29,7 @@ const ApplyJob = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
-  const { candidate } = useCandidateAuth();
-
-  const [job, setJob] = useState<any>(null);
-  const [loadingJob, setLoadingJob] = useState(true);
-
-  /*
-  // Authentication Gate: Check if candidate is logged in before accessing this page (Commented out for future use)
-  useEffect(() => {
-    const token = localStorage.getItem('candidateToken') || localStorage.getItem('token');
-    const savedCandidate = localStorage.getItem('candidate');
-    if (!candidate && !token && !savedCandidate) {
-      toast('Please create an account or sign in before applying', { icon: '🔐' });
-      navigate(`/register?redirect=${encodeURIComponent(window.location.pathname)}`, { replace: true });
-    }
-  }, [candidate, navigate]);
-  */
+  const { candidate: loggedInCandidate } = useCandidateAuth();
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -84,28 +69,30 @@ const ApplyJob = () => {
     resumeText: '',
   });
 
+  // Pre-fill form with logged-in candidate's details
+  useEffect(() => {
+    if (loggedInCandidate) {
+      setFormData((prev) => ({
+        ...prev,
+        firstName: loggedInCandidate.firstName || prev.firstName,
+        lastName: loggedInCandidate.lastName || prev.lastName,
+        email: loggedInCandidate.email || prev.email,
+        phone: loggedInCandidate.phone || prev.phone,
+        location: loggedInCandidate.location || prev.location,
+        linkedin: loggedInCandidate.linkedin || prev.linkedin,
+        portfolio: loggedInCandidate.portfolio || prev.portfolio,
+        skills: loggedInCandidate.skills?.length ? loggedInCandidate.skills : prev.skills,
+        currentCompany: loggedInCandidate.currentCompany || prev.currentCompany,
+        currentPosition: loggedInCandidate.currentPosition || prev.currentPosition,
+      }));
+    }
+  }, [loggedInCandidate]);
+
   const [customSkill, setCustomSkill] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
-  // Auto-fill logged-in candidate data
-  useEffect(() => {
-    if (candidate) {
-      setFormData((prev) => ({
-        ...prev,
-        firstName: candidate.firstName || prev.firstName,
-        lastName: candidate.lastName || prev.lastName,
-        email: candidate.email || prev.email,
-        phone: candidate.phone || prev.phone,
-        location: candidate.location || prev.location,
-        linkedin: candidate.linkedin || prev.linkedin,
-        portfolio: candidate.portfolio || prev.portfolio,
-        skills: candidate.skills && candidate.skills.length ? candidate.skills : prev.skills,
-        currentCompany: candidate.currentCompany || prev.currentCompany,
-        currentPosition: candidate.currentPosition || prev.currentPosition,
-      }));
-    }
-  }, [candidate]);
+  const [job, setJob] = useState<any>(null);
+  const [loadingJob, setLoadingJob] = useState(true);
 
   useEffect(() => {
     fetchJobInfo();
@@ -320,7 +307,7 @@ const ApplyJob = () => {
       <main className="max-w-4xl mx-auto px-4 sm:px-8 py-10 relative z-10 space-y-8">
 
         {/* Logged in candidate status banner */}
-        {candidate && (
+        {loggedInCandidate && (
           <div className="p-4 sm:p-5 rounded-3xl border bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs font-bold shadow-md">
             <div className="flex items-center gap-3">
               <span className="w-10 h-10 rounded-2xl bg-emerald-500 text-slate-950 flex items-center justify-center font-black text-base shrink-0 shadow-md">
@@ -328,10 +315,10 @@ const ApplyJob = () => {
               </span>
               <div>
                 <p className="font-extrabold text-sm text-slate-900 dark:text-white">
-                  Logged in as {candidate.firstName} {candidate.lastName}
+                  Logged in as {loggedInCandidate.firstName} {loggedInCandidate.lastName}
                 </p>
                 <p className="text-[11px] text-slate-600 dark:text-slate-300 font-medium">
-                  {candidate.email} • Your application details are pre-filled and will automatically link to your candidate dashboard.
+                  {loggedInCandidate.email} • Your application details are pre-filled and will automatically link to your candidate dashboard.
                 </p>
               </div>
             </div>
@@ -439,7 +426,7 @@ const ApplyJob = () => {
                 <input
                   type="email"
                   required
-                  disabled={Boolean(candidate)}
+                  disabled={Boolean(loggedInCandidate)}
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   placeholder="rahul.sharma@example.com"
