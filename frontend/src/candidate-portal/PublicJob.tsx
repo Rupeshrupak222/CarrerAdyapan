@@ -185,7 +185,7 @@ export const PublicJob: React.FC = () => {
   return (
     <SiteShell>
       <main className="bg-[#faf7f2] dark:bg-[#121110] text-stone-900 dark:text-stone-100 min-h-screen py-8 sm:py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
           {/* ── BREADCRUMB & BACK LINK ── */}
           <div className="flex items-center justify-between">

@@ -441,29 +441,43 @@ export const PublicJobs: React.FC = () => {
         <div className="absolute top-80 right-10 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
 
         {/* ── HERO SECTION: LARGE VISUAL TWO-COLUMN HERO ── */}
-        <section className="pt-12 pb-16 relative z-10 border-b border-stone-200/60 dark:border-stone-850">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="pt-12 pb-16 relative z-10 border-b border-stone-200/60 dark:border-stone-850 overflow-hidden bg-[#fdfbf7] dark:bg-[#141312]">
+          
+          {/* Full-Cover Prominently Visible Background Image (Darker & High Contrast) */}
+          <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none">
+            <img
+              src="/hero-option-4-celebration.jpg"
+              alt="Adyapan Celebration Workplace Atmosphere"
+              className="w-full h-full object-cover object-center scale-100 opacity-85 dark:opacity-60 brightness-90 contrast-110"
+            />
+            {/* Dark contrast & soft readability overlays */}
+            <div className="absolute inset-0 bg-black/15 dark:bg-black/50" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#fdfbf7]/85 via-[#fdfbf7]/50 to-transparent dark:from-[#141312]/90 dark:via-[#141312]/60 dark:to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#fdfbf7]/30 via-transparent to-[#fdfbf7]/90 dark:from-[#141312]/40 dark:via-transparent dark:to-[#141312]/90" />
+          </div>
+
+          <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
 
               {/* LEFT COLUMN: HEADLINE, NARRATIVE & SEARCH FORM (7 Cols) */}
               <div className="lg:col-span-7 space-y-6">
 
                 {/* Direct Opportunities Pill */}
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-400 font-extrabold text-xs tracking-wider uppercase">
-                  <Sparkles size={14} className="text-amber-500 fill-amber-500" />
-                  <span>DIRECT OPPORTUNITIES</span>
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-900 dark:text-amber-300 font-black text-xs tracking-wider uppercase shadow-xs">
+                  <Sparkles size={14} className="text-amber-600 dark:text-amber-400 fill-amber-500" />
+                  <span>DIRECT ADYAPAN OPENINGS · FAST-TRACK HIRING · TOP COMPENSATION</span>
                 </div>
 
                 {/* Main Headline */}
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-stone-900 dark:text-white tracking-tight leading-[1.08]">
-                  Explore <br />
-                  <span className="text-amber-500">opportunities</span> <br />
-                  that fit you.
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-[76px] font-black text-stone-950 dark:text-white tracking-tight leading-[1.05]">
+                  Unlock your <br />
+                  <span className="text-amber-600 dark:text-amber-400">career potential</span> <br />
+                  at Adyapan.
                 </h1>
 
-                {/* Subtitle */}
-                <p className="text-stone-600 dark:text-stone-300 text-sm sm:text-base leading-relaxed max-w-xl font-medium">
-                  Find the right role that matches your skills, ambitions, and future goals. Fast-track your corporate growth with India's fastest expanding edtech community.
+                {/* Subtitle - Dark & Crisp */}
+                <p className="text-base sm:text-lg lg:text-xl text-stone-900 dark:text-stone-100 leading-relaxed max-w-2xl font-semibold">
+                  Discover high-impact roles across tech, sales, growth, operations, and leadership. Experience instant AI ATS resume screening, direct founder access, uncapped incentives, and fast-track promotions.
                 </p>
 
                 {/* ── LARGE SEARCH BAR (ROUNDED CONTAINER WITH DROPDOWNS) ── */}
@@ -627,13 +641,13 @@ export const PublicJobs: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="absolute -bottom-4 -left-2 sm:-left-6 z-20 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-stone-200/80 dark:border-stone-800 px-4 py-2.5 rounded-2xl shadow-xl flex items-center gap-3 animate-float">
-                  <div className="w-9 h-9 rounded-xl bg-orange-500/15 text-orange-600 flex items-center justify-center font-black">
-                    <UsersRound size={18} />
+                <div className="absolute -bottom-4 -left-2 sm:-left-6 z-20 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-amber-200 dark:border-amber-800/40 px-4 py-2.5 rounded-2xl shadow-xl flex items-center gap-3 animate-float bento-glow-orange">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center font-black shadow-md">
+                    <Zap size={18} />
                   </div>
                   <div>
-                    <b className="text-xs font-black text-stone-900 dark:text-white block">500+</b>
-                    <small className="text-[10px] font-semibold text-stone-500 dark:text-stone-400">Hiring Partners</small>
+                    <b className="text-xs font-black text-stone-900 dark:text-white block">48 - 72 Hours</b>
+                    <small className="text-[10px] font-semibold text-stone-500 dark:text-stone-400">Fast-Track Hiring</small>
                   </div>
                 </div>
 
@@ -645,7 +659,7 @@ export const PublicJobs: React.FC = () => {
 
         {/* ── MAIN JOBS STREAM & 280PX FILTER SIDEBAR ── */}
         <section className="py-12 relative z-10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
               {/* ── LEFT COLUMN: 280PX FILTER SIDEBAR (4 Cols / 280px) ── */}
@@ -731,28 +745,6 @@ export const PublicJobs: React.FC = () => {
                   </div>
                 </div>
 
-                {/* ── JOB ALERT CARD (WARM ORANGE/CREAM CARD) ── */}
-                <div className="p-6 rounded-3xl bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 text-white shadow-xl relative overflow-hidden space-y-4">
-                  <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
-                    <Zap size={22} className="fill-white text-white" />
-                  </div>
-
-                  <div className="space-y-1">
-                    <h4 className="font-black text-lg text-white">Get Job Alerts</h4>
-                    <p className="text-xs text-white/90 leading-relaxed font-medium">
-                      Create personalized alerts and receive instant notifications when new jobs match your preferences.
-                    </p>
-                  </div>
-
-                  <button
-                    onClick={() => toast.success('Job alerts subscribed for new openings!')}
-                    className="w-full py-3 px-4 rounded-2xl bg-white hover:bg-stone-100 text-stone-900 font-extrabold text-xs shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <span>Create Alert</span>
-                    <ArrowRight size={14} />
-                  </button>
-                </div>
-
               </div>
 
               {/* ── RIGHT COLUMN: JOB RESULTS HEADER & DYNAMIC CARDS (8-9 Cols) ── */}
@@ -789,8 +781,8 @@ export const PublicJobs: React.FC = () => {
                       <button
                         onClick={() => setViewMode('list')}
                         className={`p-2 rounded-xl transition-all cursor-pointer ${viewMode === 'list'
-                            ? 'bg-amber-500 text-white shadow-md'
-                            : 'text-stone-500 hover:text-stone-900 dark:hover:text-white'
+                          ? 'bg-amber-500 text-white shadow-md'
+                          : 'text-stone-500 hover:text-stone-900 dark:hover:text-white'
                           }`}
                         title="List View"
                       >
@@ -799,8 +791,8 @@ export const PublicJobs: React.FC = () => {
                       <button
                         onClick={() => setViewMode('grid')}
                         className={`p-2 rounded-xl transition-all cursor-pointer ${viewMode === 'grid'
-                            ? 'bg-amber-500 text-white shadow-md'
-                            : 'text-stone-500 hover:text-stone-900 dark:hover:text-white'
+                          ? 'bg-amber-500 text-white shadow-md'
+                          : 'text-stone-500 hover:text-stone-900 dark:hover:text-white'
                           }`}
                         title="Grid View"
                       >
@@ -925,8 +917,8 @@ export const PublicJobs: React.FC = () => {
                                   <button
                                     onClick={(e) => toggleSave(job.id || job.slug, e)}
                                     className={`p-2 rounded-xl border transition-all cursor-pointer ${isSaved
-                                        ? 'bg-rose-500/15 border-rose-500 text-rose-600'
-                                        : 'border-stone-200 dark:border-stone-800 text-stone-400 hover:text-amber-500 hover:border-amber-500 bg-stone-50 dark:bg-stone-850'
+                                      ? 'bg-rose-500/15 border-rose-500 text-rose-600'
+                                      : 'border-stone-200 dark:border-stone-800 text-stone-400 hover:text-amber-500 hover:border-amber-500 bg-stone-50 dark:bg-stone-850'
                                       }`}
                                     title={isSaved ? 'Job Saved' : 'Save Job'}
                                   >
@@ -967,8 +959,8 @@ export const PublicJobs: React.FC = () => {
                         key={pageNum}
                         onClick={() => setCurrentPage(pageNum)}
                         className={`w-10 h-10 rounded-2xl font-black text-xs transition-all flex items-center justify-center cursor-pointer ${currentPage === pageNum
-                            ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/25 scale-105'
-                            : 'bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:bg-amber-500/10 hover:text-amber-600'
+                          ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/25 scale-105'
+                          : 'bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:bg-amber-500/10 hover:text-amber-600'
                           }`}
                       >
                         {pageNum}

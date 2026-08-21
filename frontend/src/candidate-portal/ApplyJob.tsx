@@ -372,7 +372,7 @@ export const ApplyJob: React.FC = () => {
 
         {/* ── COMPACT APPLICATION HERO ── */}
         <section className="pt-8 pb-8 relative z-10 border-b border-stone-200/60 dark:border-stone-850 bg-[#fdfbf7] dark:bg-[#141312]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
 
               {/* Left Role Details */}
@@ -383,7 +383,7 @@ export const ApplyJob: React.FC = () => {
                 </div>
 
                 <div>
-                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-stone-900 dark:text-white tracking-tight">
+                  <h1 className="text-2xl sm:text-3xl lg:text-5xl font-black text-stone-900 dark:text-white tracking-tight">
                     Build your next career move.
                   </h1>
                   <p className="text-xs sm:text-sm text-stone-500 font-semibold pt-0.5">
@@ -442,7 +442,7 @@ export const ApplyJob: React.FC = () => {
 
         {/* ── GLOBAL APPLICATION PROGRESS TIMELINE ── */}
         <section className="py-6 border-b border-stone-200/60 dark:border-stone-850 bg-white/70 dark:bg-stone-900/70 backdrop-blur-md sticky top-[64px] z-30 shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
             
             {/* Desktop Horizontal Timeline */}
             <div className="hidden lg:flex items-center justify-between relative">
@@ -528,7 +528,7 @@ export const ApplyJob: React.FC = () => {
         </section>
 
         {/* ── TWO-COLUMN MAIN APPLICATION LAYOUT ── */}
-        <section className="pt-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="pt-10 max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
             {/* ── LEFT COLUMN: MAIN CURRENT STEP FORM (65% / 8 Cols) ── */}
