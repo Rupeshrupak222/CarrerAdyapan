@@ -50,7 +50,16 @@ export const createJob = async (req, res) => {
     }
     const targetUserId = userRecord.id;
 
-    const safeRequirements = requirements || responsibilities || description || 'Strong communication, relevant domain skills, and target orientation.';
+    const toStringValue = (val: any) => {
+      if (!val) return '';
+      if (Array.isArray(val)) return val.join('\n');
+      if (typeof val === 'object') return JSON.stringify(val);
+      return String(val);
+    };
+
+    const safeRequirements = toStringValue(requirements) || toStringValue(responsibilities) || toStringValue(description) || 'Strong communication, relevant domain skills, and target orientation.';
+    const safeResponsibilities = toStringValue(responsibilities);
+    const safeDescription = toStringValue(description);
 
     // Check if default sample job or duplicate unedited job exists to prevent copy creation
     const existingDefault = await prisma.job.findFirst({
@@ -71,9 +80,9 @@ export const createJob = async (req, res) => {
         data: {
           title,
           department,
-          description,
+          description: safeDescription,
           requirements: safeRequirements,
-          responsibilities: responsibilities || '',
+          responsibilities: safeResponsibilities,
           type: type || 'FULL_TIME',
           experienceLevel: experienceLevel || 'MID',
           salaryMin: salaryMin ? parseFloat(salaryMin) : null,
@@ -90,9 +99,9 @@ export const createJob = async (req, res) => {
           title,
           slug,
           department,
-          description,
+          description: safeDescription,
           requirements: safeRequirements,
-          responsibilities: responsibilities || '',
+          responsibilities: safeResponsibilities,
           type: type || 'FULL_TIME',
           experienceLevel: experienceLevel || 'MID',
           salaryMin: salaryMin ? parseFloat(salaryMin) : null,

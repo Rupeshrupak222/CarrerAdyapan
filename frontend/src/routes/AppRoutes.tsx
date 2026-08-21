@@ -80,15 +80,21 @@ const AppRoutes = () => {
       <Route path="/" element={<Careers />} />
       <Route path="/careers" element={<Careers />} />
       <Route path="/open-positions" element={<PublicJobs />} />
+      <Route path="/jobs-all" element={<PublicJobs />} />
       <Route path="/careers/jobs" element={<PublicJobs />} />
       <Route path="/careers/:slug" element={<PublicJob />} />
       <Route path="/careers/:slug/apply" element={<ApplyJob />} />
       <Route path="/open-positions/:slug" element={<PublicJob />} />
       <Route path="/open-positions/:slug/apply" element={<ApplyJob />} />
+      <Route path="/job/:slug" element={<PublicJob />} />
+      <Route path="/apply/:slug" element={<ApplyJob />} />
       <Route path="/application-success" element={<ApplicationSuccess />} />
       <Route path="/about" element={<AboutUs />} />
+      <Route path="/about-us" element={<AboutUs />} />
+      <Route path="/life" element={<LifeAtAdyapan />} />
       <Route path="/life-at-adyapan" element={<LifeAtAdyapan />} />
       <Route path="/contact" element={<ContactUs />} />
+      <Route path="/contact-us" element={<ContactUs />} />
       <Route path="/privacy" element={<LegalPrivacy />} />
       <Route path="/terms" element={<LegalTerms />} />
 
