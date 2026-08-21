@@ -4,6 +4,14 @@ import AdyapanLogo from '../common/AdyapanLogo';
 import { useTheme } from '../../context/ThemeContext';
 import { useCandidateAuth } from '../../context/CandidateAuthContext';
 
+interface NavLinkItem {
+  label: string;
+  path: string;
+  key: string;
+  icon: string;
+  isHash?: boolean;
+}
+
 interface CandidateNavbarProps {
   activePage?: 'careers' | 'jobs' | 'about' | 'applications' | 'contact' | 'login' | 'register' | string;
 }
@@ -64,16 +72,14 @@ const CandidateNavbar: React.FC<CandidateNavbarProps> = ({ activePage }) => {
     };
   }, [mobileDrawerOpen]);
 
-  const navLinks = [
+  const navLinks: NavLinkItem[] = [
     { label: 'Jobs', path: '/open-positions', key: 'jobs', icon: '💼' },
-    { label: 'Life at Adyapan', path: '/careers#life', key: 'life', isHash: true, icon: '🌟' },
-    { label: 'Career Pathways', path: '/careers#journey', key: 'journey', isHash: true, icon: '🚀' },
-    { label: 'Departments', path: '/careers#categories', key: 'departments', isHash: true, icon: '🏢' },
+    { label: 'Life at Adyapan', path: '/life-at-adyapan', key: 'life', icon: '🌟' },
     { label: 'About Us', path: '/about', key: 'about', icon: '📖' },
     { label: 'Contact', path: '/contact', key: 'contact', icon: '📞' },
   ];
 
-  const isLinkActive = (link: typeof navLinks[0]) => {
+  const isLinkActive = (link: NavLinkItem) => {
     if (activePage && activePage === link.key) return true;
     if (link.isHash) {
       return location.pathname === '/careers' && location.hash === link.path.replace('/careers', '');

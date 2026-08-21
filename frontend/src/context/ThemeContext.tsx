@@ -19,6 +19,8 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const root = document.documentElement;
     const body = document.body;
 
+    root.dataset.theme = theme;
+
     if (theme === 'dark') {
       root.classList.add('dark');
       body.classList.add('dark');
@@ -34,9 +36,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      <div className={`min-h-screen transition-colors ${
-        theme === 'dark' ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-800'
-      }`}>
+      <div className="min-h-screen">
         {children}
       </div>
     </ThemeContext.Provider>

@@ -1,873 +1,1328 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import CandidateNavbar from '../components/layout/CandidateNavbar';
-import Footer from '../components/layout/Footer';
-import { useTheme } from '../context/ThemeContext';
-import { useCandidateAuth } from '../context/CandidateAuthContext';
-import { jobService } from '../services/jobService';
+import { Link } from 'react-router-dom';
+import {
+  ArrowRight,
+  Award,
+  BookOpen,
+  Briefcase,
+  BriefcaseBusiness,
+  Building2,
+  Calendar,
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  Clock3,
+  Compass,
+  Flame,
+  Globe2,
+  GraduationCap,
+  Heart,
+  HelpCircle,
+  Laptop,
+  Mail,
+  MapPin,
+  MessageSquare,
+  Palmtree,
+  PartyPopper,
+  Phone,
+  Quote,
+  Rocket,
+  Search,
+  ShieldCheck,
+  Smile,
+  Sparkles,
+  Star,
+  Target,
+  TrendingUp,
+  Trophy,
+  User,
+  UsersRound,
+  Zap,
+} from 'lucide-react';
+import logo from '../assets/adyapan-logo.png';
+import SiteShell from '../components/layout/SiteShell';
+import { useScrollReveal } from '../hooks/useScrollReveal';
+import VideoReelCard from './components/VideoReelCard';
 
-const CAREER_JOURNEYS = [
-  {
-    title: 'Students and new grads',
-    stepNumber: '01',
-    tag: 'EARLY CAREER & INTERNSHIPS',
-    description:
-      'Launch your career with high-impact learning. We offer fast-paced paid internships, structured mentorship from senior leaders, and a direct conversion path into full-time roles across EdTech sales, technology, and operations.',
-    highlights: [
-      'Comprehensive 1-on-1 mentorship',
-      'Real project ownership from Day 1',
-      'Fast-track performance appraisals',
-      'Competitive stipend & incentives',
-    ],
-    cta: 'Explore Early Career Roles',
-    image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&h=1000&fit=crop&q=80',
-  },
-  {
-    title: 'Experienced professionals',
-    stepNumber: '02',
-    tag: 'LEADERSHIP & DOMAIN EXPERTS',
-    description:
-      'Drive scale, strategy, and innovation. Bring your domain expertise in sales leadership, curriculum engineering, full-stack architecture, and institutional partnerships to shape the future of Indian education.',
-    highlights: [
-      'High-ownership leadership tracks',
-      'Direct cross-functional impact',
-      'Merit-based compensation packages',
-      'Hybrid & flexible work environment',
-    ],
-    cta: 'Explore Experienced Openings',
-    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&h=1000&fit=crop&q=80',
-  },
-  {
-    title: 'Alumni & continuous learning',
-    stepNumber: '03',
-    tag: 'UPSKILLING & NETWORK',
-    description:
-      'Our commitment to your growth never stops. Benefit from continuous learning allowances, access to 65+ certified courses, executive roundtables, and co-branded certifications with Microsoft, Cisco, and Adobe.',
-    highlights: [
-      '100% sponsored global certifications',
-      'Active alumni network & referral bonus',
-      'Internal mobility & domain switching',
-      'Executive skill masterclasses',
-    ],
-    cta: 'Discover Lifelong Learning',
-    image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&h=1000&fit=crop&q=80',
-  },
-  {
-    title: 'Returnship & career restart',
-    stepNumber: '04',
-    tag: 'WELCOME BACK PROGRAM',
-    description:
-      'Restarting your career after a break? Our Returnship initiative provides tailored onboarding, refresher masterclasses, and empathetic peer support to help you smoothly transition back into leadership.',
-    highlights: [
-      'Structured 90-day ramp-up plan',
-      'Flexible scheduling & hybrid options',
-      'Dedicated onboarding buddy & coach',
-      'Equitable pay from Day 1',
-    ],
-    cta: 'Explore Returnship Roles',
-    image: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=800&h=1000&fit=crop&q=80',
-  },
-];
+// Video URLs
+export const WHY_JOIN_VIDEO_URL =
+  'https://adyapan-website-storage.s3.ap-south-1.amazonaws.com/videos/final-web-video.mp4';
+export const DREAM_JOB_VIDEO_URL = '/dream-job.mp4';
 
-const CERT_PARTNERS = [
-  { name: 'ISO 9001:2015', desc: 'Quality Management' },
-  { name: 'NSDC', desc: 'Skill Development' },
-  { name: 'Skill India', desc: 'Digital Hub Partner' },
-  { name: 'MSME', desc: 'Govt. of India' },
-  { name: 'Microsoft', desc: 'Certification Partner' },
-  { name: 'Cisco', desc: 'Networking Academy' },
-  { name: 'Adobe', desc: 'Creative Ecosystem' },
-  { name: 'Meta', desc: 'Digital Marketing' },
-];
-
-const CULTURE_PILLARS = [
-  {
-    id: 'growth',
-    title: 'Growth & Rapid Progression',
-    category: 'Career',
-    stepNumber: '01',
-    image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=700&h=450&fit=crop&q=80',
-    shortDesc: 'Clear 6-month appraisal cycles, 1-on-1 executive mentoring, and rapid promotion roadmaps.',
-    fullStory:
-      'We believe ambition should never be bottlenecked by bureaucracy. At Adyapan, high performers are recognized and promoted fast. Every team member receives an individualized career roadmap, direct executive mentorship, and quarterly progression milestones.',
-    perks: [
-      'Bi-annual performance review & merit appraisals',
-      '100% sponsored certification vouchers (Microsoft, Cisco)',
-      'Leadership training & executive shadowing',
-      'Cross-departmental lateral mobility',
-    ],
-    quote: '"I joined as an intern and within 14 months was leading my own team of 8 advisors. The growth velocity here is truly unmatched."',
-    quoteAuthor: 'Pooja R. — Senior Team Lead',
-  },
-  {
-    id: 'innovation',
-    title: 'Innovation & Real AI at Scale',
-    category: 'Technology',
-    stepNumber: '02',
-    image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=700&h=450&fit=crop&q=80',
-    shortDesc: 'Proprietary AI candidate matching, interactive LMS tools, and data-driven student coaching.',
-    fullStory:
-      'We build tools that make a real-world difference. From our automated ATS candidate ranking engine to interactive learning dashboards, our engineers and curriculum developers work on the cutting edge of generative AI and educational technology.',
-    perks: [
-      'Access to state-of-the-art AI tooling & APIs',
-      'Quarterly innovation hackathons with cash prizes',
-      'Modern tech stack (React, Node, PostgreSQL, Python)',
-      'Autonomy to prototype and ship experimental features',
-    ],
-    quote: '"Building AI solutions that directly help students land jobs across India is the most fulfilling engineering work I have done."',
-    quoteAuthor: 'Arjun M. — Full Stack Engineer',
-  },
-  {
-    id: 'culture',
-    title: 'Collaborative & High-Energy Culture',
-    category: 'Culture',
-    stepNumber: '03',
-    image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=700&h=450&fit=crop&q=80',
-    shortDesc: 'Vibrant team celebrations, quarterly offsites, milestone awards, and inclusive camaraderie.',
-    fullStory:
-      'Work is more than just tasks—it is about the people you build with. Our workplace is energized with daily wins, weekly game hours, festival celebrations, and open-door leadership where every idea is heard and valued.',
-    perks: [
-      'Quarterly team offsites and adventure retreats',
-      'Weekly team celebrations & reward galas',
-      'Zero-hierarchy communication & open door policy',
-      'Vibrant festival events & creative workshops',
-    ],
-    quote: '"The energy on the floor is contagious. You are surrounded by teammates who genuinely push and celebrate each other every single day."',
-    quoteAuthor: 'Sneha K. — Inside Sales Specialist',
-  },
-  {
-    id: 'rewards',
-    title: 'Top Tier Pay & Performance Wealth',
-    category: 'Rewards',
-    stepNumber: '04',
-    image: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=700&h=450&fit=crop&q=80',
-    shortDesc: 'Aggressive uncapped incentives, competitive base salary, and milestone equity bonuses.',
-    fullStory:
-      'We believe in rewarding hard work generously. In addition to industry-leading base salaries, our sales and growth professionals enjoy lucrative uncapped commissions, quarterly bonuses, and annual performance rewards.',
-    perks: [
-      'Uncapped weekly & monthly sales incentives',
-      'Performance bonuses & President Club luxury trips',
-      'Comprehensive health coverage for family',
-      'Milestone achievement trophies and tech rewards',
-    ],
-    quote: '"The incentive structure is completely transparent and uncapped. If you deliver results, your earning potential has no ceiling."',
-    quoteAuthor: 'Vikram S. — Business Development Manager',
-  },
-  {
-    id: 'flexibility',
-    title: 'Flexible Hybrid Work & Wellness',
-    category: 'Wellness',
-    stepNumber: '05',
-    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=700&h=450&fit=crop&q=80',
-    shortDesc: 'Work from our modern Hyderabad hub or hybrid remote. Flexible hours & wellness leave.',
-    fullStory:
-      'We understand life happens outside of work. Our modern work policies support flexible scheduling, hybrid arrangements, mental health days, and generous leave allowances so you can do your best work without burning out.',
-    perks: [
-      'Flexible hybrid office & remote options',
-      'Dedicated mental health & wellness days',
-      'Generous paid annual leave & festival breaks',
-      'Ergonomic workspace allowances',
-    ],
-    quote: '"Having the flexibility to work hybrid while staying tightly connected with the team has made my work-life balance incredible."',
-    quoteAuthor: 'Ananya D. — Curriculum Designer',
-  },
-  {
-    id: 'impact',
-    title: 'Direct National Education Impact',
-    category: 'Impact',
-    stepNumber: '06',
-    image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=700&h=450&fit=crop&q=80',
-    shortDesc: 'Directly empower 50,000+ students and young graduates across India to land dream careers.',
-    fullStory:
-      'Every program we design and candidate we place creates a ripple effect of upward mobility across families and communities. Building at Adyapan means contributing directly to national skilling and meaningful employment.',
-    perks: [
-      'Direct contribution to 50,000+ learner lives',
-      'Partnerships with top tier universities across India',
-      'CSR initiatives & student scholarship programs',
-      'Verified social and educational impact tracking',
-    ],
-    quote: '"Knowing our daily effort directly helps a student get placed at their dream company gives our work immense purpose."',
-    quoteAuthor: 'Ramesh T. — Academic Advisor',
-  },
-];
-
-const Careers = () => {
-  const { theme, toggleTheme } = useTheme();
-  const { candidate, logout } = useCandidateAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const [searchTerm, setSearchTerm] = useState('');
-  const [locationTerm, setLocationTerm] = useState('');
-  const [jobs, setJobs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [activeJourney, setActiveJourney] = useState(0);
-
-  // Life at Adyapan Interactive Modal & Filter State
-  const [selectedCultureModal, setSelectedCultureModal] = useState<any | null>(null);
-  const [cultureFilter, setCultureFilter] = useState('All');
-  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+// ── LIVE ANIMATED COUNTER ──
+const AnimatedCounter: React.FC<{
+  end: number;
+  suffix?: string;
+  prefix?: string;
+  duration?: number;
+}> = ({ end, suffix = '', prefix = '', duration = 1800 }) => {
+  const [count, setCount] = useState(0);
+  const [hasStarted, setHasStarted] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    fetchLiveJobs();
-  }, []);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasStarted) {
+          setHasStarted(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
 
-  // Smooth scroll to section if hash is in URL (e.g. /careers#life or /careers#journey)
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [hasStarted]);
+
   useEffect(() => {
-    if (location.hash) {
-      const targetId = location.hash.replace('#', '');
-      const timer = setTimeout(() => {
-        const element = document.getElementById(targetId);
-        if (element) {
-          const navOffset = 80;
-          const elementPosition = element.getBoundingClientRect().top;
-          const offsetPosition = elementPosition + window.pageYOffset - navOffset;
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-          });
-        }
-      }, 150);
-      return () => clearTimeout(timer);
-    }
-  }, [location.hash, location.pathname]);
+    if (!hasStarted) return;
+    let startTime: number | null = null;
+    let animationFrameId: number;
 
-  const fetchLiveJobs = async () => {
-    try {
-      const res = await jobService.getPublicJobs();
-      if (res?.jobs) {
-        setJobs(res.jobs.filter((j: any) => j.status === 'PUBLISHED'));
+    const updateCount = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+      setCount(easeOut * end);
+
+      if (progress < 1) {
+        animationFrameId = requestAnimationFrame(updateCount);
+      } else {
+        setCount(end);
       }
-    } catch {
-      try {
-        const res = await jobService.getAllJobs();
-        if (res?.jobs) {
-          setJobs(res.jobs.filter((j: any) => j.status === 'PUBLISHED'));
-        }
-      } catch (e2) {
-        console.error('Failed to load jobs:', e2);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    navigate(`/open-positions?q=${encodeURIComponent(searchTerm)}&location=${encodeURIComponent(locationTerm)}`);
-  };
-
-  const filteredPillars = cultureFilter === 'All'
-    ? CULTURE_PILLARS
-    : CULTURE_PILLARS.filter((p) => p.category === cultureFilter);
+    animationFrameId = requestAnimationFrame(updateCount);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [hasStarted, end, duration]);
 
   return (
-    <div className={`min-h-screen font-sans antialiased transition-colors relative overflow-x-hidden ${theme === 'dark'
-      ? 'bg-gradient-to-l from-amber-950/40 via-amber-950/15 via-30% to-[#0a0a1a] text-white'
-      : 'bg-gradient-to-l from-orange-300/40 via-amber-100/30 via-40% to-white text-slate-900'
-      }`}>
+    <span ref={ref}>
+      {prefix}
+      {Math.round(count).toLocaleString('en-IN')}
+      {suffix}
+    </span>
+  );
+};
 
-      {/* Persistent Full-Page Right-to-Left Orange Gradient Glow */}
-      <div className="fixed top-0 right-0 w-[60vw] max-w-[900px] h-full pointer-events-none bg-gradient-to-l from-orange-400/20 via-amber-200/10 via-45% to-transparent dark:from-amber-500/10 dark:via-amber-900/5 dark:to-transparent blur-3xl z-0" />
+// ── TESTIMONIALS DATA (REAL ADYAPAN EDUTECH WORKING REVIEWS) ──
+const testimonials = [
+  {
+    featured: true,
+    quote:
+      "Started as an Inside Sales Specialist Intern with ₹18K stipend. Within 5 months, the direct mentorship from leadership and the transparent target culture helped me bag a full-time PPO of ₹10 LPA. If you are hungry to perform and grow fast in sales & edtech, Adyapan is the best launchpad.",
+    name: 'Pranay Varma',
+    role: 'Inside Sales Specialist (PPO Converted)',
+    growth: 'Intern to Full-Time · ₹10 LPA',
+    company: 'Adyapan Edutech Hyderabad Hub',
+  },
+  {
+    featured: false,
+    quote:
+      'The work environment at the Hyderabad office is super supportive and energetic. Management genuinely values freshers, providing 1-on-1 counseling training with zero toxic pressure and high uncapped weekly incentives.',
+    name: 'Divya Sri',
+    role: 'Senior Academic Counselor',
+    growth: '₹45K+ Monthly Incentives',
+  },
+  {
+    featured: false,
+    quote:
+      'Hands-on learning with direct access to founders. Every target achieved is celebrated with Friday team games, cricket matches, and instant rewards. Best culture for anyone wanting fast corporate sales and leadership exposure.',
+    name: 'Karthik Nambiar',
+    role: 'Business Development Specialist',
+    growth: 'Top Performer Award',
+  },
+];
 
-      {/* ===== MAIN NAV ===== */}
-      <CandidateNavbar activePage="careers" />
+// ── FAQ DATA ──
+const faqList = [
+  {
+    q: 'How do I apply for a career opportunity at Adyapan?',
+    a: 'Simply click "Explore Opportunities", pick the role that matches your skills, and submit your resume. Our AI ATS instantly screens your profile and alerts our corporate recruitment team within minutes.',
+  },
+  {
+    q: 'Can freshers and final-year college students apply?',
+    a: 'Yes! We have dedicated fresher-friendly roles with structured hands-on training, flexible work shifts, and fast evaluation cycles designed for ambitious beginners.',
+  },
+  {
+    q: 'What happens after I submit my application?',
+    a: 'Our recruiting team reviews your ATS score within 24 to 48 hours. Shortlisted candidates receive a direct WhatsApp and Email invite for an interview round.',
+  },
+  {
+    q: 'How do I track my application status in real time?',
+    a: 'You can log into your Candidate Portal under "My Applications" anytime to see live status updates from Shortlisted, Interview Scheduled, to Offer Rollout.',
+  },
+  {
+    q: 'What is the typical hiring and offer timeline?',
+    a: 'Our entire process takes between 48 to 72 business hours from resume submission to formal offer letter rollout.',
+  },
+  {
+    q: 'Are internships and flexible shifts available?',
+    a: 'Yes, we offer both full-time positions and paid corporate internships with flexible morning/evening shift options.',
+  },
+  {
+    q: 'Is there any registration or application fee?',
+    a: 'No. Applying at Adyapan Career is 100% free of charge. We never charge candidates for job applications or interview rounds.',
+  },
+];
 
-      {/* ===== 1. HERO SECTION ===== */}
-      <section className="relative overflow-hidden">
-        {/* Right-to-Left Orange Fade Gradient Background Layers */}
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-l from-orange-400/25 via-amber-200/10 to-transparent dark:from-amber-600/15 dark:via-amber-900/5 dark:to-transparent" />
-        <div className="absolute top-0 right-0 w-[550px] h-[550px] rounded-full blur-3xl pointer-events-none bg-gradient-to-l from-orange-500/20 via-amber-400/10 to-transparent" />
+const Careers: React.FC = () => {
+  const [faqOpen, setFaqOpen] = useState<number | null>(0);
+  const [activeJourneyStep, setActiveJourneyStep] = useState<number>(0);
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-8 py-20 sm:py-28 lg:py-32">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left Content */}
-            <div className="space-y-6 sm:space-y-8">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30">
-                ● OFFICIAL ADYAPAN CAREERS PORTAL
-              </div>
+  // Initialize scroll reveal observer
+  useScrollReveal();
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1]">
-                Empowering Ambition.{' '}
-                <span className="bg-gradient-to-r from-amber-500 via-amber-400 to-orange-500 bg-clip-text text-transparent">
-                  Accelerating Careers.
-                </span>
-              </h1>
+  return (
+    <SiteShell>
+      <main className="overflow-x-hidden text-stone-900 dark:text-stone-100 selection:bg-amber-500 selection:text-white">
 
-              <p className={`text-base sm:text-lg leading-relaxed max-w-xl ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
-                Whether you are a student launching your first career breakthrough or an experienced professional driving industry innovation, explore high-impact opportunities designed to elevate your future with Adyapan Edutech.
-              </p>
+        {/* ══════════════════════════════════════════════════════════
+            SECTION 01 — HERO (EXACT APPROVED SCREENSHOT LAYOUT)
+           ══════════════════════════════════════════════════════════ */}
+        <section className="relative pt-10 pb-20 md:pt-16 md:pb-28 overflow-hidden bg-[#fdfbf7] dark:bg-[#141312] border-b border-stone-200/70 dark:border-stone-850 pattern-dots">
+          {/* Ambient Glowing Orbs */}
+          <div className="glow-orb top-[-100px] right-[-100px] w-[500px] h-[500px] bg-amber-500/15 dark:bg-amber-500/10" />
+          <div className="glow-orb bottom-[-80px] left-[-80px] w-[420px] h-[420px] bg-orange-500/10 dark:bg-orange-500/5" />
 
-              {/* Search Box Form */}
-              <form onSubmit={handleSearch} className={`flex flex-col sm:flex-row gap-2 sm:gap-0 p-2 rounded-2xl shadow-xl border ${theme === 'dark' ? 'bg-slate-900/90 border-slate-700/80 shadow-black/40' : 'bg-white border-amber-200/80 shadow-amber-500/10'}`}>
-                <div className="flex-1 relative">
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search roles, skills, or keywords (e.g. BDA, Sales, Tech)"
-                    className={`w-full px-5 py-4 text-sm font-medium border-0 focus:outline-none ${theme === 'dark' ? 'bg-slate-900 text-white placeholder-slate-500' : 'bg-white text-slate-900 placeholder-slate-400'}`}
-                  />
-                </div>
-                <div className={`w-px self-stretch ${theme === 'dark' ? 'bg-slate-700' : 'bg-slate-200'} hidden sm:block`} />
-                <div className="flex-1 relative">
-                  <input
-                    type="text"
-                    value={locationTerm}
-                    onChange={(e) => setLocationTerm(e.target.value)}
-                    placeholder="Location (e.g. Hyderabad, Remote, Hybrid)"
-                    className={`w-full px-5 py-4 text-sm font-medium border-0 focus:outline-none ${theme === 'dark' ? 'bg-slate-900 text-white placeholder-slate-500' : 'bg-white text-slate-900 placeholder-slate-400'}`}
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="px-7 py-4 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:from-amber-300 hover:to-orange-400 transition-all flex items-center justify-center cursor-pointer font-black text-slate-950 rounded-xl"
-                >
-                  <span>Explore Jobs</span>
-                </button>
-              </form>
-            </div>
-
-            {/* Right - Hero Visual */}
-            <div className="hidden lg:block relative">
-              <div className={`absolute -inset-4 rounded-3xl rotate-3 ${theme === 'dark' ? 'bg-gradient-to-br from-amber-500/20 to-orange-500/10' : 'bg-gradient-to-br from-amber-200 to-orange-100'}`} />
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl aspect-[4/3] border border-white/20">
-                <img
-                  src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=600&fit=crop&q=80"
-                  alt="Team collaborating at Adyapan"
-                  className="w-full h-full object-cover"
-                />
-                <div className={`absolute inset-0 ${theme === 'dark' ? 'bg-gradient-to-t from-[#0a0a1a]/90 via-transparent to-transparent' : 'bg-gradient-to-t from-slate-950/80 via-transparent to-transparent'}`} />
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <p className="text-white text-xs font-bold uppercase tracking-wider">
-                    ISO 9001:2015 Certified • MSME Recognized • Skill India Partner
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== 2. RECOGNITION & CULTURE BANNER ===== */}
-      <section className={`border-t py-16 sm:py-20 relative overflow-hidden ${theme === 'dark' ? 'border-slate-800 bg-[#0d0d20]' : 'border-slate-200/80 bg-white'
-        }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-8">
-          <div className="grid lg:grid-cols-12 gap-10 sm:gap-14 items-center">
-
-            {/* Left: Certification Seal Card */}
-            <div className="lg:col-span-5 relative group">
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/3] bg-gradient-to-br from-red-600 via-rose-700 to-amber-700 p-8 flex flex-col justify-between text-white border border-white/20">
-                <img
-                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=600&fit=crop&q=80"
-                  alt="Team Culture at Adyapan"
-                  className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-35 group-hover:scale-105 transition-transform duration-700"
-                />
-
-                <div className="relative z-10 bg-[#e11d48] text-white p-6 rounded-2xl shadow-2xl border border-white/30 text-center max-w-[280px] mx-auto my-auto space-y-2">
-                  <div className="text-2xl sm:text-3xl font-black uppercase tracking-tight leading-tight drop-shadow-md">
-                    Great Place To Grow
-                  </div>
-                  <div className="h-0.5 w-16 bg-white/50 mx-auto" />
-                  <div className="text-xs font-black tracking-widest uppercase bg-white/25 py-1 rounded-lg">
-                    Certified 2026-2027
-                  </div>
-                  <div className="text-[11px] font-bold tracking-wider text-white/95">
-                    ISO 9001:2015 • MSME • INDIA
-                  </div>
-                </div>
-
-                <div className="relative z-10 text-center text-xs font-bold text-white/90 tracking-wide">
-                  Skill India Partner • 300+ Corporate Hiring Networks
-                </div>
-              </div>
-            </div>
-
-            {/* Right: Copy & CTA */}
-            <div className="lg:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30">
-                ● PURPOSE-DRIVEN WORKPLACE EXCELLENCE
-              </div>
-
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.15]">
-                We're recognized for our impact, culture & people!
-              </h2>
-
-              <p className={`text-base sm:text-lg leading-relaxed ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
-                Our team has spoken. At <strong className="text-amber-500 font-bold">Adyapan Edutech</strong>, you'll find more than a job—you'll find meaningful work transforming education across India, fast-track career progression, and an energetic team that empowers you to thrive.
-              </p>
-
-              <div className="flex flex-wrap gap-4 pt-2">
-                <a
-                  href="#life"
-                  className="px-7 py-3.5 rounded-full text-sm font-bold text-slate-950 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:from-amber-300 hover:to-orange-400 transition-all shadow-lg shadow-amber-500/25 flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                >
-                  <span>Discover the Adyapan culture</span>
-                  <span>→</span>
-                </a>
-                <Link
-                  to="/open-positions"
-                  className={`px-7 py-3.5 rounded-full text-sm font-bold transition-all border ${theme === 'dark'
-                    ? 'border-slate-700 text-slate-200 hover:bg-slate-800'
-                    : 'border-slate-300 text-slate-700 hover:bg-slate-100 bg-white shadow-sm'
-                    }`}
-                >
-                  Explore Open Positions
-                </Link>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* ===== 3. CAREER JOURNEY PATHWAYS ===== */}
-      <section id="journey" className={`border-t py-16 sm:py-24 relative overflow-hidden ${theme === 'dark' ? 'border-slate-800 bg-[#0a0a1a]' : 'border-slate-200/80 bg-slate-50/50'
-        }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-8">
-
-          <div className="mb-12 space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 rounded-full text-[11px] font-extrabold uppercase">
-              TAILORED CAREER PATHWAYS
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-slate-900 dark:text-white">
-              Where are you in your career journey?
-            </h2>
-            <p className={`text-base sm:text-lg max-w-2xl ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-              Whether you're starting out, taking the next big leap, or returning to the workforce—we have tailored pathways designed for your success.
-            </p>
+          {/* Large Watermark Typography */}
+          <div className="absolute right-4 top-1/3 watermark-text text-stone-900 dark:text-white">
+            CAREER
           </div>
 
-          <div className="grid lg:grid-cols-12 gap-10 items-start">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
 
-            {/* Left: Interactive Accordion Tabs */}
-            <div className="lg:col-span-7 space-y-4">
-              {CAREER_JOURNEYS.map((journey, idx) => {
-                const isOpen = activeJourney === idx;
-                return (
-                  <div
-                    key={journey.title}
-                    className={`rounded-3xl border transition-all overflow-hidden ${isOpen
-                      ? theme === 'dark'
-                        ? 'bg-slate-900 border-amber-500/60 shadow-xl'
-                        : 'bg-white border-amber-400 shadow-xl shadow-amber-500/10'
-                      : theme === 'dark'
-                        ? 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
-                        : 'bg-white border-slate-200 hover:border-amber-300 shadow-sm'
-                      }`}
+              {/* Left Column (Approx 55%) */}
+              <div data-reveal="left" className="lg:col-span-7 space-y-6">
+
+                {/* Small uppercase animated badge */}
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-400 font-extrabold text-xs tracking-wider uppercase shadow-sm">
+                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+                  <span>ADYAPAN CAREER · DIRECT OPPORTUNITIES · FAST HIRING</span>
+                </div>
+
+                {/* Very Large Editorial Heading */}
+                <h1 className="text-4xl sm:text-5xl lg:text-[62px] font-black tracking-tight text-stone-900 dark:text-white leading-[1.08]">
+                  Your next <br />
+                  <span className="relative inline-block text-amber-500">
+                    career move
+                    <span className="absolute left-0 bottom-1.5 w-full h-3 bg-amber-500/15 -z-10 rounded-sm" />
+                  </span> <br />
+                  starts here.
+                </h1>
+
+                {/* Supporting Copy */}
+                <p className="text-base sm:text-lg text-stone-600 dark:text-stone-300 max-w-xl leading-relaxed font-medium">
+                  Discover high-paying job opportunities, get instant AI ATS screening on your resume, and connect directly with hiring managers within 48 hours.
+                </p>
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap items-center gap-4 pt-2">
+                  <Link
+                    to="/open-positions"
+                    className="group inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-full font-extrabold text-sm text-white bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 shadow-xl shadow-amber-500/25 hover:shadow-2xl hover:shadow-amber-500/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300"
                   >
-                    <button
-                      onClick={() => setActiveJourney(idx)}
-                      className="w-full p-6 text-left flex items-center justify-between gap-4 cursor-pointer"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 font-black text-xs flex items-center justify-center border border-amber-500/30">
-                          {journey.stepNumber}
-                        </span>
-                        <span className={`text-xl sm:text-2xl font-black transition-colors ${isOpen ? 'text-amber-500' : theme === 'dark' ? 'text-white' : 'text-slate-800'
-                          }`}>
-                          {journey.title}
-                        </span>
-                      </div>
-                      <span className={`w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold transition-transform ${isOpen
-                        ? 'bg-amber-500 text-slate-950 rotate-45 shadow-md shadow-amber-500/20'
-                        : theme === 'dark' ? 'bg-slate-800 text-slate-300' : 'bg-slate-100 text-slate-600'
-                        }`}>
-                        +
-                      </span>
-                    </button>
+                    <span>Explore Opportunities</span>
+                    <ArrowRight size={17} className="group-hover:translate-x-1 transition-transform" />
+                  </Link>
 
-                    {isOpen && (
-                      <div className="px-6 pb-6 pt-1 space-y-4 text-sm sm:text-base border-t border-slate-100 dark:border-slate-800/80">
-                        <p className={`leading-relaxed ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
-                          {journey.description}
-                        </p>
-                        <div className="flex flex-wrap gap-2 pt-1">
-                          {journey.highlights.map((h: string) => (
-                            <span
-                              key={h}
-                              className="px-3 py-1 text-xs font-bold rounded-xl bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30"
-                            >
-                              ✓ {h}
-                            </span>
-                          ))}
-                        </div>
-                        <div className="pt-2">
-                          <Link
-                            to="/open-positions"
-                            className="inline-flex items-center gap-2 text-xs sm:text-sm font-black text-amber-600 dark:text-amber-400 hover:text-amber-500 uppercase tracking-wider"
-                          >
-                            <span>{journey.cta}</span>
-                            <span>→</span>
-                          </Link>
-                        </div>
-                      </div>
-                    )}
+                  <a
+                    href="#why-join"
+                    className="inline-flex items-center gap-1.5 px-5 py-4 font-bold text-sm text-stone-800 dark:text-stone-200 hover:text-amber-500 dark:hover:text-amber-400 transition-colors"
+                  >
+                    <span>Why Work Here</span>
+                    <ChevronRight size={16} />
+                  </a>
+                </div>
+
+                {/* Small Benefit Pills with Multi-Color Badges */}
+                <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-stone-200/80 dark:border-stone-800">
+                  <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white dark:bg-stone-900 border border-amber-200/80 dark:border-amber-900/40 text-xs font-bold text-stone-800 dark:text-stone-200 shadow-sm hover:scale-105 transition-transform">
+                    <span className="w-6 h-6 rounded-lg bg-amber-500/15 text-amber-600 flex items-center justify-center">
+                      <Flame size={14} className="animate-pulse" />
+                    </span>
+                    <span>Fast 48h Interviews</span>
                   </div>
-                );
-              })}
+
+                  <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white dark:bg-stone-900 border border-purple-200/80 dark:border-purple-900/40 text-xs font-bold text-stone-800 dark:text-stone-200 shadow-sm hover:scale-105 transition-transform">
+                    <span className="w-6 h-6 rounded-lg bg-purple-500/15 text-purple-600 flex items-center justify-center">
+                      <Trophy size={14} />
+                    </span>
+                    <span>Uncapped Monthly Incentives</span>
+                  </div>
+
+                  <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white dark:bg-stone-900 border border-emerald-200/80 dark:border-emerald-900/40 text-xs font-bold text-stone-800 dark:text-stone-200 shadow-sm hover:scale-105 transition-transform">
+                    <span className="w-6 h-6 rounded-lg bg-emerald-500/15 text-emerald-600 flex items-center justify-center">
+                      <Clock3 size={14} />
+                    </span>
+                    <span>Flexible Shifts & Zero Pressure</span>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Right Column: Visual Composition + 3 Floating Overlapping Cards */}
+              <div data-reveal="right" className="lg:col-span-5 relative flex justify-center">
+                {/* Decorative background glow & frame */}
+                <div className="absolute -inset-4 bg-gradient-to-tr from-amber-500/25 via-orange-500/15 to-transparent rounded-[2.5rem] transform rotate-2 blur-md -z-10" />
+
+                {/* Main Portrait Workplace Image */}
+                <div className="relative w-full max-w-md h-[470px] sm:h-[530px] rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-stone-800 bg-stone-900 group">
+                  <img
+                    src="/adyapan-team-fun.png"
+                    alt="Adyapan Team in modern office"
+                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
+
+                  <div className="absolute bottom-5 left-5 right-5 text-white pointer-events-none">
+                    <span className="inline-block px-2.5 py-1 rounded-md bg-amber-500/90 text-[10px] font-extrabold uppercase tracking-widest text-stone-950 mb-1">
+                      Hyderabad Hub · Sattva Magnus
+                    </span>
+                    <h3 className="text-xl font-black text-white">Work Hard. Win Together.</h3>
+                  </div>
+                </div>
+
+                {/* 1. Top-Right Floating Card: Verified Jobs */}
+                <div className="absolute -top-3 -right-2 sm:-right-6 z-20 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-stone-200/80 dark:border-stone-800 p-3.5 rounded-2xl shadow-xl animate-float flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold flex-shrink-0 shadow-sm">
+                    <CheckCircle2 size={19} />
+                  </div>
+                  <div>
+                    <b className="text-xs sm:text-sm font-black text-stone-900 dark:text-white block">
+                      Verified Jobs
+                    </b>
+                    <small className="text-[11px] text-stone-500 dark:text-stone-400 font-semibold">Updated Daily</small>
+                  </div>
+                </div>
+
+                {/* 2. Mid-Left Floating Card: 4.8/5 */}
+                <div className="absolute top-1/2 -left-3 sm:-left-8 -translate-y-1/2 z-20 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-stone-200 dark:border-stone-800 p-3.5 rounded-2xl shadow-xl animate-float-delayed flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-500 flex items-center justify-center font-bold flex-shrink-0">
+                    <Star size={18} className="fill-amber-500 text-amber-500" />
+                  </div>
+                  <div>
+                    <b className="text-xs sm:text-sm font-black text-stone-900 dark:text-white block">
+                      4.8 / 5.0
+                    </b>
+                    <small className="text-[11px] text-stone-500 dark:text-stone-400 font-semibold">Team Satisfaction</small>
+                  </div>
+                </div>
+
+                {/* 3. Bottom-Right Floating Card: 10,000+ Opportunities */}
+                <div className="absolute -bottom-5 right-2 sm:right-6 z-20 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-emerald-200 dark:border-emerald-800/40 p-3.5 rounded-2xl shadow-xl animate-float flex items-center gap-3.5 bento-glow-emerald">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center font-bold flex-shrink-0 shadow-md">
+                    <CheckCircle2 size={18} />
+                  </div>
+                  <div>
+                    <b className="text-xs sm:text-sm font-black text-stone-900 dark:text-white block">
+                      10,000+
+                    </b>
+                    <small className="text-[11px] text-stone-500 dark:text-stone-400 font-semibold">Opportunities Available</small>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════════════════
+            SECTION 02 — TRUST / STATS STRIP (FLOATING CONTAINER)
+           ══════════════════════════════════════════════════════════ */}
+        <section className="relative z-20 -mt-6 sm:-mt-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+          <div className="bg-white dark:bg-[#181715] rounded-3xl p-6 sm:p-8 border border-stone-200/80 dark:border-stone-800 shadow-2xl">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-0 lg:divide-x divide-stone-200/80 dark:divide-stone-800">
+
+              {/* Stat 1: Orange */}
+              <div data-reveal="up" data-delay="100" className="interactive-card flex items-center gap-4 px-2 sm:px-6">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0 shadow-inner">
+                  <Briefcase size={22} />
+                </div>
+                <div>
+                  <b className="text-2xl sm:text-3xl font-black text-stone-900 dark:text-white block tracking-tight">
+                    <AnimatedCounter end={10000} suffix="+" />
+                  </b>
+                  <span className="text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider">
+                    Opportunities
+                  </span>
+                </div>
+              </div>
+
+              {/* Stat 2: Mint Green */}
+              <div data-reveal="up" data-delay="200" className="interactive-card flex items-center gap-4 px-2 sm:px-6">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0 shadow-inner">
+                  <UsersRound size={22} />
+                </div>
+                <div>
+                  <b className="text-2xl sm:text-3xl font-black text-stone-900 dark:text-white block tracking-tight">
+                    <AnimatedCounter end={500} suffix="+" />
+                  </b>
+                  <span className="text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider">
+                    Hiring Partners
+                  </span>
+                </div>
+              </div>
+
+              {/* Stat 3: Purple */}
+              <div data-reveal="up" data-delay="300" className="interactive-card flex items-center gap-4 px-2 sm:px-6">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center flex-shrink-0 shadow-inner">
+                  <GraduationCap size={22} />
+                </div>
+                <div>
+                  <b className="text-2xl sm:text-3xl font-black text-stone-900 dark:text-white block tracking-tight">
+                    <AnimatedCounter end={50000} suffix="+" />
+                  </b>
+                  <span className="text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider">
+                    Placed Learners
+                  </span>
+                </div>
+              </div>
+
+              {/* Stat 4: Sky Blue */}
+              <div data-reveal="up" data-delay="400" className="interactive-card flex items-center gap-4 px-2 sm:px-6">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500/20 to-blue-500/20 text-sky-600 dark:text-sky-400 flex items-center justify-center flex-shrink-0 shadow-inner">
+                  <Zap size={22} />
+                </div>
+                <div>
+                  <b className="text-2xl sm:text-3xl font-black text-stone-900 dark:text-white block tracking-tight">
+                    <AnimatedCounter end={48} suffix="h" />
+                  </b>
+                  <span className="text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider">
+                    Interview Call
+                  </span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════════════════
+            SECTION 03 — LIFE AT ADYAPAN / CULTURE (LAYERED COLLAGE)
+           ══════════════════════════════════════════════════════════ */}
+        <section className="py-24 bg-[#f7f3ec] dark:bg-[#121110] border-b border-stone-200/60 dark:border-stone-850 relative pattern-dots-subtle" id="culture">
+          {/* Watermark text */}
+          <div className="absolute left-6 top-1/4 watermark-text text-stone-900 dark:text-white">
+            CULTURE
+          </div>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+
+              {/* Left Column: Heading & Culture Story */}
+              <div data-reveal="left" className="lg:col-span-5 space-y-7">
+                <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-400 font-extrabold text-xs sm:text-sm uppercase tracking-wider">
+                  <Sparkles size={15} className="text-amber-500" />
+                  <span>LIFE AT ADYAPAN · CULTURE</span>
+                </div>
+
+                <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-stone-900 dark:text-white tracking-tight leading-[1.08]">
+                  Come for the opportunity. <br />
+                  <span className="text-amber-500">Stay for the people.</span>
+                </h2>
+
+                <p className="text-stone-600 dark:text-stone-300 text-base sm:text-lg leading-relaxed font-medium">
+                  We believe great people build great companies. At Adyapan, your ideas are listened to, your individual growth is championed, and your happiness and mental wellbeing truly matter.
+                </p>
+
+                <div className="flex flex-wrap items-center gap-5 pt-3">
+                  <Link
+                    to="/life-at-adyapan"
+                    className="inline-flex items-center gap-2.5 px-8 py-4 rounded-full text-sm sm:text-base font-black text-white bg-amber-500 hover:bg-amber-600 shadow-xl shadow-amber-500/25 hover:scale-105 transition-all"
+                  >
+                    <span>Explore Life at Adyapan</span>
+                    <ArrowRight size={17} />
+                  </Link>
+
+                  <span className="text-sm font-black text-stone-600 dark:text-stone-300 flex items-center gap-1.5">
+                    <span>✨</span>
+                    <span>94% Retention Rate</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Right Column: Layered Photo Collage with Floating Stickers */}
+              <div data-reveal="right" className="lg:col-span-7 relative">
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 h-[440px] max-h-[440px]">
+
+                  {/* Main Large Team Image */}
+                  <div className="sm:col-span-7 relative rounded-3xl overflow-hidden shadow-2xl border-2 border-white dark:border-stone-800 bg-stone-900 group h-[440px]">
+                    <img
+                      src="/adyapan-team-fun.png"
+                      alt="Adyapan Full Team"
+                      className="w-full h-full object-cover object-[center_70%] group-hover:scale-105 transition-transform duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+
+                    <div className="absolute top-4 left-4 px-3.5 py-1.5 rounded-full bg-white/95 dark:bg-stone-900/95 backdrop-blur-md text-[11px] font-extrabold text-stone-900 dark:text-white shadow-md flex items-center gap-1.5">
+                      <Heart size={13} className="text-rose-500 fill-rose-500" />
+                      <span>Growing Together</span>
+                    </div>
+
+                    <div className="absolute bottom-4 left-4 right-4 text-white pointer-events-none">
+                      <span className="text-xs font-black uppercase tracking-wider text-amber-400 block mb-0.5">
+                        Adyapan Culture
+                      </span>
+                      <h4 className="text-base sm:text-lg font-black text-white leading-tight">
+                        Work Hard. Laugh Harder.
+                      </h4>
+                    </div>
+                  </div>
+
+                  {/* Two Stacked Photos on Right */}
+                  <div className="sm:col-span-5 flex flex-col gap-4 h-[440px] justify-between">
+                    <div className="relative rounded-2xl overflow-hidden shadow-lg border-2 border-white dark:border-stone-800 bg-stone-900 group h-[210px]">
+                      <img
+                        src="/Founders.jpeg"
+                        alt="Adyapan Founders & Leadership"
+                        className="w-full h-full object-cover object-[center_55%] group-hover:scale-105 transition-transform duration-700"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+                      <span className="absolute bottom-3 left-3 px-3 py-1 rounded-lg bg-black/70 backdrop-blur-md text-[10px] font-bold text-amber-400">
+                        ✨ Leadership & Vision
+                      </span>
+                    </div>
+
+                    <div className="relative rounded-2xl overflow-hidden shadow-lg border-2 border-white dark:border-stone-800 bg-stone-900 group h-[210px]">
+                      <img
+                        src="/cricket.jpg"
+                        alt="Adyapan Sports & Team Spirit"
+                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+                      <span className="absolute bottom-3 left-3 px-3 py-1 rounded-lg bg-black/70 backdrop-blur-md text-[10px] font-bold text-amber-400">
+                        🏏 Sports & Outings
+                      </span>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
             </div>
 
-            {/* Right: Dynamic Visual Display */}
-            <div className="lg:col-span-5 relative">
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/5] border border-white/20 group">
+            {/* Bottom 4 Feature Cards with Distinct Colors */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-20 sm:mt-24">
+              <div data-reveal="up" data-delay="100" className="interactive-card p-6 rounded-3xl bg-white dark:bg-stone-900 border border-amber-200/60 dark:border-stone-800 shadow-sm bento-glow-orange">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4">
+                  <UsersRound size={22} />
+                </div>
+                <h4 className="font-extrabold text-base text-stone-900 dark:text-white">Young & Passionate Team</h4>
+                <p className="text-xs text-stone-500 dark:text-stone-400 mt-2 leading-relaxed font-medium">
+                  Work alongside energetic and driven people who genuinely love what they build.
+                </p>
+              </div>
+
+              <div data-reveal="up" data-delay="200" className="interactive-card p-6 rounded-3xl bg-white dark:bg-stone-900 border border-orange-200/60 dark:border-stone-800 shadow-sm">
+                <div className="w-12 h-12 rounded-2xl bg-orange-500/15 text-orange-600 dark:text-orange-400 flex items-center justify-center mb-4">
+                  <PartyPopper size={22} />
+                </div>
+                <h4 className="font-extrabold text-base text-stone-900 dark:text-white">Fun & Celebrations</h4>
+                <p className="text-xs text-stone-500 dark:text-stone-400 mt-2 leading-relaxed font-medium">
+                  From team outings and festive parties to pizza win bashes, we celebrate every milestone.
+                </p>
+              </div>
+
+              <div data-reveal="up" data-delay="300" className="interactive-card p-6 rounded-3xl bg-white dark:bg-stone-900 border border-rose-200/60 dark:border-stone-800 shadow-sm">
+                <div className="w-12 h-12 rounded-2xl bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-4">
+                  <Heart size={22} />
+                </div>
+                <h4 className="font-extrabold text-base text-stone-900 dark:text-white">Work-Life Balance</h4>
+                <p className="text-xs text-stone-500 dark:text-stone-400 mt-2 leading-relaxed font-medium">
+                  Flexible environment that respects your personal time, mental health, and family life.
+                </p>
+              </div>
+
+              <div data-reveal="up" data-delay="400" className="interactive-card p-6 rounded-3xl bg-white dark:bg-stone-900 border border-indigo-200/60 dark:border-stone-800 shadow-sm">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-4">
+                  <Rocket size={22} />
+                </div>
+                <h4 className="font-extrabold text-base text-stone-900 dark:text-white">Learn & Grow Fast</h4>
+                <p className="text-xs text-stone-500 dark:text-stone-400 mt-2 leading-relaxed font-medium">
+                  Direct founder mentorship and rapid 6-month evaluation cycles for accelerated promotions.
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════════════════
+            SECTION 04 — FUN DAY / TEAM CULTURE (HERO-LIKE IMMERSIVE)
+           ══════════════════════════════════════════════════════════ */}
+        <section className="py-20 bg-[#121110] text-white relative overflow-hidden" id="team-fun">
+          {/* Ambient colorful neon blobs */}
+          <div className="glow-orb top-0 left-1/4 w-[400px] h-[400px] bg-amber-500/10" />
+          <div className="glow-orb bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-500/10" />
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12" data-reveal="up">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 font-extrabold text-xs uppercase tracking-wider mb-3">
+                  <PartyPopper size={14} />
+                  <span>FUN DAYS AT ADYAPAN · REAL MOMENTS</span>
+                </div>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white">
+                  Work hard. <span className="text-amber-400">Laugh harder.</span> Win together.
+                </h2>
+              </div>
+              <p className="text-stone-400 text-sm max-w-md">
+                Life at Adyapan is a high-energy blend of passion, celebration, and purpose. We work like a team and celebrate like a family.
+              </p>
+            </div>
+
+            {/* Asymmetric Rich Photo Gallery */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+              <div data-reveal="up" data-delay="100" className="interactive-card relative rounded-3xl overflow-hidden aspect-[4/3] bg-stone-900 group shadow-xl border border-stone-800">
                 <img
-                  src={CAREER_JOURNEYS[activeJourney].image}
-                  alt={CAREER_JOURNEYS[activeJourney].title}
-                  className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
+                  src="/adyapan-team-fun.png"
+                  alt="Friday Fun Games"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 space-y-1.5 text-white" style={{ color: '#ffffff' }}>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-400 text-slate-950 inline-block mb-1 shadow-md">
-                    {CAREER_JOURNEYS[activeJourney].tag}
-                  </span>
-                  <h3 className="text-xl sm:text-2xl font-black text-white drop-shadow-lg" style={{ color: '#ffffff' }}>
-                    {CAREER_JOURNEYS[activeJourney].title}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+                <span className="absolute bottom-3 left-3 px-3 py-1 rounded-lg bg-black/70 backdrop-blur-md text-xs font-bold text-amber-400 uppercase tracking-wide">
+                  🎉 Friday Games
+                </span>
+              </div>
+
+              <div data-reveal="up" data-delay="200" className="interactive-card relative rounded-3xl overflow-hidden aspect-[4/3] bg-stone-900 group shadow-xl border border-stone-800">
+                <img
+                  src="/cricket.jpg"
+                  alt="Adyapan Cricket Outing"
+                  className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+                <span className="absolute bottom-3 left-3 px-3 py-1 rounded-lg bg-black/70 backdrop-blur-md text-xs font-bold text-amber-400 uppercase tracking-wide">
+                  🏏 Cricket Matches
+                </span>
+              </div>
+
+              <div data-reveal="up" data-delay="300" className="interactive-card relative rounded-3xl overflow-hidden aspect-[4/3] bg-stone-900 group shadow-xl border border-stone-800">
+                <img
+                  src="/party.jpeg"
+                  alt="Adyapan Team Celebrations"
+                  className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+                <span className="absolute bottom-3 left-3 px-3 py-1 rounded-lg bg-black/70 backdrop-blur-md text-xs font-bold text-amber-400 uppercase tracking-wide">
+                  🏆 Win Celebration
+                </span>
+              </div>
+
+              <div data-reveal="up" data-delay="400" className="interactive-card relative rounded-3xl overflow-hidden aspect-[4/3] bg-stone-900 group shadow-xl border border-stone-800">
+                <img
+                  src="/charanfoo.jpeg"
+                  alt="Student Community & Team Bond"
+                  className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+                <span className="absolute bottom-3 left-3 px-3 py-1 rounded-lg bg-black/70 backdrop-blur-md text-xs font-bold text-amber-400 uppercase tracking-wide">
+                  🤝 Student Community
+                </span>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════════════════
+            SECTION 05 — CAREER GROWTH (TRUE BENTO GRID)
+           ══════════════════════════════════════════════════════════ */}
+        <section className="py-24 bg-[#faf6f0] dark:bg-[#141312] border-b border-stone-200/60 dark:border-stone-850 relative pattern-dots" id="growth">
+          <div className="absolute right-8 top-1/4 watermark-text text-stone-900 dark:text-white">
+            GROWTH
+          </div>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
+              <div data-reveal="left">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-400 font-extrabold text-xs uppercase tracking-wider mb-3">
+                  <Rocket size={13} className="text-amber-500" />
+                  <span>CAREER ACCELERATION</span>
+                </div>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-stone-900 dark:text-white leading-tight">
+                  More than a job. <br />
+                  <span className="text-amber-500">A place to grow.</span>
+                </h2>
+              </div>
+              <p data-reveal="right" className="text-sm sm:text-base text-stone-600 dark:text-stone-300 max-w-md leading-relaxed font-medium">
+                We design our career trajectories for maximum acceleration. Your speed of growth is determined solely by your impact, hunger, and execution.
+              </p>
+            </div>
+
+            {/* Bento Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+              {/* Bento Card 1: Fast-Track 6-Month Evaluations (Spans 2 columns) */}
+              <div data-reveal="up" data-delay="100" className="md:col-span-2 interactive-card p-8 sm:p-10 rounded-3xl bg-white dark:bg-stone-900 border border-amber-200/70 dark:border-stone-800 shadow-md flex flex-col justify-between bento-glow-orange">
+                <div>
+                  <div className="flex items-center justify-between gap-4 mb-6">
+                    <div className="w-14 h-14 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+                      <Rocket size={28} />
+                    </div>
+                    <div className="text-right">
+                      <span className="text-3xl sm:text-4xl font-black text-amber-500 block">06</span>
+                      <small className="text-xs font-bold uppercase tracking-wider text-stone-500">Months Cycle</small>
+                    </div>
+                  </div>
+
+                  <h3 className="text-2xl font-black text-stone-900 dark:text-white">
+                    Fast-Track 6-Month Promotions
                   </h3>
-                  <p className="text-xs text-white/90 leading-relaxed font-medium" style={{ color: '#ffffff' }}>
-                    Empowering ambitious minds across India with world-class education.
+                  <p className="text-stone-600 dark:text-stone-300 text-sm mt-3 leading-relaxed max-w-xl">
+                    No waiting for years for annual appraisal cycles. Every 6 months, high-performing advisors, specialists, and engineers are directly reviewed for team lead, managerial promotions, and salary escalations.
                   </p>
                 </div>
-              </div>
-            </div>
 
-          </div>
-
-        </div>
-      </section>
-
-      {/* ===== 4. CERTIFIED BY INDUSTRY LEADERS ===== */}
-      <section className={`border-t py-14 border-b ${theme === 'dark' ? 'border-slate-800 bg-[#0d0d20]' : 'border-slate-200/80 bg-white'
-        }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 text-center space-y-8">
-          <div>
-            <p className="text-xs font-extrabold uppercase tracking-widest text-amber-500">
-              TRUSTED & ACCREDITED ECOSYSTEM
-            </p>
-            <h2 className="text-2xl sm:text-3xl font-black mt-1">
-              Recognized & Certified by Industry Leaders
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-4">
-            {CERT_PARTNERS.map((partner) => (
-              <div
-                key={partner.name}
-                className={`p-4 rounded-2xl border text-center transition-all hover:scale-105 ${theme === 'dark'
-                  ? 'bg-slate-900/60 border-slate-800 hover:border-amber-500/50'
-                  : 'bg-slate-50 border-slate-200 hover:border-amber-300 shadow-sm'
-                  }`}
-              >
-                <p className="text-sm font-black text-slate-900 dark:text-white">
-                  {partner.name}
-                </p>
-                <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
-                  {partner.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== 5. DEPARTMENT CATEGORIES ===== */}
-      <section id="categories" className={`border-t py-16 sm:py-20 relative overflow-hidden ${theme === 'dark' ? 'border-slate-800 bg-[#0a0a1a]' : 'border-slate-200/80 bg-slate-50/50'
-        }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 rounded-full text-[11px] font-extrabold uppercase mb-3">
-                CAREER DOMAINS
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white">
-                Explore by Department
-              </h2>
-              <p className={`text-sm sm:text-base mt-1.5 max-w-xl ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                Discover specialized teams across Adyapan and find the perfect role matching your strengths.
-              </p>
-            </div>
-
-            <Link
-              to="/open-positions"
-              className="inline-flex items-center gap-2 text-xs sm:text-sm font-black text-amber-600 dark:text-amber-400 hover:text-amber-500 uppercase tracking-wider shrink-0"
-            >
-              <span>View All Open Positions</span>
-              <span>→</span>
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                name: 'Sales & Growth',
-                code: 'SLS',
-                desc: 'Inside sales, BDA, enterprise partnerships & student lead conversions.',
-                searchQuery: 'Sales',
-              },
-              {
-                name: 'Technology & AI',
-                code: 'ENG',
-                desc: 'Full-stack software engineering, AI screening engines, and cloud architecture.',
-                searchQuery: 'Developer',
-              },
-              {
-                name: 'Academic Counselling',
-                code: 'CNS',
-                desc: 'Student career advisory, personalized learning roadmaps & mentor matchmaking.',
-                searchQuery: 'Counsellor',
-              },
-              {
-                name: 'Marketing & Brand',
-                code: 'MKT',
-                desc: 'Performance marketing, social media campaigns, brand storytelling & growth.',
-                searchQuery: 'Marketing',
-              },
-              {
-                name: 'Operations & Success',
-                code: 'OPS',
-                desc: 'Corporate placement logistics, student onboarding & recruiter network operations.',
-                searchQuery: 'Operations',
-              },
-              {
-                name: 'Curriculum & Content',
-                code: 'CUR',
-                desc: 'Pedagogy development, verified industry skill modules & co-branded certifications.',
-                searchQuery: 'Content',
-              },
-            ].map((cat) => {
-              const count = jobs.filter(j =>
-                (j.department || '').toLowerCase().includes(cat.searchQuery.toLowerCase()) ||
-                (j.title || '').toLowerCase().includes(cat.searchQuery.toLowerCase())
-              ).length;
-
-              return (
-                <div
-                  key={cat.name}
-                  onClick={() => { navigate(`/open-positions?q=${encodeURIComponent(cat.searchQuery)}`); }}
-                  className={`p-6 sm:p-7 rounded-3xl border text-left transition-all duration-300 group cursor-pointer flex flex-col justify-between gap-6 hover:-translate-y-1 ${theme === 'dark'
-                    ? 'bg-slate-900/70 border-slate-800 hover:border-amber-500/60 hover:bg-slate-900 shadow-lg hover:shadow-amber-500/10'
-                    : 'bg-white border-slate-200 hover:border-amber-400 hover:shadow-xl hover:shadow-amber-500/10 shadow-sm'
-                    }`}
-                >
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 font-black text-xs flex items-center justify-center border border-amber-500/30 group-hover:scale-110 transition-transform">
-                        {cat.code}
-                      </div>
-                      <span className={`px-3 py-1 text-[11px] font-extrabold rounded-full border ${count > 0
-                        ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
-                        : 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20'
-                        }`}>
-                        {count > 0 ? `${count} Open Role${count !== 1 ? 's' : ''}` : 'Active Hiring'}
-                      </span>
-                    </div>
-
-                    <div>
-                      <h3 className={`text-lg font-bold group-hover:text-amber-500 transition-colors ${theme === 'dark' ? 'text-white' : 'text-slate-900'
-                        }`}>
-                        {cat.name}
-                      </h3>
-                      <p className={`text-xs mt-1.5 leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
-                        }`}>
-                        {cat.desc}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1.5 text-xs font-black text-amber-500 pt-2 border-t border-slate-100 dark:border-slate-800">
-                    <span>Explore Roles</span>
-                    <span className="group-hover:translate-x-1 transition-transform">→</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== 6. LIFE AT ADYAPAN ===== */}
-      <section id="life" className={`border-t py-16 sm:py-24 relative overflow-hidden ${theme === 'dark' ? 'border-slate-800 bg-[#0d0d20]' : 'border-slate-200/80 bg-white'
-        }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 space-y-12">
-
-          {/* Header & Category Filter */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 rounded-full text-[11px] font-extrabold uppercase">
-                CULTURE & COMMUNITY
-              </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white">
-                Life at Adyapan
-              </h2>
-              <p className={`text-sm sm:text-base max-w-xl ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                We believe in empowering passionate builders. Explore our core culture pillars, real teammate stories, and comprehensive benefits.
-              </p>
-            </div>
-
-            {/* Filter Pills */}
-            <div className="flex flex-wrap gap-2">
-              {['All', 'Career', 'Technology', 'Culture', 'Rewards', 'Wellness', 'Impact'].map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setCultureFilter(cat)}
-                  className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${cultureFilter === cat
-                    ? 'bg-amber-500 text-slate-950 font-black shadow-md shadow-amber-500/20 scale-105'
-                    : theme === 'dark'
-                      ? 'bg-slate-900 text-slate-300 border border-slate-800 hover:border-amber-400/50'
-                      : 'bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200'
-                    }`}
-                >
-                  {cat === 'All' ? 'All Pillars' : cat}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 6 Rich Visual Pillar Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {filteredPillars.map((pillar) => (
-              <div
-                key={pillar.id}
-                onClick={() => setSelectedCultureModal(pillar)}
-                className={`rounded-3xl border overflow-hidden transition-all duration-300 flex flex-col justify-between group cursor-pointer hover:-translate-y-1.5 ${theme === 'dark'
-                  ? 'bg-slate-900/80 border-slate-800 hover:border-amber-500/60 hover:bg-slate-900 shadow-xl hover:shadow-amber-500/10'
-                  : 'bg-white border-slate-200 hover:border-amber-400 hover:shadow-2xl hover:shadow-amber-500/15 shadow-sm'
-                  }`}
-              >
-                {/* Photo Header */}
-                <div className="relative aspect-[16/10] overflow-hidden">
-                  <img
-                    src={pillar.image}
-                    alt={pillar.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className={`absolute inset-0 ${theme === 'dark'
-                    ? 'bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent'
-                    : 'bg-gradient-to-t from-slate-950/80 via-transparent to-transparent'
-                    }`} />
-                  <div className="absolute top-4 left-4">
-                    <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500 text-slate-950 shadow-md">
-                      {pillar.category}
-                    </span>
-                  </div>
-                  <div className="absolute bottom-3 left-4 text-xs font-black px-2 py-1 rounded-lg bg-black/60 text-white backdrop-blur-sm">
-                    Pillar {pillar.stepNumber}
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-6 space-y-3 flex-1 flex flex-col justify-between">
-                  <div>
-                    <h3 className={`text-lg font-bold group-hover:text-amber-500 transition-colors ${theme === 'dark' ? 'text-white' : 'text-slate-900'
-                      }`}>
-                      {pillar.title}
-                    </h3>
-                    <p className={`text-xs mt-2 leading-relaxed ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
-                      }`}>
-                      {pillar.shortDesc}
-                    </p>
-                  </div>
-
-                  <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-extrabold text-amber-500">
-                    <span>Read Story & Perks</span>
-                    <span className="group-hover:translate-x-1.5 transition-transform text-sm font-bold">→</span>
-                  </div>
+                <div className="mt-8 pt-6 border-t border-stone-100 dark:border-stone-800 flex flex-wrap items-center gap-3">
+                  <span className="px-3.5 py-1.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-extrabold flex items-center gap-1">
+                    <CheckCircle2 size={13} /> Transparent Metrics
+                  </span>
+                  <span className="px-3.5 py-1.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-extrabold flex items-center gap-1">
+                    <Star size={13} /> Direct Founder Sync
+                  </span>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* ===== CULTURE DETAILS MODAL ===== */}
-      {selectedCultureModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn">
-          <div className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border shadow-2xl relative ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200 text-slate-900'
-            }`}>
-            <button
-              onClick={() => setSelectedCultureModal(null)}
-              className="absolute top-5 right-5 w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center font-black text-sm z-10 hover:bg-amber-500 hover:text-slate-950 transition-colors cursor-pointer"
-            >
-              ✕
-            </button>
-
-            <div className="relative aspect-[16/9] w-full overflow-hidden">
-              <img
-                src={selectedCultureModal.image}
-                alt={selectedCultureModal.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
-              <div className="absolute bottom-6 left-6 right-6 text-white space-y-1" style={{ color: '#ffffff' }}>
-                <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-400 text-slate-950 inline-block mb-1 shadow-md">
-                  {selectedCultureModal.category}
+              {/* Bento Card 2: Learning & Masterclasses */}
+              <div data-reveal="up" data-delay="200" className="interactive-card p-8 rounded-3xl bg-white dark:bg-stone-900 border border-blue-200/70 dark:border-stone-800 shadow-md flex flex-col justify-between bento-glow-blue">
+                <div>
+                  <div className="w-12 h-12 rounded-2xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-6">
+                    <GraduationCap size={24} />
+                  </div>
+                  <h3 className="text-xl font-black text-stone-900 dark:text-white">Masterclasses & Mentorship</h3>
+                  <p className="text-stone-500 dark:text-stone-400 text-xs sm:text-sm mt-2 leading-relaxed">
+                    Gain exclusive access to executive communication workshops, AI ATS tooling coaching, and sales masterclasses.
+                  </p>
+                </div>
+                <span className="text-xs font-extrabold text-blue-500 mt-6 block">
+                  100% Free Professional Coaching →
                 </span>
-                <h3 className="text-2xl sm:text-3xl font-black text-white drop-shadow-lg" style={{ color: '#ffffff' }}>
-                  {selectedCultureModal.title}
-                </h3>
+              </div>
+
+              {/* Bento Card 3: Leadership Exposure */}
+              <div data-reveal="up" data-delay="300" className="interactive-card p-8 rounded-3xl bg-white dark:bg-stone-900 border border-purple-200/70 dark:border-stone-800 shadow-md bento-glow-purple flex flex-col justify-between">
+                <div>
+                  <div className="w-12 h-12 rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-6">
+                    <Building2 size={24} />
+                  </div>
+                  <h3 className="text-xl font-black text-stone-900 dark:text-white">Leadership Shadowing</h3>
+                  <p className="text-stone-500 dark:text-stone-400 text-xs sm:text-sm mt-2 leading-relaxed">
+                    Work alongside seasoned founders and recruitment directors with zero bureaucratic barriers.
+                  </p>
+                </div>
+                <span className="text-xs font-extrabold text-purple-500 mt-6 block">
+                  High-Impact Visibility →
+                </span>
+              </div>
+
+              {/* Bento Card 4: Recognition & Cash Rewards */}
+              <div data-reveal="up" data-delay="400" className="interactive-card p-8 rounded-3xl bg-white dark:bg-stone-900 border border-amber-200/70 dark:border-stone-800 shadow-md bento-glow-orange flex flex-col justify-between">
+                <div>
+                  <div className="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-6">
+                    <Trophy size={24} />
+                  </div>
+                  <h3 className="text-xl font-black text-stone-900 dark:text-white">Weekly Spot Incentives</h3>
+                  <p className="text-stone-500 dark:text-stone-400 text-xs sm:text-sm mt-2 leading-relaxed">
+                    Weekly cash rewards, milestone trophies, and spotlight recognition for high performers.
+                  </p>
+                </div>
+                <span className="text-xs font-extrabold text-amber-500 mt-6 block">
+                  Instant Payouts & Trophies →
+                </span>
+              </div>
+
+              {/* Bento Card 5: Team Pods & Culture */}
+              <div data-reveal="up" data-delay="500" className="interactive-card p-8 rounded-3xl bg-white dark:bg-stone-900 border border-emerald-200/70 dark:border-stone-800 shadow-md bento-glow-emerald flex flex-col justify-between">
+                <div>
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-6">
+                    <UsersRound size={24} />
+                  </div>
+                  <h3 className="text-xl font-black text-stone-900 dark:text-white">Collaborative Squads</h3>
+                  <p className="text-stone-500 dark:text-stone-400 text-xs sm:text-sm mt-2 leading-relaxed">
+                    Supportive pod leads and colleagues who back you up at every step. Zero office politics.
+                  </p>
+                </div>
+                <span className="text-xs font-extrabold text-emerald-500 mt-6 block">
+                  Zero Toxic Stress →
+                </span>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════════════════
+            SECTION 06 — FLEXIBLE WORKING (FREEDOM & WELLBEING)
+           ══════════════════════════════════════════════════════════ */}
+        <section className="py-24 bg-white dark:bg-[#181715] border-b border-stone-200/60 dark:border-stone-850 relative" id="why-join">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+
+              {/* Left Column (7 cols) */}
+              <div data-reveal="left" className="lg:col-span-7 space-y-6">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-400 font-extrabold text-xs uppercase tracking-wider">
+                  <Clock3 size={13} className="text-amber-500" />
+                  <span>FREEDOM & WELLBEING</span>
+                </div>
+
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-stone-900 dark:text-white leading-tight">
+                  Flexible Working Hours, <br />
+                  <span className="text-amber-500">Zero Pressure Culture</span> <br />
+                  & Uncapped Growth.
+                </h2>
+
+                <p className="text-stone-600 dark:text-stone-300 text-sm sm:text-base leading-relaxed font-medium">
+                  Looking for a career with true respect and autonomy? At Adyapan, we offer flexible work shifts, strong base compensation with uncapped performance bonuses, and a supportive team environment where you can earn and thrive without toxic stress or micromanagement.
+                </p>
+
+                {/* 4 Feature Cards with Colored Icons */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div className="interactive-card flex items-start gap-3.5 p-4 rounded-2xl bg-[#faf6f0] dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-600 flex items-center justify-center flex-shrink-0">
+                      <Clock3 size={20} />
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-sm text-stone-900 dark:text-white">Flexible Work Shifts</h4>
+                      <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Customize schedule around college or family.</p>
+                    </div>
+                  </div>
+
+                  <div className="interactive-card flex items-start gap-3.5 p-4 rounded-2xl bg-[#faf6f0] dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800">
+                    <div className="w-10 h-10 rounded-xl bg-rose-500/15 text-rose-600 flex items-center justify-center flex-shrink-0">
+                      <Heart size={20} />
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-sm text-stone-900 dark:text-white">Work-Life Balance</h4>
+                      <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Zero toxic pressure or unrealistic burnout.</p>
+                    </div>
+                  </div>
+
+                  <div className="interactive-card flex items-start gap-3.5 p-4 rounded-2xl bg-[#faf6f0] dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800">
+                    <div className="w-10 h-10 rounded-xl bg-blue-500/15 text-blue-600 flex items-center justify-center flex-shrink-0">
+                      <GraduationCap size={20} />
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-sm text-stone-900 dark:text-white">Learning Environment</h4>
+                      <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Fresher and student-friendly mentorship.</p>
+                    </div>
+                  </div>
+
+                  <div className="interactive-card flex items-start gap-3.5 p-4 rounded-2xl bg-[#faf6f0] dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center flex-shrink-0">
+                      <Trophy size={20} />
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-sm text-stone-900 dark:text-white">Performance Culture</h4>
+                      <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Weekly uncapped cash rewards for winners.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-3">
+                  <Link
+                    to="/open-positions"
+                    className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-sm font-extrabold text-white bg-amber-500 hover:bg-amber-600 shadow-xl shadow-amber-500/25 hover:scale-105 transition-all"
+                  >
+                    <span>Join Adyapan Today</span>
+                    <ArrowRight size={16} />
+                  </Link>
+                </div>
+              </div>
+
+              {/* Right: Vertical Video Reel Poster Card (5 cols) */}
+              <div className="lg:col-span-5 flex justify-center">
+                <VideoReelCard
+                  videoSrc={WHY_JOIN_VIDEO_URL}
+                  badgeText="WHY WORK AT ADYAPAN · CULTURE"
+                  title="Flexible Shifts & Stress-Free Work"
+                  subtitle="Flexible Timings · Zero Pressure · High Incentives · Hyderabad Hub"
+                  accentBadge="FLEXIBLE & STRESS-FREE"
+                  dataReveal="right"
+                />
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════════════════
+            SECTION 07 — DREAM JOB / OPPORTUNITY ECOSYSTEM
+           ══════════════════════════════════════════════════════════ */}
+        <section className="py-24 bg-gradient-to-b from-[#faf6f0] to-[#fff8ee] dark:bg-[#121110] border-b border-stone-200/60 dark:border-stone-850 relative" id="dream-job">
+          <div className="absolute left-6 top-1/4 watermark-text text-stone-900 dark:text-white">
+            OPPORTUNITY
+          </div>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+
+              {/* Left Column: Vertical Dream Job Reel (5 cols) */}
+              <div className="lg:col-span-5 order-2 lg:order-1 flex justify-center">
+                <VideoReelCard
+                  videoSrc={DREAM_JOB_VIDEO_URL}
+                  badgeText="DREAM JOB ROADMAP · 500+ RECRUITERS"
+                  title="Land High-Paying Dream Careers"
+                  subtitle="Instant AI ATS Matching · 500+ Corporate Partners · 48h Fast Track"
+                  accentBadge="APPLY & GET HIRED"
+                  dataReveal="left"
+                />
+              </div>
+
+              {/* Right Column: Narrative & 2x2 Feature Grid (7 cols) */}
+              <div data-reveal="right" className="lg:col-span-7 order-1 lg:order-2 space-y-6">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-400 font-extrabold text-xs uppercase tracking-wider">
+                  <Target size={13} className="text-amber-500" />
+                  <span>YOUR CAREER · YOUR OPPORTUNITY</span>
+                </div>
+
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-stone-900 dark:text-white leading-tight">
+                  Where ambitious talent <br />
+                  <span className="text-amber-500">applies directly & lands</span> <br />
+                  their dream job.
+                </h2>
+
+                <p className="text-stone-600 dark:text-stone-300 text-sm sm:text-base leading-relaxed font-medium">
+                  Stop submitting applications into recruiter black holes with zero response. At Adyapan, we match your resume directly with 500+ verified corporate recruiters, offering instant ATS evaluation and fast 48-hour interview scheduling.
+                </p>
+
+                {/* 2x2 Feature Cards Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div className="interactive-card p-5 rounded-2xl bg-white dark:bg-stone-900 border border-amber-200/70 dark:border-stone-800 shadow-sm flex items-start gap-3.5">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-600 flex items-center justify-center flex-shrink-0">
+                      <BriefcaseBusiness size={20} />
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-sm text-stone-900 dark:text-white">Direct Opportunities</h4>
+                      <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">500+ corporate recruitment openings.</p>
+                    </div>
+                  </div>
+
+                  <div className="interactive-card p-5 rounded-2xl bg-white dark:bg-stone-900 border border-emerald-200/70 dark:border-stone-800 shadow-sm flex items-start gap-3.5">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center flex-shrink-0">
+                      <ShieldCheck size={20} />
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-sm text-stone-900 dark:text-white">Verified Hiring</h4>
+                      <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">100% verified salary & CTC transparency.</p>
+                    </div>
+                  </div>
+
+                  <div className="interactive-card p-5 rounded-2xl bg-white dark:bg-stone-900 border border-purple-200/70 dark:border-stone-800 shadow-sm flex items-start gap-3.5">
+                    <div className="w-10 h-10 rounded-xl bg-purple-500/15 text-purple-600 flex items-center justify-center flex-shrink-0">
+                      <Zap size={20} />
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-sm text-stone-900 dark:text-white">AI / ATS Screening</h4>
+                      <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Instant resume matching within seconds.</p>
+                    </div>
+                  </div>
+
+                  <div className="interactive-card p-5 rounded-2xl bg-white dark:bg-stone-900 border border-blue-200/70 dark:border-stone-800 shadow-sm flex items-start gap-3.5">
+                    <div className="w-10 h-10 rounded-xl bg-blue-500/15 text-blue-600 flex items-center justify-center flex-shrink-0">
+                      <UsersRound size={20} />
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-sm text-stone-900 dark:text-white">Career Support</h4>
+                      <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">1-on-1 recruiter interview coaching.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-3">
+                  <Link
+                    to="/open-positions"
+                    className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-sm font-extrabold text-white bg-amber-500 hover:bg-amber-600 shadow-xl shadow-amber-500/25 hover:scale-105 transition-all"
+                  >
+                    <span>Explore Opportunities</span>
+                    <ArrowRight size={16} />
+                  </Link>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════════════════
+            SECTION 08 — CAREER JOURNEY (INTERACTIVE ANIMATED TIMELINE)
+           ══════════════════════════════════════════════════════════ */}
+        <section className="py-24 bg-white dark:bg-[#181715] border-b border-stone-200/60 dark:border-stone-850 relative" id="hiring-process">
+          <div className="absolute right-8 top-1/4 watermark-text text-stone-900 dark:text-white">
+            JOURNEY
+          </div>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
+            <div className="text-center max-w-2xl mx-auto mb-16">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-400 font-extrabold text-xs uppercase tracking-wider mb-3">
+                <Compass size={14} className="text-amber-500" />
+                <span>STEP-BY-STEP HIRING ROADMAP</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-stone-900 dark:text-white leading-tight">
+                From learning <br />
+                <span className="text-amber-500">to earning.</span>
+              </h2>
+              <p className="text-stone-500 dark:text-stone-400 text-sm mt-3 font-medium">
+                We support you at every single step of your recruitment journey to ensure you land top offers.
+              </p>
+            </div>
+
+            {/* 5-Step Process with Colored Nodes & Connected Line */}
+            <div className="relative">
+              {/* Connecting Line on Desktop */}
+              <div className="hidden lg:block absolute top-12 left-[10%] right-[10%] h-1 bg-gradient-to-r from-amber-500 via-emerald-500 to-teal-500 rounded-full -z-0 opacity-40" />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 relative z-10">
+
+                {/* Step 01: Discover */}
+                <div
+                  className="flex flex-col items-center text-center p-6 rounded-3xl bg-[#faf6f0] dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 transition-all duration-300 hover:border-amber-500 hover:shadow-xl hover:bento-glow-orange hover:-translate-y-2 cursor-pointer group"
+                >
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <Search size={26} />
+                  </div>
+                  <span className="text-xs font-black uppercase tracking-widest text-amber-500">STAGE 01</span>
+                  <h4 className="font-black text-lg text-stone-900 dark:text-white mt-1">Discover</h4>
+                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-2 leading-relaxed font-medium">
+                    Explore curated roles that match your passion, skills, and growth ambition.
+                  </p>
+                </div>
+
+                {/* Step 02: Prepare */}
+                <div
+                  className="flex flex-col items-center text-center p-6 rounded-3xl bg-[#faf6f0] dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 transition-all duration-300 hover:border-emerald-500 hover:shadow-xl hover:bento-glow-emerald hover:-translate-y-2 cursor-pointer group"
+                >
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <BookOpen size={26} />
+                  </div>
+                  <span className="text-xs font-black uppercase tracking-widest text-emerald-500">STAGE 02</span>
+                  <h4 className="font-black text-lg text-stone-900 dark:text-white mt-1">Prepare</h4>
+                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-2 leading-relaxed font-medium">
+                    Hone your resume with our instant AI ATS evaluation and guidance.
+                  </p>
+                </div>
+
+                {/* Step 03: Apply */}
+                <div
+                  className="flex flex-col items-center text-center p-6 rounded-3xl bg-[#faf6f0] dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 transition-all duration-300 hover:border-purple-500 hover:shadow-xl hover:bento-glow-purple hover:-translate-y-2 cursor-pointer group"
+                >
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 text-white shadow-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <Laptop size={26} />
+                  </div>
+                  <span className="text-xs font-black uppercase tracking-widest text-purple-500">STAGE 03</span>
+                  <h4 className="font-black text-lg text-stone-900 dark:text-white mt-1">Apply</h4>
+                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-2 leading-relaxed font-medium">
+                    Submit in 1-click and get direct recruiter visibility within 24 hours.
+                  </p>
+                </div>
+
+                {/* Step 04: Interview */}
+                <div
+                  className="flex flex-col items-center text-center p-6 rounded-3xl bg-[#faf6f0] dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 transition-all duration-300 hover:border-amber-500 hover:shadow-xl hover:bento-glow-orange hover:-translate-y-2 cursor-pointer group"
+                >
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 text-white shadow-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <MessageSquare size={26} />
+                  </div>
+                  <span className="text-xs font-black uppercase tracking-widest text-amber-500">STAGE 04</span>
+                  <h4 className="font-black text-lg text-stone-900 dark:text-white mt-1">Interview</h4>
+                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-2 leading-relaxed font-medium">
+                    Connect directly with friendly hiring teams and ace your interview rounds.
+                  </p>
+                </div>
+
+                {/* Step 05: Get Hired */}
+                <div
+                  className="flex flex-col items-center text-center p-6 rounded-3xl bg-[#faf6f0] dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 transition-all duration-300 hover:border-teal-500 hover:shadow-xl hover:bento-glow-emerald hover:-translate-y-2 cursor-pointer group"
+                >
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 text-white shadow-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <Trophy size={26} />
+                  </div>
+                  <span className="text-xs font-black uppercase tracking-widest text-teal-500">STAGE 05</span>
+                  <h4 className="font-black text-lg text-stone-900 dark:text-white mt-1">Get Hired</h4>
+                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-2 leading-relaxed font-medium">
+                    Receive formal offer rollout and start your high-growth career journey!
+                  </p>
+                </div>
+
               </div>
             </div>
 
-            <div className="p-6 sm:p-8 space-y-6">
-              <p className={`text-sm sm:text-base leading-relaxed ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
-                }`}>
-                {selectedCultureModal.fullStory}
-              </p>
+          </div>
+        </section>
 
-              <div className="space-y-3">
-                <h4 className="text-xs font-black uppercase tracking-wider text-amber-500">
-                  Key Benefits & Teammate Advantages:
-                </h4>
-                <div className="grid sm:grid-cols-2 gap-3">
-                  {selectedCultureModal.perks.map((perk: string) => (
+        {/* ══════════════════════════════════════════════════════════
+            SECTION 09 — REAL PEOPLE / TESTIMONIALS (EDITORIAL PHYSICAL CARDS)
+           ══════════════════════════════════════════════════════════ */}
+        <section className="py-24 bg-[#f5f0e6] dark:bg-[#141312] border-b border-stone-200/60 dark:border-stone-850 relative" id="stories">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <div className="mb-14" data-reveal="left">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-400 font-extrabold text-xs uppercase tracking-wider mb-3">
+                <Quote size={13} className="text-amber-500" />
+                <span>REAL PEOPLE · REAL CAREERS</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-stone-900 dark:text-white">
+                Real people. <br />
+                <span className="text-amber-500">Real careers.</span>
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+
+              {/* 1 Large Featured Testimonial on Left (7 cols) */}
+              <div data-reveal="left" className="lg:col-span-7 interactive-card p-8 sm:p-12 rounded-3xl bg-white dark:bg-stone-900 border border-amber-200/80 dark:border-stone-800 shadow-xl flex flex-col justify-between relative overflow-hidden bento-glow-orange">
+                <div className="absolute right-6 top-6 text-amber-500/10 pointer-events-none">
+                  <Quote size={120} />
+                </div>
+
+                <div>
+                  <div className="flex items-center gap-1.5 text-amber-400 mb-6">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} size={20} className="fill-amber-400 text-amber-400" />
+                    ))}
+                  </div>
+
+                  <p className="text-lg sm:text-2xl font-medium text-stone-800 dark:text-stone-200 italic leading-relaxed">
+                    "{testimonials[0].quote}"
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between pt-8 border-t border-stone-100 dark:border-stone-800 mt-8">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white font-black text-2xl flex items-center justify-center shadow-lg shadow-amber-500/25 flex-shrink-0">
+                      {testimonials[0].name.charAt(0)}
+                    </div>
+                    <div>
+                      <b className="text-base font-black text-stone-900 dark:text-white block">{testimonials[0].name}</b>
+                      <span className="text-xs text-stone-500 dark:text-stone-400">{testimonials[0].role} · {testimonials[0].company}</span>
+                    </div>
+                  </div>
+
+                  <span className="hidden sm:inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-extrabold shadow-sm">
+                    <TrendingUp size={14} /> {testimonials[0].growth}
+                  </span>
+                </div>
+              </div>
+
+              {/* 2 Stacked Smaller Testimonials on Right (5 cols) */}
+              <div className="lg:col-span-5 grid grid-rows-2 gap-6">
+                {testimonials.slice(1).map((t, idx) => (
+                  <div data-reveal="right" data-delay={idx * 150} key={t.name} className="interactive-card p-6 sm:p-8 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 shadow-md flex flex-col justify-between">
+                    <p className="text-sm text-stone-600 dark:text-stone-300 italic leading-relaxed font-medium">
+                      "{t.quote}"
+                    </p>
+                    <div className="flex items-center justify-between pt-4 border-t border-stone-100 dark:border-stone-800 mt-4">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white font-black text-lg flex-shrink-0 shadow-md ${idx === 0
+                            ? 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/20'
+                            : 'bg-gradient-to-br from-purple-500 to-indigo-600 shadow-purple-500/20'
+                          }`}>
+                          {t.name.charAt(0)}
+                        </div>
+                        <div>
+                          <b className="text-xs font-black text-stone-900 dark:text-white block">{t.name}</b>
+                          <span className="text-[11px] text-stone-500 dark:text-stone-400">{t.role}</span>
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-bold text-amber-500">{t.growth}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════════════════
+            SECTION 10 — LIFE AT ADYAPAN PHOTO STORY (MASONRY COLLAGE)
+           ══════════════════════════════════════════════════════════ */}
+        <section className="py-24 bg-[#faf6f0] dark:bg-[#181715] border-b border-stone-200/60 dark:border-stone-850">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <div className="text-center max-w-2xl mx-auto mb-14" data-reveal="up">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-400 font-extrabold text-xs uppercase tracking-wider mb-3">
+                <Sparkles size={14} className="text-amber-500" />
+                <span>PHOTO STORIES & MEMORIES</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-stone-900 dark:text-white">
+                Come for the opportunity. <br />
+                <span className="text-amber-500">Stay for the people.</span>
+              </h2>
+            </div>
+
+            {/* Editorial Photo Masonry Collage */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <div className="sm:col-span-2 relative rounded-3xl overflow-hidden shadow-xl border-2 border-white dark:border-stone-800 bg-stone-900 group h-[340px]">
+                <img
+                  src="/adyapan-team-fun.png"
+                  alt="Team Life"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute bottom-4 left-4 px-3.5 py-1.5 rounded-xl bg-black/70 backdrop-blur-md text-xs font-bold text-white">
+                  🏆 Adyapan Hyderabad Headquarters
+                </div>
+              </div>
+
+              <div className="relative rounded-3xl overflow-hidden shadow-xl border-2 border-white dark:border-stone-800 bg-stone-900 group h-[340px]">
+                <img
+                  src="/Founders.jpeg"
+                  alt="Adyapan Leadership"
+                  className="w-full h-full object-cover object-[center_55%] group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute bottom-4 left-4 px-3.5 py-1.5 rounded-xl bg-black/70 backdrop-blur-md text-xs font-bold text-white">
+                  ✨ Leadership & Vision
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════════════════
+            SECTION 11 — FULL ORANGE CTA (VERY STRONG & IMPRESSIVE)
+           ══════════════════════════════════════════════════════════ */}
+        <section className="py-20 sm:py-24 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white relative overflow-hidden">
+          {/* Giant Transparent Watermark in Background */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white/10 font-black text-[120px] sm:text-[200px] select-none pointer-events-none uppercase tracking-tighter">
+            ADYAPAN
+          </div>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+
+              {/* Left Column: Heading & Button */}
+              <div data-reveal="left" className="lg:col-span-7 space-y-4">
+                <span className="inline-block px-3.5 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-extrabold uppercase tracking-widest text-white mb-2">
+                  DON'T WAIT FOR THE RIGHT MOMENT
+                </span>
+                <h2 className="text-4xl sm:text-6xl font-black text-white leading-tight">
+                  Your next chapter <br />
+                  starts here.
+                </h2>
+                <p className="text-amber-100 text-base sm:text-lg max-w-lg font-medium">
+                  Explore opportunities, accelerate your career, and find the workplace where your potential is celebrated every single day.
+                </p>
+
+                <div className="pt-4">
+                  <Link
+                    to="/open-positions"
+                    className="group inline-flex items-center gap-3 px-9 py-4 rounded-full text-base font-extrabold text-white bg-black hover:bg-stone-900 shadow-2xl hover:scale-105 active:scale-95 transition-all"
+                  >
+                    <span>Explore Opportunities</span>
+                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* Right Column: 3 Stat Highlights */}
+              <div data-reveal="right" className="lg:col-span-5 grid grid-cols-3 gap-4 text-center">
+                <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20">
+                  <b className="text-3xl sm:text-4xl font-black text-white block">10K+</b>
+                  <span className="text-xs text-amber-100 font-bold uppercase tracking-wider">Jobs</span>
+                </div>
+                <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20">
+                  <b className="text-3xl sm:text-4xl font-black text-white block">500+</b>
+                  <span className="text-xs text-amber-100 font-bold uppercase tracking-wider">Companies</span>
+                </div>
+                <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20">
+                  <b className="text-3xl sm:text-4xl font-black text-white block">48h</b>
+                  <span className="text-xs text-amber-100 font-bold uppercase tracking-wider">Offers</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════════════════
+            SECTION 12 — FAQ (WIDE ACCORDION & CONTACT CARD)
+           ══════════════════════════════════════════════════════════ */}
+        <section className="py-24 bg-[#faf7f2] dark:bg-[#121110] border-b border-stone-200/60 dark:border-stone-850" id="faq">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+
+              {/* Left Column: Heading + Help Card */}
+              <div data-reveal="left" className="lg:col-span-5 space-y-6">
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-400 font-extrabold text-xs uppercase tracking-wider mb-3">
+                    <HelpCircle size={13} className="text-amber-500" />
+                    <span>EVERYTHING YOU NEED TO KNOW</span>
+                  </div>
+                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-stone-900 dark:text-white leading-tight">
+                    Still curious? <br />
+                    <span className="text-amber-500">We've got answers.</span>
+                  </h2>
+                </div>
+
+                {/* Support Card */}
+                <div className="p-7 rounded-3xl bg-white dark:bg-stone-900 border border-amber-200/70 dark:border-stone-800 shadow-md space-y-4 bento-glow-orange">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-600 flex items-center justify-center font-bold">
+                    <Phone size={22} />
+                  </div>
+                  <h4 className="font-black text-base text-stone-900 dark:text-white">Have specific questions?</h4>
+                  <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 leading-relaxed font-medium">
+                    Our team is here to assist you with applications, resume reviews, or technical positions.
+                  </p>
+                  <Link
+                    to="/contact"
+                    className="inline-flex items-center gap-2 text-xs sm:text-sm font-extrabold text-amber-500 hover:text-amber-600 pt-1"
+                  >
+                    <span>Contact Our Career Team</span>
+                    <ArrowRight size={15} />
+                  </Link>
+                </div>
+              </div>
+
+              {/* Right Column: Accordion FAQ List */}
+              <div data-reveal="right" className="lg:col-span-7 space-y-3.5">
+                {faqList.map((item, idx) => {
+                  const isOpen = faqOpen === idx;
+                  return (
                     <div
-                      key={perk}
-                      className={`p-3.5 rounded-2xl border text-xs font-bold flex items-start gap-2.5 ${theme === 'dark'
-                        ? 'bg-slate-950/80 border-slate-800 text-slate-200'
-                        : 'bg-amber-50/50 border-amber-200/80 text-slate-800'
+                      key={idx}
+                      className={`rounded-2xl border transition-all overflow-hidden ${isOpen
+                        ? 'bg-amber-500/5 dark:bg-stone-900 border-amber-500/50 shadow-md'
+                        : 'bg-white dark:bg-stone-900 border-stone-200/80 dark:border-stone-800 shadow-sm'
                         }`}
                     >
-                      <span className="text-emerald-500 font-extrabold text-sm shrink-0">✓</span>
-                      <span className="leading-snug">{perk}</span>
+                      <button
+                        onClick={() => setFaqOpen(isOpen ? null : idx)}
+                        className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-sm sm:text-base text-stone-900 dark:text-white"
+                      >
+                        <span className="flex items-center gap-3">
+                          <span className="text-xs font-black text-amber-500">0{idx + 1}</span>
+                          <span>{item.q}</span>
+                        </span>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold transition-transform ${isOpen ? 'bg-amber-500 text-white rotate-180' : 'bg-stone-100 dark:bg-stone-800 text-stone-500'
+                          }`}>
+                          {isOpen ? '−' : '+'}
+                        </div>
+                      </button>
+
+                      {isOpen && (
+                        <div className="px-6 pb-6 text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed border-t border-stone-200/40 dark:border-stone-800 pt-3 animate-fadeIn font-medium">
+                          {item.a}
+                        </div>
+                      )}
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
 
-              <div className={`p-5 rounded-2xl border italic text-xs leading-relaxed ${theme === 'dark' ? 'bg-slate-950/60 border-slate-800 text-amber-200/90' : 'bg-amber-50/40 border-amber-200 text-slate-800'
-                }`}>
-                <p>{selectedCultureModal.quote}</p>
-                <p className="font-extrabold text-amber-600 dark:text-amber-400 not-italic mt-2">
-                  — {selectedCultureModal.quoteAuthor}
-                </p>
-              </div>
-
-              <div className="pt-2 flex items-center justify-end gap-3">
-                <button
-                  onClick={() => setSelectedCultureModal(null)}
-                  className={`px-5 py-2.5 rounded-xl text-xs font-bold border transition-colors ${theme === 'dark'
-                    ? 'border-slate-700 text-slate-300 hover:bg-slate-800'
-                    : 'border-slate-200 text-slate-700 hover:bg-slate-100'
-                    }`}
-                >
-                  Close
-                </button>
-                <Link
-                  to="/open-positions"
-                  className="px-6 py-2.5 rounded-xl text-xs font-black text-slate-950 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:from-amber-300 hover:to-orange-400 shadow-md uppercase tracking-wider"
-                >
-                  Explore Related Roles →
-                </Link>
-              </div>
             </div>
           </div>
-        </div>
-      )}
+        </section>
 
-      {/* ===== 7. FOOTER ===== */}
-      <Footer isPublic={true} />
-
-    </div>
+      </main>
+    </SiteShell>
   );
 };
 

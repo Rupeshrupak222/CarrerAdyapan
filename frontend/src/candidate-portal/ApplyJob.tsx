@@ -1,75 +1,132 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import CandidateNavbar from '../components/layout/CandidateNavbar';
-import Footer from '../components/layout/Footer';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Briefcase,
+  Building2,
+  Calendar,
+  Check,
+  CheckCircle2,
+  Clock3,
+  FileCheck2,
+  FileText,
+  FileUp,
+  Globe2,
+  GraduationCap,
+  Heart,
+  HelpCircle,
+  IndianRupee,
+  Layers,
+  MapPin,
+  Plus,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Star,
+  Trash2,
+  Upload,
+  User,
+  UsersRound,
+  X,
+  Zap,
+} from 'lucide-react';
+import SiteShell from '../components/layout/SiteShell';
 import { candidateService } from '../services/candidateService';
 import { jobService } from '../services/jobService';
 import { calculateRealAIScore, addCandidateNotification, saveCandidateApplication } from '../utils/applicationStore';
-import { useTheme } from '../context/ThemeContext';
 import { useCandidateAuth } from '../context/CandidateAuthContext';
 import { toast } from 'react-hot-toast';
 
 const SUGGESTED_SKILLS = [
-  'EdTech Sales',
-  'Student Counselling',
-  'Telesales',
-  'Lead Conversion',
-  'Target Handling',
-  'CRM Tools',
-  'Objection Handling',
-  'Inside Sales',
-  'Communication Skills',
-  'Client Relationship',
   'React.js',
   'Node.js',
+  'TypeScript',
+  'JavaScript',
+  'Python',
+  'SQL',
   'PostgreSQL',
+  'AWS',
+  'Network Security',
+  'SIEM',
+  'Direct Sales',
+  'Student Counselling',
+  'Client Advisory',
+  'Lead Generation',
+  'CRM Tools',
+  'Communication Skills',
+  'Problem Solving',
+  'Leadership',
 ];
 
-const ApplyJob = () => {
+const STEPS = [
+  { id: 1, label: 'Profile', desc: 'Personal details' },
+  { id: 2, label: 'Experience', desc: 'Career history' },
+  { id: 3, label: 'Education', desc: 'Qualifications' },
+  { id: 4, label: 'Skills', desc: 'Core strengths' },
+  { id: 5, label: 'Resume', desc: 'Upload document' },
+  { id: 6, label: 'Final Details', desc: 'Pitch & links' },
+  { id: 7, label: 'Review', desc: 'Verify & submit' },
+];
+
+export const ApplyJob: React.FC = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
   const { candidate: loggedInCandidate } = useCandidateAuth();
 
+  const [currentStep, setCurrentStep] = useState(1);
+  const [job, setJob] = useState<any>(null);
+  const [loadingJob, setLoadingJob] = useState(true);
+
+  // Form State
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
     location: '',
-    employmentStatus: 'STUDENT',
 
-    // If Employed
-    currentPosition: '',
+    // Experience
+    employmentStatus: 'WORKING', // FRESHER | WORKING | HUNTING | OTHER
+    experience: '1-3 Years',
     currentCompany: '',
-    currentCompanyTenure: '',
-    currentRoleDescription: '',
-    experience: '0',
+    currentPosition: '',
     currentCtc: '',
     expectedCtc: '',
     noticePeriod: 'Immediate',
+    currentRoleDescription: '',
 
-    // If Student
-    education: '',
+    // Education
+    highestQualification: "Bachelor's Degree",
     collegeName: '',
-    graduationYear: '',
-    specialization: '',
+    degree: 'B.Tech / B.E.',
+    fieldOfStudy: 'Computer Science / Engineering',
+    graduationYear: '2024',
     cgpa: '',
 
-    // Work Preference & Motivation
-    preferredLocationType: 'Hybrid',
-    motivationPitch: '',
+    // Skills
+    skills: ['Communication Skills', 'Problem Solving'] as string[],
 
-    // Links & Skills
-    linkedin: '',
-    portfolio: '',
-    skills: [] as string[],
+    // Resume
     resumeFileName: '',
+    resumeFileSize: '',
     resumeDataUrl: null as any,
     resumeText: '',
+
+    // Final Details
+    motivationPitch: '',
+    linkedin: '',
+    portfolio: '',
+    github: '',
   });
 
-  // Pre-fill form with logged-in candidate's details
+  const [customSkill, setCustomSkill] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitStage, setSubmitStage] = useState(1); // 1: Validating, 2: Uploading, 3: Processing
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  // Pre-fill logged-in candidate profile
   useEffect(() => {
     if (loggedInCandidate) {
       setFormData((prev) => ({
@@ -88,69 +145,92 @@ const ApplyJob = () => {
     }
   }, [loggedInCandidate]);
 
-  const [customSkill, setCustomSkill] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [job, setJob] = useState<any>(null);
-  const [loadingJob, setLoadingJob] = useState(true);
-
+  // Load Job info
   useEffect(() => {
-    fetchJobInfo();
+    const fetchJob = async () => {
+      setLoadingJob(true);
+      try {
+        const res = await jobService.getPublicJob(slug);
+        if (res?.job) {
+          setJob(res.job);
+        } else {
+          const allRes = await jobService.getPublicJobs();
+          const found = allRes?.jobs?.find((j: any) => j.slug === slug || j.id === slug);
+          if (found) setJob(found);
+        }
+      } catch (e) {
+        console.error('Error fetching job details:', e);
+      } finally {
+        setLoadingJob(false);
+      }
+    };
+    fetchJob();
   }, [slug]);
 
-  const fetchJobInfo = async () => {
-    try {
-      const res = await jobService.getPublicJob(slug);
-      if (res?.job) {
-        setJob(res.job);
-      } else {
-        const allRes = await jobService.getPublicJobs();
-        const found = allRes?.jobs?.find((j: any) => j.slug === slug || j.id === slug);
-        if (found) setJob(found);
-      }
-    } catch {
-      // Fallback
-    } finally {
-      setLoadingJob(false);
+  const displayJobTitle = useMemo(() => {
+    if (job?.title) return job.title;
+    if (slug?.includes('cyber')) return 'Cybersecurity Analyst';
+    if (slug?.includes('developer') || slug?.includes('stack')) return 'Senior Full Stack Developer';
+    if (slug?.includes('sales') || slug?.includes('telecaller')) return 'Inside Sales Executive / Telecaller';
+    if (slug?.includes('counselor') || slug?.includes('advisory')) return 'Senior Academic Counselor';
+    return 'Business Development Associate (BDA)';
+  }, [job, slug]);
+
+  const displaySalary = useMemo(() => {
+    if (job?.salaryMin && job?.salaryMax) {
+      const min = job.salaryMin >= 10000 ? (job.salaryMin / 100000).toFixed(1) : job.salaryMin;
+      const max = job.salaryMax >= 10000 ? (job.salaryMax / 100000).toFixed(1) : job.salaryMax;
+      return `₹${min} – ${max} LPA`;
+    }
+    return job?.salary || '₹3.5 – 6.0 LPA';
+  }, [job]);
+
+  // Handle Input Changes
+  const handleChange = (field: string, value: any) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => {
+        const copy = { ...prev };
+        delete copy[field];
+        return copy;
+      });
     }
   };
 
-  const getJobTitle = () => {
-    if (job?.title) return job.title;
-    if (slug?.includes('counsellor')) return 'Academic Counsellor / Student Advisor';
-    if (slug?.includes('telecaller') || slug?.includes('sales')) return 'Inside Sales Executive / Telecaller';
-    if (slug?.includes('developer') || slug?.includes('tech')) return 'Senior Full Stack Developer';
-    return 'Business Development Associate (BDA)';
-  };
-
+  // Skill Management
   const toggleSkill = (skill: string) => {
     if (formData.skills.includes(skill)) {
-      setFormData({ ...formData, skills: formData.skills.filter((s) => s !== skill) });
+      handleChange('skills', formData.skills.filter((s) => s !== skill));
     } else {
-      setFormData({ ...formData, skills: [...formData.skills, skill] });
+      handleChange('skills', [...formData.skills, skill]);
     }
   };
 
   const addCustomSkill = (e: React.FormEvent) => {
     e.preventDefault();
     if (customSkill.trim() && !formData.skills.includes(customSkill.trim())) {
-      setFormData({ ...formData, skills: [...formData.skills, customSkill.trim()] });
+      handleChange('skills', [...formData.skills, customSkill.trim()]);
       setCustomSkill('');
     }
   };
 
   const removeSkill = (skillToRemove: string) => {
-    setFormData({ ...formData, skills: formData.skills.filter((s) => s !== skillToRemove) });
+    handleChange('skills', formData.skills.filter((s) => s !== skillToRemove));
   };
 
+  // File Upload
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (file.size > 15 * 1024 * 1024) {
-      toast.error('File size must be under 15MB');
+      toast.error('Resume size must be under 15MB');
       return;
     }
+
+    const fileSizeStr = file.size > 1024 * 1024
+      ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+      : `${Math.round(file.size / 1024)} KB`;
 
     setSelectedFile(file);
 
@@ -159,34 +239,61 @@ const ApplyJob = () => {
       setFormData((prev) => ({
         ...prev,
         resumeFileName: file.name,
+        resumeFileSize: fileSizeStr,
         resumeDataUrl: event.target.result,
-        resumeText: `Parsed candidate resume: ${file.name}. Verified candidate application.`,
+        resumeText: `Parsed candidate resume: ${file.name}. Verified application.`,
       }));
       toast.success(`Resume attached: ${file.name}`);
     };
     reader.readAsDataURL(file);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Validation per step
+  const validateCurrentStep = () => {
+    const newErrors: { [key: string]: string } = {};
 
-    if (!formData.firstName.trim() || !formData.email.trim() || !formData.phone.trim()) {
-      toast.error('Please fill in required personal contact fields (Name, Email, Phone)');
-      return;
+    if (currentStep === 1) {
+      if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
+      if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
+      if (!formData.email.trim() || !formData.email.includes('@')) newErrors.email = 'Valid email address is required';
+      if (!formData.phone.trim() || formData.phone.length < 10) newErrors.phone = 'Valid phone number is required';
     }
 
-    if (!formData.resumeDataUrl && !formData.resumeFileName && !selectedFile) {
-      toast.error('Please attach your Resume PDF/DOCX before submitting');
-      return;
+    if (currentStep === 5) {
+      if (!selectedFile && !formData.resumeFileName && !formData.resumeDataUrl) {
+        newErrors.resume = 'Please attach your resume PDF or DOCX';
+      }
     }
 
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const nextStep = () => {
+    if (!validateCurrentStep()) {
+      toast.error('Please complete the required fields to continue');
+      return;
+    }
+    setCurrentStep((prev) => Math.min(STEPS.length, prev + 1));
+    window.scrollTo({ top: 220, behavior: 'smooth' });
+  };
+
+  const prevStep = () => {
+    setCurrentStep((prev) => Math.max(1, prev - 1));
+    window.scrollTo({ top: 220, behavior: 'smooth' });
+  };
+
+  // Final Application Submission
+  const handleSubmitApplication = async () => {
     setSubmitting(true);
-    const jobTitle = getJobTitle();
-    const isStudent = formData.employmentStatus === 'STUDENT';
+    setSubmitStage(1);
+
+    const jobTitle = displayJobTitle;
+    const isStudent = formData.employmentStatus === 'FRESHER';
 
     const submissionData = {
       ...formData,
-      experience: isStudent ? '0' : (formData.experience || '0'),
+      experience: isStudent ? 'Fresher (0 Yrs)' : formData.experience,
       currentPosition: isStudent ? 'Student / Fresher' : (formData.currentPosition || jobTitle),
       currentCompany: isStudent ? (formData.collegeName || 'University Student') : (formData.currentCompany || 'Independent Candidate'),
       employmentStatus: isStudent ? 'STUDENT' : formData.employmentStatus,
@@ -195,6 +302,8 @@ const ApplyJob = () => {
     const aiAnalysis = calculateRealAIScore(formData.skills, submissionData.experience, jobTitle);
 
     try {
+      setTimeout(() => setSubmitStage(2), 700);
+
       saveCandidateApplication(submissionData, jobTitle);
 
       const formPayload = new FormData();
@@ -218,16 +327,19 @@ const ApplyJob = () => {
           formPayload.append(key, (submissionData as any)[key] || '');
         }
       });
+
       formPayload.append('jobTitle', jobTitle);
       formPayload.append('jobId', slug || 'business-development-associate-edtech');
       formPayload.append('aiScore', String(aiAnalysis.score));
       formPayload.append('matchReason', aiAnalysis.reason);
 
+      setTimeout(() => setSubmitStage(3), 1400);
+
       await candidateService.publicApply(formPayload);
 
       addCandidateNotification(`${formData.firstName} ${formData.lastName}`, jobTitle, aiAnalysis.score);
 
-      toast.success(`Application submitted! Saved to database.`);
+      toast.success('Application submitted successfully!');
       setSubmitting(false);
 
       navigate('/application-success', {
@@ -235,616 +347,985 @@ const ApplyJob = () => {
           candidateName: `${formData.firstName} ${formData.lastName}`,
           candidateEmail: formData.email,
           jobTitle: jobTitle,
+          company: job?.company || 'Adyapan Technologies',
+          location: job?.location || 'Hyderabad',
           score: aiAnalysis.score,
         },
       });
     } catch (error: any) {
       console.error('Application submit error:', error);
-      const errMsg = error.response?.data?.message || error.message || 'Failed to submit application to database';
+      const errMsg = error.response?.data?.message || error.message || 'Failed to submit application';
       toast.error(errMsg);
       setSubmitting(false);
     }
   };
 
-  const inputClass = theme === 'dark'
-    ? 'w-full px-4 py-3 rounded-xl text-xs font-semibold bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-500/20 transition-all'
-    : 'w-full px-4 py-3 rounded-xl text-xs font-semibold bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all';
-
-  const labelClass = theme === 'dark'
-    ? 'text-xs font-bold text-slate-200 block mb-1.5'
-    : 'text-xs font-bold text-slate-700 block mb-1.5';
-
-  const cardSectionClass = theme === 'dark'
-    ? 'p-6 sm:p-8 rounded-3xl border bg-slate-900/90 border-slate-800 shadow-xl space-y-6'
-    : 'p-6 sm:p-8 rounded-3xl border bg-white border-amber-200/60 shadow-lg shadow-amber-500/5 space-y-6';
-
-  const displayJobTitle = getJobTitle();
-  const department = job?.department || 'EdTech Growth & Operations';
-  const location = job?.location || 'Hyderabad / Pan-India';
+  const progressPercent = Math.round((currentStep / STEPS.length) * 100);
 
   return (
-    <div className={`min-h-screen font-sans antialiased transition-colors relative overflow-x-hidden ${theme === 'dark' ? 'bg-[#0a0a1a] text-slate-100' : 'bg-slate-50/50 text-slate-900'
-      }`}>
+    <SiteShell>
+      <main className="bg-[#faf7f2] dark:bg-[#121110] text-stone-900 dark:text-stone-100 min-h-screen relative pb-20">
 
-      {/* Persistent Full-Page Right-to-Left Orange Gradient Glow */}
-      <div className="fixed top-0 right-0 w-[55vw] max-w-[800px] h-full pointer-events-none bg-gradient-to-l from-orange-400/15 via-amber-200/10 to-transparent dark:from-amber-500/10 dark:via-amber-900/5 dark:to-transparent blur-3xl z-0" />
+        {/* Background glow and subtle dots */}
+        <div className="absolute inset-0 bg-dotted-grid pointer-events-none opacity-35" />
+        <div className="absolute top-10 left-1/3 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* ===== 1. TOP NAVBAR ===== */}
-      <CandidateNavbar />
+        {/* ── COMPACT APPLICATION HERO ── */}
+        <section className="pt-8 pb-8 relative z-10 border-b border-stone-200/60 dark:border-stone-850 bg-[#fdfbf7] dark:bg-[#141312]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
 
-      {/* ===== 2. HERO GRADIENT HEADER ===== */}
-      <section className="relative overflow-hidden bg-gradient-to-r from-[#18181b] via-[#78350f] via-50% to-[#d97706] text-white py-12 sm:py-14 px-4 sm:px-8 border-b border-amber-500/30 shadow-xl" style={{ color: '#ffffff' }}>
-        {/* Ambient Glows */}
-        <div className="absolute -top-24 right-0 w-[500px] h-[500px] bg-amber-400/30 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 right-1/4 w-[350px] h-[350px] bg-orange-500/25 rounded-full blur-2xl pointer-events-none" />
+              {/* Left Role Details */}
+              <div className="space-y-3">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-400 font-black text-xs uppercase tracking-wider">
+                  <Sparkles size={13} className="text-amber-500 fill-amber-500" />
+                  <span>DIRECT APPLICATION</span>
+                </div>
 
-        <div className="max-w-4xl mx-auto space-y-4 relative z-10">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-amber-400 text-slate-950 rounded-full text-[11px] font-black uppercase tracking-wider shadow-md">
-            ● OFFICIAL ADYAPAN CANDIDATE APPLICATION
-          </div>
-
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white leading-tight drop-shadow-sm" style={{ color: '#ffffff' }}>
-            Apply for {displayJobTitle}
-          </h1>
-
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs font-bold text-white pt-1" style={{ color: '#ffffff' }}>
-            <span className="flex items-center gap-1.5 bg-black/50 px-3.5 py-1.5 rounded-xl text-white font-bold backdrop-blur-sm border border-white/30" style={{ color: '#ffffff' }}>
-              <svg className="w-3.5 h-3.5 text-amber-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-              <span className="text-white font-bold" style={{ color: '#ffffff' }}>{department}</span>
-            </span>
-            <span className="flex items-center gap-1.5 bg-black/50 px-3.5 py-1.5 rounded-xl text-white font-bold backdrop-blur-sm border border-white/30" style={{ color: '#ffffff' }}>
-              <svg className="w-3.5 h-3.5 text-amber-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-              <span className="text-white font-bold" style={{ color: '#ffffff' }}>{location}</span>
-            </span>
-            <span className="px-3.5 py-1.5 rounded-full bg-emerald-400 text-slate-950 font-black shadow-md flex items-center gap-1">
-              <span>● Instant AI Screening Enabled</span>
-            </span>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== 3. FORM CONTAINER ===== */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-8 py-10 relative z-10 space-y-8">
-
-        {/* Logged in candidate status banner */}
-        {loggedInCandidate && (
-          <div className="p-4 sm:p-5 rounded-3xl border bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs font-bold shadow-md">
-            <div className="flex items-center gap-3">
-              <span className="w-10 h-10 rounded-2xl bg-emerald-500 text-slate-950 flex items-center justify-center font-black text-base shrink-0 shadow-md">
-                ✓
-              </span>
-              <div>
-                <p className="font-extrabold text-sm text-slate-900 dark:text-white">
-                  Logged in as {loggedInCandidate.firstName} {loggedInCandidate.lastName}
-                </p>
-                <p className="text-[11px] text-slate-600 dark:text-slate-300 font-medium">
-                  {loggedInCandidate.email} • Your application details are pre-filled and will automatically link to your candidate dashboard.
-                </p>
-              </div>
-            </div>
-            <Link
-              to="/my-applications"
-              className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black whitespace-nowrap text-center transition-all shadow-md"
-            >
-              My Dashboard ↗
-            </Link>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-8">
-
-          {/* Section 1: Employment Status */}
-          <div className={cardSectionClass}>
-            <div className="flex items-center gap-3 border-b pb-4 border-slate-200 dark:border-slate-800">
-              <span className="w-7 h-7 rounded-xl bg-amber-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-md shadow-amber-500/20">
-                01
-              </span>
-              <div>
-                <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-                  Current Employment Status
-                </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Select your current professional standing
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[
-                { key: 'STUDENT', label: 'Student / Fresher', code: '01' },
-                { key: 'EMPLOYED', label: 'Working Professional', code: '02' },
-                { key: 'LOOKING_FOR_JOB', label: 'Actively Job Hunting', code: '03' },
-                { key: 'FREELANCER', label: 'Freelancer / Other', code: '04' },
-              ].map((item) => {
-                const active = formData.employmentStatus === item.key;
-                return (
-                  <button
-                    key={item.key}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, employmentStatus: item.key })}
-                    className={`p-4 rounded-2xl border text-left transition-all flex flex-col justify-between gap-3 cursor-pointer ${active
-                        ? 'bg-gradient-to-br from-amber-400 to-amber-500 text-slate-950 border-amber-400 shadow-lg shadow-amber-500/25 scale-[1.02]'
-                        : theme === 'dark'
-                          ? 'bg-slate-950 text-slate-300 border-slate-800 hover:border-amber-400/50'
-                          : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-amber-400/60 hover:bg-white'
-                      }`}
-                  >
-                    <span className="w-7 h-7 rounded-lg bg-amber-500/20 text-slate-950 dark:text-white font-black text-xs flex items-center justify-center">
-                      {item.code}
-                    </span>
-                    <span className={`text-xs font-extrabold ${active ? 'text-slate-950' : ''}`}>
-                      {item.label}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Section 2: Personal Contact Information */}
-          <div className={cardSectionClass}>
-            <div className="flex items-center gap-3 border-b pb-4 border-slate-200 dark:border-slate-800">
-              <span className="w-7 h-7 rounded-xl bg-amber-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-md shadow-amber-500/20">
-                02
-              </span>
-              <div>
-                <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-                  Personal Contact Information
-                </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  How our HR & Recruitment team will reach out to you
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div>
-                <label className={labelClass}>First Name *</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.firstName}
-                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                  placeholder="e.g. Rahul"
-                  className={inputClass}
-                />
-              </div>
-
-              <div>
-                <label className={labelClass}>Last Name</label>
-                <input
-                  type="text"
-                  value={formData.lastName}
-                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                  placeholder="e.g. Sharma"
-                  className={inputClass}
-                />
-              </div>
-
-              <div>
-                <label className={labelClass}>Email Address *</label>
-                <input
-                  type="email"
-                  required
-                  disabled={Boolean(loggedInCandidate)}
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="rahul.sharma@example.com"
-                  className={inputClass}
-                />
-              </div>
-
-              <div>
-                <label className={labelClass}>Mobile Number *</label>
-                <input
-                  type="tel"
-                  required
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="+91 98765 43210"
-                  className={inputClass}
-                />
-              </div>
-
-              <div className="sm:col-span-2">
-                <label className={labelClass}>Current City / Location</label>
-                <input
-                  type="text"
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  placeholder="e.g. Hyderabad, Telangana / Bengaluru / Pan-India"
-                  className={inputClass}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Section 3: Professional Experience (If Employed) */}
-          {formData.employmentStatus !== 'STUDENT' && (
-            <div className={cardSectionClass}>
-              <div className="flex items-center gap-3 border-b pb-4 border-slate-200 dark:border-slate-800">
-                <span className="w-7 h-7 rounded-xl bg-amber-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-md shadow-amber-500/20">
-                  03
-                </span>
                 <div>
-                  <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-                    Work Experience & Compensation
-                  </h2>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Details of your current and prior professional engagements
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-stone-900 dark:text-white tracking-tight">
+                    Build your next career move.
+                  </h1>
+                  <p className="text-xs sm:text-sm text-stone-500 font-semibold pt-0.5">
+                    You are applying for:{' '}
+                    <strong className="text-amber-600 dark:text-amber-400 font-black">
+                      {displayJobTitle}
+                    </strong>{' '}
+                    at {job?.company || 'Adyapan Technologies'}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-stone-600 dark:text-stone-300 pt-1">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white dark:bg-stone-850 border border-stone-200 dark:border-stone-800 shadow-sm">
+                    <MapPin size={13} className="text-amber-500" />
+                    <span>{job?.location || 'Hyderabad'}</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white dark:bg-stone-850 border border-stone-200 dark:border-stone-800 shadow-sm">
+                    <Clock3 size={13} className="text-amber-500" />
+                    <span>{job?.type || 'Full Time'}</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-400 font-black">
+                    <IndianRupee size={13} />
+                    <span>{displaySalary}</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Right Mini Photo & Verified Floating Card */}
+              <div className="hidden md:flex items-center gap-4">
+                <div className="relative w-44 h-24 rounded-2xl overflow-hidden shadow-lg border-2 border-white dark:border-stone-800 bg-stone-900 shrink-0">
+                  <img
+                    src="/largest-student-community.jpeg"
+                    alt="Adyapan"
+                    className="w-full h-full object-cover object-center"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  <span className="absolute bottom-2 left-2 text-[10px] font-black text-white">
+                    Hyderabad Hub
+                  </span>
+                </div>
+
+                <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-3 rounded-2xl shadow-md space-y-1">
+                  <div className="flex items-center gap-1.5 text-xs font-black text-emerald-600 dark:text-emerald-400">
+                    <ShieldCheck size={16} />
+                    <span>Verified Official Opening</span>
+                  </div>
+                  <p className="text-[11px] text-stone-500 font-medium">
+                    Direct HR placement pipeline
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div>
-                  <label className={labelClass}>Current / Most Recent Company</label>
-                  <input
-                    type="text"
-                    value={formData.currentCompany}
-                    onChange={(e) => setFormData({ ...formData, currentCompany: e.target.value })}
-                    placeholder="e.g. EdTech Solutions Pvt Ltd"
-                    className={inputClass}
-                  />
-                </div>
-
-                <div>
-                  <label className={labelClass}>Current Designation / Title</label>
-                  <input
-                    type="text"
-                    value={formData.currentPosition}
-                    onChange={(e) => setFormData({ ...formData, currentPosition: e.target.value })}
-                    placeholder="e.g. Business Development Associate"
-                    className={inputClass}
-                  />
-                </div>
-
-                <div>
-                  <label className={labelClass}>Total Experience (Years)</label>
-                  <input
-                    type="number"
-                    step="0.5"
-                    min="0"
-                    value={formData.experience}
-                    onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
-                    placeholder="e.g. 1.5"
-                    className={inputClass}
-                  />
-                </div>
-
-                <div>
-                  <label className={labelClass}>Notice Period</label>
-                  <select
-                    value={formData.noticePeriod}
-                    onChange={(e) => setFormData({ ...formData, noticePeriod: e.target.value })}
-                    className={inputClass}
-                  >
-                    <option value="Immediate">Immediate (0-7 Days)</option>
-                    <option value="15 Days">15 Days</option>
-                    <option value="30 Days">30 Days</option>
-                    <option value="45 Days">45 Days</option>
-                    <option value="60+ Days">60+ Days</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className={labelClass}>Current Annual CTC (₹)</label>
-                  <input
-                    type="text"
-                    value={formData.currentCtc}
-                    onChange={(e) => setFormData({ ...formData, currentCtc: e.target.value })}
-                    placeholder="e.g. ₹4.2 LPA"
-                    className={inputClass}
-                  />
-                </div>
-
-                <div>
-                  <label className={labelClass}>Expected Annual CTC (₹)</label>
-                  <input
-                    type="text"
-                    value={formData.expectedCtc}
-                    onChange={(e) => setFormData({ ...formData, expectedCtc: e.target.value })}
-                    placeholder="e.g. ₹6.0 LPA"
-                    className={inputClass}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Section 4: Academic Background */}
-          <div className={cardSectionClass}>
-            <div className="flex items-center gap-3 border-b pb-4 border-slate-200 dark:border-slate-800">
-              <span className="w-7 h-7 rounded-xl bg-amber-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-md shadow-amber-500/20">
-                {formData.employmentStatus === 'STUDENT' ? '03' : '04'}
-              </span>
-              <div>
-                <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-                  Academic Credentials
-                </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  College, degree, and specialization details
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div>
-                <label className={labelClass}>College / University Name *</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.collegeName}
-                  onChange={(e) => setFormData({ ...formData, collegeName: e.target.value })}
-                  placeholder="e.g. Osmania University / JNTU Hyderabad"
-                  className={inputClass}
-                />
-              </div>
-
-              <div>
-                <label className={labelClass}>Degree / Qualification</label>
-                <input
-                  type="text"
-                  value={formData.education}
-                  onChange={(e) => setFormData({ ...formData, education: e.target.value })}
-                  placeholder="e.g. B.Tech / BBA / B.Com / MBA"
-                  className={inputClass}
-                />
-              </div>
-
-              <div>
-                <label className={labelClass}>Year of Graduation</label>
-                <input
-                  type="text"
-                  value={formData.graduationYear}
-                  onChange={(e) => setFormData({ ...formData, graduationYear: e.target.value })}
-                  placeholder="e.g. 2024 / 2025"
-                  className={inputClass}
-                />
-              </div>
-
-              <div>
-                <label className={labelClass}>CGPA / Percentage</label>
-                <input
-                  type="text"
-                  value={formData.cgpa}
-                  onChange={(e) => setFormData({ ...formData, cgpa: e.target.value })}
-                  placeholder="e.g. 8.4 CGPA or 78%"
-                  className={inputClass}
-                />
-              </div>
             </div>
           </div>
+        </section>
 
-          {/* Section 5: Skills & Expertise */}
-          <div className={cardSectionClass}>
-            <div className="flex items-center gap-3 border-b pb-4 border-slate-200 dark:border-slate-800">
-              <span className="w-7 h-7 rounded-xl bg-amber-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-md shadow-amber-500/20">
-                {formData.employmentStatus === 'STUDENT' ? '04' : '05'}
-              </span>
-              <div>
-                <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-                  Key Skills & Domain Expertise
-                </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Select relevant skills for automated ATS AI candidate matching
-                </p>
+        {/* ── GLOBAL APPLICATION PROGRESS TIMELINE ── */}
+        <section className="py-6 border-b border-stone-200/60 dark:border-stone-850 bg-white/70 dark:bg-stone-900/70 backdrop-blur-md sticky top-[64px] z-30 shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            {/* Desktop Horizontal Timeline */}
+            <div className="hidden lg:flex items-center justify-between relative">
+              {STEPS.map((step, idx) => {
+                const isCompleted = currentStep > step.id;
+                const isCurrent = currentStep === step.id;
+
+                return (
+                  <React.Fragment key={step.id}>
+                    <button
+                      onClick={() => {
+                        if (isCompleted) setCurrentStep(step.id);
+                      }}
+                      disabled={!isCompleted && !isCurrent}
+                      className={`flex items-center gap-3 transition-all select-none text-left cursor-pointer ${
+                        !isCompleted && !isCurrent ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      <div
+                        className={`w-9 h-9 rounded-2xl flex items-center justify-center font-black text-xs transition-all shadow-sm ${
+                          isCompleted
+                            ? 'bg-emerald-500 text-white'
+                            : isCurrent
+                            ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white scale-110 shadow-amber-500/30'
+                            : 'bg-stone-100 dark:bg-stone-800 text-stone-500'
+                        }`}
+                      >
+                        {isCompleted ? <Check size={16} /> : `0${step.id}`}
+                      </div>
+
+                      <div>
+                        <b
+                          className={`text-xs block font-black ${
+                            isCurrent
+                              ? 'text-amber-500'
+                              : isCompleted
+                              ? 'text-stone-900 dark:text-white'
+                              : 'text-stone-400'
+                          }`}
+                        >
+                          {step.label}
+                        </b>
+                        <small className="text-[10px] text-stone-400 font-semibold block">
+                          {step.desc}
+                        </small>
+                      </div>
+                    </button>
+
+                    {idx < STEPS.length - 1 && (
+                      <div
+                        className={`flex-1 h-0.5 mx-3 rounded-full transition-all ${
+                          currentStep > step.id
+                            ? 'bg-emerald-500'
+                            : 'bg-stone-200 dark:bg-stone-800'
+                        }`}
+                      />
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+
+            {/* Mobile Compact Progress Bar */}
+            <div className="lg:hidden flex items-center justify-between gap-4">
+              <div className="space-y-1">
+                <span className="text-[10px] font-black uppercase tracking-wider text-amber-500 block">
+                  STEP {currentStep} OF {STEPS.length}
+                </span>
+                <b className="text-sm font-black text-stone-900 dark:text-white block">
+                  {STEPS[currentStep - 1]?.label}: {STEPS[currentStep - 1]?.desc}
+                </b>
+              </div>
+
+              <div className="w-32 bg-stone-100 dark:bg-stone-800 h-2.5 rounded-full overflow-hidden">
+                <div
+                  className="bg-gradient-to-r from-amber-500 to-orange-500 h-full rounded-full transition-all duration-300"
+                  style={{ width: `${progressPercent}%` }}
+                />
               </div>
             </div>
 
-            <div className="space-y-4">
-              <div className="flex flex-wrap gap-2">
-                {SUGGESTED_SKILLS.map((skill) => {
-                  const selected = formData.skills.includes(skill);
-                  return (
-                    <button
-                      key={skill}
-                      type="button"
-                      onClick={() => toggleSkill(skill)}
-                      className={`px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${selected
-                          ? 'bg-amber-500 text-slate-950 font-black shadow-md shadow-amber-500/20 scale-[1.03]'
-                          : theme === 'dark'
-                            ? 'bg-slate-950 text-slate-200 border border-slate-800 hover:border-amber-400/50'
-                            : 'bg-slate-100 text-slate-700 border border-slate-200 hover:bg-amber-50 hover:border-amber-300'
-                        }`}
-                    >
-                      {selected ? '✓ ' : '+ '}
-                      {skill}
-                    </button>
-                  );
-                })}
-              </div>
+          </div>
+        </section>
 
-              {/* Custom Skill Adder */}
-              <div className="flex items-center gap-2 pt-2">
-                <input
-                  type="text"
-                  value={customSkill}
-                  onChange={(e) => setCustomSkill(e.target.value)}
-                  placeholder="Add custom skill (e.g. Cold Calling, Course Selling)..."
-                  className={inputClass}
-                />
-                <button
-                  type="button"
-                  onClick={addCustomSkill}
-                  className="px-5 py-3 text-xs font-extrabold text-slate-950 bg-amber-400 hover:bg-amber-500 rounded-xl shadow-md shrink-0 cursor-pointer transition-all active:scale-95"
-                >
-                  + Add
-                </button>
-              </div>
+        {/* ── TWO-COLUMN MAIN APPLICATION LAYOUT ── */}
+        <section className="pt-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-              {/* Selected Skills Tags */}
-              {formData.skills.length > 0 && (
-                <div className="pt-2 space-y-2">
-                  <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 block">
-                    Selected Skills ({formData.skills.length}):
-                  </span>
-                  <div className="flex flex-wrap gap-2">
-                    {formData.skills.map((s) => (
-                      <span
-                        key={s}
-                        className="px-3 py-1.5 text-xs font-bold bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30 rounded-xl flex items-center gap-2"
-                      >
-                        <span>{s}</span>
-                        <button
-                          type="button"
-                          onClick={() => removeSkill(s)}
-                          className="hover:text-red-500 font-black cursor-pointer text-sm"
-                        >
-                          ✕
-                        </button>
-                      </span>
-                    ))}
+            {/* ── LEFT COLUMN: MAIN CURRENT STEP FORM (65% / 8 Cols) ── */}
+            <div className="lg:col-span-8 bg-white dark:bg-stone-900 rounded-3xl p-6 sm:p-10 border border-stone-200/80 dark:border-stone-800 shadow-xl relative overflow-hidden space-y-8">
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500" />
+
+              {/* ── STEP 01: PROFILE ── */}
+              {currentStep === 1 && (
+                <div className="space-y-6 animate-fadeIn">
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-black uppercase tracking-wider text-amber-500">
+                      Step 01 of 07
+                    </span>
+                    <h2 className="text-2xl sm:text-3xl font-black text-stone-900 dark:text-white">
+                      Let's get to know you.
+                    </h2>
+                    <p className="text-xs sm:text-sm text-stone-500 font-medium">
+                      Tell us a little about yourself so our talent acquisition team can reach out.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
+                        First Name <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.firstName}
+                        onChange={(e) => handleChange('firstName', e.target.value)}
+                        placeholder="e.g. Dinesh"
+                        className={`w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border ${
+                          errors.firstName ? 'border-rose-500' : 'border-stone-200 dark:border-stone-800'
+                        } text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all`}
+                      />
+                      {errors.firstName && <span className="text-[11px] text-rose-500 font-bold">{errors.firstName}</span>}
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
+                        Last Name <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.lastName}
+                        onChange={(e) => handleChange('lastName', e.target.value)}
+                        placeholder="e.g. Sharma"
+                        className={`w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border ${
+                          errors.lastName ? 'border-rose-500' : 'border-stone-200 dark:border-stone-800'
+                        } text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all`}
+                      />
+                      {errors.lastName && <span className="text-[11px] text-rose-500 font-bold">{errors.lastName}</span>}
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
+                        Email Address <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => handleChange('email', e.target.value)}
+                        placeholder="dinesh@example.com"
+                        className={`w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border ${
+                          errors.email ? 'border-rose-500' : 'border-stone-200 dark:border-stone-800'
+                        } text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all`}
+                      />
+                      {errors.email && <span className="text-[11px] text-rose-500 font-bold">{errors.email}</span>}
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
+                        Phone Number <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => handleChange('phone', e.target.value)}
+                        placeholder="+91 98765 43210"
+                        className={`w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border ${
+                          errors.phone ? 'border-rose-500' : 'border-stone-200 dark:border-stone-800'
+                        } text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all`}
+                      />
+                      {errors.phone && <span className="text-[11px] text-rose-500 font-bold">{errors.phone}</span>}
+                    </div>
+
+                    <div className="sm:col-span-2 space-y-1.5">
+                      <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
+                        Current City / Location
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.location}
+                        onChange={(e) => handleChange('location', e.target.value)}
+                        placeholder="e.g. Hyderabad, Telangana / Remote"
+                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
-            </div>
-          </div>
 
-          {/* Section 6: Resume Upload (Luxurious Glowing Dropzone) */}
-          <div className={cardSectionClass}>
-            <div className="flex items-center gap-3 border-b pb-4 border-slate-200 dark:border-slate-800">
-              <span className="w-7 h-7 rounded-xl bg-amber-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-md shadow-amber-500/20">
-                {formData.employmentStatus === 'STUDENT' ? '05' : '06'}
-              </span>
-              <div>
-                <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-                  Attach Resume PDF / DOCX *
-                </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Our ATS engine analyzes your resume directly for recruiter shortlisting
-                </p>
-              </div>
-            </div>
+              {/* ── STEP 02: EXPERIENCE ── */}
+              {currentStep === 2 && (
+                <div className="space-y-6 animate-fadeIn">
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-black uppercase tracking-wider text-amber-500">
+                      Step 02 of 07
+                    </span>
+                    <h2 className="text-2xl sm:text-3xl font-black text-stone-900 dark:text-white">
+                      Tell us about your experience.
+                    </h2>
+                    <p className="text-xs sm:text-sm text-stone-500 font-medium">
+                      Help us understand where you are in your professional career journey.
+                    </p>
+                  </div>
 
-            <div className={`border-2 border-dashed rounded-3xl p-8 sm:p-10 text-center transition-all relative group cursor-pointer ${selectedFile || formData.resumeFileName
-                ? 'border-emerald-500/60 bg-emerald-500/5'
-                : theme === 'dark'
-                  ? 'border-slate-700 hover:border-amber-400 bg-slate-950/60 hover:bg-slate-950'
-                  : 'border-amber-300/80 hover:border-amber-500 bg-amber-50/20 hover:bg-amber-50/40'
-              }`}>
-              <input
-                type="file"
-                accept=".pdf,.docx,.doc,.txt"
-                onChange={handleFileUpload}
-                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
-              />
+                  {/* Employment Status Selection Cards */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
+                      Current Employment Status
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                      {[
+                        { id: 'FRESHER', title: 'Fresher / Student', desc: 'Starting career / Graduating soon', icon: GraduationCap },
+                        { id: 'WORKING', title: 'Working Professional', desc: 'Currently employed in a role', icon: Briefcase },
+                        { id: 'HUNTING', title: 'Actively Job Hunting', desc: 'Available for immediate joining', icon: Zap },
+                        { id: 'OTHER', title: 'Freelance / Consultant', desc: 'Independent contractor or other', icon: User },
+                      ].map((card) => {
+                        const Icon = card.icon;
+                        const isSelected = formData.employmentStatus === card.id;
 
-              <div className="space-y-3 pointer-events-none">
-                <div className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center shadow-inner bg-amber-500/15 text-amber-500 border border-amber-500/30 group-hover:scale-110 transition-transform">
-                  <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        return (
+                          <div
+                            key={card.id}
+                            onClick={() => handleChange('employmentStatus', card.id)}
+                            className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-start gap-3.5 select-none ${
+                              isSelected
+                                ? 'border-amber-500 bg-amber-500/10 shadow-md shadow-amber-500/10'
+                                : 'border-stone-200 dark:border-stone-800 hover:border-amber-400 bg-stone-50/50 dark:bg-stone-850'
+                            }`}
+                          >
+                            <div
+                              className={`w-10 h-10 rounded-xl flex items-center justify-center font-black shrink-0 ${
+                                isSelected ? 'bg-amber-500 text-white' : 'bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-300'
+                              }`}
+                            >
+                              <Icon size={18} />
+                            </div>
+                            <div className="space-y-0.5 flex-1">
+                              <b className={`text-xs sm:text-sm block font-black ${isSelected ? 'text-amber-600 dark:text-amber-400' : 'text-stone-900 dark:text-white'}`}>
+                                {card.title}
+                              </b>
+                              <small className="text-[11px] text-stone-500 dark:text-stone-400 font-semibold block">
+                                {card.desc}
+                              </small>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Conditional Experience Fields */}
+                  {formData.employmentStatus !== 'FRESHER' ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-3 border-t border-stone-100 dark:border-stone-800">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
+                          Total Relevant Experience
+                        </label>
+                        <select
+                          value={formData.experience}
+                          onChange={(e) => handleChange('experience', e.target.value)}
+                          className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                        >
+                          <option value="0-1 Years">0–1 Years</option>
+                          <option value="1-3 Years">1–3 Years</option>
+                          <option value="3-5 Years">3–5 Years</option>
+                          <option value="5+ Years">5+ Years</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
+                          Current Company
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.currentCompany}
+                          onChange={(e) => handleChange('currentCompany', e.target.value)}
+                          placeholder="e.g. Cognizant / TCS / Startup"
+                          className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
+                          Current Designation
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.currentPosition}
+                          onChange={(e) => handleChange('currentPosition', e.target.value)}
+                          placeholder="e.g. Associate Analyst / Developer"
+                          className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
+                          Notice Period
+                        </label>
+                        <select
+                          value={formData.noticePeriod}
+                          onChange={(e) => handleChange('noticePeriod', e.target.value)}
+                          className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                        >
+                          <option value="Immediate">Immediate / Serving Notice</option>
+                          <option value="15 Days">15 Days</option>
+                          <option value="30 Days">30 Days</option>
+                          <option value="60+ Days">60+ Days</option>
+                        </select>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-3">
+                      <Sparkles size={18} className="text-emerald-600 shrink-0" />
+                      <p className="text-xs text-emerald-800 dark:text-emerald-300 font-semibold leading-relaxed">
+                        Fresher friendly! Adyapan offers comprehensive training, founder mentorship, and fast-track promotion paths for emerging talent.
+                      </p>
+                    </div>
+                  )}
                 </div>
+              )}
 
-                {formData.resumeFileName ? (
-                  <div className="space-y-1">
-                    <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-1.5">
-                      <span>✓</span> Attached: {formData.resumeFileName}
-                    </p>
-                    <p className="text-[11px] text-slate-500">
-                      Click or drop another document to replace
+              {/* ── STEP 03: EDUCATION ── */}
+              {currentStep === 3 && (
+                <div className="space-y-6 animate-fadeIn">
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-black uppercase tracking-wider text-amber-500">
+                      Step 03 of 07
+                    </span>
+                    <h2 className="text-2xl sm:text-3xl font-black text-stone-900 dark:text-white">
+                      Your learning journey.
+                    </h2>
+                    <p className="text-xs sm:text-sm text-stone-500 font-medium">
+                      Tell us about the education and qualifications that shaped your skills.
                     </p>
                   </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
+                        Highest Qualification
+                      </label>
+                      <select
+                        value={formData.highestQualification}
+                        onChange={(e) => handleChange('highestQualification', e.target.value)}
+                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                      >
+                        <option value="Bachelor's Degree">Bachelor's Degree (B.Tech / B.E / B.Sc / B.Com)</option>
+                        <option value="Master's Degree">Master's Degree (M.Tech / MBA / MCA)</option>
+                        <option value="Diploma / Polytechnic">Diploma / Polytechnic</option>
+                        <option value="Doctorate / PhD">Doctorate / PhD</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
+                        College / University Name
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.collegeName}
+                        onChange={(e) => handleChange('collegeName', e.target.value)}
+                        placeholder="e.g. Lovely Professional University / JNTU"
+                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
+                        Specialization / Branch
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.fieldOfStudy}
+                        onChange={(e) => handleChange('fieldOfStudy', e.target.value)}
+                        placeholder="e.g. Computer Science / Electronics / Business"
+                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
+                        Year of Graduation
+                      </label>
+                      <select
+                        value={formData.graduationYear}
+                        onChange={(e) => handleChange('graduationYear', e.target.value)}
+                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                      >
+                        {['2027', '2026', '2025', '2024', '2023', '2022', '2021', '2020', 'Prior'].map((yr) => (
+                          <option key={yr} value={yr}>{yr}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── STEP 04: SKILLS ── */}
+              {currentStep === 4 && (
+                <div className="space-y-6 animate-fadeIn">
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-black uppercase tracking-wider text-amber-500">
+                      Step 04 of 07
+                    </span>
+                    <h2 className="text-2xl sm:text-3xl font-black text-stone-900 dark:text-white">
+                      What are you great at?
+                    </h2>
+                    <p className="text-xs sm:text-sm text-stone-500 font-medium">
+                      Select your key strengths. You currently have{' '}
+                      <b className="text-amber-500">{formData.skills.length} skills</b> selected.
+                    </p>
+                  </div>
+
+                  {/* Add Custom Skill Form */}
+                  <form onSubmit={addCustomSkill} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={customSkill}
+                      onChange={(e) => setCustomSkill(e.target.value)}
+                      placeholder="Add a custom skill (e.g. PyTorch, B2B Sales)..."
+                      className="flex-1 px-4 py-3 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-xs sm:text-sm font-semibold outline-none focus:border-amber-500"
+                    />
+                    <button
+                      type="submit"
+                      className="px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs shadow-md shadow-amber-500/20 transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+                    >
+                      <Plus size={15} />
+                      <span>Add</span>
+                    </button>
+                  </form>
+
+                  {/* Interactive Skill Chips */}
+                  <div className="space-y-3 pt-2">
+                    <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
+                      Suggested & Available Skills:
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {SUGGESTED_SKILLS.map((skill) => {
+                        const isSelected = formData.skills.includes(skill);
+                        return (
+                          <button
+                            key={skill}
+                            type="button"
+                            onClick={() => toggleSkill(skill)}
+                            className={`px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all flex items-center gap-1.5 cursor-pointer ${
+                              isSelected
+                                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md shadow-amber-500/20 scale-105'
+                                : 'bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:border-amber-400'
+                            }`}
+                          >
+                            <span>{skill}</span>
+                            {isSelected ? <Check size={13} /> : <Plus size={13} className="text-stone-400" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Selected Custom Chips */}
+                  {formData.skills.filter((s) => !SUGGESTED_SKILLS.includes(s)).length > 0 && (
+                    <div className="space-y-2 pt-2">
+                      <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
+                        Custom Added Skills:
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {formData.skills
+                          .filter((s) => !SUGGESTED_SKILLS.includes(s))
+                          .map((custom) => (
+                            <span
+                              key={custom}
+                              className="px-3.5 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-300 font-bold text-xs flex items-center gap-1.5"
+                            >
+                              <span>{custom}</span>
+                              <button
+                                onClick={() => removeSkill(custom)}
+                                className="hover:text-rose-500 p-0.5 cursor-pointer"
+                              >
+                                <X size={13} />
+                              </button>
+                            </span>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ── STEP 05: RESUME ── */}
+              {currentStep === 5 && (
+                <div className="space-y-6 animate-fadeIn">
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-black uppercase tracking-wider text-amber-500">
+                      Step 05 of 07
+                    </span>
+                    <h2 className="text-2xl sm:text-3xl font-black text-stone-900 dark:text-white">
+                      Let's add your resume.
+                    </h2>
+                    <p className="text-xs sm:text-sm text-stone-500 font-medium">
+                      Your resume helps our talent acquisition team review your background quickly.
+                    </p>
+                  </div>
+
+                  {/* Upload Card */}
+                  <div className="border-2 border-dashed border-stone-200 dark:border-stone-800 rounded-3xl p-8 sm:p-12 text-center bg-stone-50/50 dark:bg-stone-850/50 hover:border-amber-500 transition-all group">
+                    <input
+                      type="file"
+                      id="resume-upload"
+                      accept=".pdf,.doc,.docx"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+
+                    {formData.resumeFileName ? (
+                      <div className="space-y-4 max-w-sm mx-auto">
+                        <div className="w-16 h-16 rounded-2xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center mx-auto shadow-md">
+                          <FileCheck2 size={32} />
+                        </div>
+                        <div className="space-y-1">
+                          <b className="text-sm font-black text-stone-900 dark:text-white block truncate">
+                            {formData.resumeFileName}
+                          </b>
+                          <small className="text-xs text-stone-500 font-bold block">
+                            {formData.resumeFileSize || 'Ready for submission'} · Verified
+                          </small>
+                        </div>
+                        <label
+                          htmlFor="resume-upload"
+                          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-white text-xs font-bold text-stone-700 dark:text-stone-300 transition-all cursor-pointer"
+                        >
+                          <Upload size={14} />
+                          <span>Replace File</span>
+                        </label>
+                      </div>
+                    ) : (
+                      <label htmlFor="resume-upload" className="cursor-pointer space-y-4 block">
+                        <div className="w-16 h-16 rounded-2xl bg-amber-500/15 text-amber-600 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                          <FileUp size={30} />
+                        </div>
+                        <div className="space-y-1">
+                          <b className="text-base font-black text-stone-900 dark:text-white block">
+                            Upload your resume
+                          </b>
+                          <p className="text-xs text-stone-500 font-medium">
+                            Drag & drop your file here, or{' '}
+                            <span className="text-amber-500 font-bold underline">browse files</span>
+                          </p>
+                        </div>
+                        <span className="inline-block text-[11px] font-bold text-stone-400 px-3 py-1 rounded-full bg-stone-200/60 dark:bg-stone-800">
+                          Supports PDF, DOC, DOCX up to 15MB
+                        </span>
+                      </label>
+                    )}
+                  </div>
+
+                  {errors.resume && (
+                    <p className="text-xs text-rose-500 font-bold text-center">{errors.resume}</p>
+                  )}
+                </div>
+              )}
+
+              {/* ── STEP 06: FINAL DETAILS ── */}
+              {currentStep === 6 && (
+                <div className="space-y-6 animate-fadeIn">
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-black uppercase tracking-wider text-amber-500">
+                      Step 06 of 07
+                    </span>
+                    <h2 className="text-2xl sm:text-3xl font-black text-stone-900 dark:text-white">
+                      One last thing.
+                    </h2>
+                    <p className="text-xs sm:text-sm text-stone-500 font-medium">
+                      A few final details and links before we review your application.
+                    </p>
+                  </div>
+
+                  {/* Motivation Textarea with 500 Char limit */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
+                        Why are you interested in this role at Adyapan?
+                      </label>
+                      <span className="text-[11px] font-bold text-stone-400">
+                        {formData.motivationPitch.length} / 500
+                      </span>
+                    </div>
+                    <textarea
+                      rows={4}
+                      maxLength={500}
+                      value={formData.motivationPitch}
+                      onChange={(e) => handleChange('motivationPitch', e.target.value)}
+                      placeholder="Tell us why this role interests you and what strengths you bring to our high-growth team..."
+                      className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all resize-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300 flex items-center gap-1.5">
+                        <Globe2 size={14} className="text-sky-600" />
+                        <span>LinkedIn Profile URL</span>
+                      </label>
+                      <input
+                        type="url"
+                        value={formData.linkedin}
+                        onChange={(e) => handleChange('linkedin', e.target.value)}
+                        placeholder="https://linkedin.com/in/username"
+                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300 flex items-center gap-1.5">
+                        <Globe2 size={14} className="text-amber-500" />
+                        <span>Portfolio / Website / GitHub</span>
+                      </label>
+                      <input
+                        type="url"
+                        value={formData.portfolio}
+                        onChange={(e) => handleChange('portfolio', e.target.value)}
+                        placeholder="https://yourportfolio.com or github.com"
+                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── STEP 07: REVIEW ── */}
+              {currentStep === 7 && (
+                <div className="space-y-6 animate-fadeIn">
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-black uppercase tracking-wider text-amber-500">
+                      Step 07 of 07
+                    </span>
+                    <h2 className="text-2xl sm:text-3xl font-black text-stone-900 dark:text-white">
+                      Review your application.
+                    </h2>
+                    <p className="text-xs sm:text-sm text-stone-500 font-medium">
+                      Everything looks good? You're ready to submit to Adyapan hiring team.
+                    </p>
+                  </div>
+
+                  {/* Readiness Card */}
+                  <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-black">
+                        <Check size={16} />
+                      </div>
+                      <div>
+                        <b className="text-xs sm:text-sm font-black text-emerald-800 dark:text-emerald-300 block">
+                          APPLICATION READY
+                        </b>
+                        <small className="text-[11px] text-emerald-700/80 dark:text-emerald-400 font-semibold block">
+                          All 7 verification steps completed
+                        </small>
+                      </div>
+                    </div>
+                    <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full bg-emerald-500/20">
+                      100% Complete
+                    </span>
+                  </div>
+
+                  {/* Segmented Review Cards with Edit Links */}
+                  <div className="space-y-4">
+
+                    {/* Profile Summary */}
+                    <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 flex items-start justify-between">
+                      <div className="space-y-1">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-amber-500">
+                          01 Profile
+                        </span>
+                        <b className="text-sm font-black text-stone-900 dark:text-white block">
+                          {formData.firstName} {formData.lastName}
+                        </b>
+                        <p className="text-xs text-stone-500 font-semibold">
+                          {formData.email} · {formData.phone}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setCurrentStep(1)}
+                        className="text-xs font-bold text-amber-500 hover:underline cursor-pointer"
+                      >
+                        Edit
+                      </button>
+                    </div>
+
+                    {/* Experience Summary */}
+                    <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 flex items-start justify-between">
+                      <div className="space-y-1">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-amber-500">
+                          02 Experience
+                        </span>
+                        <b className="text-sm font-black text-stone-900 dark:text-white block">
+                          {formData.employmentStatus === 'FRESHER' ? 'Fresher / Student' : `${formData.experience} Experience`}
+                        </b>
+                        <p className="text-xs text-stone-500 font-semibold">
+                          {formData.employmentStatus === 'FRESHER'
+                            ? formData.collegeName || 'University Student'
+                            : `${formData.currentPosition || 'Candidate'} at ${formData.currentCompany || 'Previous Company'}`}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setCurrentStep(2)}
+                        className="text-xs font-bold text-amber-500 hover:underline cursor-pointer"
+                      >
+                        Edit
+                      </button>
+                    </div>
+
+                    {/* Resume & Skills Summary */}
+                    <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 flex items-start justify-between">
+                      <div className="space-y-1">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-amber-500">
+                          05 Resume & Skills
+                        </span>
+                        <b className="text-sm font-black text-stone-900 dark:text-white block">
+                          📄 {formData.resumeFileName || 'Resume.pdf'}
+                        </b>
+                        <p className="text-xs text-stone-500 font-semibold">
+                          {formData.skills.length} skills listed ({formData.skills.slice(0, 3).join(', ')}...)
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setCurrentStep(5)}
+                        className="text-xs font-bold text-amber-500 hover:underline cursor-pointer"
+                      >
+                        Edit
+                      </button>
+                    </div>
+
+                  </div>
+                </div>
+              )}
+
+              {/* ── STEP ACTION BUTTONS (BACK & CONTINUE / SUBMIT) ── */}
+              <div className="flex items-center justify-between pt-6 border-t border-stone-100 dark:border-stone-800">
+                {currentStep > 1 ? (
+                  <button
+                    type="button"
+                    onClick={prevStep}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-extrabold text-xs sm:text-sm transition-all cursor-pointer"
+                  >
+                    <ArrowLeft size={16} />
+                    <span>Back</span>
+                  </button>
                 ) : (
-                  <div className="space-y-1">
-                    <p className="text-sm font-bold text-slate-900 dark:text-white">
-                      Drop your Resume PDF/DOCX here, or <span className="text-amber-500 underline">browse files</span>
-                    </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      Supports PDF, DOCX, DOC (Up to 15MB)
-                    </p>
-                  </div>
+                  <div />
+                )}
+
+                {currentStep < 7 ? (
+                  <button
+                    type="button"
+                    onClick={nextStep}
+                    className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-xs sm:text-sm shadow-xl shadow-amber-500/25 hover:scale-105 transition-all cursor-pointer"
+                  >
+                    <span>Continue</span>
+                    <ArrowRight size={16} />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleSubmitApplication}
+                    disabled={submitting}
+                    className="inline-flex items-center gap-2 px-10 py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-sm shadow-2xl shadow-amber-500/30 hover:scale-105 transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    <span>Submit Application</span>
+                    <ArrowRight size={16} />
+                  </button>
                 )}
               </div>
-            </div>
-          </div>
 
-          {/* Section 7: Motivation & Online Links */}
-          <div className={cardSectionClass}>
-            <div className="flex items-center gap-3 border-b pb-4 border-slate-200 dark:border-slate-800">
-              <span className="w-7 h-7 rounded-xl bg-amber-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-md shadow-amber-500/20">
-                {formData.employmentStatus === 'STUDENT' ? '06' : '07'}
-              </span>
-              <div>
-                <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-                  Motivation & Social Profiles
-                </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Optional links to showcase your background
+            </div>
+
+            {/* ── RIGHT COLUMN: STICKY APPLICATION SUMMARY (35% / 4 Cols) ── */}
+            <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-28">
+
+              <div className="bg-white dark:bg-stone-900 rounded-3xl p-6 border border-stone-200/80 dark:border-stone-800 shadow-xl space-y-5">
+                <span className="text-[10px] font-black uppercase tracking-wider text-amber-500 block">
+                  YOUR APPLICATION
+                </span>
+
+                <div className="space-y-1 pb-3 border-b border-stone-100 dark:border-stone-800">
+                  <h3 className="font-black text-lg text-stone-900 dark:text-white leading-tight">
+                    {displayJobTitle}
+                  </h3>
+                  <p className="text-xs font-bold text-stone-500">
+                    {job?.company || 'Adyapan Technologies'}
+                  </p>
+                  <div className="flex items-center gap-3 text-xs font-semibold text-stone-500 pt-1">
+                    <span>{job?.location || 'Hyderabad'}</span>
+                    <span>·</span>
+                    <span>{job?.type || 'Full Time'}</span>
+                    <span>·</span>
+                    <span className="text-amber-500 font-bold">{displaySalary}</span>
+                  </div>
+                </div>
+
+                {/* Live Progress Bar */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-black">
+                    <span className="text-stone-700 dark:text-stone-300">Application Progress</span>
+                    <span className="text-amber-500">{progressPercent}%</span>
+                  </div>
+                  <div className="w-full bg-stone-100 dark:bg-stone-800 h-2.5 rounded-full overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-amber-500 to-orange-500 h-full rounded-full transition-all duration-300"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Step Checklist */}
+                <div className="space-y-2 pt-2 text-xs font-bold">
+                  {STEPS.map((s) => {
+                    const isDone = currentStep > s.id;
+                    const isCurrent = currentStep === s.id;
+
+                    return (
+                      <div
+                        key={s.id}
+                        className={`flex items-center gap-2.5 ${
+                          isDone
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : isCurrent
+                            ? 'text-amber-500 font-black'
+                            : 'text-stone-400'
+                        }`}
+                      >
+                        <span className="text-sm">{isDone ? '✓' : isCurrent ? '●' : '○'}</span>
+                        <span>{s.label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <Link
+                  to={`/careers/${slug}`}
+                  className="block text-center text-xs font-bold text-amber-500 hover:text-amber-600 pt-2"
+                >
+                  View Job Details →
+                </Link>
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+        {/* ── MULTI-STAGE SUBMITTING MODAL OVERLAY ── */}
+        {submitting && (
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-stone-900 rounded-3xl p-8 max-w-md w-full text-center space-y-6 shadow-2xl border border-stone-200 dark:border-stone-800 animate-scaleUp">
+              <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto" />
+
+              <div className="space-y-2">
+                <h3 className="font-black text-xl text-stone-900 dark:text-white">
+                  Submitting your application...
+                </h3>
+                <p className="text-xs text-stone-500 font-medium">
+                  Please hold on while we process your profile and documents.
                 </p>
               </div>
-            </div>
 
-            <div className="space-y-5">
-              <div>
-                <label className={labelClass}>Why are you excited to join Adyapan Edutech?</label>
-                <textarea
-                  rows={3}
-                  value={formData.motivationPitch}
-                  onChange={(e) => setFormData({ ...formData, motivationPitch: e.target.value })}
-                  placeholder="Share why you're passionate about this role and our educational mission..."
-                  className={inputClass}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div>
-                  <label className={labelClass}>LinkedIn Profile URL</label>
-                  <input
-                    type="url"
-                    value={formData.linkedin}
-                    onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
-                    placeholder="https://linkedin.com/in/yourname"
-                    className={inputClass}
-                  />
+              <div className="space-y-2.5 text-xs font-bold text-left p-4 rounded-2xl bg-stone-50 dark:bg-stone-850">
+                <div className="flex items-center gap-2 text-emerald-600">
+                  <span>✓</span>
+                  <span>Validating candidate information</span>
                 </div>
-
-                <div>
-                  <label className={labelClass}>Portfolio / Work Drive Link</label>
-                  <input
-                    type="url"
-                    value={formData.portfolio}
-                    onChange={(e) => setFormData({ ...formData, portfolio: e.target.value })}
-                    placeholder="https://portfolio.com or Google Drive link"
-                    className={inputClass}
-                  />
+                <div className={`flex items-center gap-2 ${submitStage >= 2 ? 'text-emerald-600' : 'text-amber-500'}`}>
+                  <span>{submitStage >= 2 ? '✓' : '●'}</span>
+                  <span>Attaching and parsing resume document</span>
+                </div>
+                <div className={`flex items-center gap-2 ${submitStage >= 3 ? 'text-emerald-600' : 'text-stone-400'}`}>
+                  <span>{submitStage >= 3 ? '✓' : '○'}</span>
+                  <span>Saving application to Adyapan recruitment database</span>
                 </div>
               </div>
             </div>
           </div>
+        )}
 
-          {/* Submit Action Area */}
-          <div className="space-y-4 pt-2">
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full py-4 px-8 rounded-2xl text-sm font-black text-slate-950 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:from-amber-300 hover:to-orange-400 transition-all shadow-xl shadow-amber-500/25 uppercase tracking-wider text-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2"
-            >
-              {submitting ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
-                  <span>Submitting & Running Real-Time AI ATS Screening...</span>
-                </>
-              ) : (
-                <>
-                  <span>Submit Candidate Application & Run AI Screening</span>
-                  <span className="text-base">→</span>
-                </>
-              )}
-            </button>
-
-            <div className="flex items-center justify-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 text-center">
-              <span>🔒 256-Bit Encrypted PostgreSQL Database Submission</span>
-              <span>•</span>
-              <span>Official Adyapan Edutech Recruitment Portal</span>
-            </div>
-          </div>
-
-        </form>
       </main>
-
-      <Footer isPublic={true} />
-
-    </div>
+    </SiteShell>
   );
 };
 

@@ -16,12 +16,12 @@ const router = express.Router();
 // Public routes (accessible without login)
 router.get('/public', getPublicJobs);
 router.get('/public/:slug', getPublicJob);
-
-// Protected routes (require HR/Admin login)
-router.use(authMiddleware);
-router.post('/', createJob);
 router.get('/', getAllJobs);
 router.get('/:id', getJobById);
+
+// Protected routes (require HR/Admin login for create, edit, delete)
+router.use(authMiddleware);
+router.post('/', createJob);
 router.put('/:id', updateJob);
 router.delete('/:id', deleteJob);
 router.patch('/:id/publish', publishJob);

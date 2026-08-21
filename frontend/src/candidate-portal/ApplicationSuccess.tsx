@@ -1,121 +1,164 @@
 import React, { useMemo } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { useTheme } from '../context/ThemeContext';
-import AdyapanLogo from '../components/common/AdyapanLogo';
-import Footer from '../components/layout/Footer';
+import {
+  ArrowRight,
+  Briefcase,
+  Calendar,
+  CheckCircle2,
+  Clock3,
+  FileCheck,
+  Globe2,
+  Mail,
+  MapPin,
+  MessageSquare,
+  ShieldCheck,
+  Sparkles,
+  UserCheck,
+} from 'lucide-react';
+import SiteShell from '../components/layout/SiteShell';
 
-const ApplicationSuccess = () => {
+export const ApplicationSuccess: React.FC = () => {
   const location = useLocation();
   const state = location.state || {};
-  const { theme, toggleTheme } = useTheme();
 
   const refId = useMemo(() => {
     return `APP-ADY-${Math.floor(100000 + Math.random() * 900000)}`;
   }, []);
 
+  const submissionDate = useMemo(() => {
+    return new Date().toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  }, []);
+
   return (
-    <div className={`min-h-screen font-sans antialiased flex flex-col items-center justify-between transition-colors relative overflow-x-hidden ${
-      theme === 'dark' ? 'bg-[#0a0a1a] text-slate-100' : 'bg-slate-50/60 text-slate-900'
-    }`}>
-      
-      {/* Glow Effect */}
-      <div className="fixed top-0 right-0 w-[50vw] h-full pointer-events-none bg-gradient-to-l from-orange-400/20 via-amber-200/10 to-transparent dark:from-amber-500/10 dark:to-transparent blur-3xl z-0" />
+    <SiteShell>
+      <main className="bg-[#faf7f2] dark:bg-[#121110] text-stone-900 dark:text-stone-100 min-h-screen relative py-16">
 
-      {/* Navigation Bar */}
-      <nav className={`w-full sticky top-0 z-50 px-4 sm:px-8 py-4 border-b backdrop-blur-xl transition-all ${
-        theme === 'dark' ? 'bg-[#0a0a1a]/90 border-slate-800' : 'bg-white/90 border-amber-200/40'
-      }`}>
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Link to="/careers">
-            <AdyapanLogo variant={theme === 'dark' ? 'dark' : 'light'} size="small" />
-          </Link>
-          <button
-            onClick={toggleTheme}
-            className={`p-2 rounded-xl transition-colors border cursor-pointer ${
-              theme === 'dark' ? 'bg-slate-900 text-amber-300 border-slate-800' : 'bg-white text-slate-600 border-slate-200 shadow-sm'
-            }`}
-            aria-label="Toggle theme"
-            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-          >
-            {theme === 'dark' ? '🌙' : '☀️'}
-          </button>
-        </div>
-      </nav>
+        {/* Ambient Decorative Glows */}
+        <div className="absolute inset-0 bg-dotted-grid pointer-events-none opacity-35" />
+        <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Main Success Card */}
-      <main className="max-w-lg w-full px-4 py-12 relative z-10">
-        <div className={`p-8 sm:p-10 rounded-3xl text-center space-y-6 shadow-2xl border relative overflow-hidden ${
-          theme === 'dark' ? 'bg-slate-900/90 border-slate-800 shadow-slate-950' : 'bg-white border-amber-200/80 shadow-amber-500/10'
-        }`}>
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 via-amber-400 to-orange-500" />
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-8">
 
-          {/* Success Checkmark Icon */}
-          <div className="w-16 h-16 bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 rounded-2xl flex items-center justify-center text-3xl mx-auto shadow-md">
-            ✓
-          </div>
+          {/* ── MAIN SUCCESS CARD ── */}
+          <div className="bg-white dark:bg-stone-900 rounded-3xl p-8 sm:p-12 border border-stone-200/80 dark:border-stone-800 shadow-2xl text-center space-y-7 relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500" />
 
-          {/* Title & Personalized Note */}
-          <div className="space-y-2.5">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
-              ● APPLICATION SUBMITTED SUCCESSFULLY
+            {/* Celebration Badge */}
+            <div className="w-20 h-20 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 rounded-3xl flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/10 animate-bounce">
+              <CheckCircle2 size={42} />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-              Application Received!
-            </h1>
-            <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
-              Thank you, <strong className="text-slate-900 dark:text-white font-extrabold">{state.candidateName || 'Applicant'}</strong>. Your application for{' '}
-              <strong className="text-amber-600 dark:text-amber-400 font-extrabold">{state.jobTitle || 'the position'}</strong> has been received by the Adyapan Talent Acquisition team.
-            </p>
-          </div>
 
-          {/* Professional Next Steps Box */}
-          <div className={`p-5 rounded-2xl border text-left text-xs space-y-3.5 ${
-            theme === 'dark' ? 'bg-slate-950/80 border-slate-800 text-slate-200' : 'bg-amber-50/40 border-amber-200/80 text-slate-800'
-          }`}>
-            <p className="font-extrabold text-xs uppercase tracking-wider text-amber-600 dark:text-amber-400">
-              What happens next?
-            </p>
-            <p className="flex items-start gap-2.5 leading-relaxed">
-              <span className="text-emerald-500 font-extrabold text-sm shrink-0">✓</span>
-              <span>Your resume and profile have been routed to our hiring managers.</span>
-            </p>
-            <p className="flex items-start gap-2.5 leading-relaxed">
-              <span className="text-emerald-500 font-extrabold text-sm shrink-0">✓</span>
-              <span>If your profile matches our requirements, our recruitment team will reach out via email/phone for the next interview round.</span>
-            </p>
-            <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-slate-500 dark:text-slate-400 font-bold">
-              <span>Application Reference:</span>
-              <code className="text-amber-600 dark:text-amber-400 font-mono font-bold">{refId}</code>
+            {/* Headings & Context */}
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-700 dark:text-emerald-300 font-black text-xs uppercase tracking-wider">
+                <Sparkles size={14} className="text-emerald-500" />
+                <span>APPLICATION RECEIVED</span>
+              </div>
+
+              <h1 className="text-3xl sm:text-4xl font-black text-stone-900 dark:text-white tracking-tight">
+                You're officially in. 🎉
+              </h1>
+
+              <p className="text-sm sm:text-base text-stone-600 dark:text-stone-300 font-medium max-w-lg mx-auto leading-relaxed">
+                Thank you, <strong className="text-stone-900 dark:text-white font-extrabold">{state.candidateName || 'Applicant'}</strong>. Your application for{' '}
+                <strong className="text-amber-600 dark:text-amber-400 font-black">{state.jobTitle || 'Career Opportunity'}</strong> has been submitted to the Adyapan talent acquisition team.
+              </p>
             </div>
+
+            {/* Application Metadata Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200/60 dark:border-stone-800 text-left text-xs">
+              <div className="space-y-1">
+                <span className="text-stone-400 font-bold uppercase text-[10px] tracking-wider block">
+                  Application Reference
+                </span>
+                <b className="font-mono font-black text-amber-600 dark:text-amber-400 text-sm">
+                  {refId}
+                </b>
+              </div>
+
+              <div className="space-y-1 sm:text-right">
+                <span className="text-stone-400 font-bold uppercase text-[10px] tracking-wider block">
+                  Submission Date
+                </span>
+                <b className="font-extrabold text-stone-800 dark:text-stone-200 text-xs">
+                  {submissionDate}
+                </b>
+              </div>
+            </div>
+
+            {/* ── VERTICAL NEXT STEPS TIMELINE ── */}
+            <div className="space-y-4 text-left pt-2 border-t border-stone-100 dark:border-stone-800">
+              <span className="text-xs font-black uppercase tracking-wider text-stone-500 dark:text-stone-400 block">
+                What happens next?
+              </span>
+
+              <div className="space-y-3.5 text-xs font-semibold">
+                {[
+                  { step: '01', title: 'Application Received', desc: 'Profile and resume indexed in Adyapan ATS', isDone: true, icon: FileCheck },
+                  { step: '02', title: 'Resume Review', desc: 'HR talent team verifies experience and skill alignment', isCurrent: true, icon: UserCheck },
+                  { step: '03', title: 'Recruiter Evaluation', desc: 'Telephonic pre-screening and culture fitment discussion', isPending: true, icon: MessageSquare },
+                  { step: '04', title: 'Technical / Domain Interview', desc: '1-on-1 interview with hiring lead and domain mentors', isPending: true, icon: Briefcase },
+                  { step: '05', title: 'Final Selection & Offer Rollout', desc: 'Fast-track offer release and onboarding orientation', isPending: true, icon: ShieldCheck },
+                ].map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <div key={item.step} className="flex items-start gap-3.5 p-3 rounded-xl bg-stone-50/70 dark:bg-stone-850/70 border border-stone-200/40 dark:border-stone-800">
+                      <div
+                        className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${
+                          item.isDone
+                            ? 'bg-emerald-500 text-white'
+                            : item.isCurrent
+                            ? 'bg-amber-500 text-white animate-pulse'
+                            : 'bg-stone-200 dark:bg-stone-800 text-stone-500'
+                        }`}
+                      >
+                        {item.isDone ? '✓' : item.step}
+                      </div>
+                      <div className="space-y-0.5">
+                        <b className={`text-xs font-black block ${item.isCurrent ? 'text-amber-600 dark:text-amber-400' : 'text-stone-900 dark:text-white'}`}>
+                          {item.title}
+                        </b>
+                        <p className="text-[11px] text-stone-500 font-medium">
+                          {item.desc}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Reassurance Microcopy */}
+            <p className="text-xs text-stone-500 font-medium italic">
+              "We'll contact you through the email or phone number provided in your application if your profile moves forward."
+            </p>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+              <Link
+                to="/open-positions"
+                className="w-full sm:flex-1 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold text-xs shadow-xl shadow-amber-500/25 transition-all text-center cursor-pointer"
+              >
+                Explore More Opportunities
+              </Link>
+              <Link
+                to="/careers"
+                className="w-full sm:flex-1 py-3.5 px-6 rounded-2xl border border-stone-200 dark:border-stone-800 hover:border-amber-500 text-stone-700 dark:text-stone-300 font-bold text-xs bg-stone-50 dark:bg-stone-850 transition-all text-center cursor-pointer"
+              >
+                Back to Careers Home
+              </Link>
+            </div>
+
           </div>
 
-          {/* Action Buttons */}
-          <div className="space-y-3 pt-2">
-            <Link
-              to="/careers"
-              className="inline-flex items-center justify-center gap-2 w-full py-4 text-xs font-black text-slate-950 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:from-amber-300 hover:to-orange-400 rounded-2xl transition-all shadow-xl shadow-amber-500/25 uppercase tracking-wider hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-            >
-              <span>Go to Home</span>
-              <span>→</span>
-            </Link>
-
-            <Link
-              to="/open-positions"
-              className={`inline-block w-full py-3.5 text-xs font-bold rounded-2xl border transition-all cursor-pointer ${
-                theme === 'dark'
-                  ? 'border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white'
-                  : 'border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 shadow-sm'
-              }`}
-            >
-              Browse More Open Positions
-            </Link>
-          </div>
         </div>
+
       </main>
-
-      <Footer isPublic={true} />
-
-    </div>
+    </SiteShell>
   );
 };
 

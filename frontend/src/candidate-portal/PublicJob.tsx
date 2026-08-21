@@ -1,478 +1,487 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import CandidateNavbar from '../components/layout/CandidateNavbar';
-import Footer from '../components/layout/Footer';
-import { useTheme } from '../context/ThemeContext';
-import { useCandidateAuth } from '../context/CandidateAuthContext';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Bookmark,
+  Briefcase,
+  Building2,
+  Calendar,
+  CheckCircle2,
+  Clock3,
+  GraduationCap,
+  Heart,
+  HelpCircle,
+  IndianRupee,
+  MapPin,
+  Share2,
+  ShieldCheck,
+  Sparkles,
+  TrendingUp,
+  UsersRound,
+  Zap,
+} from 'lucide-react';
+import SiteShell from '../components/layout/SiteShell';
 import { jobService } from '../services/jobService';
 import toast from 'react-hot-toast';
 
-const PublicJob = () => {
-  const { slug } = useParams();
-  const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
-  const { candidate, logout } = useCandidateAuth();
-  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+const fallbackJob = {
+  id: '1',
+  slug: 'business-development-associate',
+  title: 'Business Development Associate (BDA)',
+  company: 'Adyapan Edutech Pvt. Ltd.',
+  location: 'Hyderabad, India (On-Site)',
+  type: 'Full Time',
+  experienceLevel: '0–2 Years',
+  department: 'Sales & Student Advisory',
+  salaryMin: 400000,
+  salaryMax: 800000,
+  salary: '₹4.0 – 8.0 LPA',
+  description: `Adyapan Edutech is rapidly expanding India's leading student upskilling and career development ecosystem. We are looking for ambitious, high-energy individuals to join our advisory team.
 
-  const [job, setJob] = useState<any>(null);
+In this role, you will have direct ownership of student interactions, high-impact counseling sessions, and revenue growth. You will collaborate closely with founders and senior leaders with fast-track 6-month evaluation cycles for accelerated leadership promotions.`,
+  responsibilities: [
+    'Engage with prospective students and working professionals to understand their career goals and consult them on relevant certification programs.',
+    'Build and nurture qualified candidate pipelines through structured consultations, webinars, and inbound lead outreach.',
+    'Conduct 1-on-1 counseling calls to explain course value propositions, learning roadmaps, and career placement support.',
+    'Achieve and exceed weekly and monthly enrollment targets with uncapped performance incentives.',
+    'Maintain accurate CRM updates, follow-ups, and student feedback loops.',
+  ],
+  requirements: [
+    'Excellent verbal and written English communication skills with strong consultative persuasion.',
+    'High energy, self-motivated, and target-driven mindset with genuine interest in the EdTech sector.',
+    'Bachelor’s degree in any discipline (B.Tech, BBA, B.Com, B.Sc, MBA, etc.).',
+    'Open to freshers, recent graduates, or candidates with 0–2 years of experience in sales, admissions, or customer advisory.',
+    'Comfortable working in a fast-paced, high-growth startup environment.',
+  ],
+  benefits: [
+    'Competitive base salary + Uncapped weekly and monthly cash incentives.',
+    'Fast-track 6-month performance evaluation and leadership promotion track.',
+    'Direct 1-on-1 mentorship from experienced founders and industry experts.',
+    'Energetic, toxic-free work culture with Friday games, cricket matches, and win celebrations.',
+    'Comprehensive healthcare, team outings, and skill development allowances.',
+  ],
+};
+
+const parseToList = (val: any): string[] => {
+  if (Array.isArray(val)) return val.filter(Boolean);
+  if (typeof val === 'string') {
+    return val
+      .split('\n')
+      .map((s) => s.replace(/^[-*•\d.]\s*/, '').trim())
+      .filter((s) => s.length > 0);
+  }
+  return [];
+};
+
+const formatSalary = (min?: number | null, max?: number | null, raw?: string) => {
+  if (raw && typeof raw === 'string' && raw.trim()) return raw;
+  if (min && max) {
+    const minLPA = (min / 100000).toFixed(1);
+    const maxLPA = (max / 100000).toFixed(1);
+    return `₹${minLPA} – ${maxLPA} LPA`;
+  }
+  if (min) return `₹${(min / 100000).toFixed(1)} LPA+`;
+  return 'Competitive + Uncapped Incentives';
+};
+
+export const PublicJob: React.FC = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  const [job, setJob] = useState<any>(fallbackJob);
   const [loading, setLoading] = useState(true);
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
-    fetchJobFromDB();
-    checkSavedStatus();
+    const fetchJob = async () => {
+      setLoading(true);
+      try {
+        const res = await jobService.getAllJobs();
+        const apiJobs = Array.isArray(res) ? res : res?.jobs || res?.data || [];
+        const found = apiJobs.find(
+          (j: any) =>
+            (j.slug && j.slug.toLowerCase() === (slug || '').toLowerCase()) ||
+            (j.id && j.id.toString() === (slug || '').toString()) ||
+            (j.title && j.title.toLowerCase().includes((slug || '').toLowerCase()))
+        );
+
+        if (found) {
+          const respList = parseToList(found.responsibilities);
+          const reqList = parseToList(found.requirements);
+
+          setJob({
+            ...found,
+            id: found.id || found._id || '1',
+            slug: found.slug || found.id || slug,
+            title: found.title || 'Career Opportunity',
+            company: found.company || 'Adyapan Edutech Pvt. Ltd.',
+            department: found.department || 'Growth & Operations',
+            location: found.location || 'Hyderabad, India',
+            type: found.type === 'FULL_TIME' ? 'Full Time' : found.type || 'Full Time',
+            experienceLevel: found.experienceLevel || found.experience || '0–2 Years',
+            salary: formatSalary(found.salaryMin, found.salaryMax, found.salary),
+            description: found.description || fallbackJob.description,
+            responsibilities: respList.length > 0 ? respList : fallbackJob.responsibilities,
+            requirements: reqList.length > 0 ? reqList : fallbackJob.requirements,
+            benefits: fallbackJob.benefits,
+          });
+        }
+      } catch (e) {
+        console.error('Error fetching job details:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (slug) {
+      fetchJob();
+    }
   }, [slug]);
 
-  const checkSavedStatus = () => {
+  // Check saved state in localStorage
+  useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem('adyapan_saved_jobs') || '[]');
-      setIsSaved(saved.includes(slug));
-    } catch {
-      setIsSaved(false);
-    }
-  };
+      setIsSaved(saved.includes(job.id || slug));
+    } catch { }
+  }, [job.id, slug]);
 
   const toggleSaveJob = () => {
     try {
       const saved = JSON.parse(localStorage.getItem('adyapan_saved_jobs') || '[]');
-      let updated;
-      if (saved.includes(slug)) {
-        updated = saved.filter((s: string) => s !== slug);
+      const id = job.id || slug;
+      let next: string[];
+      if (saved.includes(id)) {
+        next = saved.filter((x: string) => x !== id);
         setIsSaved(false);
-        toast.success('Job removed from saved roles');
+        toast('Job removed from saved list', { icon: '🔖' });
       } else {
-        updated = [...saved, slug];
+        next = [...saved, id];
         setIsSaved(true);
-        toast.success('Job saved to your favorites!');
+        toast.success('Job saved successfully!');
       }
-      localStorage.setItem('adyapan_saved_jobs', JSON.stringify(updated));
-    } catch {
-      setIsSaved(!isSaved);
-    }
-  };
-
-  const fetchJobFromDB = async () => {
-    try {
-      const res = await jobService.getPublicJob(slug);
-      if (res?.job) {
-        setJob(res.job);
-      } else {
-        const allRes = await jobService.getPublicJobs();
-        const found = allRes?.jobs?.find((j: any) => j.slug === slug || j.id === slug);
-        if (found) setJob(found);
-      }
-    } catch (e) {
-      console.warn('Failed to fetch job by slug, trying public jobs list:', e);
-      try {
-        const allRes = await jobService.getPublicJobs();
-        const found = allRes?.jobs?.find((j: any) => j.slug === slug || j.id === slug);
-        if (found) setJob(found);
-      } catch (e2) {
-        console.error('Failed to load job:', e2);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const parseToList = (text: any) => {
-    if (!text) return [];
-    if (Array.isArray(text)) return text;
-    return String(text)
-      .split(/[\n;•]+/)
-      .map((s) => s.trim().replace(/^[-•*]\s*/, ''))
-      .filter((s) => s.length > 2);
-  };
-
-  const formatSalary = (min?: number, max?: number) => {
-    if (!min && !max) return 'Competitive / Best in Industry';
-    const fmt = (n: number) => {
-      if (n >= 100000) return `₹${(n / 100000).toFixed(n % 100000 === 0 ? 0 : 1)} LPA`;
-      return `₹${n?.toLocaleString('en-IN')}`;
-    };
-    if (min && max) return `${fmt(min)} - ${fmt(max)} / year`;
-    if (min) return `${fmt(min)}+ / year`;
-    return `Up to ${fmt(max)} / year`;
-  };
-
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return 'Aug 19 2026';
-    try {
-      const d = new Date(dateStr);
-      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    } catch {
-      return 'Recently Posted';
-    }
+      localStorage.setItem('adyapan_saved_jobs', JSON.stringify(next));
+    } catch { }
   };
 
   const copyShareLink = () => {
     navigator.clipboard.writeText(window.location.href);
-    toast.success('Direct Role link copied to clipboard!');
+    toast.success('Direct job link copied to clipboard!');
   };
 
   const shareLinkedIn = () => {
-    const text = `🚀 We are hiring at Adyapan Edutech! Explore the ${job?.title} role and apply directly here: ${window.location.href}`;
-    window.open(`https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(text)}`, '_blank');
+    const url = encodeURIComponent(window.location.href);
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
   };
 
   const shareTwitter = () => {
-    const text = `🚀 Adyapan Edutech is hiring for ${job?.title}! Apply online:`;
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`, '_blank');
+    const text = encodeURIComponent(`We are hiring: ${job.title} at Adyapan Edutech! Apply here:`);
+    const url = encodeURIComponent(window.location.href);
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
   };
 
-  const shareFacebook = () => {
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank');
-  };
-
-  const shareEmail = () => {
-    const subject = encodeURIComponent(`Job Opportunity at Adyapan Edutech: ${job?.title}`);
-    const body = encodeURIComponent(`Hi,\n\nI wanted to share this exciting job opening with you:\n\nRole: ${job?.title}\nDepartment: ${job?.department}\nLocation: ${job?.location}\nApply directly here: ${window.location.href}\n\nBest regards,\nAdyapan Recruitment Team`);
-    window.location.href = `mailto:?subject=${subject}&body=${body}`;
-  };
-
-  if (loading) {
-    return (
-      <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-[#0a0a1a] text-white' : 'bg-white text-slate-900'}`}>
-        <div className="text-center space-y-3">
-          <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-xs font-bold text-slate-500">Loading Job Specifications...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!job) {
-    return (
-      <div className={`min-h-screen flex items-center justify-center p-6 ${theme === 'dark' ? 'bg-[#0a0a1a] text-white' : 'bg-slate-50 text-slate-900'}`}>
-        <div className="text-center space-y-4 max-w-md">
-          <div className="w-14 h-14 bg-amber-500/20 text-amber-500 rounded-2xl flex items-center justify-center text-2xl mx-auto">
-            🔍
-          </div>
-          <h2 className="text-xl font-black">Role Posting Not Found</h2>
-          <p className="text-xs font-medium text-slate-500">This job opening may have been closed or fulfilled.</p>
-          <Link to="/careers" className="px-6 py-2.5 text-xs font-extrabold text-white bg-amber-500 hover:bg-amber-600 rounded-xl inline-block shadow-md">
-            ← Return to All Careers
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  const salaryRange = job.salaryMin && job.salaryMax
-    ? `₹${(job.salaryMin / 100000).toFixed(1)}L - ₹${(job.salaryMax / 100000).toFixed(1)}L PA + Lucrative Incentives`
-    : 'Industry Leading Fixed CTC + Performance Bonus';
-
-  const responsibilities = Array.isArray(job.responsibilities) && job.responsibilities.length > 0
-    ? job.responsibilities
-    : [
-      'Engage with prospective students, working professionals, and parents to understand educational requirements.',
-      'Present and counsel candidates on Adyapan’s accredited programs and certification courses.',
-      'Manage and optimize lead pipelines through inside sales calls, live webinars, and CRM follow-ups.',
-      'Achieve and exceed weekly/monthly student enrollment and revenue targets with team collaboration.',
-      'Maintain high conversion quality and adhere strictly to ethical counselling guidelines.',
-    ];
-
-  const benefits = Array.isArray(job.benefits) && job.benefits.length > 0
-    ? job.benefits
-    : [
-      'Uncapped Weekly Performance Incentives & Spot Cash Bonuses',
-      'Transparent 6-Month Merit Appraisal & Fast-Track Promotion Track',
-      'Sponsored Certifications with Microsoft, Cisco & Adobe Ecosystems',
-      'Comprehensive Health & Family Insurance Coverage',
-      'Hybrid & Flexible Work Model with Vibrant Team Retreats',
-    ];
-
-  const reqId = job.id ? `REQ-ADY-${job.id.slice(0, 8).toUpperCase()}` : 'REQ-ADY-HYD2026';
-  const publishedDate = job.publishedAt || job.createdAt ? new Date(job.publishedAt || job.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Active';
+  const applyUrl = `/careers/${job.slug || job.id || slug}/apply`;
 
   return (
-    <div className={`min-h-screen font-sans antialiased transition-colors relative overflow-x-hidden ${theme === 'dark'
-      ? 'bg-gradient-to-l from-amber-950/40 via-amber-950/15 via-30% to-[#0a0a1a] text-white'
-      : 'bg-gradient-to-l from-orange-300/40 via-amber-100/30 via-40% to-white text-slate-900'
-      }`}>
+    <SiteShell>
+      <main className="bg-[#faf7f2] dark:bg-[#121110] text-stone-900 dark:text-stone-100 min-h-screen py-8 sm:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
-      {/* Persistent Full-Page Right-to-Left Orange Gradient Glow */}
-      <div className="fixed top-0 right-0 w-[60vw] max-w-[900px] h-full pointer-events-none bg-gradient-to-l from-orange-400/20 via-amber-200/10 via-45% to-transparent dark:from-amber-500/10 dark:via-amber-900/5 dark:to-transparent blur-3xl z-0" />
+          {/* ── BREADCRUMB & BACK LINK ── */}
+          <div className="flex items-center justify-between">
+            <Link
+              to="/open-positions"
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-stone-600 dark:text-stone-400 hover:text-amber-500 dark:hover:text-amber-400 transition-colors"
+            >
+              <ArrowLeft size={16} />
+              <span>Back to Open Positions</span>
+            </Link>
 
-      {/* ===== 1. TOP NAVBAR ===== */}
-      <CandidateNavbar activePage="jobs" />
-
-      {/* ===== 2. HERO HEADER (Adyapan Signature Warm Amber & Charcoal Gradient Banner) ===== */}
-      <section className="relative overflow-hidden bg-gradient-to-r from-[#18181b] via-[#78350f] via-50% to-[#d97706] text-white py-12 sm:py-16 px-4 sm:px-8 border-b border-amber-500/30 shadow-xl" style={{ color: '#ffffff' }}>
-        {/* Subtle Ambient Glows */}
-        <div className="absolute -top-24 right-0 w-[500px] h-[500px] bg-amber-400/25 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 right-1/4 w-[350px] h-[350px] bg-orange-500/20 rounded-full blur-2xl pointer-events-none" />
-
-        <div className="max-w-7xl mx-auto space-y-5 relative z-10">
-
-          {/* Main Title & Req Code */}
-          <div className="space-y-2.5">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-tight drop-shadow-sm" style={{ color: '#ffffff' }}>
-              {job.title}
-            </h1>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-white/15 text-white border border-white/30 rounded-full text-xs font-bold tracking-wider backdrop-blur-sm" style={{ color: '#ffffff' }}>
-              <span style={{ color: '#ffffff' }}>● {reqId}</span>
-            </div>
+            <span className="text-xs font-semibold text-stone-400">
+              Job ID: <code className="font-mono text-stone-600 dark:text-stone-300">{String(job.id).slice(-8)}</code>
+            </span>
           </div>
 
-          {/* Metadata Horizontal Bar */}
-          <div className="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 text-xs sm:text-sm border-t border-white/25">
-            <div>
-              <p className="text-white text-xs font-bold uppercase tracking-wider opacity-90" style={{ color: '#ffffff' }}>Date published</p>
-              <p className="font-bold text-white text-sm mt-0.5" style={{ color: '#ffffff' }}>{publishedDate}</p>
-            </div>
-            <div>
-              <p className="text-white text-xs font-bold uppercase tracking-wider opacity-90" style={{ color: '#ffffff' }}>Location</p>
-              <p className="font-bold text-white text-sm mt-0.5" style={{ color: '#ffffff' }}>{job.location || 'Hyderabad / Pan-India'}</p>
-            </div>
-            <div>
-              <p className="text-white text-xs font-bold uppercase tracking-wider opacity-90" style={{ color: '#ffffff' }}>Job category</p>
-              <p className="font-bold text-white text-sm mt-0.5" style={{ color: '#ffffff' }}>{job.department || 'EdTech & Growth'}</p>
-            </div>
-            <div>
-              <p className="text-white text-xs font-bold uppercase tracking-wider opacity-90" style={{ color: '#ffffff' }}>Experience & Type</p>
-              <p className="font-bold text-white text-sm mt-0.5" style={{ color: '#ffffff' }}>{job.experienceLevel || 'Fresher / Experienced'} • {job.type === 'FULL_TIME' ? 'Full Time' : job.type || 'Full Time'}</p>
-            </div>
-            <div>
-              <p className="text-white text-xs font-bold uppercase tracking-wider opacity-90" style={{ color: '#ffffff' }}>Compensation</p>
-              <p className="font-bold text-white text-sm mt-0.5" style={{ color: '#ffffff' }}>{salaryRange}</p>
-            </div>
-          </div>
-        </div>
-      </section>
+          {/* ── HERO JOB HEADER BANNER (ADYAPAN BRAND GRADIENT) ── */}
+          <div className="bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 rounded-3xl p-6 sm:p-10 border border-amber-400/40 shadow-2xl relative overflow-hidden text-white">
+            {/* Ambient decorative glow */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
 
-      {/* ===== 3. MAIN BODY & COGNIZANT ACTION SIDEBAR ===== */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-8 py-10 lg:py-14 relative">
-        <div className="grid lg:grid-cols-12 gap-10 items-start">
-
-          {/* Left Column: Comprehensive Job Details & Specifications (8 Cols) */}
-          <div className="lg:col-span-8 space-y-10 text-sm sm:text-base leading-relaxed">
-
-            {/* Role Introduction / Overview */}
-            <div className="space-y-4">
-              <p className={`font-normal leading-relaxed ${theme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>
-                As a <strong className="font-bold text-slate-900 dark:text-white">{job.title}</strong> at <strong className="font-bold text-amber-600 dark:text-amber-400">Adyapan Edutech Pvt. Ltd.</strong>, you will provide dynamic service and support in relation to education innovation, student career counselling, and business growth. Dedicated to quality, you will use your communication and problem-solving skills to continuously deliver value to our student community and enterprise partners.
-              </p>
-              {job.description && (
-                <p className={`font-normal leading-relaxed whitespace-pre-line ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-                  {job.description}
-                </p>
-              )}
-            </div>
-
-            {/* Key Responsibilities Section */}
-            {responsibilities.length > 0 && (
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
               <div className="space-y-4">
-                <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-                  Roles and responsibilities may include, but are not limited to:
-                </h2>
-                <ul className="space-y-3 pl-2">
-                  {responsibilities.map((r: string, idx: number) => (
-                    <li key={idx} className="flex items-start gap-3 text-sm">
-                      <span className="w-1.5 h-1.5 rounded-full bg-slate-900 dark:bg-amber-400 mt-2 shrink-0" />
-                      <span className={`${theme === 'dark' ? 'text-slate-200' : 'text-slate-700'} leading-relaxed`}>{r}</span>
-                    </li>
-                  ))}
-                </ul>
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <span className="px-3.5 py-1 rounded-full text-xs font-black bg-white/20 text-white border border-white/30 backdrop-blur-md uppercase tracking-wider">
+                    {job.department || 'EdTech Career'}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-black bg-emerald-950/40 text-emerald-200 border border-emerald-300/30 backdrop-blur-md">
+                    <ShieldCheck size={14} className="text-emerald-300" />
+                    <span>Verified Official Hiring</span>
+                  </span>
+                </div>
+
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
+                  {job.title}
+                </h1>
+
+                <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs sm:text-sm font-bold text-white/95">
+                  <span className="inline-flex items-center gap-1.5 bg-black/15 px-3 py-1.5 rounded-xl backdrop-blur-sm border border-white/10">
+                    <Building2 size={16} className="text-amber-200" />
+                    <span>{job.company}</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 bg-black/15 px-3 py-1.5 rounded-xl backdrop-blur-sm border border-white/10">
+                    <MapPin size={16} className="text-amber-200" />
+                    <span>{job.location}</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 bg-black/15 px-3 py-1.5 rounded-xl backdrop-blur-sm border border-white/10">
+                    <Briefcase size={16} className="text-amber-200" />
+                    <span>{job.type}</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white text-stone-900 font-black shadow-lg shadow-black/10">
+                    <IndianRupee size={15} className="text-amber-600" />
+                    <span>{job.salary ? String(job.salary).replace(/^₹\s*/, '') : 'Competitive'}</span>
+                  </span>
+                </div>
               </div>
-            )}
 
-            {/* Professional Skills & Preferred Competencies */}
-            <div className="space-y-4">
-              <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-                Professional Skills & Core Capabilities:
-              </h2>
-              <ul className="space-y-3 pl-2">
-                <li className="flex items-start gap-3 text-sm">
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-900 dark:bg-amber-400 mt-2 shrink-0" />
-                  <span className={`${theme === 'dark' ? 'text-slate-200' : 'text-slate-700'} leading-relaxed`}>
-                    <strong>Experience Level:</strong> {job.experienceLevel || 'Fresher / Experienced candidates welcome'}.
-                  </span>
-                </li>
-                <li className="flex items-start gap-3 text-sm">
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-900 dark:bg-amber-400 mt-2 shrink-0" />
-                  <span className={`${theme === 'dark' ? 'text-slate-200' : 'text-slate-700'} leading-relaxed`}>
-                    Excellent communication (verbal and written), facilitation, and interpersonal counseling skills.
-                  </span>
-                </li>
-                <li className="flex items-start gap-3 text-sm">
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-900 dark:bg-amber-400 mt-2 shrink-0" />
-                  <span className={`${theme === 'dark' ? 'text-slate-200' : 'text-slate-700'} leading-relaxed`}>
-                    Passion for educational transformation, target orientation, and ensuring a world-class student experience.
-                  </span>
-                </li>
-                <li className="flex items-start gap-3 text-sm">
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-900 dark:bg-amber-400 mt-2 shrink-0" />
-                  <span className={`${theme === 'dark' ? 'text-slate-200' : 'text-slate-700'} leading-relaxed`}>
-                    Ability to work collaboratively in high-energy teams while managing individual performance metrics.
-                  </span>
-                </li>
-              </ul>
+              {/* Quick Actions in Header */}
+              <div className="flex flex-wrap items-center gap-3 pt-2 lg:pt-0">
+                <button
+                  onClick={toggleSaveJob}
+                  className={`p-3.5 rounded-2xl border transition-all flex items-center justify-center cursor-pointer ${
+                    isSaved
+                      ? 'bg-white text-rose-600 border-white shadow-md'
+                      : 'bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-md'
+                  }`}
+                  title={isSaved ? 'Job Saved' : 'Save Job'}
+                >
+                  <Heart size={18} className={isSaved ? 'fill-rose-600 text-rose-600' : ''} />
+                </button>
+
+                <button
+                  onClick={copyShareLink}
+                  className="p-3.5 rounded-2xl border border-white/30 bg-white/20 hover:bg-white/30 text-white backdrop-blur-md transition-all cursor-pointer"
+                  title="Share Job Link"
+                >
+                  <Share2 size={18} />
+                </button>
+
+                <Link
+                  to={applyUrl}
+                  className="px-8 py-3.5 rounded-2xl bg-white hover:bg-stone-100 text-stone-900 font-black text-sm shadow-2xl hover:scale-105 transition-all inline-flex items-center gap-2"
+                >
+                  <span>Apply For This Position</span>
+                  <ArrowRight size={16} />
+                </Link>
+              </div>
             </div>
-
-            {/* About Adyapan Edutech */}
-            <div className={`pt-6 border-t ${theme === 'dark' ? 'border-slate-800' : 'border-slate-200'} space-y-3`}>
-              <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-                About Adyapan:
-              </h2>
-              <p className={`text-sm leading-relaxed ${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
-                Adyapan Edutech Pvt. Ltd. is an <strong>ISO 9001:2015 Certified, MSME Recognized</strong> educational leader and <strong>Skill India Partner</strong> bridging the gap between talent and top industry opportunities. We empower learners and young professionals nationwide with industry-aligned skill acceleration, career counseling, and high-impact placements.
-              </p>
-            </div>
-
-            {/* Equal Employment Opportunity (EEO) Statement */}
-            <div className={`pt-6 border-t ${theme === 'dark' ? 'border-slate-800' : 'border-slate-200'} space-y-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400`}>
-              <h3 className="font-bold text-slate-700 dark:text-slate-300 text-sm">
-                Additional Employment Information
-              </h3>
-              <p>
-                Compensation information is accurate as of the date of this posting. Adyapan Edutech reserves the right to modify this information at any time, subject to applicable guidelines.
-              </p>
-              <p>
-                Adyapan is an equal opportunity employer. Your application and candidacy will not be considered based on race, color, sex, religion, creed, sexual orientation, gender identity, national origin, or disability.
-              </p>
-              <p>
-                If you have an inquiry or require assistance during the recruitment process, please reach out to our talent team at <a href="mailto:careers@adyapan.com" className="text-amber-500 underline font-semibold">careers@adyapan.com</a>.
-              </p>
-            </div>
-
           </div>
 
-          {/* Right Column: Cognizant-Style Floating Action Area (4 Cols) */}
-          <div className="lg:col-span-4 lg:sticky lg:top-24 space-y-6 pt-2">
+          {/* ── 2-COLUMN DETAILED SPECIFICATIONS LAYOUT ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-            {/* Primary Action Buttons Box */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => {
-                  const targetApplyUrl = `/careers/${job.slug || job.id || slug}/apply`;
-                  /*
-                  // Authentication Gate (Commented out - open direct application enabled):
-                  const token = localStorage.getItem('candidateToken') || localStorage.getItem('token');
-                  if (!candidate && !token) {
-                    toast('Please create an account or sign in to apply', { icon: '🔐' });
-                    navigate(`/register?redirect=${encodeURIComponent(targetApplyUrl)}`);
-                    return;
-                  }
-                  */
-                  navigate(targetApplyUrl);
-                }}
-                className="flex-1 py-3.5 px-6 rounded-full text-sm font-extrabold text-slate-950 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:from-amber-300 hover:to-orange-400 transition-all shadow-lg shadow-amber-500/25 text-center cursor-pointer tracking-wide flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
-              >
-                <span>Apply now</span>
-                <span className="text-base">→</span>
-              </button>
+            {/* LEFT COLUMN: FULL JOB CONTENT (8 Cols) */}
+            <div className="lg:col-span-8 space-y-8">
 
-              {/* Save / Favorite Heart Button */}
-              <button
-                onClick={toggleSaveJob}
-                className={`p-3.5 rounded-full border transition-all flex items-center justify-center shrink-0 cursor-pointer ${isSaved
-                  ? 'bg-red-500/15 border-red-500 text-red-500'
-                  : theme === 'dark'
-                    ? 'border-slate-700 text-slate-300 hover:border-amber-400 bg-slate-900'
-                    : 'border-slate-300 text-slate-600 hover:border-amber-500 bg-white shadow-sm'
-                  }`}
-                title={isSaved ? 'Job Saved' : 'Save Job'}
-                aria-label="Save Job"
-              >
-                <svg className={`w-5 h-5 ${isSaved ? 'fill-red-500 stroke-red-500' : 'fill-none stroke-currentColor'}`} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-              </button>
+              {/* Role Overview Card */}
+              <div className="bg-white dark:bg-stone-900 rounded-3xl p-6 sm:p-8 border border-stone-200/80 dark:border-stone-800 shadow-md space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-extrabold text-xs">
+                  <Sparkles size={13} />
+                  <span>ROLE OVERVIEW</span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-white">
+                  About The Opportunity
+                </h2>
+                <div className="text-stone-600 dark:text-stone-300 text-sm sm:text-base leading-relaxed whitespace-pre-line font-medium">
+                  {job.description}
+                </div>
+              </div>
+
+              {/* Key Responsibilities Card */}
+              <div className="bg-white dark:bg-stone-900 rounded-3xl p-6 sm:p-8 border border-stone-200/80 dark:border-stone-800 shadow-md space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-extrabold text-xs">
+                  <Zap size={13} />
+                  <span>RESPONSIBILITIES</span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-white">
+                  What You Will Do
+                </h2>
+                <div className="space-y-3 pt-1">
+                  {job.responsibilities.map((resp: string, idx: number) => (
+                    <div
+                      key={idx}
+                      className="flex items-start gap-3.5 p-3.5 rounded-2xl bg-[#fdfbf7] dark:bg-stone-850/60 border border-stone-100 dark:border-stone-800 text-xs sm:text-sm font-medium text-stone-700 dark:text-stone-200"
+                    >
+                      <CheckCircle2 size={18} className="text-emerald-500 shrink-0 mt-0.5" />
+                      <span className="leading-relaxed">{resp}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Requirements & Candidate Profile Card */}
+              <div className="bg-white dark:bg-stone-900 rounded-3xl p-6 sm:p-8 border border-stone-200/80 dark:border-stone-800 shadow-md space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-extrabold text-xs">
+                  <GraduationCap size={13} />
+                  <span>REQUIREMENTS</span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-white">
+                  What We Look For
+                </h2>
+                <div className="space-y-3 pt-1">
+                  {job.requirements.map((req: string, idx: number) => (
+                    <div
+                      key={idx}
+                      className="flex items-start gap-3.5 p-3.5 rounded-2xl bg-[#fdfbf7] dark:bg-stone-850/60 border border-stone-100 dark:border-stone-800 text-xs sm:text-sm font-medium text-stone-700 dark:text-stone-200"
+                    >
+                      <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0 mt-2" />
+                      <span className="leading-relaxed">{req}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Benefits & Perks Card */}
+              <div className="bg-white dark:bg-stone-900 rounded-3xl p-6 sm:p-8 border border-stone-200/80 dark:border-stone-800 shadow-md space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 font-extrabold text-xs">
+                  <Heart size={13} />
+                  <span>BENEFITS & PERKS</span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-white">
+                  Life & Growth at Adyapan
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  {job.benefits.map((b: string, idx: number) => (
+                    <div
+                      key={idx}
+                      className="p-4 rounded-2xl bg-[#fdfbf7] dark:bg-stone-850/60 border border-amber-200/40 dark:border-stone-800 text-xs font-semibold text-stone-700 dark:text-stone-200 flex items-start gap-2.5"
+                    >
+                      <Sparkles size={16} className="text-amber-500 shrink-0 mt-0.5" />
+                      <span>{b}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Bottom Apply CTA Card */}
+              <div className="p-8 rounded-3xl bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 text-white shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-6">
+                <div className="space-y-1 text-center sm:text-left">
+                  <h3 className="text-2xl font-black">Ready to apply?</h3>
+                  <p className="text-xs sm:text-sm text-white/90 font-medium">
+                    Submit your application in 2 minutes. Our recruitment team reviews resumes within 48 hours.
+                  </p>
+                </div>
+                <Link
+                  to={applyUrl}
+                  className="px-8 py-4 rounded-2xl bg-white hover:bg-stone-100 text-stone-900 font-black text-sm shadow-xl transition-all hover:scale-105 shrink-0 inline-flex items-center gap-2"
+                >
+                  <span>Apply Now</span>
+                  <ArrowRight size={16} />
+                </Link>
+              </div>
+
             </div>
 
-            {/* Share Social Links (Cognizant Style) */}
-            <div className="flex items-center gap-4 text-xs font-semibold text-slate-600 dark:text-slate-400 pt-2">
-              <span>Share</span>
+            {/* RIGHT COLUMN: STICKY QUICK SNAPSHOT & ACTIONS (4 Cols) */}
+            <div className="lg:col-span-4 lg:sticky lg:top-24 space-y-6">
 
-              {/* LinkedIn */}
-              <button
-                onClick={shareLinkedIn}
-                className="p-1 text-slate-600 dark:text-slate-300 hover:text-sky-500 transition-colors cursor-pointer"
-                title="Share on LinkedIn"
-              >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.25a1.62 1.62 0 0 0-1.62 1.63c0 .9.72 1.63 1.62 1.63s1.63-.73 1.63-1.63c0-.9-.73-1.63-1.63-1.63Z" />
-                </svg>
-              </button>
+              {/* Primary Floating Action Box */}
+              <div className="bg-white dark:bg-stone-900 rounded-3xl p-6 border border-stone-200/80 dark:border-stone-800 shadow-xl space-y-5">
+                <h3 className="text-base font-black text-stone-900 dark:text-white">
+                  Join The Team
+                </h3>
 
-              {/* Email */}
-              <button
-                onClick={shareEmail}
-                className="p-1 text-slate-600 dark:text-slate-300 hover:text-amber-500 transition-colors cursor-pointer"
-                title="Share via Email"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </button>
+                <Link
+                  to={applyUrl}
+                  className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold text-sm shadow-lg shadow-amber-500/25 transition-all text-center flex items-center justify-center gap-2 hover:scale-[1.02]"
+                >
+                  <span>Apply Now</span>
+                  <ArrowRight size={16} />
+                </Link>
 
-              {/* X / Twitter */}
-              <button
-                onClick={shareTwitter}
-                className="p-1 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
-                title="Share on X"
-              >
-                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                </svg>
-              </button>
-
-              {/* Facebook */}
-              <button
-                onClick={shareFacebook}
-                className="p-1 text-slate-600 dark:text-slate-300 hover:text-blue-600 transition-colors cursor-pointer"
-                title="Share on Facebook"
-              >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                </svg>
-              </button>
-
-              {/* Copy Link */}
-              <button
-                onClick={copyShareLink}
-                className="p-1 text-slate-600 dark:text-slate-300 hover:text-amber-500 transition-colors cursor-pointer"
-                title="Copy Direct Link"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Quick Information Summary Card */}
-            <div className={`p-6 rounded-2xl border ${theme === 'dark' ? 'bg-slate-900/60 border-slate-800' : 'bg-slate-50 border-slate-200'} space-y-3.5 text-xs`}>
-              <h4 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-[11px]">
-                Role Snapshot
-              </h4>
-              <div className="flex items-center justify-between py-1 border-b border-slate-200 dark:border-slate-800">
-                <span className="text-slate-500 dark:text-slate-400">Position Type</span>
-                <span className="font-semibold">{job.type === 'FULL_TIME' ? 'Full Time' : job.type || 'Full Time'}</span>
+                <div className="space-y-2.5 pt-2 text-xs font-semibold text-stone-500 dark:text-stone-400">
+                  <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+                    <CheckCircle2 size={16} />
+                    <span>100% Free Application (Zero Fees)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock3 size={16} className="text-amber-500" />
+                    <span>Quick 48-Hour HR Review</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <UsersRound size={16} className="text-amber-500" />
+                    <span>Direct Founder Mentorship</span>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center justify-between py-1 border-b border-slate-200 dark:border-slate-800">
-                <span className="text-slate-500 dark:text-slate-400">Location</span>
-                <span className="font-semibold">{job.location || 'India'}</span>
+
+              {/* Role Snapshot Summary Card */}
+              <div className="bg-white dark:bg-stone-900 rounded-3xl p-6 border border-stone-200/80 dark:border-stone-800 shadow-md space-y-4">
+                <h4 className="text-xs font-black uppercase tracking-wider text-amber-500">
+                  Role Snapshot
+                </h4>
+
+                <div className="space-y-3 text-xs">
+                  <div className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-800">
+                    <span className="text-stone-500 dark:text-stone-400 font-medium">Department</span>
+                    <span className="font-bold text-stone-900 dark:text-white">{job.department || 'EdTech'}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-800">
+                    <span className="text-stone-500 dark:text-stone-400 font-medium">Employment Type</span>
+                    <span className="font-bold text-stone-900 dark:text-white">{job.type}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-800">
+                    <span className="text-stone-500 dark:text-stone-400 font-medium">Location</span>
+                    <span className="font-bold text-stone-900 dark:text-white">{job.location}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-800">
+                    <span className="text-stone-500 dark:text-stone-400 font-medium">Experience</span>
+                    <span className="font-bold text-amber-600 dark:text-amber-400">{job.experienceLevel}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-stone-500 dark:text-stone-400 font-medium">Compensation</span>
+                    <span className="font-black text-emerald-600 dark:text-emerald-400">{job.salary}</span>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center justify-between py-1 border-b border-slate-200 dark:border-slate-800">
-                <span className="text-slate-500 dark:text-slate-400">Experience</span>
-                <span className="font-semibold text-amber-600 dark:text-amber-400">{job.experienceLevel || 'Fresher / Experienced'}</span>
+
+              {/* Social Share Box */}
+              <div className="bg-white dark:bg-stone-900 rounded-3xl p-6 border border-stone-200/80 dark:border-stone-800 shadow-md space-y-3 text-xs">
+                <span className="font-extrabold text-stone-900 dark:text-white block">
+                  Share this opening
+                </span>
+                <div className="flex items-center gap-2.5">
+                  <button
+                    onClick={shareLinkedIn}
+                    className="flex-1 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-sky-500 hover:text-white text-stone-700 dark:text-stone-300 font-bold transition-all text-center"
+                  >
+                    LinkedIn
+                  </button>
+                  <button
+                    onClick={shareTwitter}
+                    className="flex-1 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-950 hover:text-white text-stone-700 dark:text-stone-300 font-bold transition-all text-center"
+                  >
+                    X / Twitter
+                  </button>
+                  <button
+                    onClick={copyShareLink}
+                    className="flex-1 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-amber-500 hover:text-white text-stone-700 dark:text-stone-300 font-bold transition-all text-center"
+                  >
+                    Copy Link
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center justify-between py-1">
-                <span className="text-slate-500 dark:text-slate-400">Compensation</span>
-                <span className="font-bold text-emerald-600 dark:text-emerald-400">{salaryRange}</span>
-              </div>
+
             </div>
 
           </div>
 
         </div>
       </main>
-
-      {/* ===== FOOTER ===== */}
-      <Footer isPublic={true} />
-
-    </div>
+    </SiteShell>
   );
 };
 

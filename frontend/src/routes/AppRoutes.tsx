@@ -33,9 +33,12 @@ import CandidateLogin from '../candidate-portal/CandidateLogin';
 import CandidateRegister from '../candidate-portal/CandidateRegister';
 import MyApplications from '../candidate-portal/MyApplications';
 import AboutUs from '../candidate-portal/AboutUs';
+import LifeAtAdyapan from '../candidate-portal/LifeAtAdyapan';
 import ContactUs from '../pages/contact/ContactUs';
 import LegalPrivacy from '../pages/legal/LegalPrivacy';
 import LegalTerms from '../pages/legal/LegalTerms';
+
+import AuthPage from '../candidate-portal/AuthPage';
 
 // Admin Protected Route
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -73,25 +76,28 @@ const CandidateProtectedRoute = ({ children }: { children: React.ReactNode }) =>
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* Root → Careers */}
-      <Route path="/" element={<Navigate to="/careers" replace />} />
-
-      {/* ===== PUBLIC ===== */}
+      {/* ===== PUBLIC CANDIDATE PORTAL ===== */}
+      <Route path="/" element={<Careers />} />
       <Route path="/careers" element={<Careers />} />
       <Route path="/open-positions" element={<PublicJobs />} />
+      <Route path="/careers/jobs" element={<PublicJobs />} />
       <Route path="/careers/:slug" element={<PublicJob />} />
       <Route path="/careers/:slug/apply" element={<ApplyJob />} />
+      <Route path="/open-positions/:slug" element={<PublicJob />} />
+      <Route path="/open-positions/:slug/apply" element={<ApplyJob />} />
       <Route path="/application-success" element={<ApplicationSuccess />} />
       <Route path="/about" element={<AboutUs />} />
+      <Route path="/life-at-adyapan" element={<LifeAtAdyapan />} />
       <Route path="/contact" element={<ContactUs />} />
       <Route path="/privacy" element={<LegalPrivacy />} />
       <Route path="/terms" element={<LegalTerms />} />
 
-      {/* ===== AUTH (Original Simple Login) ===== */}
-      <Route path="/login" element={<Login />} />
+      {/* ===== AUTH ===== */}
+      <Route path="/auth" element={<AuthPage />} />
+      <Route path="/login" element={<AuthPage />} />
+      <Route path="/register" element={<AuthPage />} />
       <Route path="/admin/login" element={<Login />} />
       <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
-      <Route path="/register" element={<CandidateRegister />} />
 
       {/* ===== CANDIDATE PROTECTED ===== */}
       <Route
@@ -103,12 +109,16 @@ const AppRoutes = () => {
         }
       />
 
-      {/* ===== ADMIN PROTECTED ===== */}
+      {/* ===== ADMIN RECRUITER PROTECTED ===== */}
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
       <Route path="/jobs/new" element={<ProtectedRoute><CreateJob /></ProtectedRoute>} />
       <Route path="/jobs/create" element={<ProtectedRoute><CreateJob /></ProtectedRoute>} />
       <Route path="/jobs/:id" element={<ProtectedRoute><JobDetails /></ProtectedRoute>} />
+      <Route path="/admin/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
+      <Route path="/admin/jobs/new" element={<ProtectedRoute><CreateJob /></ProtectedRoute>} />
+      <Route path="/admin/jobs/create" element={<ProtectedRoute><CreateJob /></ProtectedRoute>} />
+      <Route path="/admin/jobs/:id" element={<ProtectedRoute><JobDetails /></ProtectedRoute>} />
       <Route path="/candidates" element={<ProtectedRoute><Candidates /></ProtectedRoute>} />
       <Route path="/candidates/compare" element={<ProtectedRoute><CompareCandidates /></ProtectedRoute>} />
       <Route path="/candidates/:id" element={<ProtectedRoute><CandidateDetails /></ProtectedRoute>} />
