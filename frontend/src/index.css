@@ -2447,3 +2447,330 @@ h1 em, h2 em {
     display: block;
   }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   HARSHITHA EXACT HERO SECTIONS (ABOUT US & LIFE AT ADYAPAN)
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── 1. EXACT ABOUT US HERO ── */
+.about-reference-page .about-ref-hero {
+  min-height: 610px;
+  position: relative;
+  background: #fffaf2;
+  overflow: hidden;
+  border-bottom: 1px solid #ead7c2;
+}
+
+.about-reference-page .about-ref-hero-grid {
+  min-height: 555px;
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  gap: 0;
+  align-items: center;
+  width: min(1280px, calc(100% - 40px));
+  margin: auto;
+}
+
+.about-reference-page .about-ref-hero-copy {
+  position: relative;
+  z-index: 4;
+  padding: 86px 36px 82px 0;
+}
+
+.about-reference-page .about-ref-kicker {
+  font-size: 11px;
+  letter-spacing: 2.4px;
+  font-weight: 800;
+  color: #ff7200;
+  display: block;
+}
+
+.about-reference-page .about-ref-hero-copy h1 {
+  font-family: 'Manrope', sans-serif;
+  font-size: clamp(52px, 5.8vw, 84px);
+  line-height: 0.94;
+  letter-spacing: -4px;
+  margin: 18px 0 25px;
+  font-weight: 900;
+  color: #17120d;
+}
+
+.about-reference-page .about-ref-hero-copy h1 em {
+  color: #ff7200;
+  font-style: normal;
+}
+
+.about-reference-page .about-ref-hero-copy p {
+  max-width: 540px;
+  font-size: 16px;
+  line-height: 1.78;
+  color: #665f57;
+}
+
+.about-reference-page .about-ref-mini-stats {
+  display: flex;
+  gap: 16px;
+  margin-top: 36px;
+}
+
+.about-reference-page .about-ref-mini-stats > div {
+  width: 188px;
+  min-height: 92px;
+  padding: 17px 19px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #ead7c2;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+.about-reference-page .about-ref-mini-stats span {
+  font-size: 11px;
+  color: #665f57;
+  display: block;
+  line-height: 1.35;
+}
+
+.about-reference-page .about-ref-mini-stats b {
+  font-family: 'Manrope', sans-serif;
+  font-size: 29px;
+  font-weight: 800;
+  color: #ff7200;
+  margin-top: 6px;
+  display: block;
+}
+
+.about-reference-page .about-ref-hero-visual {
+  position: relative;
+  min-height: 610px;
+  align-self: stretch;
+  overflow: visible;
+}
+
+.about-reference-page .about-ref-hero-photo {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: -5vw;
+  width: min(760px, 58vw);
+  height: 610px;
+  overflow: hidden;
+  clip-path: polygon(18% 0, 100% 0, 100% 100%, 0 100%, 10% 72%, 14% 35%);
+  background: #ead7bd;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.1);
+}
+
+.about-reference-page .about-ref-hero-photo img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center center;
+  transition: transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.about-reference-page .about-ref-hero-photo:hover img {
+  transform: scale(1.03);
+}
+
+.about-reference-page .about-ref-hero-photo-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255, 250, 242, 0.1), transparent 30%),
+    linear-gradient(0deg, rgba(24, 14, 5, 0.18), transparent 34%);
+  pointer-events: none;
+}
+
+.about-reference-page .about-ref-hero-dot-grid {
+  position: absolute;
+  z-index: 4;
+  right: 2%;
+  top: 52%;
+  width: 95px;
+  height: 95px;
+  opacity: 0.28;
+  background-image: radial-gradient(#ff7200 1px, transparent 1px);
+  background-size: 10px 10px;
+}
+
+@media (max-width: 980px) {
+  .about-reference-page .about-ref-hero {
+    min-height: auto;
+  }
+  .about-reference-page .about-ref-hero-grid {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+  .about-reference-page .about-ref-hero-copy {
+    padding: 60px 0 30px;
+  }
+  .about-reference-page .about-ref-hero-visual {
+    min-height: 380px;
+  }
+  .about-reference-page .about-ref-hero-photo {
+    right: 0;
+    width: 100%;
+    height: 380px;
+    clip-path: none;
+    border-radius: 24px;
+  }
+}
+
+
+/* ── 2. EXACT LIFE AT ADYAPAN HERO ── */
+.life-page-hero {
+  position: relative;
+  min-height: 440px;
+  display: flex;
+  align-items: center;
+  background: radial-gradient(circle at 82% 28%, rgba(255, 138, 0, 0.18), transparent 28%),
+    linear-gradient(135deg, #fffaf3 0%, #fff1df 100%);
+  border-bottom: 1px solid #e9dfd2;
+  overflow: hidden;
+}
+
+.life-page-hero::before,
+.life-page-hero::after {
+  content: "";
+  position: absolute;
+  border: 1px solid rgba(255, 138, 0, 0.2);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.life-page-hero::before {
+  width: 480px;
+  height: 480px;
+  right: -170px;
+  top: -250px;
+}
+
+.life-page-hero::after {
+  width: 260px;
+  height: 260px;
+  left: -160px;
+  bottom: -175px;
+}
+
+.life-page-hero-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  align-items: center;
+  min-height: 440px;
+  width: min(1280px, calc(100% - 40px));
+  margin: auto;
+}
+
+.life-page-hero-copy {
+  max-width: 700px;
+  padding: 65px 0;
+}
+
+.life-page-hero-copy .kicker {
+  font-size: 11px;
+  letter-spacing: 2.4px;
+  font-weight: 800;
+  color: #ff8a00;
+}
+
+.life-page-hero-copy h1 {
+  font-family: 'Manrope', sans-serif;
+  font-size: clamp(52px, 6.2vw, 88px);
+  font-weight: 800;
+  line-height: 0.94;
+  letter-spacing: -4px;
+  margin: 18px 0 22px;
+  color: #17120d;
+}
+
+.life-page-hero-copy h1 em {
+  color: #ff8a00;
+  font-style: normal;
+}
+
+.life-page-hero-copy p {
+  max-width: 590px;
+  color: #6f6a63;
+  font-size: 16px;
+  line-height: 1.8;
+  margin: 0;
+}
+
+.life-page-hero-orbit {
+  height: 330px;
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.life-page-hero-orbit::before {
+  content: "";
+  width: 260px;
+  height: 260px;
+  border: 1px solid rgba(255, 138, 0, 0.28);
+  border-radius: 50%;
+  position: absolute;
+  animation: lifeOrbit 14s linear infinite;
+}
+
+.life-page-hero-orbit::after {
+  content: "ady.";
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, #ff8a00, #ffb13b);
+  color: #fff;
+  font: 800 38px 'Manrope', sans-serif;
+  box-shadow: 0 25px 70px rgba(255, 138, 0, 0.25);
+  animation: lifeFloat 5s ease-in-out infinite;
+}
+
+.life-page-hero-orbit span {
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  background: #ff8a00;
+  border-radius: 50%;
+  box-shadow: 0 0 0 8px rgba(255, 138, 0, 0.1);
+}
+
+.life-page-hero-orbit span:nth-child(1) {
+  transform: translate(126px, -20px);
+}
+
+.life-page-hero-orbit span:nth-child(2) {
+  transform: translate(-95px, 65px);
+  width: 9px;
+  height: 9px;
+}
+
+.life-page-hero-orbit span:nth-child(3) {
+  transform: translate(45px, 112px);
+  width: 7px;
+  height: 7px;
+}
+
+@keyframes lifeOrbit {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes lifeFloat {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-12px) rotate(2deg); }
+}
+
+@media (max-width: 980px) {
+  .life-page-hero-inner {
+    grid-template-columns: 1fr;
+  }
+  .life-page-hero-orbit {
+    display: none;
+  }
+  .life-page-hero-copy {
+    padding: 50px 0;
+  }
+}
