@@ -7,13 +7,18 @@ import {
   Clock3,
   Flame,
   Heart,
+  HelpCircle,
   LayoutGrid,
   List,
   MapPin,
+  MessageSquare,
   Search,
   SlidersHorizontal,
   Sparkles,
   Star,
+  Target,
+  TrendingUp,
+  User,
   UsersRound,
   X,
   Zap,
@@ -742,6 +747,82 @@ export const PublicJobs: React.FC = () => {
                         );
                       })}
                     </div>
+                  </div>
+                </div>
+
+                {/* ── WHY ADYAPAN SIDEBAR CARD ── */}
+                <div className="bg-[#fffdfa] dark:bg-stone-900 p-6 rounded-3xl border border-amber-200/80 dark:border-amber-900/40 shadow-sm space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-amber-500 font-bold">
+                        <Sparkles size={18} className="fill-amber-500 text-amber-500" />
+                      </span>
+                      <h3 className="font-extrabold text-base text-amber-600 dark:text-amber-400 tracking-tight">
+                        Why Adyapan?
+                      </h3>
+                    </div>
+                  </div>
+
+                  <ul className="space-y-3 text-xs font-bold text-stone-800 dark:text-stone-200">
+                    <li className="flex items-center gap-2.5">
+                      <span className="w-5 h-5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center text-[10px] shrink-0">
+                        <Target size={12} />
+                      </span>
+                      <span>Learning &amp; Growth</span>
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <span className="w-5 h-5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center text-[10px] shrink-0">
+                        <Sparkles size={12} />
+                      </span>
+                      <span>Real Impact</span>
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <span className="w-5 h-5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center text-[10px] shrink-0">
+                        <UsersRound size={12} />
+                      </span>
+                      <span>Collaborative Culture</span>
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <span className="w-5 h-5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center text-[10px] shrink-0">
+                        <TrendingUp size={12} />
+                      </span>
+                      <span>Career Advancement</span>
+                    </li>
+                  </ul>
+
+                  <div className="pt-2 border-t border-amber-100 dark:border-stone-800">
+                    <Link
+                      to="/life-at-adyapan"
+                      className="inline-flex items-center gap-1.5 text-xs font-black text-amber-600 dark:text-amber-400 hover:text-amber-700 hover:underline group"
+                    >
+                      <span>Explore Life at Adyapan</span>
+                      <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                  </div>
+                </div>
+
+                {/* ── CAREER GUIDANCE & HR SUPPORT SIDEBAR CARD (NO SIGNUP) ── */}
+                <div className="bg-[#fffdfa] dark:bg-stone-900 p-6 rounded-3xl border border-amber-200/80 dark:border-amber-900/40 shadow-sm space-y-3.5">
+                  <div className="flex items-center gap-2">
+                    <span className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xs font-black">
+                      <MessageSquare size={16} />
+                    </span>
+                    <h3 className="font-extrabold text-base text-stone-900 dark:text-white tracking-tight">
+                      Need Career Guidance?
+                    </h3>
+                  </div>
+                  <p className="text-xs text-stone-600 dark:text-stone-300 font-medium leading-relaxed">
+                    Have questions about role qualifications, interview processes, or growth opportunities? Our recruitment team is here to help.
+                  </p>
+                  <div className="pt-1">
+                    <Link
+                      to="/contact"
+                      className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold text-xs shadow-md shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                    >
+                      <MessageSquare size={15} />
+                      <span>Speak with Hiring Team</span>
+                      <ArrowRight size={14} />
+                    </Link>
                   </div>
                 </div>
 

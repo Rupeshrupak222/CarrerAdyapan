@@ -95,8 +95,12 @@ const AppRoutes = () => {
       <Route path="/life-at-adyapan" element={<LifeAtAdyapan />} />
       <Route path="/contact" element={<ContactUs />} />
       <Route path="/contact-us" element={<ContactUs />} />
+      <Route path="/support" element={<ContactUs />} />
+      <Route path="/help" element={<ContactUs />} />
       <Route path="/privacy" element={<LegalPrivacy />} />
+      <Route path="/privacy-policy" element={<LegalPrivacy />} />
       <Route path="/terms" element={<LegalTerms />} />
+      <Route path="/terms-of-service" element={<LegalTerms />} />
 
       {/* ===== AUTH ===== */}
       <Route path="/auth" element={<AuthPage />} />

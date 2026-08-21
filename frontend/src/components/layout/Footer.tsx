@@ -150,9 +150,27 @@ const Footer: React.FC<FooterProps> = () => {
             © 2026 <b className="text-[#a9a198] font-bold">SR's Adyapan Edutech Pvt. Ltd.</b> All rights reserved.
           </span>
           <div className="flex items-center gap-6 text-[#777]">
-            <span className="hover:text-white cursor-pointer transition-colors">Privacy</span>
-            <span className="hover:text-white cursor-pointer transition-colors">Terms</span>
-            <span className="hover:text-white cursor-pointer transition-colors">Support</span>
+            <Link
+              to="/privacy"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="text-[#777] hover:text-white hover:underline transition-colors"
+            >
+              Privacy
+            </Link>
+            <Link
+              to="/terms"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="text-[#777] hover:text-white hover:underline transition-colors"
+            >
+              Terms
+            </Link>
+            <Link
+              to="/support"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="text-[#777] hover:text-white hover:underline transition-colors"
+            >
+              Support
+            </Link>
           </div>
         </div>
       </div>
