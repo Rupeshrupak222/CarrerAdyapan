@@ -309,7 +309,7 @@ export const PublicJob: React.FC = () => {
                   {job.responsibilities.map((resp: string, idx: number) => (
                     <div
                       key={idx}
-                      className="flex items-start gap-3.5 p-3.5 rounded-2xl bg-[#fdfbf7] dark:bg-stone-850/60 border border-stone-100 dark:border-stone-800 text-xs sm:text-sm font-medium text-stone-700 dark:text-stone-200"
+                      className="flex items-start gap-3.5 p-3.5 rounded-2xl bg-[#fdfbf7] dark:bg-stone-800/90 border border-stone-200/60 dark:border-stone-700 text-xs sm:text-sm font-medium text-stone-800 dark:text-stone-100"
                     >
                       <CheckCircle2 size={18} className="text-emerald-500 shrink-0 mt-0.5" />
                       <span className="leading-relaxed">{resp}</span>
@@ -331,7 +331,7 @@ export const PublicJob: React.FC = () => {
                   {job.requirements.map((req: string, idx: number) => (
                     <div
                       key={idx}
-                      className="flex items-start gap-3.5 p-3.5 rounded-2xl bg-[#fdfbf7] dark:bg-stone-850/60 border border-stone-100 dark:border-stone-800 text-xs sm:text-sm font-medium text-stone-700 dark:text-stone-200"
+                      className="flex items-start gap-3.5 p-3.5 rounded-2xl bg-[#fdfbf7] dark:bg-stone-800/90 border border-stone-200/60 dark:border-stone-700 text-xs sm:text-sm font-medium text-stone-800 dark:text-stone-100"
                     >
                       <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0 mt-2" />
                       <span className="leading-relaxed">{req}</span>
@@ -353,7 +353,7 @@ export const PublicJob: React.FC = () => {
                   {job.benefits.map((b: string, idx: number) => (
                     <div
                       key={idx}
-                      className="p-4 rounded-2xl bg-[#fdfbf7] dark:bg-stone-850/60 border border-amber-200/40 dark:border-stone-800 text-xs font-semibold text-stone-700 dark:text-stone-200 flex items-start gap-2.5"
+                      className="p-4 rounded-2xl bg-[#fdfbf7] dark:bg-stone-800/90 border border-amber-200/40 dark:border-stone-700 text-xs font-semibold text-stone-800 dark:text-stone-100 flex items-start gap-2.5"
                     >
                       <Sparkles size={16} className="text-amber-500 shrink-0 mt-0.5" />
                       <span>{b}</span>

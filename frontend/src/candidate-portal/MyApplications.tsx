@@ -264,7 +264,7 @@ const MyApplications = () => {
 
                       {/* 6-Step Hiring Funnel Progress Bar */}
                       <div className="space-y-2 pt-2">
-                        <div className="grid grid-cols-6 gap-2">
+                        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                           {PROGRESS_STEPS.map((stepName, idx) => {
                             const isCompleted = currentStep > idx + 1;
                             const isCurrent = currentStep === idx + 1;

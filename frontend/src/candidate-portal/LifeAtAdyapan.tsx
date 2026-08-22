@@ -1,9 +1,65 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Sparkles, Users, Award, Briefcase, Heart, CheckCircle2, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import SiteShell from '../components/layout/SiteShell';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import adyapanTeam from '../assets/adyapan-team.jpg';
+
+// ── LIVE ANIMATED COUNTER ──
+const AnimatedCounter: React.FC<{
+  end: number;
+  suffix?: string;
+  prefix?: string;
+  duration?: number;
+}> = ({ end, suffix = '', prefix = '', duration = 1800 }) => {
+  const [count, setCount] = useState(0);
+  const [hasStarted, setHasStarted] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasStarted) {
+          setHasStarted(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [hasStarted]);
+
+  useEffect(() => {
+    if (!hasStarted) return;
+    let startTime: number | null = null;
+    let animationFrameId: number;
+
+    const updateCount = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+      setCount(easeOut * end);
+
+      if (progress < 1) {
+        animationFrameId = requestAnimationFrame(updateCount);
+      } else {
+        setCount(end);
+      }
+    };
+
+    animationFrameId = requestAnimationFrame(updateCount);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [hasStarted, end, duration]);
+
+  return (
+    <span ref={ref}>
+      {prefix}
+      {Math.round(count).toLocaleString('en-IN')}
+      {suffix}
+    </span>
+  );
+};
 
 const LifeAtAdyapan: React.FC = () => {
   useScrollReveal();
@@ -22,10 +78,10 @@ const LifeAtAdyapan: React.FC = () => {
   ];
 
   const stats = [
-    { value: '200+', label: 'People Joined', icon: <Users size={20} className="text-amber-500" /> },
-    { value: '50+', label: 'Active Projects', icon: <Briefcase size={20} className="text-amber-500" /> },
-    { value: '64+', label: 'Completed Milestones', icon: <Award size={20} className="text-amber-500" /> },
-    { value: '25+', label: 'Open Opportunities', icon: <Sparkles size={20} className="text-amber-500" /> },
+    { num: 200, suffix: '+', label: 'People Joined', icon: <Users size={20} className="text-amber-500" /> },
+    { num: 50, suffix: '+', label: 'Active Projects', icon: <Briefcase size={20} className="text-amber-500" /> },
+    { num: 64, suffix: '+', label: 'Completed Milestones', icon: <Award size={20} className="text-amber-500" /> },
+    { num: 25, suffix: '+', label: 'Open Opportunities', icon: <Sparkles size={20} className="text-amber-500" /> },
   ];
 
   return (
@@ -59,7 +115,7 @@ const LifeAtAdyapan: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             GALLERY SECTION (INSIDE ADYAPAN)
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-20 sm:py-28 border-b border-stone-200/70 dark:border-stone-850">
+        <section className="py-20 sm:py-28 border-b border-stone-200/70 dark:border-stone-800">
           <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
 
             {/* Heading */}
@@ -85,7 +141,7 @@ const LifeAtAdyapan: React.FC = () => {
                   key={photo.title}
                   data-reveal="up"
                   data-delay={i * 100}
-                  className="group relative h-[280px] sm:h-[340px] rounded-3xl overflow-hidden bg-stone-100 dark:bg-stone-850 border border-stone-200/80 dark:border-stone-800 shadow-lg hover:shadow-2xl transition-all duration-500"
+                  className="group relative h-[280px] sm:h-[340px] rounded-3xl overflow-hidden bg-stone-100 dark:bg-stone-800 border border-stone-200/80 dark:border-stone-700 shadow-lg hover:shadow-2xl transition-all duration-500"
                 >
                   <img
                     src={photo.src}
@@ -124,21 +180,19 @@ const LifeAtAdyapan: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             STATS STRIP
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-14 sm:py-20 bg-amber-500/5 dark:bg-stone-900/40 border-b border-stone-200/70 dark:border-stone-850">
+        <section className="py-14 sm:py-20 bg-amber-500/5 dark:bg-stone-900/40 border-b border-stone-200/70 dark:border-stone-800">
           <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              {stats.map((stat, idx) => (
+              {stats.map((stat) => (
                 <div
                   key={stat.label}
-                  data-reveal="up"
-                  data-delay={idx * 100}
-                  className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 shadow-md flex flex-col items-center text-center justify-center hover:border-amber-500/40 transition-all"
+                  className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 shadow-md flex flex-col items-center text-center justify-center"
                 >
                   <div className="w-11 h-11 rounded-2xl bg-amber-500/15 flex items-center justify-center mb-3">
                     {stat.icon}
                   </div>
                   <strong className="text-3xl sm:text-4xl lg:text-5xl font-black text-amber-600 dark:text-amber-400 tracking-tight">
-                    {stat.value}
+                    <AnimatedCounter end={stat.num} suffix={stat.suffix} />
                   </strong>
                   <span className="text-xs font-extrabold uppercase tracking-wider text-stone-500 dark:text-stone-400 mt-1">
                     {stat.label}
@@ -152,7 +206,7 @@ const LifeAtAdyapan: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             FOUNDERS SECTION (THE PEOPLE BEHIND ADYAPAN)
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-20 sm:py-28 border-b border-stone-200/70 dark:border-stone-850">
+        <section className="py-20 sm:py-28 border-b border-stone-200/70 dark:border-stone-800">
           <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
 
             {/* Heading */}

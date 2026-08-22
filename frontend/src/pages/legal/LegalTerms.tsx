@@ -7,8 +7,8 @@ const LegalTerms = () => {
   const { theme } = useTheme();
 
   return (
-    <div className={`min-h-screen flex flex-col font-sans ${
-      theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'
+    <div className={`min-h-screen font-sans antialiased flex flex-col transition-colors ${
+      theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-[#fdf6ee] text-slate-900'
     }`}>
       {/* Header Bar */}
       <header className={`border-b sticky top-0 z-40 backdrop-blur-md ${
@@ -31,7 +31,7 @@ const LegalTerms = () => {
       {/* Main Content Container */}
       <main className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 py-10 w-full">
         <div className={`p-6 sm:p-10 rounded-3xl border shadow-sm ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-amber-200/80'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
         }`}>
           {/* Document Title Header */}
           <div className="border-b pb-6 mb-8 border-slate-200 dark:border-slate-800">

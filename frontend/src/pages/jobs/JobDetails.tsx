@@ -123,44 +123,43 @@ const JobDetails = () => {
 
         {/* Job Header Card */}
         <div className={`rounded-3xl border p-6 md:p-8 shadow-sm space-y-6 relative overflow-hidden ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}>
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pt-1">
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="px-3 py-1 text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 rounded-full">
+                <span className="px-3 py-1 text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-full">
                    {job.department}
                 </span>
-                <span className="px-3 py-1 text-xs font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 rounded-full">
+                <span className="px-3 py-1 text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-full">
                   ● {job.status}
                 </span>
               </div>
 
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{job.title}</h1>
               <p className="text-xs text-slate-600 dark:text-slate-300">
-                📍 {job.location} • 💼 {job.type === 'FULL_TIME' ? 'Full Time' : job.type} • 🎯 Experience: <span className="font-semibold text-amber-600 dark:text-amber-400">{job.experienceLevel || 'Fresher / Experienced'}</span>
+                📍 {job.location} • 💼 {job.type === 'FULL_TIME' ? 'Full Time' : job.type} • 🎯 Experience: <span className="font-semibold text-slate-900 dark:text-white">{job.experienceLevel || 'Fresher / Experienced'}</span>
               </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2.5">
               <button
                 onClick={shareWhatsApp}
-                className="px-3.5 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 WhatsApp
               </button>
               <button
                 onClick={shareLinkedIn}
-                className="px-3.5 py-2 text-xs font-semibold text-sky-700 dark:text-sky-300 bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 LinkedIn
               </button>
               <button
                 onClick={copyShareLink}
                 className={`px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all flex items-center gap-1.5 cursor-pointer ${
-                  theme === 'dark' ? 'bg-slate-950 text-slate-200 border-slate-800 hover:border-amber-400' : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-amber-50'
+                  theme === 'dark' ? 'bg-slate-950 text-slate-200 border-slate-800 hover:border-slate-600' : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
                 }`}
               >
                 Copy Link
@@ -178,7 +177,7 @@ const JobDetails = () => {
 
         {/* Details & Description */}
         <div className={`rounded-3xl border p-6 shadow-sm space-y-4 ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}>
           <h2 className="text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
             <span className="text-amber-500"></span> Job Overview & Role Details
@@ -187,9 +186,9 @@ const JobDetails = () => {
           
           {job.responsibilities && (
             <div className={`p-4 rounded-2xl border text-xs leading-relaxed space-y-1.5 ${
-              theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-white border-amber-200/60 text-slate-800'
+              theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-white border-slate-200 text-slate-800'
             }`}>
-              <strong className="text-amber-600 dark:text-amber-400 font-bold block mb-1">Key Responsibilities:</strong>
+              <strong className="text-slate-900 dark:text-white font-bold block mb-1">Key Responsibilities:</strong>
               <p className="whitespace-pre-line">{job.responsibilities}</p>
             </div>
           )}
@@ -197,7 +196,7 @@ const JobDetails = () => {
 
         {/* Applicants */}
         <div className={`rounded-3xl border p-6 shadow-sm space-y-4 ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}>
           <h2 className="text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
             <span className="text-amber-500"></span> Candidates Applied ({job.applications?.length || 0})
@@ -210,7 +209,7 @@ const JobDetails = () => {
               }`}>
                 <div className="flex items-center gap-3">
                   <span className="font-bold text-xs text-slate-900 dark:text-white">{app.candidate?.firstName} {app.candidate?.lastName}</span>
-                  <span className="px-2.5 py-0.5 text-xs font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 rounded-full">
+                  <span className="px-2.5 py-0.5 text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-full">
                     AI Match: {app.aiScore}%
                   </span>
                 </div>

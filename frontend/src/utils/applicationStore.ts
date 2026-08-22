@@ -327,10 +327,30 @@ export const addCandidateNotification = (candidateName: string, jobTitle: string
 
 export const markNotificationsRead = () => {
   const notifications = getStoredNotifications();
-  const updated = notifications.map((n) => ({ ...n, unread: false }));
+  const updated = notifications.map((n) => ({ ...n, unread: false, isRead: true }));
   localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(updated));
   return updated;
 };
+
+export const markStoredNotificationRead = (id: string) => {
+  const notifications = getStoredNotifications();
+  const updated = notifications.map((n) => (n.id === id ? { ...n, unread: false, isRead: true } : n));
+  localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(updated));
+  return updated;
+};
+
+export const removeStoredNotification = (id: string) => {
+  const notifications = getStoredNotifications();
+  const updated = notifications.filter((n) => n.id !== id);
+  localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(updated));
+  return updated;
+};
+
+export const clearStoredNotifications = () => {
+  localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify([]));
+  return [];
+};
+
 
 // --- GLOBAL OFFER TEMPLATE & SYNCHRONIZED CANDIDATE OFFER STORE ---
 

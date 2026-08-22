@@ -165,9 +165,8 @@ const Jobs = () => {
       <div className="space-y-6">
         {/* Header Section */}
         <div className={`p-6 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden shadow-sm ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}>
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
           
           <div className="pt-1 space-y-1">
             <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
@@ -193,7 +192,7 @@ const Jobs = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {jobs.length === 0 && !loading ? (
             <div className={`p-8 rounded-3xl border text-center col-span-full space-y-3 ${
-              theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-800 shadow-sm'
+              theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-800 shadow-sm'
             }`}>
               <h3 className="text-sm font-bold">No Active Job Openings</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">There are currently no active job postings in the database.</p>
@@ -209,17 +208,16 @@ const Jobs = () => {
               <div
                 key={job.id || job._id}
                 className={`rounded-3xl p-6 transition-all duration-200 flex flex-col justify-between space-y-4 border shadow-sm hover:shadow-md relative overflow-hidden group ${
-                  theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+                  theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
                 }`}
               >
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 opacity-80 group-hover:opacity-100 transition-opacity" />
 
                 <div className="space-y-3 pt-1">
                   <div className="flex items-center justify-between">
-                    <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                    <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                       {job.department || 'EdTech Growth'}
                     </span>
-                    <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                    <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                       ● {job.status || 'PUBLISHED'}
                     </span>
                   </div>
@@ -238,7 +236,7 @@ const Jobs = () => {
                       💼 {job.type === 'FULL_TIME' ? 'Full Time' : job.type || 'Full Time'}
                     </span>
                     <span className={`px-2.5 py-1 rounded-xl border ${
-                      theme === 'dark' ? 'bg-slate-950 border-slate-800 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-800'
+                      theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
                     }`}>
                       🎯 {job.experienceLevel || 'Fresher / Exp'}
                     </span>
@@ -246,11 +244,11 @@ const Jobs = () => {
 
                   <div className="text-xs font-medium space-y-1 pt-2 border-t border-slate-100 dark:border-slate-800">
                     <p className="text-slate-600 dark:text-slate-300">
-                      Applicants: <strong className="text-amber-600 dark:text-amber-400 font-bold">{job.applications?.length || 0} Candidates</strong>
+                      Applicants: <strong className="text-slate-900 dark:text-white font-bold">{job.applications?.length || 0} Candidates</strong>
                     </p>
                     {job.salaryMin && (
                       <p className="text-slate-600 dark:text-slate-300">
-                        <strong className="text-emerald-600 dark:text-emerald-400 font-semibold">₹{job.salaryMin.toLocaleString()} - ₹{job.salaryMax.toLocaleString()} / yr</strong>
+                        <strong className="text-slate-900 dark:text-white font-bold">₹{job.salaryMin.toLocaleString()} - ₹{job.salaryMax.toLocaleString()} / yr</strong>
                       </p>
                     )}
                   </div>
@@ -261,7 +259,9 @@ const Jobs = () => {
                   <div className="grid grid-cols-3 gap-2">
                     <button
                       onClick={() => shareWhatsApp(job)}
-                      className="py-1.5 text-[11px] font-semibold rounded-xl border transition-colors text-center bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20 cursor-pointer"
+                      className={`py-1.5 text-[11px] font-semibold rounded-xl border transition-colors text-center cursor-pointer ${
+                        theme === 'dark' ? 'bg-slate-950 text-slate-200 border-slate-800 hover:bg-slate-900' : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+                      }`}
                       title="Share on WhatsApp"
                     >
                       WhatsApp
@@ -269,7 +269,7 @@ const Jobs = () => {
                     <button
                       onClick={() => shareLinkedIn(job)}
                       className={`py-1.5 text-[11px] font-semibold rounded-xl border transition-colors text-center cursor-pointer ${
-                        theme === 'dark' ? 'bg-slate-950 text-amber-300 border-slate-800' : 'bg-white text-amber-900 border-amber-200'
+                        theme === 'dark' ? 'bg-slate-950 text-slate-200 border-slate-800 hover:bg-slate-900' : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
                       }`}
                       title="Share on LinkedIn"
                     >
@@ -278,7 +278,7 @@ const Jobs = () => {
                     <button
                       onClick={() => copyShareLink(job)}
                       className={`py-1.5 text-[11px] font-semibold rounded-xl border transition-colors text-center cursor-pointer ${
-                        theme === 'dark' ? 'bg-slate-950 text-slate-300 border-slate-800' : 'bg-slate-100 text-slate-700 border-slate-200'
+                        theme === 'dark' ? 'bg-slate-950 text-slate-300 border-slate-800 hover:bg-slate-900' : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
                       }`}
                       title="Copy direct shareable link"
                     >
@@ -297,7 +297,7 @@ const Jobs = () => {
 
                     <button
                       onClick={() => handleEditJob(job)}
-                      className="px-3 py-2 text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-500/15 border border-amber-500/30 hover:bg-amber-500/25 rounded-xl transition-all flex items-center gap-1 cursor-pointer"
+                      className="px-3 py-2 text-xs font-bold text-slate-800 dark:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl transition-all flex items-center gap-1 cursor-pointer"
                       title="Edit job opening details & requirements"
                     >
                       Edit
@@ -321,7 +321,7 @@ const Jobs = () => {
         {editingJob && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
             <div className={`w-full max-w-2xl p-6 sm:p-8 rounded-3xl border shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto ${
-              theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+              theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
             }`}>
               <div className="flex items-center justify-between border-b pb-4 border-slate-200 dark:border-slate-800">
                 <div>

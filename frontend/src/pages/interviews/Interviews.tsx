@@ -269,9 +269,8 @@ const Interviews = () => {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header Bar */}
-        <div className={`p-6 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden shadow-sm ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+        <div className={`p-6 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden shadow-sm ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
 
           <div className="space-y-1.5 pt-1">
             <BackButton label="Back to Dashboard" to="/dashboard" />
@@ -294,7 +293,7 @@ const Interviews = () => {
         </div>
 
         {/* Filter Bar */}
-        <div className={`flex flex-wrap items-center gap-2 p-3 rounded-3xl border shadow-sm ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-amber-200/80'
+        <div className={`flex flex-wrap items-center gap-2 p-3 rounded-3xl border shadow-sm ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
           }`}>
           <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-2">Status:</span>
           <button
@@ -335,7 +334,7 @@ const Interviews = () => {
         {/* Interviews Cards List */}
         <div className="space-y-4">
           {filteredInterviews.length === 0 ? (
-            <div className={`p-8 text-center rounded-3xl border text-xs font-medium ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-slate-400' : 'bg-white border-amber-200/80 text-slate-500'
+            <div className={`p-8 text-center rounded-3xl border text-xs font-medium ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-slate-400' : 'bg-white border-slate-200 text-slate-500'
               }`}>
               No interviews found for this filter. Click "+ Schedule New Interview" to create one.
             </div>
@@ -360,18 +359,18 @@ const Interviews = () => {
               return (
                 <div
                   key={interview.id}
-                  className={`p-6 rounded-3xl border shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative overflow-hidden ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+                  className={`p-6 rounded-3xl border shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative overflow-hidden ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
                     }`}
                 >
                   <div className="space-y-2 flex-1">
                     {/* Round & Status Badges */}
                     <div className="flex flex-wrap items-center gap-2.5">
-                      <span className="px-3 py-0.5 text-xs font-semibold rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30">
+                      <span className="px-3 py-0.5 text-xs font-semibold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                         {interview.type?.replace(/_/g, ' ') || 'SALES PITCH ROUND'}
                       </span>
                       <span
                         className={`px-3 py-0.5 text-xs font-bold rounded-full border ${interview.status === 'COMPLETED'
-                            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
+                            ? 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
                             : 'bg-orange-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-300 dark:border-amber-800'
                           }`}
                       >
@@ -427,7 +426,7 @@ const Interviews = () => {
                     {interview.status === 'SCHEDULED' && (
                       <button
                         onClick={() => handleCompleteInterview(interview.id)}
-                        className="px-4 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all shadow-sm flex items-center gap-1.5"
+                        className="px-4 py-2.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
                       >
                         Mark Completed
                       </button>

@@ -371,8 +371,20 @@ export const ApplyJob: React.FC = () => {
         <div className="absolute top-10 left-1/3 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
         {/* ── COMPACT APPLICATION HERO ── */}
-        <section className="pt-8 pb-8 relative z-10 border-b border-stone-200/60 dark:border-stone-850 bg-[#fdfbf7] dark:bg-[#141312]">
+        <section className="pt-6 pb-8 relative z-10 border-b border-stone-200/60 dark:border-stone-800 bg-[#fdfbf7] dark:bg-[#141312]">
           <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
+
+            {/* Top Back Navigation Breadcrumb */}
+            <div className="mb-4">
+              <Link
+                to={`/careers/${job?.slug || slug || ''}`}
+                className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-stone-600 dark:text-stone-400 hover:text-amber-500 dark:hover:text-amber-400 transition-colors"
+              >
+                <ArrowLeft size={16} />
+                <span>Back to Job Details</span>
+              </Link>
+            </div>
+
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
 
               {/* Left Role Details */}
@@ -395,12 +407,12 @@ export const ApplyJob: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-stone-600 dark:text-stone-300 pt-1">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white dark:bg-stone-850 border border-stone-200 dark:border-stone-800 shadow-sm">
+                <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-stone-600 dark:text-stone-200 pt-1">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-sm">
                     <MapPin size={13} className="text-amber-500" />
                     <span>{job?.location || 'Hyderabad'}</span>
                   </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white dark:bg-stone-850 border border-stone-200 dark:border-stone-800 shadow-sm">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-sm">
                     <Clock3 size={13} className="text-amber-500" />
                     <span>{job?.type || 'Full Time'}</span>
                   </span>
@@ -441,9 +453,9 @@ export const ApplyJob: React.FC = () => {
         </section>
 
         {/* ── GLOBAL APPLICATION PROGRESS TIMELINE ── */}
-        <section className="py-6 border-b border-stone-200/60 dark:border-stone-850 bg-white/70 dark:bg-stone-900/70 backdrop-blur-md sticky top-[64px] z-30 shadow-sm">
+        <section className="py-6 border-b border-stone-200/60 dark:border-stone-800 bg-white/70 dark:bg-stone-900/70 backdrop-blur-md sticky top-[64px] z-30 shadow-sm">
           <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
-            
+
             {/* Desktop Horizontal Timeline */}
             <div className="hidden lg:flex items-center justify-between relative">
               {STEPS.map((step, idx) => {
@@ -457,31 +469,28 @@ export const ApplyJob: React.FC = () => {
                         if (isCompleted) setCurrentStep(step.id);
                       }}
                       disabled={!isCompleted && !isCurrent}
-                      className={`flex items-center gap-3 transition-all select-none text-left cursor-pointer ${
-                        !isCompleted && !isCurrent ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
+                      className={`flex items-center gap-3 transition-all select-none text-left cursor-pointer ${!isCompleted && !isCurrent ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
                     >
                       <div
-                        className={`w-9 h-9 rounded-2xl flex items-center justify-center font-black text-xs transition-all shadow-sm ${
-                          isCompleted
+                        className={`w-9 h-9 rounded-2xl flex items-center justify-center font-black text-xs transition-all shadow-sm ${isCompleted
                             ? 'bg-emerald-500 text-white'
                             : isCurrent
-                            ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white scale-110 shadow-amber-500/30'
-                            : 'bg-stone-100 dark:bg-stone-800 text-stone-500'
-                        }`}
+                              ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white scale-110 shadow-amber-500/30'
+                              : 'bg-stone-100 dark:bg-stone-800 text-stone-500'
+                          }`}
                       >
                         {isCompleted ? <Check size={16} /> : `0${step.id}`}
                       </div>
 
                       <div>
                         <b
-                          className={`text-xs block font-black ${
-                            isCurrent
+                          className={`text-xs block font-black ${isCurrent
                               ? 'text-amber-500'
                               : isCompleted
-                              ? 'text-stone-900 dark:text-white'
-                              : 'text-stone-400'
-                          }`}
+                                ? 'text-stone-900 dark:text-white'
+                                : 'text-stone-400'
+                            }`}
                         >
                           {step.label}
                         </b>
@@ -493,11 +502,10 @@ export const ApplyJob: React.FC = () => {
 
                     {idx < STEPS.length - 1 && (
                       <div
-                        className={`flex-1 h-0.5 mx-3 rounded-full transition-all ${
-                          currentStep > step.id
+                        className={`flex-1 h-0.5 mx-3 rounded-full transition-all ${currentStep > step.id
                             ? 'bg-emerald-500'
                             : 'bg-stone-200 dark:bg-stone-800'
-                        }`}
+                          }`}
                       />
                     )}
                   </React.Fragment>
@@ -560,9 +568,8 @@ export const ApplyJob: React.FC = () => {
                         value={formData.firstName}
                         onChange={(e) => handleChange('firstName', e.target.value)}
                         placeholder="e.g. Dinesh"
-                        className={`w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border ${
-                          errors.firstName ? 'border-rose-500' : 'border-stone-200 dark:border-stone-800'
-                        } text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all`}
+                        className={`w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border ${errors.firstName ? 'border-rose-500' : 'border-stone-200 dark:border-stone-700'
+                          } text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all`}
                       />
                       {errors.firstName && <span className="text-[11px] text-rose-500 font-bold">{errors.firstName}</span>}
                     </div>
@@ -576,9 +583,8 @@ export const ApplyJob: React.FC = () => {
                         value={formData.lastName}
                         onChange={(e) => handleChange('lastName', e.target.value)}
                         placeholder="e.g. Sharma"
-                        className={`w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border ${
-                          errors.lastName ? 'border-rose-500' : 'border-stone-200 dark:border-stone-800'
-                        } text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all`}
+                        className={`w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border ${errors.lastName ? 'border-rose-500' : 'border-stone-200 dark:border-stone-700'
+                          } text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all`}
                       />
                       {errors.lastName && <span className="text-[11px] text-rose-500 font-bold">{errors.lastName}</span>}
                     </div>
@@ -592,9 +598,8 @@ export const ApplyJob: React.FC = () => {
                         value={formData.email}
                         onChange={(e) => handleChange('email', e.target.value)}
                         placeholder="dinesh@example.com"
-                        className={`w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border ${
-                          errors.email ? 'border-rose-500' : 'border-stone-200 dark:border-stone-800'
-                        } text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all`}
+                        className={`w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border ${errors.email ? 'border-rose-500' : 'border-stone-200 dark:border-stone-700'
+                          } text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all`}
                       />
                       {errors.email && <span className="text-[11px] text-rose-500 font-bold">{errors.email}</span>}
                     </div>
@@ -608,9 +613,8 @@ export const ApplyJob: React.FC = () => {
                         value={formData.phone}
                         onChange={(e) => handleChange('phone', e.target.value)}
                         placeholder="+91 98765 43210"
-                        className={`w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border ${
-                          errors.phone ? 'border-rose-500' : 'border-stone-200 dark:border-stone-800'
-                        } text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all`}
+                        className={`w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border ${errors.phone ? 'border-rose-500' : 'border-stone-200 dark:border-stone-700'
+                          } text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all`}
                       />
                       {errors.phone && <span className="text-[11px] text-rose-500 font-bold">{errors.phone}</span>}
                     </div>
@@ -624,7 +628,7 @@ export const ApplyJob: React.FC = () => {
                         value={formData.location}
                         onChange={(e) => handleChange('location', e.target.value)}
                         placeholder="e.g. Hyderabad, Telangana / Remote"
-                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all"
+                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all"
                       />
                     </div>
                   </div>
@@ -665,16 +669,14 @@ export const ApplyJob: React.FC = () => {
                           <div
                             key={card.id}
                             onClick={() => handleChange('employmentStatus', card.id)}
-                            className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-start gap-3.5 select-none ${
-                              isSelected
+                            className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-start gap-3.5 select-none ${isSelected
                                 ? 'border-amber-500 bg-amber-500/10 shadow-md shadow-amber-500/10'
-                                : 'border-stone-200 dark:border-stone-800 hover:border-amber-400 bg-stone-50/50 dark:bg-stone-850'
-                            }`}
+                                : 'border-stone-200 dark:border-stone-700 hover:border-amber-400 bg-stone-50/50 dark:bg-stone-800/80'
+                              }`}
                           >
                             <div
-                              className={`w-10 h-10 rounded-xl flex items-center justify-center font-black shrink-0 ${
-                                isSelected ? 'bg-amber-500 text-white' : 'bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-300'
-                              }`}
+                              className={`w-10 h-10 rounded-xl flex items-center justify-center font-black shrink-0 ${isSelected ? 'bg-amber-500 text-white' : 'bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-300'
+                                }`}
                             >
                               <Icon size={18} />
                             </div>
@@ -702,12 +704,12 @@ export const ApplyJob: React.FC = () => {
                         <select
                           value={formData.experience}
                           onChange={(e) => handleChange('experience', e.target.value)}
-                          className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                          className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
                         >
-                          <option value="0-1 Years">0–1 Years</option>
-                          <option value="1-3 Years">1–3 Years</option>
-                          <option value="3-5 Years">3–5 Years</option>
-                          <option value="5+ Years">5+ Years</option>
+                          <option value="0-1 Years" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">0–1 Years</option>
+                          <option value="1-3 Years" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">1–3 Years</option>
+                          <option value="3-5 Years" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">3–5 Years</option>
+                          <option value="5+ Years" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">5+ Years</option>
                         </select>
                       </div>
 
@@ -720,7 +722,7 @@ export const ApplyJob: React.FC = () => {
                           value={formData.currentCompany}
                           onChange={(e) => handleChange('currentCompany', e.target.value)}
                           placeholder="e.g. Cognizant / TCS / Startup"
-                          className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                          className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
                         />
                       </div>
 
@@ -733,7 +735,7 @@ export const ApplyJob: React.FC = () => {
                           value={formData.currentPosition}
                           onChange={(e) => handleChange('currentPosition', e.target.value)}
                           placeholder="e.g. Associate Analyst / Developer"
-                          className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                          className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
                         />
                       </div>
 
@@ -744,12 +746,12 @@ export const ApplyJob: React.FC = () => {
                         <select
                           value={formData.noticePeriod}
                           onChange={(e) => handleChange('noticePeriod', e.target.value)}
-                          className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                          className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
                         >
-                          <option value="Immediate">Immediate / Serving Notice</option>
-                          <option value="15 Days">15 Days</option>
-                          <option value="30 Days">30 Days</option>
-                          <option value="60+ Days">60+ Days</option>
+                          <option value="Immediate" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Immediate / Serving Notice</option>
+                          <option value="15 Days" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">15 Days</option>
+                          <option value="30 Days" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">30 Days</option>
+                          <option value="60+ Days" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">60+ Days</option>
                         </select>
                       </div>
                     </div>
@@ -787,12 +789,12 @@ export const ApplyJob: React.FC = () => {
                       <select
                         value={formData.highestQualification}
                         onChange={(e) => handleChange('highestQualification', e.target.value)}
-                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
                       >
-                        <option value="Bachelor's Degree">Bachelor's Degree (B.Tech / B.E / B.Sc / B.Com)</option>
-                        <option value="Master's Degree">Master's Degree (M.Tech / MBA / MCA)</option>
-                        <option value="Diploma / Polytechnic">Diploma / Polytechnic</option>
-                        <option value="Doctorate / PhD">Doctorate / PhD</option>
+                        <option value="Bachelor's Degree" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Bachelor's Degree (B.Tech / B.E / B.Sc / B.Com)</option>
+                        <option value="Master's Degree" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Master's Degree (M.Tech / MBA / MCA)</option>
+                        <option value="Diploma / Polytechnic" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Diploma / Polytechnic</option>
+                        <option value="Doctorate / PhD" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Doctorate / PhD</option>
                       </select>
                     </div>
 
@@ -805,7 +807,7 @@ export const ApplyJob: React.FC = () => {
                         value={formData.collegeName}
                         onChange={(e) => handleChange('collegeName', e.target.value)}
                         placeholder="e.g. Lovely Professional University / JNTU"
-                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
                       />
                     </div>
 
@@ -818,7 +820,7 @@ export const ApplyJob: React.FC = () => {
                         value={formData.fieldOfStudy}
                         onChange={(e) => handleChange('fieldOfStudy', e.target.value)}
                         placeholder="e.g. Computer Science / Electronics / Business"
-                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
                       />
                     </div>
 
@@ -829,10 +831,10 @@ export const ApplyJob: React.FC = () => {
                       <select
                         value={formData.graduationYear}
                         onChange={(e) => handleChange('graduationYear', e.target.value)}
-                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
                       >
                         {['2027', '2026', '2025', '2024', '2023', '2022', '2021', '2020', 'Prior'].map((yr) => (
-                          <option key={yr} value={yr}>{yr}</option>
+                          <option key={yr} value={yr} className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">{yr}</option>
                         ))}
                       </select>
                     </div>
@@ -863,7 +865,7 @@ export const ApplyJob: React.FC = () => {
                       value={customSkill}
                       onChange={(e) => setCustomSkill(e.target.value)}
                       placeholder="Add a custom skill (e.g. PyTorch, B2B Sales)..."
-                      className="flex-1 px-4 py-3 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-xs sm:text-sm font-semibold outline-none focus:border-amber-500"
+                      className="flex-1 px-4 py-3 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-xs sm:text-sm font-semibold outline-none focus:border-amber-500 text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500"
                     />
                     <button
                       type="submit"
@@ -887,11 +889,10 @@ export const ApplyJob: React.FC = () => {
                             key={skill}
                             type="button"
                             onClick={() => toggleSkill(skill)}
-                            className={`px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all flex items-center gap-1.5 cursor-pointer ${
-                              isSelected
+                            className={`px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all flex items-center gap-1.5 cursor-pointer ${isSelected
                                 ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md shadow-amber-500/20 scale-105'
-                                : 'bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:border-amber-400'
-                            }`}
+                                : 'bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 hover:border-amber-400'
+                              }`}
                           >
                             <span>{skill}</span>
                             {isSelected ? <Check size={13} /> : <Plus size={13} className="text-stone-400" />}
@@ -946,7 +947,7 @@ export const ApplyJob: React.FC = () => {
                   </div>
 
                   {/* Upload Card */}
-                  <div className="border-2 border-dashed border-stone-200 dark:border-stone-800 rounded-3xl p-8 sm:p-12 text-center bg-stone-50/50 dark:bg-stone-850/50 hover:border-amber-500 transition-all group">
+                  <div className="border-2 border-dashed border-stone-200 dark:border-stone-700 rounded-3xl p-8 sm:p-12 text-center bg-stone-50/50 dark:bg-stone-800/50 hover:border-amber-500 transition-all group">
                     <input
                       type="file"
                       id="resume-upload"
@@ -1034,7 +1035,7 @@ export const ApplyJob: React.FC = () => {
                       value={formData.motivationPitch}
                       onChange={(e) => handleChange('motivationPitch', e.target.value)}
                       placeholder="Tell us why this role interests you and what strengths you bring to our high-growth team..."
-                      className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all resize-none"
+                      className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all resize-none"
                     />
                   </div>
 
@@ -1049,7 +1050,7 @@ export const ApplyJob: React.FC = () => {
                         value={formData.linkedin}
                         onChange={(e) => handleChange('linkedin', e.target.value)}
                         placeholder="https://linkedin.com/in/username"
-                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
                       />
                     </div>
 
@@ -1063,7 +1064,7 @@ export const ApplyJob: React.FC = () => {
                         value={formData.portfolio}
                         onChange={(e) => handleChange('portfolio', e.target.value)}
                         placeholder="https://yourportfolio.com or github.com"
-                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
                       />
                     </div>
                   </div>
@@ -1109,7 +1110,7 @@ export const ApplyJob: React.FC = () => {
                   <div className="space-y-4">
 
                     {/* Profile Summary */}
-                    <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 flex items-start justify-between">
+                    <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 flex items-start justify-between">
                       <div className="space-y-1">
                         <span className="text-[10px] font-black uppercase tracking-wider text-amber-500">
                           01 Profile
@@ -1117,7 +1118,7 @@ export const ApplyJob: React.FC = () => {
                         <b className="text-sm font-black text-stone-900 dark:text-white block">
                           {formData.firstName} {formData.lastName}
                         </b>
-                        <p className="text-xs text-stone-500 font-semibold">
+                        <p className="text-xs text-stone-600 dark:text-stone-300 font-semibold">
                           {formData.email} · {formData.phone}
                         </p>
                       </div>
@@ -1130,7 +1131,7 @@ export const ApplyJob: React.FC = () => {
                     </div>
 
                     {/* Experience Summary */}
-                    <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 flex items-start justify-between">
+                    <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 flex items-start justify-between">
                       <div className="space-y-1">
                         <span className="text-[10px] font-black uppercase tracking-wider text-amber-500">
                           02 Experience
@@ -1138,7 +1139,7 @@ export const ApplyJob: React.FC = () => {
                         <b className="text-sm font-black text-stone-900 dark:text-white block">
                           {formData.employmentStatus === 'FRESHER' ? 'Fresher / Student' : `${formData.experience} Experience`}
                         </b>
-                        <p className="text-xs text-stone-500 font-semibold">
+                        <p className="text-xs text-stone-600 dark:text-stone-300 font-semibold">
                           {formData.employmentStatus === 'FRESHER'
                             ? formData.collegeName || 'University Student'
                             : `${formData.currentPosition || 'Candidate'} at ${formData.currentCompany || 'Previous Company'}`}
@@ -1153,7 +1154,7 @@ export const ApplyJob: React.FC = () => {
                     </div>
 
                     {/* Resume & Skills Summary */}
-                    <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-800 flex items-start justify-between">
+                    <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 flex items-start justify-between">
                       <div className="space-y-1">
                         <span className="text-[10px] font-black uppercase tracking-wider text-amber-500">
                           05 Resume & Skills
@@ -1161,7 +1162,7 @@ export const ApplyJob: React.FC = () => {
                         <b className="text-sm font-black text-stone-900 dark:text-white block">
                           📄 {formData.resumeFileName || 'Resume.pdf'}
                         </b>
-                        <p className="text-xs text-stone-500 font-semibold">
+                        <p className="text-xs text-stone-600 dark:text-stone-300 font-semibold">
                           {formData.skills.length} skills listed ({formData.skills.slice(0, 3).join(', ')}...)
                         </p>
                       </div>
@@ -1178,25 +1179,31 @@ export const ApplyJob: React.FC = () => {
               )}
 
               {/* ── STEP ACTION BUTTONS (BACK & CONTINUE / SUBMIT) ── */}
-              <div className="flex items-center justify-between pt-6 border-t border-stone-100 dark:border-stone-800">
+              <div className="flex items-center justify-between gap-3 pt-6 border-t border-stone-100 dark:border-stone-800">
                 {currentStep > 1 ? (
                   <button
                     type="button"
                     onClick={prevStep}
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-extrabold text-xs sm:text-sm transition-all cursor-pointer"
+                    className="inline-flex items-center gap-2 px-5 sm:px-6 py-3 rounded-2xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 font-extrabold text-xs sm:text-sm transition-all cursor-pointer shrink-0"
                   >
                     <ArrowLeft size={16} />
                     <span>Back</span>
                   </button>
                 ) : (
-                  <div />
+                  <Link
+                    to={`/careers/${job?.slug || slug || ''}`}
+                    className="inline-flex items-center gap-2 px-5 sm:px-6 py-3 rounded-2xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 font-extrabold text-xs sm:text-sm transition-all cursor-pointer shrink-0"
+                  >
+                    <ArrowLeft size={16} />
+                    <span>Back to Job</span>
+                  </Link>
                 )}
 
                 {currentStep < 7 ? (
                   <button
                     type="button"
                     onClick={nextStep}
-                    className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-xs sm:text-sm shadow-xl shadow-amber-500/25 hover:scale-105 transition-all cursor-pointer"
+                    className="inline-flex items-center gap-2 px-6 sm:px-8 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-xs sm:text-sm shadow-xl shadow-amber-500/25 hover:scale-105 transition-all cursor-pointer shrink-0"
                   >
                     <span>Continue</span>
                     <ArrowRight size={16} />
@@ -1206,7 +1213,7 @@ export const ApplyJob: React.FC = () => {
                     type="button"
                     onClick={handleSubmitApplication}
                     disabled={submitting}
-                    className="inline-flex items-center gap-2 px-10 py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-sm shadow-2xl shadow-amber-500/30 hover:scale-105 transition-all cursor-pointer disabled:opacity-50"
+                    className="inline-flex items-center gap-2 px-6 sm:px-10 py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-xs sm:text-sm shadow-2xl shadow-amber-500/30 hover:scale-105 transition-all cursor-pointer disabled:opacity-50 shrink-0"
                   >
                     <span>Submit Application</span>
                     <ArrowRight size={16} />
@@ -1263,13 +1270,12 @@ export const ApplyJob: React.FC = () => {
                     return (
                       <div
                         key={s.id}
-                        className={`flex items-center gap-2.5 ${
-                          isDone
+                        className={`flex items-center gap-2.5 ${isDone
                             ? 'text-emerald-600 dark:text-emerald-400'
                             : isCurrent
-                            ? 'text-amber-500 font-black'
-                            : 'text-stone-400'
-                        }`}
+                              ? 'text-amber-500 font-black'
+                              : 'text-stone-400'
+                          }`}
                       >
                         <span className="text-sm">{isDone ? '✓' : isCurrent ? '●' : '○'}</span>
                         <span>{s.label}</span>
@@ -1306,7 +1312,7 @@ export const ApplyJob: React.FC = () => {
                 </p>
               </div>
 
-              <div className="space-y-2.5 text-xs font-bold text-left p-4 rounded-2xl bg-stone-50 dark:bg-stone-850">
+              <div className="space-y-2.5 text-xs font-bold text-left p-4 rounded-2xl bg-stone-100 dark:bg-stone-800">
                 <div className="flex items-center gap-2 text-emerald-600">
                   <span>✓</span>
                   <span>Validating candidate information</span>

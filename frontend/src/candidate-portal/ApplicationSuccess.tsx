@@ -70,7 +70,7 @@ export const ApplicationSuccess: React.FC = () => {
             </div>
 
             {/* Application Metadata Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 rounded-2xl bg-stone-50 dark:bg-stone-850 border border-stone-200/60 dark:border-stone-800 text-left text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 rounded-2xl bg-stone-100 dark:bg-stone-800 border border-stone-200/60 dark:border-stone-700 text-left text-xs">
               <div className="space-y-1">
                 <span className="text-stone-400 font-bold uppercase text-[10px] tracking-wider block">
                   Application Reference
@@ -106,14 +106,14 @@ export const ApplicationSuccess: React.FC = () => {
                 ].map((item) => {
                   const Icon = item.icon;
                   return (
-                    <div key={item.step} className="flex items-start gap-3.5 p-3 rounded-xl bg-stone-50/70 dark:bg-stone-850/70 border border-stone-200/40 dark:border-stone-800">
+                    <div key={item.step} className="flex items-start gap-3.5 p-3 rounded-xl bg-stone-50/70 dark:bg-stone-800/70 border border-stone-200/40 dark:border-stone-700">
                       <div
                         className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${
                           item.isDone
                             ? 'bg-emerald-500 text-white'
                             : item.isCurrent
                             ? 'bg-amber-500 text-white animate-pulse'
-                            : 'bg-stone-200 dark:bg-stone-800 text-stone-500'
+                            : 'bg-stone-200 dark:bg-stone-700 text-stone-500'
                         }`}
                       >
                         {item.isDone ? '✓' : item.step}
@@ -147,7 +147,7 @@ export const ApplicationSuccess: React.FC = () => {
               </Link>
               <Link
                 to="/careers"
-                className="w-full sm:flex-1 py-3.5 px-6 rounded-2xl border border-stone-200 dark:border-stone-800 hover:border-amber-500 text-stone-700 dark:text-stone-300 font-bold text-xs bg-stone-50 dark:bg-stone-850 transition-all text-center cursor-pointer"
+                className="w-full sm:flex-1 py-3.5 px-6 rounded-2xl border border-stone-200 dark:border-stone-700 hover:border-amber-500 text-stone-800 dark:text-stone-200 font-bold text-xs bg-stone-100 dark:bg-stone-800 transition-all text-center cursor-pointer"
               >
                 Back to Careers Home
               </Link>

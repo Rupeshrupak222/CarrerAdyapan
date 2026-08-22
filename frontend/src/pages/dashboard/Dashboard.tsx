@@ -204,9 +204,8 @@ const Dashboard = () => {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Welcome Header Banner */}
-        <div className={`p-6 md:p-8 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden shadow-sm ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+        <div className={`p-6 md:p-8 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden shadow-sm ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
 
           <div className="space-y-2 pt-1">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
@@ -249,20 +248,19 @@ const Dashboard = () => {
             <StatCard title="Total Applications" value={stats.totalApplications} icon="" change="+14% this week" trend="up" color="amber" />
             <StatCard title="AI Screened & Qualified" value={stats.aiScreened} icon="" change={`${stats.averageScore}% Avg AI Match`} trend="up" color="amber" />
             <StatCard title="Interviews Scheduled" value={stats.interviewed} icon="" change="Google Meet Synced" trend="neutral" color="amber" />
-            <StatCard title="Hired Candidates" value={stats.hired} icon="" change="Offers Accepted" trend="up" color="emerald" />
+            <StatCard title="Hired Candidates" value={stats.hired} icon="" change="Offers Accepted" trend="up" color="amber" />
           </div>
         )}
 
         {/* Hired & Selected Candidates Section */}
-        <div className={`p-6 rounded-3xl border shadow-sm space-y-5 relative overflow-hidden ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+        <div className={`p-6 rounded-3xl border shadow-sm space-y-5 relative overflow-hidden ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3.5 pt-1">
             <div>
               <h2 className="text-base font-bold flex items-center gap-2">
                 <span>Hired & Selected Candidates (Onboarding Control)</span>
-                <span className="px-2.5 py-0.5 text-xs font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 rounded-full">
+                <span className="px-2.5 py-0.5 text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-full">
                   {selectedCandidates.length} Selected
                 </span>
               </h2>
@@ -299,16 +297,16 @@ const Dashboard = () => {
                         </div>
                       </div>
 
-                      <span className="px-2.5 py-0.5 text-xs font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 rounded-full shrink-0">
+                      <span className="px-2.5 py-0.5 text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-full shrink-0">
                         ● {cand.status}
                       </span>
                     </div>
 
-                    <div className={`p-3.5 rounded-xl border grid grid-cols-2 gap-2 text-xs font-normal ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
+                    <div className={`p-3.5 rounded-xl border grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs font-normal ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
                       }`}>
                       <div>
                         <span className="text-slate-400 block text-[10px] font-semibold uppercase">Agreed Compensation</span>
-                        <span className="text-emerald-600 dark:text-emerald-400 font-bold">Fixed Base: {typeof cand.salary === 'number' ? `₹${cand.salary.toLocaleString()}/- Per Month` : String(cand.salary || '₹20,000/- Per Month')}</span>
+                        <span className="text-slate-900 dark:text-white font-bold">Fixed Base: {typeof cand.salary === 'number' ? `₹${cand.salary.toLocaleString()}/- Per Month` : String(cand.salary || '₹20,000/- Per Month')}</span>
                       </div>
                       <div>
                         <span className="text-slate-400 block text-[10px] font-semibold uppercase">Target Joining Date</span>
@@ -338,7 +336,7 @@ const Dashboard = () => {
                           <span
                             key={idx}
                             className={`px-2 py-0.5 text-[11px] font-medium rounded-md border ${m.done
-                                ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
+                                ? 'bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700'
                                 : 'bg-slate-200/60 text-slate-600 border-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
                               }`}
                           >
@@ -379,7 +377,7 @@ const Dashboard = () => {
           {loading ? (
             <ChartSkeleton />
           ) : (
-            <div className={`rounded-3xl shadow-sm border p-6 space-y-3 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+            <div className={`rounded-3xl shadow-sm border p-6 space-y-3 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
               }`}>
               <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <span className="text-amber-500"></span> Recruitment Funnel Conversion
@@ -402,7 +400,7 @@ const Dashboard = () => {
             </div>
           )}
 
-          <div className={`rounded-3xl shadow-sm border p-6 space-y-3 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+          <div className={`rounded-3xl shadow-sm border p-6 space-y-3 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
             }`}>
             <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <span className="text-amber-500"></span> Application Inflow Trends
@@ -434,7 +432,7 @@ const Dashboard = () => {
         {loading && recentJobs.length === 0 ? (
           <JobListSkeleton />
         ) : (
-          <div className={`rounded-3xl shadow-sm border p-6 space-y-4 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+          <div className={`rounded-3xl shadow-sm border p-6 space-y-4 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
             }`}>
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -451,7 +449,7 @@ const Dashboard = () => {
               ) : recentJobs.map((job) => (
                 <div
                   key={job.id || job._id}
-                  className={`flex items-center justify-between p-4 rounded-2xl border transition-colors ${theme === 'dark' ? 'bg-slate-950 border-slate-800 hover:bg-slate-800/60' : 'bg-slate-50 border-slate-200/80 hover:bg-slate-100/60'
+                  className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl border gap-3 transition-colors ${theme === 'dark' ? 'bg-slate-950 border-slate-800 hover:bg-slate-800/60' : 'bg-slate-50 border-slate-200/80 hover:bg-slate-100/60'
                     }`}
                 >
                   <div>
@@ -461,7 +459,7 @@ const Dashboard = () => {
                     <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">{job.department} • {job.location}</p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="px-2.5 py-0.5 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 rounded-full text-xs font-semibold">
+                    <span className="px-2.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-full text-xs font-semibold">
                       ● {job.status}
                     </span>
                     <Link to={`/jobs`} className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline">

@@ -642,9 +642,8 @@ const Candidates = () => {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header Bar */}
-        <div className={`p-6 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden shadow-sm ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+        <div className={`p-6 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden shadow-sm ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-500" />
 
           <div className="pt-1 space-y-1">
             <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
@@ -667,7 +666,7 @@ const Candidates = () => {
                 }`}
               title="Import students / candidates list from Excel sheet (.xlsx, .csv)"
             >
-              <svg className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-slate-600 dark:text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
               <span>Import Excel</span>
@@ -688,7 +687,7 @@ const Candidates = () => {
                 }`}
               title="Export all candidates data to Excel spreadsheet"
             >
-              <svg className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-slate-600 dark:text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               <span>Export Excel</span>
@@ -735,7 +734,7 @@ const Candidates = () => {
         </div>
 
         {/* Search & Filter Bar */}
-        <div className={`p-4 rounded-3xl border shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-amber-200/80'
+        <div className={`p-4 rounded-3xl border shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
           }`}>
           {/* Search Input */}
           <div className="relative w-full md:w-80">
@@ -748,7 +747,7 @@ const Candidates = () => {
               placeholder="Search candidate name, skills, role..."
               className={`w-full pl-9 pr-4 py-2 text-xs font-normal border rounded-xl focus:outline-none ${theme === 'dark'
                 ? 'bg-slate-950 border-slate-700 text-white placeholder-slate-500 focus:border-amber-400'
-                : 'bg-white border-amber-200/80 text-slate-800 placeholder-slate-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20'
+                : 'bg-white border-slate-200 text-slate-800 placeholder-slate-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20'
                 }`}
             />
           </div>
@@ -780,7 +779,7 @@ const Candidates = () => {
         {/* Candidate Cards Grid */}
         <div className="space-y-4">
           {filteredCandidates.length === 0 ? (
-            <div className={`p-8 text-center rounded-3xl border text-xs font-normal ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-slate-400' : 'bg-white border-amber-200/80 text-slate-500'
+            <div className={`p-8 text-center rounded-3xl border text-xs font-normal ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-slate-400' : 'bg-white border-slate-200 text-slate-500'
               }`}>
               No candidates found matching filter criteria. Click "+ Add Candidate Manually" to add one.
             </div>
@@ -811,13 +810,12 @@ const Candidates = () => {
               return (
                 <div
                   key={cand.id}
-                  className={`p-6 rounded-3xl border shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative overflow-hidden group ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+                  className={`p-6 rounded-3xl border shadow-sm hover:shadow-md transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative overflow-hidden group ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
                     }`}
                 >
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 opacity-80 group-hover:opacity-100 transition-opacity" />
 
                   {/* Candidate Info */}
-                  <div className="flex items-start gap-4 pt-1">
+                  <div className="flex flex-col sm:flex-row items-start gap-4 pt-1 flex-1 min-w-0">
                     <Link
                       to={`/candidates/${cand.id}`}
                       className="w-12 h-12 rounded-2xl bg-amber-400 text-slate-950 font-bold text-base flex items-center justify-center shrink-0 shadow-sm hover:scale-105 hover:bg-amber-500 transition-all cursor-pointer"
@@ -827,7 +825,7 @@ const Candidates = () => {
                       {cand.lastName?.charAt(0)}
                     </Link>
 
-                    <div className="space-y-2">
+                    <div className="space-y-2 flex-1 min-w-0 w-full">
                       <div className="flex flex-wrap items-center gap-2.5">
                         <Link
                           to={`/candidates/${cand.id}`}
@@ -846,12 +844,12 @@ const Candidates = () => {
                         <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                           ● {isStudent ? 'Student / Fresher' : `Working (${cand.currentCompanyTenure || 'Professional'})`}
                         </span>
-                        <span className="px-2.5 py-0.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 rounded-full border border-emerald-500/30">
+                        <span className="px-2.5 py-0.5 text-xs font-bold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 rounded-full border border-slate-200 dark:border-slate-700">
                           {aiScore}% AI Match
                         </span>
 
                         {isCompleted ? (
-                          <span className="px-2.5 py-0.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 rounded-full border border-emerald-500/30">
+                          <span className="px-2.5 py-0.5 text-xs font-bold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 rounded-full border border-slate-200 dark:border-slate-700">
                             ● Interview Completed
                           </span>
                         ) : isScheduled ? (
@@ -903,7 +901,7 @@ const Candidates = () => {
 
                       <p className={`text-xs font-normal mt-1 p-3 rounded-2xl border leading-relaxed ${theme === 'dark'
                         ? 'bg-slate-950 text-slate-300 border-slate-800'
-                        : 'bg-white text-slate-800 border-amber-200/60'
+                        : 'bg-white text-slate-800 border-slate-200'
                         }`}>
                         <strong className="font-bold text-amber-600 dark:text-amber-400">AI Match Insight:</strong> {candReason}
                       </p>
@@ -952,10 +950,10 @@ const Candidates = () => {
 
                         return (
                           <div className="space-y-1 pt-1.5 border-t border-slate-100 dark:border-slate-800/80 mt-1">
-                            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200">
                               <span>● Candidate Positive Strengths:</span>
                               {pills.slice(0, 2).map((pill, pIdx) => (
-                                <span key={pIdx} className="px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/60 font-medium">
+                                <span key={pIdx} className="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-medium text-slate-700 dark:text-slate-300">
                                   {pill}
                                 </span>
                               ))}

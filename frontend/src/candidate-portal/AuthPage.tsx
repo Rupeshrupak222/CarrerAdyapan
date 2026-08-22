@@ -22,10 +22,11 @@ const AuthPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
-  const isSignup = params.get('mode') !== 'signin';
+  // Signup mode temporarily commented out for future release (defaults to direct Sign In)
+  const isSignup = false; // params.get('mode') === 'signup';
   const redirectUrl = params.get('redirect') || '';
 
-  const { register: registerCandidate } = useCandidateAuth();
+  // const { register: registerCandidate } = useCandidateAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -56,6 +57,9 @@ const AuthPage: React.FC = () => {
       return;
     }
 
+    /* ══════════════════════════════════════════════════════════
+       SIGNUP FLOW (COMMENTED OUT FOR FUTURE RELEASE)
+       ══════════════════════════════════════════════════════════
     if (isSignup) {
       if (!formData.fullName.trim()) {
         setError('Please enter your full name.');
@@ -91,13 +95,16 @@ const AuthPage: React.FC = () => {
       } else {
         setError(res.error || 'Failed to create account.');
       }
-    } else {
-      // Sign In Flow
-      try {
-        const response = await api.post('/auth/login', {
-          email: formData.email.trim().toLowerCase(),
-          password: formData.password,
-        });
+      return;
+    }
+    ══════════════════════════════════════════════════════════ */
+
+    // Sign In Flow
+    try {
+      const response = await api.post('/auth/login', {
+        email: formData.email.trim().toLowerCase(),
+        password: formData.password,
+      });
         const data = response.data;
 
         if (data.success) {
@@ -143,7 +150,6 @@ const AuthPage: React.FC = () => {
       } finally {
         setLoading(false);
       }
-    }
   };
 
   return (
@@ -355,21 +361,22 @@ const AuthPage: React.FC = () => {
           </form>
 
           <div className="pt-4 text-center text-xs text-slate-400 border-t border-[#26211a]">
-            {isSignup ? (
-              <p>
-                Already have an account?{' '}
-                <Link to="/auth?mode=signin" className="font-bold text-amber-400 hover:underline">
-                  Sign in
-                </Link>
-              </p>
-            ) : (
-              <p>
-                New to Adyapan?{' '}
-                <Link to="/auth?mode=signup" className="font-bold text-amber-400 hover:underline">
-                  Create an account
-                </Link>
-              </p>
-            )}
+            {/* ══════════════════════════════════════════════════════════
+                SIGNUP SWITCH LINK (COMMENTED OUT FOR FUTURE RELEASE)
+                ══════════════════════════════════════════════════════════
+            <p>
+              New to Adyapan?{' '}
+              <Link to="/auth?mode=signup" className="font-bold text-amber-400 hover:underline">
+                Create an account
+              </Link>
+            </p>
+            ══════════════════════════════════════════════════════════ */}
+            <p className="text-slate-500 text-xs">
+              Need assistance?{' '}
+              <Link to="/contact" className="font-bold text-amber-400 hover:underline">
+                Contact Recruitment Team
+              </Link>
+            </p>
           </div>
         </div>
       </div>

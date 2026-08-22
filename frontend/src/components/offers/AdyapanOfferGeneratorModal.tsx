@@ -630,7 +630,7 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
           </div>
 
           {/* Right Column: Live Document Preview / Print Content */}
-          <div className="lg:col-span-7 p-6 overflow-y-auto bg-slate-200 dark:bg-slate-950 print:bg-white print:p-0 print:overflow-visible">
+          <div className="lg:col-span-7 p-3 sm:p-6 overflow-y-auto overflow-x-auto bg-slate-200 dark:bg-slate-950 print:bg-white print:p-0 print:overflow-visible">
 
             {/* Preview Candidate Switcher Tabs (Hidden when printing) */}
             {selectedCandidates.length > 1 && (
@@ -652,7 +652,7 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
             )}
 
             {/* Screen Preview Mode (Single Candidate Active Preview) */}
-            <div className="print:hidden">
+            <div className="print:hidden overflow-x-auto pb-4">
               <AdyapanOfferDocument data={currentPreviewData} />
             </div>
 

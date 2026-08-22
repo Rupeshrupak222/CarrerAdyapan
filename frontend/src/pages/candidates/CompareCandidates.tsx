@@ -69,9 +69,8 @@ const CompareCandidates = () => {
       <div className="space-y-6">
         {/* Header */}
         <div className={`p-6 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden shadow-sm ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}>
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
 
           <div className="space-y-1.5 pt-1">
             <BackButton label="Back to Candidate Directory" to="/candidates" />
@@ -109,15 +108,14 @@ const CompareCandidates = () => {
               <div
                 key={cand.id}
                 className={`rounded-3xl border shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col justify-between relative group ${
-                  theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+                  theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
                 }`}
               >
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 opacity-80 group-hover:opacity-100 transition-opacity" />
 
                 <div>
                   {/* Candidate Top Banner */}
                   <div className={`p-5 border-b pt-6 ${
-                    theme === 'dark' ? 'border-slate-800 bg-slate-950/50' : 'border-amber-200/60 bg-white'
+                    theme === 'dark' ? 'border-slate-800 bg-slate-950/50' : 'border-slate-100 bg-white'
                   }`}>
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-4">
@@ -132,7 +130,7 @@ const CompareCandidates = () => {
                       </div>
 
                       <div className="text-right">
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 rounded-full font-bold text-xs">
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-full font-bold text-xs">
                           <span> {cand.score}% Match</span>
                         </div>
                       </div>
@@ -166,7 +164,7 @@ const CompareCandidates = () => {
                         {cand.skills.map((skill) => (
                           <span
                             key={skill}
-                            className="px-2.5 py-0.5 text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 rounded-xl border border-amber-500/30"
+                            className="px-2.5 py-0.5 text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl border border-slate-200 dark:border-slate-700"
                           >
                             {skill}
                           </span>
@@ -179,7 +177,7 @@ const CompareCandidates = () => {
                       <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">AI Highlighted Strengths</h3>
                       <ul className="space-y-1.5">
                         {cand.strengths.map((str) => (
-                          <li key={str} className="flex items-center gap-2 text-xs font-normal text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20">
+                          <li key={str} className="flex items-center gap-2 text-xs font-normal text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
                             {str}
                           </li>
                         ))}
@@ -205,7 +203,7 @@ const CompareCandidates = () => {
 
                 {/* Action Footer */}
                 <div className={`p-4 border-t flex items-center justify-between ${
-                  theme === 'dark' ? 'border-slate-800 bg-slate-950/50' : 'border-amber-200/60 bg-white'
+                  theme === 'dark' ? 'border-slate-800 bg-slate-950/50' : 'border-slate-100 bg-white'
                 }`}>
                   <Link
                     to={`/candidates/${cand.id}`}

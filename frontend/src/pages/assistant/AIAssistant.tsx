@@ -119,9 +119,8 @@ const AIAssistant = () => {
     <DashboardLayout>
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header Bar */}
-        <div className={`p-6 rounded-3xl border transition-all relative overflow-hidden shadow-sm ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+        <div className={`p-6 rounded-3xl border transition-all relative overflow-hidden shadow-sm ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
             <div className="space-y-1.5">
@@ -154,7 +153,7 @@ const AIAssistant = () => {
         </div>
 
         {/* Prompt Chips */}
-        <div className={`p-6 rounded-3xl border shadow-sm space-y-3 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-800'
+        <div className={`p-6 rounded-3xl border shadow-sm space-y-3 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-800'
           }`}>
           <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider block">
             Suggested Recruitment Prompts:
@@ -167,7 +166,7 @@ const AIAssistant = () => {
                 disabled={loading}
                 className={`px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all text-left shadow-sm ${theme === 'dark'
                     ? 'bg-slate-950 text-slate-200 hover:border-amber-400 border-slate-800'
-                    : 'bg-white text-slate-800 hover:bg-orange-50 hover:border-amber-400 border-amber-200/80'
+                    : 'bg-white text-slate-800 hover:bg-slate-100 hover:border-slate-300 border-slate-200'
                   }`}
               >
                 {prompt}
@@ -177,7 +176,7 @@ const AIAssistant = () => {
         </div>
 
         {/* Chat Window */}
-        <div className={`rounded-3xl border shadow-sm flex flex-col h-[560px] overflow-hidden ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-amber-200/80'
+        <div className={`rounded-3xl border shadow-sm flex flex-col h-[560px] overflow-hidden ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
           }`}>
           {/* Messages Container */}
           <div className="flex-1 p-6 overflow-y-auto space-y-4">
@@ -215,7 +214,7 @@ const AIAssistant = () => {
           </div>
 
           {/* Chat Input */}
-          <div className={`p-4 border-t flex items-center gap-3 ${theme === 'dark' ? 'border-slate-800 bg-slate-950/60' : 'border-amber-200/60 bg-white/40'
+          <div className={`p-4 border-t flex items-center gap-3 ${theme === 'dark' ? 'border-slate-800 bg-slate-950/60' : 'border-slate-200 bg-white/40'
             }`}>
             <textarea
               ref={textareaRef}
@@ -226,7 +225,7 @@ const AIAssistant = () => {
               placeholder="Ask HireAI: e.g. Analyze Rahul's resume. What are his missing skills? Compare him with Priya..."
               className={`flex-1 px-4 py-3 text-xs sm:text-sm font-normal border rounded-2xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 resize-none max-h-24 ${theme === 'dark'
                   ? 'bg-slate-900 border-slate-700 text-white placeholder-slate-500'
-                  : 'bg-white border-amber-200/80 text-slate-800 placeholder-slate-400'
+                  : 'bg-white border-slate-200 text-slate-800 placeholder-slate-400'
                 }`}
             />
 

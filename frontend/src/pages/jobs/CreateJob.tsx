@@ -159,9 +159,8 @@ const CreateJob = () => {
           <BackButton label="Back to Job Directory" to="/jobs" />
           
           <div className={`p-6 rounded-3xl border transition-all space-y-1 relative overflow-hidden shadow-sm ${
-            theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+            theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
             <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
               Adyapan Job Creation Studio
             </div>
@@ -176,7 +175,7 @@ const CreateJob = () => {
 
         {/* 1-Click Quick Templates Bar */}
         <div className={`p-5 rounded-3xl shadow-sm border space-y-3 ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}>
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">1-Click EdTech Role Templates</span>
@@ -190,8 +189,8 @@ const CreateJob = () => {
                 onClick={() => applyTemplate(tpl)}
                 className={`px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all text-left shadow-sm ${
                   theme === 'dark'
-                    ? 'bg-slate-950 text-amber-300 border-slate-800 hover:border-amber-400'
-                    : 'bg-white text-amber-900 border-amber-200 hover:bg-orange-100'
+                    ? 'bg-slate-950 text-slate-200 border-slate-800 hover:border-slate-600'
+                    : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-50'
                 }`}
               >
                 {tpl.name}
@@ -201,7 +200,7 @@ const CreateJob = () => {
         </div>
 
         <form onSubmit={handleSubmit} className={`rounded-3xl border p-6 md:p-8 space-y-5 shadow-sm ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}>
           <div>
             <label className={labelClass}>Job Title *</label>

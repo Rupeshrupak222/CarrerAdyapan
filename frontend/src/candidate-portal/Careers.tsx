@@ -18,6 +18,7 @@ import {
   GraduationCap,
   Heart,
   HelpCircle,
+  IndianRupee,
   Laptop,
   Mail,
   MapPin,
@@ -205,7 +206,7 @@ const Careers: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             SECTION 01 — HERO (PROMINENT WORKPLACE BACKGROUND)
            ══════════════════════════════════════════════════════════ */}
-        <section className="relative pt-10 pb-20 md:pt-16 md:pb-28 overflow-hidden bg-[#fdfbf7] dark:bg-[#141312] border-b border-stone-200/70 dark:border-stone-850">
+        <section className="relative pt-10 pb-20 md:pt-16 md:pb-28 overflow-hidden bg-[#fdfbf7] dark:bg-[#141312] border-b border-stone-200/70 dark:border-stone-800">
 
           {/* Full-Cover Prominently Visible Background Image (Darker & High Contrast) */}
           <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none">
@@ -307,7 +308,7 @@ const Careers: React.FC = () => {
                 <div className="absolute -inset-4 bg-gradient-to-tr from-amber-500/25 via-orange-500/15 to-transparent rounded-[2.5rem] transform rotate-2 blur-md -z-10" />
 
                 {/* Main Portrait Workplace Image */}
-                <div className="relative w-full max-w-md h-[470px] sm:h-[530px] rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-stone-800 bg-stone-900 group">
+                <div className="relative w-full max-w-md h-[380px] sm:h-[530px] rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-stone-800 bg-stone-900 group">
                   <img
                     src="/adyapan-team-fun.png"
                     alt="Adyapan Team in modern office"
@@ -319,46 +320,46 @@ const Careers: React.FC = () => {
                     <span className="inline-block px-2.5 py-1 rounded-md bg-amber-500/90 text-[10px] font-extrabold uppercase tracking-widest text-stone-950 mb-1">
                       Hyderabad Hub · Sattva Magnus
                     </span>
-                    <h3 className="text-xl font-black text-white">Work Hard. Win Together.</h3>
+                    <h3 className="text-lg sm:text-xl font-black text-white">Work Hard. Win Together.</h3>
                   </div>
                 </div>
 
                 {/* 1. Top-Right Floating Card: Verified Jobs */}
-                <div className="absolute -top-3 -right-2 sm:-right-6 z-20 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-stone-200/80 dark:border-stone-800 p-3.5 rounded-2xl shadow-xl animate-float flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold flex-shrink-0 shadow-sm">
-                    <CheckCircle2 size={19} />
+                <div className="absolute -top-3 right-0 sm:-right-6 z-20 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-stone-200/80 dark:border-stone-800 p-2.5 sm:p-3.5 rounded-2xl shadow-xl animate-float flex items-center gap-2.5 sm:gap-3.5">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold flex-shrink-0 shadow-sm">
+                    <CheckCircle2 size={18} />
                   </div>
                   <div>
                     <b className="text-xs sm:text-sm font-black text-stone-900 dark:text-white block">
                       Verified Jobs
                     </b>
-                    <small className="text-[11px] text-stone-500 dark:text-stone-400 font-semibold">Updated Daily</small>
+                    <small className="text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-400 font-semibold">Updated Daily</small>
                   </div>
                 </div>
 
                 {/* 2. Mid-Left Floating Card: 4.8/5 */}
-                <div className="absolute top-1/2 -left-3 sm:-left-8 -translate-y-1/2 z-20 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-stone-200 dark:border-stone-800 p-3.5 rounded-2xl shadow-xl animate-float-delayed flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-500 flex items-center justify-center font-bold flex-shrink-0">
-                    <Star size={18} className="fill-amber-500 text-amber-500" />
+                <div className="absolute top-1/2 left-0 sm:-left-8 -translate-y-1/2 z-20 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-stone-200 dark:border-stone-800 p-2.5 sm:p-3.5 rounded-2xl shadow-xl animate-float-delayed flex items-center gap-2.5 sm:gap-3.5">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-amber-500/15 text-amber-500 flex items-center justify-center font-bold flex-shrink-0">
+                    <Star size={16} className="fill-amber-500 text-amber-500" />
                   </div>
                   <div>
                     <b className="text-xs sm:text-sm font-black text-stone-900 dark:text-white block">
                       4.8 / 5.0
                     </b>
-                    <small className="text-[11px] text-stone-500 dark:text-stone-400 font-semibold">Team Satisfaction</small>
+                    <small className="text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-400 font-semibold">Team Satisfaction</small>
                   </div>
                 </div>
 
                 {/* 3. Bottom-Right Floating Card: Fast Recruiter Reply */}
-                <div className="absolute -bottom-5 right-2 sm:right-6 z-20 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-emerald-200 dark:border-emerald-800/40 p-3.5 rounded-2xl shadow-xl animate-float flex items-center gap-3.5 bento-glow-emerald">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center font-bold flex-shrink-0 shadow-md">
-                    <Zap size={18} />
+                <div className="absolute -bottom-4 right-0 sm:right-6 z-20 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-emerald-200 dark:border-emerald-800/40 p-2.5 sm:p-3.5 rounded-2xl shadow-xl animate-float flex items-center gap-2.5 sm:gap-3.5 bento-glow-emerald">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center font-bold flex-shrink-0 shadow-md">
+                    <Zap size={16} />
                   </div>
                   <div>
                     <b className="text-xs sm:text-sm font-black text-stone-900 dark:text-white block">
                       ⚡ 24 - 48 Hours
                     </b>
-                    <small className="text-[11px] text-stone-500 dark:text-stone-400 font-semibold">Fast Recruiter Reply</small>
+                    <small className="text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-400 font-semibold">Fast Recruiter Reply</small>
                   </div>
                 </div>
 
@@ -376,8 +377,8 @@ const Careers: React.FC = () => {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-0 lg:divide-x divide-stone-200/80 dark:divide-stone-800">
 
               {/* Stat 1: 24h Fast Recruiter Reply */}
-              <div data-reveal="up" data-delay="100" className="interactive-card flex items-center gap-4 px-2 sm:px-6">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0 shadow-inner">
+              <div className="flex items-center gap-4 px-2 sm:px-6">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
                   <Zap size={22} />
                 </div>
                 <div>
@@ -391,8 +392,8 @@ const Careers: React.FC = () => {
               </div>
 
               {/* Stat 2: 48-72h Direct Interview */}
-              <div data-reveal="up" data-delay="200" className="interactive-card flex items-center gap-4 px-2 sm:px-6">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0 shadow-inner">
+              <div className="flex items-center gap-4 px-2 sm:px-6">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
                   <Flame size={22} />
                 </div>
                 <div>
@@ -406,8 +407,8 @@ const Careers: React.FC = () => {
               </div>
 
               {/* Stat 3: 100% Transparent CTC */}
-              <div data-reveal="up" data-delay="300" className="interactive-card flex items-center gap-4 px-2 sm:px-6">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center flex-shrink-0 shadow-inner">
+              <div className="flex items-center gap-4 px-2 sm:px-6">
+                <div className="w-12 h-12 rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center flex-shrink-0">
                   <ShieldCheck size={22} />
                 </div>
                 <div>
@@ -421,9 +422,9 @@ const Careers: React.FC = () => {
               </div>
 
               {/* Stat 4: Zero Application Fee */}
-              <div data-reveal="up" data-delay="400" className="interactive-card flex items-center gap-4 px-2 sm:px-6">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500/20 to-blue-500/20 text-sky-600 dark:text-sky-400 flex items-center justify-center flex-shrink-0 shadow-inner">
-                  <ShieldCheck size={22} />
+              <div className="flex items-center gap-4 px-2 sm:px-6">
+                <div className="w-12 h-12 rounded-2xl bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center flex-shrink-0">
+                  <IndianRupee size={22} />
                 </div>
                 <div>
                   <b className="text-2xl sm:text-4xl font-black text-stone-900 dark:text-white block tracking-tight">
@@ -442,7 +443,7 @@ const Careers: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             SECTION 03 — LIFE AT ADYAPAN / CULTURE (LAYERED COLLAGE)
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-24 bg-[#f7f3ec] dark:bg-[#121110] border-b border-stone-200/60 dark:border-stone-850 relative pattern-dots-subtle" id="culture">
+        <section className="py-24 bg-[#f7f3ec] dark:bg-[#121110] border-b border-stone-200/60 dark:border-stone-800 relative pattern-dots-subtle" id="culture">
           {/* Watermark text */}
           <div className="absolute left-6 top-1/4 watermark-text text-stone-900 dark:text-white">
             CULTURE
@@ -485,10 +486,10 @@ const Careers: React.FC = () => {
 
               {/* Right Column: Layered Photo Collage with Floating Stickers */}
               <div data-reveal="right" className="lg:col-span-7 relative">
-                <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 h-[440px] max-h-[440px]">
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 h-auto sm:h-[440px]">
 
                   {/* Main Large Team Image */}
-                  <div className="sm:col-span-7 relative rounded-3xl overflow-hidden shadow-2xl border-2 border-white dark:border-stone-800 bg-stone-900 group h-[440px]">
+                  <div className="sm:col-span-7 relative rounded-3xl overflow-hidden shadow-2xl border-2 border-white dark:border-stone-800 bg-stone-900 group h-[280px] sm:h-[440px]">
                     <img
                       src="/adyapan-team-fun.png"
                       alt="Adyapan Full Team"
@@ -512,8 +513,8 @@ const Careers: React.FC = () => {
                   </div>
 
                   {/* Two Stacked Photos on Right */}
-                  <div className="sm:col-span-5 flex flex-col gap-4 h-[440px] justify-between">
-                    <div className="relative rounded-2xl overflow-hidden shadow-lg border-2 border-white dark:border-stone-800 bg-stone-900 group h-[210px]">
+                  <div className="sm:col-span-5 flex flex-col gap-4 h-auto sm:h-[440px] justify-between">
+                    <div className="relative rounded-2xl overflow-hidden shadow-lg border-2 border-white dark:border-stone-800 bg-stone-900 group h-[180px] sm:h-[210px]">
                       <img
                         src="/Founders.jpeg"
                         alt="Adyapan Founders & Leadership"
@@ -525,7 +526,7 @@ const Careers: React.FC = () => {
                       </span>
                     </div>
 
-                    <div className="relative rounded-2xl overflow-hidden shadow-lg border-2 border-white dark:border-stone-800 bg-stone-900 group h-[210px]">
+                    <div className="relative rounded-2xl overflow-hidden shadow-lg border-2 border-white dark:border-stone-800 bg-stone-900 group h-[180px] sm:h-[210px]">
                       <img
                         src="/cricket.jpg"
                         alt="Adyapan Sports & Team Spirit"
@@ -671,7 +672,7 @@ const Careers: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             SECTION 05 — CAREER GROWTH (TRUE BENTO GRID)
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-24 bg-[#faf6f0] dark:bg-[#141312] border-b border-stone-200/60 dark:border-stone-850 relative pattern-dots" id="growth">
+        <section className="py-24 bg-[#faf6f0] dark:bg-[#141312] border-b border-stone-200/60 dark:border-stone-800 relative pattern-dots" id="growth">
           <div className="absolute right-8 top-1/4 watermark-text text-stone-900 dark:text-white">
             GROWTH
           </div>
@@ -968,7 +969,7 @@ const Careers: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             SECTION 06 — FLEXIBLE WORKING (FREEDOM & WELLBEING)
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-24 bg-white dark:bg-[#181715] border-b border-stone-200/60 dark:border-stone-850 relative" id="why-join">
+        <section className="py-24 bg-white dark:bg-[#181715] border-b border-stone-200/60 dark:border-stone-800 relative" id="why-join">
           <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
 
@@ -1062,7 +1063,7 @@ const Careers: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             SECTION 07 — DREAM JOB / OPPORTUNITY ECOSYSTEM
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-24 bg-gradient-to-b from-[#faf6f0] to-[#fff8ee] dark:bg-[#121110] border-b border-stone-200/60 dark:border-stone-850 relative" id="dream-job">
+        <section className="py-24 bg-[#faf6f0] dark:bg-[#121110] border-b border-stone-200/60 dark:border-stone-800 relative" id="dream-job">
           <div className="absolute left-6 top-1/4 watermark-text text-stone-900 dark:text-white">
             OPPORTUNITY
           </div>
@@ -1160,7 +1161,7 @@ const Careers: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             SECTION 08 — CAREER JOURNEY (INTERACTIVE ANIMATED TIMELINE)
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-24 bg-white dark:bg-[#181715] border-b border-stone-200/60 dark:border-stone-850 relative" id="hiring-process">
+        <section className="py-24 bg-white dark:bg-[#181715] border-b border-stone-200/60 dark:border-stone-800 relative" id="hiring-process">
           <div className="absolute right-8 top-1/4 watermark-text text-stone-900 dark:text-white">
             JOURNEY
           </div>
@@ -1267,7 +1268,7 @@ const Careers: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             SECTION 09 — REAL PEOPLE / TESTIMONIALS (EDITORIAL PHYSICAL CARDS)
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-24 bg-[#f5f0e6] dark:bg-[#141312] border-b border-stone-200/60 dark:border-stone-850 relative" id="stories">
+        <section className="py-24 bg-[#f5f0e6] dark:bg-[#141312] border-b border-stone-200/60 dark:border-stone-800 relative" id="stories">
           <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
 
             <div className="mb-14" data-reveal="left">
@@ -1352,7 +1353,7 @@ const Careers: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             SECTION 09B — LEADERSHIP SPOTLIGHT & VISION (FOUNDER'S NOTE)
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-24 bg-white dark:bg-[#181715] border-b border-stone-200/60 dark:border-stone-850 relative overflow-hidden" id="leadership-vision">
+        <section className="py-24 bg-white dark:bg-[#181715] border-b border-stone-200/60 dark:border-stone-800 relative overflow-hidden" id="leadership-vision">
           {/* Subtle Ambient Glows */}
           <div className="absolute top-1/2 left-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none -translate-y-1/2" />
           <div className="absolute top-1/3 right-0 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -1363,26 +1364,28 @@ const Careers: React.FC = () => {
 
               {/* Left Column (5 Cols): Executive Portrait */}
               <div data-reveal="left" className="lg:col-span-5 relative flex justify-center">
-                {/* Glow Backdrop */}
-                <div className="absolute -inset-4 bg-gradient-to-tr from-amber-500/30 via-orange-500/20 to-amber-500/10 rounded-[2.5rem] transform -rotate-2 blur-lg -z-10" />
+                <div className="relative w-full max-w-[310px] sm:max-w-[340px]">
+                  {/* Glow Backdrop */}
+                  <div className="absolute -inset-3 bg-gradient-to-tr from-amber-500/30 via-orange-500/20 to-amber-500/10 rounded-[2.5rem] transform -rotate-2 blur-lg -z-10" />
 
-                {/* Portrait Card */}
-                <div className="relative w-full max-w-md h-[460px] sm:h-[520px] rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-stone-800 bg-stone-900 group">
-                  <img
-                    src="/Rupesh.jpeg"
-                    alt="Rupesh - Leadership at Adyapan"
-                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700"
-                  />
-                  {/* Subtle Gradient Shade */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none" />
+                  {/* Portrait Card */}
+                  <div className="relative w-full h-[460px] sm:h-[500px] rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-stone-800 bg-stone-900 group">
+                    <img
+                      src="/Rupesh.jpeg"
+                      alt="Rupesh - Leadership at Adyapan"
+                      className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700"
+                    />
+                    {/* Subtle Gradient Shade */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none" />
 
-                  {/* Leader Info Tag inside Image */}
-                  <div className="absolute bottom-6 left-6 right-6 text-white pointer-events-none">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-500 text-[11px] font-extrabold uppercase tracking-widest text-stone-950 mb-2 shadow-sm">
-                      <Sparkles size={13} className="fill-stone-950" />
-                      <span>Executive Leadership</span>
-                    </span>
-                    <h3 className="text-2xl font-black text-white">Rupesh Kumar Rupak</h3>
+                    {/* Leader Info Tag inside Image */}
+                    <div className="absolute bottom-6 left-6 right-6 text-white pointer-events-none">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-500 text-[11px] font-extrabold uppercase tracking-widest text-stone-950 mb-2 shadow-sm">
+                        <Sparkles size={13} className="fill-stone-950" />
+                        <span>Executive Leadership</span>
+                      </span>
+                      <h3 className="text-xl sm:text-2xl font-black text-white">Rupesh Kumar Rupak</h3>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1405,7 +1408,7 @@ const Careers: React.FC = () => {
                 {/* Executive Quote Body */}
                 <div className="relative p-6 sm:p-7 rounded-3xl bg-[#faf6f0] dark:bg-stone-900 border border-amber-200/80 dark:border-stone-800 shadow-sm space-y-3.5">
                   <Quote size={36} className="text-amber-500/30 absolute top-5 right-5" />
-                  
+
                   <p className="text-stone-700 dark:text-stone-200 text-base sm:text-lg leading-relaxed font-medium italic">
                     "At Adyapan, our philosophy is anchored on trust, transparency, and meritocracy. We don’t believe in rigid corporate bureaucracy or multi-year waiting lines for recognition. If you bring passion, discipline, and execution to the table, we provide the mentorship, resources, and leadership stage to propel your career 10x faster."
                   </p>
@@ -1471,7 +1474,7 @@ const Careers: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             SECTION 10 — LIFE AT ADYAPAN PHOTO STORY (EXPANDING ACCORDION)
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-24 bg-[#faf6f0] dark:bg-[#181715] border-b border-stone-200/60 dark:border-stone-850 overflow-hidden">
+        <section className="py-24 bg-[#faf6f0] dark:bg-[#181715] border-b border-stone-200/60 dark:border-stone-800 overflow-hidden">
           <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
 
             <div className="text-center max-w-2xl mx-auto mb-14" data-reveal="up">
@@ -1489,7 +1492,7 @@ const Careers: React.FC = () => {
             </div>
 
             {/* Interactive 3-Photo Accordion Gallery */}
-            <div className="flex flex-col md:flex-row gap-4 h-[380px] sm:h-[430px] w-full">
+            <div className="flex flex-col md:flex-row gap-4 h-auto md:h-[430px] w-full">
               {PHOTO_STORIES.map((story, idx) => {
                 const isActive = activePhoto === idx;
                 return (
@@ -1497,7 +1500,7 @@ const Careers: React.FC = () => {
                     key={story.title}
                     onMouseEnter={() => setActivePhoto(idx)}
                     onClick={() => setActivePhoto(idx)}
-                    className="relative rounded-3xl overflow-hidden shadow-xl border-2 border-white dark:border-stone-800 bg-stone-900 cursor-pointer group transform-gpu"
+                    className="relative rounded-3xl overflow-hidden shadow-xl border-2 border-white dark:border-stone-800 bg-stone-900 cursor-pointer group transform-gpu h-52 sm:h-64 md:h-auto"
                     style={{
                       flex: isActive ? 2.5 : 1,
                       transition: 'flex 0.65s cubic-bezier(0.25, 1, 0.5, 1), transform 0.5s ease',
@@ -1511,9 +1514,8 @@ const Careers: React.FC = () => {
 
                     {/* Gradient Overlay */}
                     <div
-                      className={`absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent transition-opacity duration-500 ${
-                        isActive ? 'opacity-95' : 'opacity-70 group-hover:opacity-85'
-                      }`}
+                      className={`absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent transition-opacity duration-500 ${isActive ? 'opacity-95' : 'opacity-70 group-hover:opacity-85'
+                        }`}
                     />
 
                     {/* Badge & Info Overlay */}
@@ -1544,11 +1546,10 @@ const Careers: React.FC = () => {
                     key={story.title}
                     onMouseEnter={() => setActivePhoto(idx)}
                     onClick={() => setActivePhoto(idx)}
-                    className={`p-5 rounded-2xl border transition-all duration-300 cursor-pointer ${
-                      isActive
+                    className={`p-5 rounded-2xl border transition-all duration-300 cursor-pointer ${isActive
                         ? 'bg-amber-500/10 dark:bg-amber-500/15 border-amber-500/60 shadow-lg -translate-y-1'
                         : 'bg-white dark:bg-stone-900 border-stone-200/80 dark:border-stone-800 shadow-sm hover:border-amber-500/30'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">
@@ -1635,7 +1636,7 @@ const Careers: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             SECTION 12 — FAQ (WIDE ACCORDION & CONTACT CARD)
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-24 bg-[#faf7f2] dark:bg-[#121110] border-b border-stone-200/60 dark:border-stone-850" id="faq">
+        <section className="py-24 bg-[#faf7f2] dark:bg-[#121110] border-b border-stone-200/60 dark:border-stone-800" id="faq">
           <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
 

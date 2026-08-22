@@ -17,6 +17,7 @@ import techTeam from '../assets/tech-team-hd-production.webp';
 import nonTechTeam from '../assets/non-tech-team-hd-production.webp';
 import managementTeam from '../assets/management-hr-team-hd-production.webp';
 import teamCultureImage from '../assets/culture-team-professional.jpg';
+import teamAvif from '../assets/team.avif';
 import adyapanTeam from '../assets/adyapan-team.jpg';
 
 const AboutUs: React.FC = () => {
@@ -194,7 +195,7 @@ const AboutUs: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             TEAMS SECTION (THE HEART OF ADYAPAN)
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-20 sm:py-28 border-b border-stone-200/70 dark:border-stone-850">
+        <section className="pt-16 pb-8 sm:pt-24 sm:pb-10 border-b border-stone-200/70 dark:border-stone-800">
           <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
 
             {/* Section Heading */}
@@ -224,9 +225,8 @@ const AboutUs: React.FC = () => {
                   >
                     {/* Image Column */}
                     <div
-                      className={`lg:col-span-5 relative rounded-2xl overflow-hidden shadow-lg h-[280px] sm:h-[360px] bg-stone-100 dark:bg-stone-800 ${
-                        isEven ? 'lg:order-2' : 'lg:order-1'
-                      }`}
+                      className={`lg:col-span-5 relative rounded-2xl overflow-hidden shadow-lg h-[280px] sm:h-[360px] bg-stone-100 dark:bg-stone-800 ${isEven ? 'lg:order-2' : 'lg:order-1'
+                        }`}
                     >
                       <img
                         src={team.image}
@@ -241,9 +241,8 @@ const AboutUs: React.FC = () => {
 
                     {/* Content Column */}
                     <div
-                      className={`lg:col-span-7 space-y-4 ${
-                        isEven ? 'lg:order-1' : 'lg:order-2'
-                      }`}
+                      className={`lg:col-span-7 space-y-4 ${isEven ? 'lg:order-1' : 'lg:order-2'
+                        }`}
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-11 h-11 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0 shadow-xs">
@@ -295,7 +294,7 @@ const AboutUs: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             PEOPLE CULTURE BANNER
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-16 sm:py-24">
+        <section className="pt-6 pb-14 sm:pt-8 sm:pb-18">
           <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
             <div
               data-reveal="up"
@@ -336,11 +335,11 @@ const AboutUs: React.FC = () => {
               <div className="lg:col-span-5 relative z-10 flex justify-center">
                 <div className="w-full h-[260px] sm:h-[320px] rounded-2xl overflow-hidden shadow-xl border-2 border-white/30 bg-stone-900">
                   <img
-                    src={teamCultureImage}
+                    src={teamAvif}
                     alt="Adyapan team"
                     className="w-full h-full object-cover object-center"
                     onError={(e) => {
-                      e.currentTarget.src = adyapanTeam;
+                      e.currentTarget.src = '/team.avif';
                     }}
                   />
                 </div>
@@ -352,7 +351,7 @@ const AboutUs: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             LIFE VALUES GRID & CTA
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-16 sm:py-24 bg-[#faf6f0] dark:bg-[#181715] border-t border-stone-200/70 dark:border-stone-850">
+        <section className="py-16 sm:py-24 bg-[#faf6f0] dark:bg-[#181715] border-t border-stone-200/70 dark:border-stone-800">
           <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
 
             <div className="text-center max-w-2xl mx-auto mb-14" data-reveal="up">

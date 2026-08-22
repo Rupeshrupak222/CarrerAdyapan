@@ -4,7 +4,13 @@ import { useTheme } from '../../context/ThemeContext';
 import { Link, useNavigate } from 'react-router-dom';
 import AdyapanLogo from '../common/AdyapanLogo';
 import { notificationService, NotificationItem } from '../../services/notificationService';
-import { getStoredNotifications, markNotificationsRead } from '../../utils/applicationStore';
+import {
+  getStoredNotifications,
+  markNotificationsRead,
+  markStoredNotificationRead,
+  removeStoredNotification,
+  clearStoredNotifications,
+} from '../../utils/applicationStore';
 
 const formatRelativeTime = (isoString?: string) => {
   if (!isoString) return 'Just now';
@@ -96,13 +102,57 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
 
   const handleToggleNotifs = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!showNotifMenu && unreadCount > 0) {
-      notificationService.markAllAsRead().catch(() => {});
-      markNotificationsRead();
-      setNotifications((prev) => prev.map((n) => ({ ...n, unread: false, isRead: true })));
-    }
     setShowNotifMenu(!showNotifMenu);
     setShowProfileMenu(false);
+  };
+
+  const handleMarkAllRead = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await notificationService.markAllAsRead();
+      markNotificationsRead();
+      setNotifications((prev) => prev.map((n) => ({ ...n, unread: false, isRead: true })));
+    } catch (err) {
+      console.warn('Failed to mark all as read:', err);
+    }
+  };
+
+  const handleClearAll = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await notificationService.clearAll();
+      clearStoredNotifications();
+      setNotifications([]);
+    } catch (err) {
+      console.warn('Failed to clear notifications:', err);
+    }
+  };
+
+  const handleNotificationClick = async (n: any) => {
+    try {
+      if (n.id) {
+        await notificationService.markAsRead(n.id);
+        markStoredNotificationRead(n.id);
+        setNotifications((prev) =>
+          prev.map((item) => (item.id === n.id ? { ...item, unread: false, isRead: true } : item))
+        );
+      }
+    } catch (err) {
+      console.warn('Failed to mark notification as read:', err);
+    }
+    setShowNotifMenu(false);
+  };
+
+  const handleDeleteSingle = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    e.preventDefault();
+    try {
+      await notificationService.deleteNotification(id);
+      removeStoredNotification(id);
+      setNotifications((prev) => prev.filter((item) => item.id !== id));
+    } catch (err) {
+      console.warn('Failed to delete notification:', err);
+    }
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -280,74 +330,176 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
             {/* Notifications Dropdown Panel (Z-Index 100 Guarantee) */}
             {showNotifMenu && (
               <div
-                className="absolute right-0 mt-2 w-80 sm:w-96 max-w-[calc(100vw-1.5rem)] rounded-2xl shadow-2xl border py-2.5 z-[100] animate-in fade-in slide-in-from-top-2 duration-200"
+                className="absolute right-0 mt-2 w-80 sm:w-96 max-w-[calc(100vw-1.5rem)] rounded-2xl shadow-2xl border overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200"
                 style={theme === 'dark'
                   ? { background: '#14162a', borderColor: 'rgba(245, 158, 11,0.35)', color: '#f1f5f9', boxShadow: '0 12px 40px rgba(0,0,0,0.6)' }
                   : { background: '#ffffff', borderColor: '#e8e0d8', boxShadow: '0 12px 36px rgba(26,26,46,0.16)' }
                 }
               >
+                {/* Dropdown Header */}
                 <div
-                  className="px-4 py-2.5 border-b flex items-center justify-between"
+                  className="px-4 py-3 border-b flex items-center justify-between gap-2"
                   style={theme === 'dark'
                     ? { borderColor: 'rgba(245, 158, 11,0.2)', background: 'rgba(13,13,26,0.8)' }
                     : { borderColor: '#f0e8df', background: '#fdfaf6' }
                   }
                 >
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
-                    <span className="text-xs font-extrabold tracking-wide" style={{ color: theme === 'dark' ? '#f1f5f9' : '#1a1a2e' }}>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    {unreadCount > 0 && <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping shrink-0" />}
+                    <span className="text-xs font-extrabold tracking-wide truncate" style={{ color: theme === 'dark' ? '#f1f5f9' : '#1a1a2e' }}>
                       Applicant Alerts & Notifications
                     </span>
                   </div>
-                  <span
-                    className="text-[10px] font-black px-2 py-0.5 rounded-full border"
-                    style={{ background: 'rgba(245, 158, 11,0.18)', color: '#f59e0b', borderColor: 'rgba(245, 158, 11,0.35)' }}
-                  >
-                    {notifications.length} Total
-                  </span>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {unreadCount > 0 ? (
+                      <span
+                        className="text-[10px] font-black px-2 py-0.5 rounded-full border"
+                        style={{ background: 'rgba(245, 158, 11,0.2)', color: '#f59e0b', borderColor: 'rgba(245, 158, 11,0.4)' }}
+                      >
+                        {unreadCount} New
+                      </span>
+                    ) : (
+                      <span
+                        className="text-[10px] font-black px-2 py-0.5 rounded-full border"
+                        style={{ background: 'rgba(100, 116, 139, 0.15)', color: theme === 'dark' ? '#94a3b8' : '#64748b', borderColor: 'rgba(100, 116, 139, 0.25)' }}
+                      >
+                        {notifications.length} Total
+                      </span>
+                    )}
+                  </div>
                 </div>
 
+                {/* Quick Action Toolbar: Mark as Read & Clear All */}
+                {notifications.length > 0 && (
+                  <div
+                    className="px-4 py-2 border-b flex items-center justify-between gap-2 text-xs"
+                    style={theme === 'dark'
+                      ? { borderColor: 'rgba(245, 158, 11,0.12)', background: 'rgba(20,22,42,0.9)' }
+                      : { borderColor: '#f4ede4', background: '#faf6f0' }
+                    }
+                  >
+                    <button
+                      type="button"
+                      onClick={handleMarkAllRead}
+                      disabled={unreadCount === 0}
+                      className={`inline-flex items-center gap-1.5 text-[11px] font-bold transition-all cursor-pointer ${
+                        unreadCount === 0
+                          ? 'opacity-40 cursor-not-allowed text-slate-400 dark:text-slate-500'
+                          : 'text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300'
+                      }`}
+                      title="Mark all notifications as read in database"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>{unreadCount === 0 ? 'All read' : 'Mark as read'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleClearAll}
+                      className="inline-flex items-center gap-1.5 text-[11px] font-bold text-rose-500 hover:text-rose-600 dark:hover:text-rose-400 transition-all cursor-pointer hover:underline"
+                      title="Clear and remove all notifications from database"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      <span>Clear all</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Notifications List */}
                 <div
-                  className="max-h-80 overflow-y-auto divide-y"
+                  className="max-h-80 overflow-y-auto divide-y custom-scrollbar"
                   style={{ borderColor: theme === 'dark' ? 'rgba(245, 158, 11,0.12)' : '#f0e8df' }}
                 >
                   {notifications.length === 0 ? (
-                    <div className="p-5 text-center text-xs font-semibold" style={{ color: '#94a3b8' }}>
-                      No new applicant alerts or notifications
+                    <div className="py-8 px-4 text-center space-y-2">
+                      <div className="w-10 h-10 mx-auto rounded-full flex items-center justify-center bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <p className="text-xs font-bold" style={{ color: theme === 'dark' ? '#f1f5f9' : '#1a1a2e' }}>
+                        All caught up!
+                      </p>
+                      <p className="text-[11px]" style={{ color: theme === 'dark' ? '#94a3b8' : '#64748b' }}>
+                        No new applicant alerts or notifications.
+                      </p>
                     </div>
                   ) : (
                     notifications.map((n) => (
-                      <Link
+                      <div
                         key={n.id}
-                        to={n.link || '/candidates'}
-                        onClick={() => setShowNotifMenu(false)}
-                        className="block p-3.5 transition-all hover:pl-4"
-                        style={{ borderColor: theme === 'dark' ? 'rgba(245, 158, 11,0.1)' : '#f0e8df' }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = theme === 'dark' ? 'rgba(245, 158, 11,0.1)' : '#fdfaf6'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                        className="group relative transition-all"
+                        style={{
+                          borderColor: theme === 'dark' ? 'rgba(245, 158, 11,0.1)' : '#f0e8df',
+                          background: n.unread
+                            ? (theme === 'dark' ? 'rgba(245, 158, 11,0.06)' : '#fffdf8')
+                            : 'transparent'
+                        }}
                       >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-center gap-1.5">
-                            {n.unread && <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>}
-                            <p className="text-xs font-extrabold leading-snug" style={{ color: theme === 'dark' ? '#f1f5f9' : '#1a1a2e' }}>
-                              {n.title}
-                            </p>
+                        <Link
+                          to={n.link || '/candidates'}
+                          onClick={() => handleNotificationClick(n)}
+                          className="block p-3.5 pr-8 transition-all hover:pl-4"
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = theme === 'dark' ? 'rgba(245, 158, 11,0.12)' : '#fdfaf6';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'transparent';
+                          }}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              {n.unread ? (
+                                <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0 shadow-sm shadow-amber-500/50" />
+                              ) : (
+                                <span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 shrink-0" />
+                              )}
+                              <p
+                                className="text-xs leading-snug truncate"
+                                style={{
+                                  fontWeight: n.unread ? 800 : 600,
+                                  color: n.unread ? (theme === 'dark' ? '#ffffff' : '#0f172a') : (theme === 'dark' ? '#cbd5e1' : '#475569')
+                                }}
+                              >
+                                {n.title}
+                              </p>
+                            </div>
+                            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 shrink-0">
+                              {n.time}
+                            </span>
                           </div>
-                          <span className="text-[10px] font-semibold shrink-0" style={{ color: '#f59e0b' }}>
-                            {n.time}
-                          </span>
-                        </div>
-                        <p className="text-[11px] mt-1 font-medium leading-relaxed" style={{ color: theme === 'dark' ? '#cbd5e1' : '#6b7280' }}>
-                          {n.message}
-                        </p>
-                      </Link>
+                          <p
+                            className="text-[11px] mt-1 font-normal leading-relaxed pl-3.5"
+                            style={{ color: theme === 'dark' ? '#94a3b8' : '#64748b' }}
+                          >
+                            {n.message}
+                          </p>
+                        </Link>
+
+                        {/* Individual Dismiss/Delete Button on hover */}
+                        <button
+                          type="button"
+                          onClick={(e) => handleDeleteSingle(e, n.id)}
+                          className="absolute top-3 right-2 p-1 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 rounded-lg transition-all opacity-0 group-hover:opacity-100 hover:bg-rose-500/10 cursor-pointer"
+                          title="Dismiss notification"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
                     ))
                   )}
                 </div>
 
+                {/* Dropdown Footer */}
                 <div
-                  className="p-2 border-t text-center"
-                  style={theme === 'dark' ? { borderColor: 'rgba(245, 158, 11,0.15)' } : { borderColor: '#f0e8df' }}
+                  className="p-2.5 border-t text-center"
+                  style={theme === 'dark' ? { borderColor: 'rgba(245, 158, 11,0.15)', background: 'rgba(13,13,26,0.6)' } : { borderColor: '#f0e8df', background: '#fdfaf6' }}
                 >
                   <Link
                     to="/candidates"

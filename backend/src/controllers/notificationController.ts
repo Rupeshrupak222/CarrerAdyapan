@@ -29,3 +29,24 @@ export const markAllAsRead = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const clearAllNotifications = async (req, res) => {
+  try {
+    const userId = req.user?.id || 'demo-user-101';
+    const result = await notificationService.clearAllNotifications(userId);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const deleteNotification = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await notificationService.deleteNotification(id);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+

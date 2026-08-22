@@ -123,9 +123,8 @@ const AnalyticsPage = () => {
       <div className="space-y-6">
         {/* Header Bar */}
         <div className={`p-6 rounded-3xl border transition-all relative overflow-hidden shadow-sm ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}>
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
 
           <div className="space-y-1.5 pt-1">
             <BackButton label="Back to Dashboard" to="/dashboard" />
@@ -152,30 +151,26 @@ const AnalyticsPage = () => {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className={`p-5 rounded-3xl border text-center shadow-sm relative overflow-hidden ${
-              theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-amber-200/80'
+              theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
             }`}>
-              <div className="absolute top-0 left-0 right-0 h-1 bg-amber-400" />
               <p className="text-3xl font-extrabold text-amber-600 dark:text-amber-400">{stats?.totalApplications || 0}</p>
               <p className="text-xs font-bold text-slate-600 dark:text-slate-300 mt-1 uppercase tracking-wider">Total Applications</p>
             </div>
             <div className={`p-5 rounded-3xl border text-center shadow-sm relative overflow-hidden ${
-              theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-amber-200/80'
+              theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
             }`}>
-              <div className="absolute top-0 left-0 right-0 h-1 bg-amber-500" />
               <p className="text-3xl font-extrabold text-amber-600 dark:text-amber-400">{stats?.aiScreened || 0}</p>
               <p className="text-xs font-bold text-slate-600 dark:text-slate-300 mt-1 uppercase tracking-wider">AI Screened</p>
             </div>
             <div className={`p-5 rounded-3xl border text-center shadow-sm relative overflow-hidden ${
-              theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-amber-200/80'
+              theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
             }`}>
-              <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500" />
-              <p className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">{stats?.interviewed || 0}</p>
+              <p className="text-3xl font-extrabold text-slate-900 dark:text-white">{stats?.interviewed || 0}</p>
               <p className="text-xs font-bold text-slate-600 dark:text-slate-300 mt-1 uppercase tracking-wider">Interviewed</p>
             </div>
             <div className={`p-5 rounded-3xl border text-center shadow-sm relative overflow-hidden ${
-              theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-amber-200/80'
+              theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
             }`}>
-              <div className="absolute top-0 left-0 right-0 h-1 bg-amber-500" />
               <p className="text-3xl font-extrabold text-amber-600 dark:text-amber-400">{stats?.hired || 0}</p>
               <p className="text-xs font-bold text-slate-600 dark:text-slate-300 mt-1 uppercase tracking-wider">Hired</p>
             </div>
@@ -188,7 +183,7 @@ const AnalyticsPage = () => {
             <ChartSkeleton title="Loading Hiring Funnel..." />
           ) : (
             <div className={`p-6 rounded-3xl border shadow-sm ${
-              theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-amber-200/80'
+              theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
             }`}>
               <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                 <span className="text-amber-500">📊</span> Hiring Pipeline Funnel (Live DB)
@@ -212,7 +207,7 @@ const AnalyticsPage = () => {
           )}
 
           <div className={`p-6 rounded-3xl border shadow-sm ${
-            theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-amber-200/80'
+            theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
           }`}>
             <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
               <span className="text-amber-500">📈</span> Monthly Application Velocity (Live DB)

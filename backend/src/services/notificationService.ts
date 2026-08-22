@@ -172,4 +172,47 @@ export const notificationService = {
       return { success: false, message: error?.message || 'Failed to update' };
     }
   },
+
+  /**
+   * Clear all notifications for user
+   */
+  clearAllNotifications: async (userId?: string) => {
+    try {
+      let targetUser = userId
+        ? await prisma.user.findFirst({ where: { id: userId } }).catch(() => null)
+        : null;
+
+      if (!targetUser) targetUser = await prisma.user.findFirst().catch(() => null);
+
+      if (targetUser) {
+        await prisma.activity.deleteMany({
+          where: { userId: targetUser.id },
+        });
+      } else {
+        await prisma.activity.deleteMany({});
+      }
+
+      return { success: true, message: 'All notifications cleared successfully' };
+    } catch (error: any) {
+      logger.error('clearAllNotifications Error:', error?.message || error);
+      return { success: false, message: error?.message || 'Failed to clear notifications' };
+    }
+  },
+
+  /**
+   * Delete a single notification by ID
+   */
+  deleteNotification: async (notificationId: string) => {
+    try {
+      await prisma.activity.delete({
+        where: { id: notificationId },
+      }).catch(() => null);
+
+      return { success: true, message: 'Notification deleted successfully' };
+    } catch (error: any) {
+      logger.error('deleteNotification Error:', error?.message || error);
+      return { success: false, message: error?.message || 'Failed to delete notification' };
+    }
+  },
 };
+

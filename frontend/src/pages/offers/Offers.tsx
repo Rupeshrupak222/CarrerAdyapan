@@ -456,9 +456,8 @@ const Offers = () => {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header Bar */}
-        <div className={`p-6 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden shadow-sm ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+        <div className={`p-6 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden shadow-sm ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
 
           <div className="space-y-1.5 pt-1">
             <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
@@ -474,7 +473,7 @@ const Offers = () => {
         </div>
 
         {/* Global Company Offer Letter Template Header Banner */}
-        <div className={`p-6 rounded-3xl border shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+        <div className={`p-6 rounded-3xl border shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
           <div className="flex items-center gap-3.5">
             <div className="w-11 h-11 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 text-xl flex items-center justify-center border border-amber-500/30 shadow-sm shrink-0">
@@ -482,7 +481,7 @@ const Offers = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-sm font-bold">Active Global Company Offer Letter Template</h2>
-                <span className="px-2.5 py-0.5 text-xs font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 rounded-full border border-emerald-500/30">
+                <span className="px-2.5 py-0.5 text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-full border border-slate-200 dark:border-slate-700">
                   Active
                 </span>
               </div>
@@ -523,7 +522,7 @@ const Offers = () => {
             return (
               <div
                 key={offer.id}
-                className={`p-6 rounded-3xl border shadow-sm hover:shadow-md transition-all flex flex-col gap-3 relative overflow-visible ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/90 text-slate-900'
+                className={`p-6 rounded-3xl border shadow-sm hover:shadow-md transition-all flex flex-col gap-3 relative overflow-visible ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
                   }`}
               >
                 {/* Header Row: Badges & Name + Options Button */}
@@ -532,11 +531,11 @@ const Offers = () => {
                   <div className="space-y-1.5 flex-1 min-w-0">
                     {/* Status Badges Row */}
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="px-3 py-0.5 text-xs font-semibold rounded-full bg-amber-100 text-amber-900 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                      <span className="px-3 py-0.5 text-xs font-semibold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                         ● {offer.jobTitle || 'Student / Fresher'}
                       </span>
 
-                      <span className="px-3 py-0.5 text-xs font-bold rounded-full bg-emerald-100 text-emerald-900 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                      <span className="px-3 py-0.5 text-xs font-bold rounded-full bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
                         Base: {formatDisplaySalary(offer.salary, offer.stipend)}
                       </span>
 
@@ -722,10 +721,10 @@ const Offers = () => {
 
                     return (
                       <div className="space-y-1 pt-2 border-t border-slate-100 dark:border-slate-800/80 mt-1">
-                        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200">
                           <span>● Candidate Positive Strengths:</span>
                           {pills.slice(0, 2).map((pill, pIdx) => (
-                            <span key={pIdx} className="px-2.5 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/60 font-medium">
+                            <span key={pIdx} className="px-2.5 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-medium text-slate-700 dark:text-slate-300">
                               {pill}
                             </span>
                           ))}
@@ -739,7 +738,7 @@ const Offers = () => {
 
                   {/* Line 4: Recruiter Note & Evaluation Callout Box */}
                   {getCleanTermsDisplay(offer.customTerms) && (
-                    <div className="p-3 rounded-2xl bg-amber-50/60 dark:bg-slate-800/40 border border-amber-200/90 dark:border-amber-500/20 text-xs text-slate-700 dark:text-slate-300 mt-2">
+                    <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 mt-2">
                       <span className="font-bold text-slate-900 dark:text-white mr-1.5">Recruiter Note & Evaluation:</span>
                       {getCleanTermsDisplay(offer.customTerms)}
                     </div>
@@ -1038,7 +1037,7 @@ const Offers = () => {
                 <a
                   href={viewingPdfUrl}
                   download={`${viewingPdfOffer.candidateName.replace(/\s+/g, '_')}_Official_Offer_Letter.pdf`}
-                  className="px-3.5 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition-all flex items-center gap-1.5"
+                  className="px-3.5 py-1.5 text-xs font-semibold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all flex items-center gap-1.5"
                 >
                   Download Copy
                 </a>
@@ -1047,11 +1046,11 @@ const Offers = () => {
             </div>
 
             {/* Candidate Appointment Header Card */}
-            <div className={`p-4 rounded-xl border space-y-2 text-xs font-medium shrink-0 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-emerald-50/70 border-emerald-200 text-slate-900'
+            <div className={`p-4 rounded-xl border space-y-2 text-xs font-medium shrink-0 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-100 border-slate-200 text-slate-900'
               }`}>
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-emerald-200 dark:border-slate-800 pb-2">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-2">
                 <div>
-                  <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block">Candidate Name</span>
+                  <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block">Candidate Name</span>
                   <span className="text-sm font-bold text-slate-900 dark:text-white">{viewingPdfOffer.candidateName}</span>
                 </div>
                 <div>
@@ -1060,7 +1059,7 @@ const Offers = () => {
                 </div>
                 <div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase block">Offered Base CTC</span>
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400">₹{viewingPdfOffer.salary?.toLocaleString()}</span>
+                  <span className="font-bold text-slate-900 dark:text-white">₹{viewingPdfOffer.salary?.toLocaleString()}</span>
                 </div>
                 <div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase block">Target Joining Date</span>

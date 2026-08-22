@@ -263,9 +263,8 @@ const AdminProfile = () => {
         </div>
 
         {/* Profile Hero Header Card */}
-        <div className={`p-4 sm:p-6 md:p-8 rounded-3xl border shadow-sm space-y-4 sm:space-y-6 relative overflow-hidden ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+        <div className={`p-4 sm:p-6 md:p-8 rounded-3xl border shadow-sm space-y-4 sm:space-y-6 relative overflow-hidden ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-500" />
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 pt-1">
             <div className="flex flex-row items-center gap-3 sm:gap-5">
@@ -278,7 +277,7 @@ const AdminProfile = () => {
                   <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-slate-900 dark:text-white truncate">
                     {profileData.name}
                   </h1>
-                  <span className="px-2.5 py-0.5 text-[10px] sm:text-xs font-bold rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 shrink-0">
+                  <span className="px-2.5 py-0.5 text-[10px] sm:text-xs font-bold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0">
                     ● Active & Synced
                   </span>
                 </div>
@@ -330,7 +329,7 @@ const AdminProfile = () => {
                 <h2 className="text-sm sm:text-base font-bold flex items-center gap-2">
                   <span>Personal & Professional Details</span>
                 </h2>
-                <span className="text-[10px] sm:text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                <span className="text-[10px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-700">
                   PostgreSQL Neon Live Sync
                 </span>
               </div>
@@ -702,20 +701,20 @@ const AdminProfile = () => {
 
             {/* Generated Credentials Success Snippet */}
             {generatedCreds && (
-              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-2 text-xs">
-                <div className="font-extrabold text-emerald-700 dark:text-emerald-300 flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
+                <div className="font-extrabold text-slate-900 dark:text-white flex items-center justify-between">
                   <span> Account Created & Ready to Issue!</span>
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(`Work Email: ${generatedCreds.email}\nPassword: ${generatedCreds.password}`);
                       toast.success('Credentials copied to clipboard! ');
                     }}
-                    className="px-2.5 py-1 text-[10px] font-black bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 uppercase tracking-wider"
+                    className="px-2.5 py-1 text-[10px] font-black bg-amber-500 text-white rounded-lg hover:bg-amber-600 uppercase tracking-wider cursor-pointer"
                   >
                     Copy Credentials
                   </button>
                 </div>
-                <div className="font-mono bg-slate-950 text-emerald-400 p-2.5 rounded-xl text-[11px] space-y-1">
+                <div className="font-mono bg-slate-950 text-amber-400 p-2.5 rounded-xl text-[11px] space-y-1">
                   <div><strong>Email:</strong> {generatedCreds.email}</div>
                   <div><strong>Password:</strong> {generatedCreds.password}</div>
                 </div>
@@ -823,7 +822,7 @@ const AdminProfile = () => {
       {/* Modal 4: Edit HR Account Password Modal */}
       {editingHRPasswordUser && (
         <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className={`w-full max-w-md p-6 rounded-3xl border shadow-2xl space-y-4 relative ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200 text-slate-900'
+          <div className={`w-full max-w-md p-6 rounded-3xl border shadow-2xl space-y-4 relative ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
             }`}>
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <div>

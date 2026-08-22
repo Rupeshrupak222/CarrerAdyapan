@@ -32,8 +32,8 @@ export const notificationService = {
 
   markAsRead: async (id: string) => {
     try {
-      const response = await api.patch(`/notifications/${id}/read`);
-      return response.data;
+      const response = await api.put(`/notifications/${id}/read`).catch(() => api.patch(`/notifications/${id}/read`));
+      return response?.data || { success: true };
     } catch (error) {
       console.warn('Failed to mark notification as read:', error);
       return { success: false };
@@ -42,11 +42,32 @@ export const notificationService = {
 
   markAllAsRead: async () => {
     try {
-      const response = await api.patch('/notifications/read-all');
-      return response.data;
+      const response = await api.put('/notifications/mark-all-read').catch(() => api.patch('/notifications/read-all'));
+      return response?.data || { success: true };
     } catch (error) {
       console.warn('Failed to mark all notifications as read:', error);
       return { success: false };
     }
   },
+
+  clearAll: async () => {
+    try {
+      const response = await api.delete('/notifications/clear-all').catch(() => api.delete('/notifications'));
+      return response?.data || { success: true };
+    } catch (error) {
+      console.warn('Failed to clear notifications:', error);
+      return { success: false };
+    }
+  },
+
+  deleteNotification: async (id: string) => {
+    try {
+      const response = await api.delete(`/notifications/${id}`);
+      return response?.data || { success: true };
+    } catch (error) {
+      console.warn('Failed to delete notification:', error);
+      return { success: false };
+    }
+  },
 };
+

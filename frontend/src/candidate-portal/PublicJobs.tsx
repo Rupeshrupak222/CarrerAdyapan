@@ -216,6 +216,7 @@ export const PublicJobs: React.FC = () => {
   const [sortBy, setSortBy] = useState<'relevant' | 'newest' | 'salary'>('relevant');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [currentPage, setCurrentPage] = useState(1);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [savedJobs, setSavedJobs] = useState<string[]>(() => {
     try {
       return JSON.parse(localStorage.getItem('adyapan_saved_jobs') || '[]');
@@ -446,8 +447,8 @@ export const PublicJobs: React.FC = () => {
         <div className="absolute top-80 right-10 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
 
         {/* ── HERO SECTION: LARGE VISUAL TWO-COLUMN HERO ── */}
-        <section className="pt-12 pb-16 relative z-10 border-b border-stone-200/60 dark:border-stone-850 overflow-hidden bg-[#fdfbf7] dark:bg-[#141312]">
-          
+        <section className="pt-12 pb-16 relative z-10 border-b border-stone-200/60 dark:border-stone-800 overflow-hidden bg-[#fdfbf7] dark:bg-[#141312]">
+
           {/* Full-Cover Prominently Visible Background Image (Darker & High Contrast) */}
           <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none">
             <img
@@ -490,7 +491,7 @@ export const PublicJobs: React.FC = () => {
                   <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2">
 
                     {/* Search Input */}
-                    <div className="flex items-center gap-3 px-4 py-2.5 flex-1 bg-stone-50/70 dark:bg-stone-850 rounded-2xl">
+                    <div className="flex items-center gap-3 px-4 py-2.5 flex-1 bg-stone-100 dark:bg-stone-800 border border-stone-200/60 dark:border-stone-700 rounded-2xl">
                       <Search size={19} className="text-amber-500 flex-shrink-0" />
                       <input
                         type="text"
@@ -500,12 +501,12 @@ export const PublicJobs: React.FC = () => {
                           setCurrentPage(1);
                         }}
                         placeholder="Search job title, skills or company..."
-                        className="w-full bg-transparent text-xs sm:text-sm font-semibold text-stone-900 dark:text-white outline-none placeholder:text-stone-400"
+                        className="w-full bg-transparent text-xs sm:text-sm font-semibold text-stone-900 dark:text-white outline-none placeholder:text-stone-400 dark:placeholder:text-stone-400"
                       />
                       {query && (
                         <button
                           onClick={() => setQuery('')}
-                          className="text-stone-400 hover:text-stone-600 p-1 cursor-pointer"
+                          className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 p-1 cursor-pointer"
                         >
                           <X size={15} />
                         </button>
@@ -513,7 +514,7 @@ export const PublicJobs: React.FC = () => {
                     </div>
 
                     {/* Location Dropdown */}
-                    <div className="flex items-center gap-2 px-3.5 py-2.5 bg-stone-50/70 dark:bg-stone-850 rounded-2xl">
+                    <div className="flex items-center gap-2 px-3.5 py-2.5 bg-stone-100 dark:bg-stone-800 border border-stone-200/60 dark:border-stone-700 rounded-2xl">
                       <MapPin size={16} className="text-amber-500 flex-shrink-0" />
                       <select
                         value={locationFilter}
@@ -521,17 +522,17 @@ export const PublicJobs: React.FC = () => {
                           setLocationFilter(e.target.value);
                           setCurrentPage(1);
                         }}
-                        className="bg-transparent text-xs font-bold text-stone-700 dark:text-stone-200 outline-none cursor-pointer pr-2"
+                        className="bg-transparent text-xs font-bold text-stone-800 dark:text-stone-100 outline-none cursor-pointer pr-2"
                       >
-                        <option value="">Location</option>
-                        <option value="Hyderabad">Hyderabad</option>
-                        <option value="Bangalore">Bangalore</option>
-                        <option value="Remote">Remote</option>
+                        <option value="" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Location</option>
+                        <option value="Hyderabad" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Hyderabad</option>
+                        <option value="Bangalore" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Bangalore</option>
+                        <option value="Remote" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Remote</option>
                       </select>
                     </div>
 
                     {/* Experience Dropdown */}
-                    <div className="hidden sm:flex items-center gap-2 px-3.5 py-2.5 bg-stone-50/70 dark:bg-stone-850 rounded-2xl">
+                    <div className="hidden sm:flex items-center gap-2 px-3.5 py-2.5 bg-stone-100 dark:bg-stone-800 border border-stone-200/60 dark:border-stone-700 rounded-2xl">
                       <Briefcase size={16} className="text-amber-500 flex-shrink-0" />
                       <select
                         value={experienceDropdown}
@@ -539,19 +540,19 @@ export const PublicJobs: React.FC = () => {
                           setExperienceDropdown(e.target.value);
                           setCurrentPage(1);
                         }}
-                        className="bg-transparent text-xs font-bold text-stone-700 dark:text-stone-200 outline-none cursor-pointer pr-2"
+                        className="bg-transparent text-xs font-bold text-stone-800 dark:text-stone-100 outline-none cursor-pointer pr-2"
                       >
-                        <option value="">Experience</option>
-                        <option value="Fresher">Fresher</option>
-                        <option value="0-1 Years">0–1 Years</option>
-                        <option value="1-3 Years">1–3 Years</option>
-                        <option value="3-5 Years">3–5 Years</option>
-                        <option value="5+ Years">5+ Years</option>
+                        <option value="" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Experience</option>
+                        <option value="Fresher" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Fresher</option>
+                        <option value="0-1 Years" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">0–1 Years</option>
+                        <option value="1-3 Years" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">1–3 Years</option>
+                        <option value="3-5 Years" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">3–5 Years</option>
+                        <option value="5+ Years" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">5+ Years</option>
                       </select>
                     </div>
 
                     {/* Job Type Dropdown */}
-                    <div className="hidden md:flex items-center gap-2 px-3.5 py-2.5 bg-stone-50/70 dark:bg-stone-850 rounded-2xl">
+                    <div className="hidden md:flex items-center gap-2 px-3.5 py-2.5 bg-stone-100 dark:bg-stone-800 border border-stone-200/60 dark:border-stone-700 rounded-2xl">
                       <Clock3 size={16} className="text-amber-500 flex-shrink-0" />
                       <select
                         value={typeDropdown}
@@ -559,13 +560,13 @@ export const PublicJobs: React.FC = () => {
                           setTypeDropdown(e.target.value);
                           setCurrentPage(1);
                         }}
-                        className="bg-transparent text-xs font-bold text-stone-700 dark:text-stone-200 outline-none cursor-pointer pr-2"
+                        className="bg-transparent text-xs font-bold text-stone-800 dark:text-stone-100 outline-none cursor-pointer pr-2"
                       >
-                        <option value="">Job Type</option>
-                        <option value="Full Time">Full Time</option>
-                        <option value="Part Time">Part Time</option>
-                        <option value="Internship">Internship</option>
-                        <option value="Remote">Remote</option>
+                        <option value="" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Job Type</option>
+                        <option value="Full Time" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Full Time</option>
+                        <option value="Part Time" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Part Time</option>
+                        <option value="Internship" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Internship</option>
+                        <option value="Remote" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Remote</option>
                       </select>
                     </div>
 
@@ -581,8 +582,8 @@ export const PublicJobs: React.FC = () => {
                 </div>
 
                 {/* ── POPULAR SEARCHES PILLS ── */}
-                <div className="flex flex-wrap items-center gap-2 pt-1 text-xs font-bold text-stone-500 dark:text-stone-400">
-                  <span className="text-stone-700 dark:text-stone-300 mr-1 flex items-center gap-1">
+                <div className="flex flex-wrap items-center gap-2 pt-1 text-xs font-bold text-stone-600 dark:text-stone-300">
+                  <span className="text-stone-800 dark:text-stone-200 mr-1 flex items-center gap-1">
                     <Flame size={14} className="text-orange-500 fill-orange-500" />
                     <span>Popular Searches:</span>
                   </span>
@@ -593,7 +594,7 @@ export const PublicJobs: React.FC = () => {
                         setQuery(term);
                         setCurrentPage(1);
                       }}
-                      className="px-3 py-1 rounded-full bg-white dark:bg-stone-850 border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:border-amber-500 hover:text-amber-500 transition-all shadow-sm cursor-pointer"
+                      className="px-3.5 py-1.5 rounded-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 hover:border-amber-500 hover:text-amber-600 hover:dark:text-amber-400 hover:dark:border-amber-400 transition-all shadow-sm cursor-pointer"
                     >
                       {term}
                     </button>
@@ -626,9 +627,9 @@ export const PublicJobs: React.FC = () => {
                 </div>
 
                 {/* Floating Cards */}
-                <div className="absolute -top-4 -left-4 sm:-left-8 z-20 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-stone-200/80 dark:border-stone-800 px-4 py-2.5 rounded-2xl shadow-xl flex items-center gap-3 animate-float">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center font-black">
-                    <CheckCircle2 size={18} />
+                <div className="absolute -top-4 left-0 sm:-left-8 z-20 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-stone-200/80 dark:border-stone-800 px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl shadow-xl flex items-center gap-2 sm:gap-3 animate-float">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center font-black">
+                    <CheckCircle2 size={16} />
                   </div>
                   <div>
                     <b className="text-xs font-black text-stone-900 dark:text-white block">Verified Jobs</b>
@@ -636,9 +637,9 @@ export const PublicJobs: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="absolute top-1/2 -right-4 sm:-right-8 -translate-y-1/2 z-20 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-stone-200/80 dark:border-stone-800 px-4 py-2.5 rounded-2xl shadow-xl flex items-center gap-3 animate-float-delayed">
-                  <div className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-600 flex items-center justify-center font-black">
-                    <Star size={18} className="fill-amber-500" />
+                <div className="absolute top-1/2 right-0 sm:-right-8 -translate-y-1/2 z-20 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-stone-200/80 dark:border-stone-800 px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl shadow-xl flex items-center gap-2 sm:gap-3 animate-float-delayed">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-500/15 text-amber-600 flex items-center justify-center font-black">
+                    <Star size={16} className="fill-amber-500" />
                   </div>
                   <div>
                     <b className="text-xs font-black text-stone-900 dark:text-white block">4.8 / 5.0</b>
@@ -646,9 +647,9 @@ export const PublicJobs: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="absolute -bottom-4 -left-2 sm:-left-6 z-20 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-amber-200 dark:border-amber-800/40 px-4 py-2.5 rounded-2xl shadow-xl flex items-center gap-3 animate-float bento-glow-orange">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center font-black shadow-md">
-                    <Zap size={18} />
+                <div className="absolute -bottom-4 left-0 sm:-left-6 z-20 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-amber-200 dark:border-amber-800/40 px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl shadow-xl flex items-center gap-2 sm:gap-3 animate-float bento-glow-orange">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center font-black shadow-md">
+                    <Zap size={16} />
                   </div>
                   <div>
                     <b className="text-xs font-black text-stone-900 dark:text-white block">48 - 72 Hours</b>
@@ -668,10 +669,22 @@ export const PublicJobs: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
               {/* ── LEFT COLUMN: 280PX FILTER SIDEBAR (4 Cols / 280px) ── */}
-              <div className="lg:col-span-4 xl:col-span-3 space-y-6">
+              <div className="lg:col-span-4 xl:col-span-3 space-y-4">
+
+                {/* Mobile Filter Toggle Trigger */}
+                <button
+                  onClick={() => setShowMobileFilters(!showMobileFilters)}
+                  className="lg:hidden w-full py-3 px-4 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200/90 dark:border-stone-800 font-bold text-xs flex items-center justify-between shadow-md text-stone-900 dark:text-white cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <SlidersHorizontal size={16} className="text-amber-500" />
+                    <span>Filter & Refine Positions {(experienceFilter.length + typeFilter.length) > 0 ? `(${experienceFilter.length + typeFilter.length} Active)` : ''}</span>
+                  </span>
+                  <span className="text-amber-500 text-xs font-extrabold">{showMobileFilters ? 'Hide ▲' : 'Show ▼'}</span>
+                </button>
 
                 {/* Filter Control Box */}
-                <div className="bg-white dark:bg-stone-900 p-6 rounded-3xl border border-stone-200/80 dark:border-stone-800 shadow-lg space-y-6">
+                <div className={`bg-white dark:bg-stone-900 p-6 rounded-3xl border border-stone-200/80 dark:border-stone-800 shadow-lg space-y-6 ${showMobileFilters ? 'block' : 'hidden lg:block'}`}>
                   <div className="flex items-center justify-between pb-4 border-b border-stone-100 dark:border-stone-800">
                     <span className="font-black text-base text-stone-900 dark:text-white flex items-center gap-2">
                       <SlidersHorizontal size={18} className="text-amber-500" />
@@ -844,21 +857,21 @@ export const PublicJobs: React.FC = () => {
 
                   <div className="flex items-center gap-3">
                     {/* Sort Dropdown */}
-                    <div className="flex items-center gap-2 bg-stone-50 dark:bg-stone-850 px-3.5 py-2 rounded-2xl border border-stone-200 dark:border-stone-800 text-xs font-bold text-stone-700 dark:text-stone-300">
+                    <div className="flex items-center gap-2 bg-stone-100 dark:bg-stone-800 px-3.5 py-2 rounded-2xl border border-stone-200/60 dark:border-stone-700 text-xs font-bold text-stone-800 dark:text-stone-200">
                       <span className="text-stone-400">Sort by:</span>
                       <select
                         value={sortBy}
                         onChange={(e: any) => setSortBy(e.target.value)}
                         className="bg-transparent outline-none cursor-pointer font-extrabold text-stone-900 dark:text-white"
                       >
-                        <option value="relevant">Most Relevant</option>
-                        <option value="newest">Newest First</option>
-                        <option value="salary">Highest Salary</option>
+                        <option value="relevant" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Most Relevant</option>
+                        <option value="newest" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Newest First</option>
+                        <option value="salary" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Highest Salary</option>
                       </select>
                     </div>
 
                     {/* View Mode Toggle */}
-                    <div className="hidden sm:flex items-center bg-stone-50 dark:bg-stone-850 p-1 rounded-2xl border border-stone-200 dark:border-stone-800">
+                    <div className="hidden sm:flex items-center bg-stone-100 dark:bg-stone-800 p-1 rounded-2xl border border-stone-200/60 dark:border-stone-700">
                       <button
                         onClick={() => setViewMode('list')}
                         className={`p-2 rounded-xl transition-all cursor-pointer ${viewMode === 'list'
@@ -972,7 +985,7 @@ export const PublicJobs: React.FC = () => {
                                       {job.skills.map((skill: string) => (
                                         <span
                                           key={skill}
-                                          className="px-2.5 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-850 text-stone-700 dark:text-stone-300 text-[11px] font-bold border border-stone-200/50 dark:border-stone-800"
+                                          className="px-2.5 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-[11px] font-bold border border-stone-200/60 dark:border-stone-700"
                                         >
                                           {skill}
                                         </span>
@@ -999,7 +1012,7 @@ export const PublicJobs: React.FC = () => {
                                     onClick={(e) => toggleSave(job.id || job.slug, e)}
                                     className={`p-2 rounded-xl border transition-all cursor-pointer ${isSaved
                                       ? 'bg-rose-500/15 border-rose-500 text-rose-600'
-                                      : 'border-stone-200 dark:border-stone-800 text-stone-400 hover:text-amber-500 hover:border-amber-500 bg-stone-50 dark:bg-stone-850'
+                                      : 'border-stone-200 dark:border-stone-700 text-stone-400 hover:text-amber-500 hover:border-amber-500 bg-stone-100 dark:bg-stone-800'
                                       }`}
                                     title={isSaved ? 'Job Saved' : 'Save Job'}
                                   >

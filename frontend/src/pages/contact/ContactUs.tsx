@@ -134,7 +134,7 @@ const ContactUs: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             CONTACT DETAILS & INTERACTIVE FORM
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-20 sm:py-28 border-b border-stone-200/70 dark:border-stone-850">
+        <section className="py-20 sm:py-28 border-b border-stone-200/70 dark:border-stone-800">
           <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
 
@@ -248,7 +248,7 @@ const ContactUs: React.FC = () => {
                             placeholder="Your full name"
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            className="w-full px-4 py-3 rounded-xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-750 text-stone-900 dark:text-white text-xs font-semibold focus:outline-none focus:border-amber-500 transition-colors"
+                            className="w-full px-4 py-3 rounded-xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-750 text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 text-xs font-semibold focus:outline-none focus:border-amber-500 transition-colors"
                           />
                         </label>
 
@@ -260,7 +260,7 @@ const ContactUs: React.FC = () => {
                             placeholder="you@example.com"
                             value={formData.email}
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            className="w-full px-4 py-3 rounded-xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-750 text-stone-900 dark:text-white text-xs font-semibold focus:outline-none focus:border-amber-500 transition-colors"
+                            className="w-full px-4 py-3 rounded-xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-750 text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 text-xs font-semibold focus:outline-none focus:border-amber-500 transition-colors"
                           />
                         </label>
                       </div>
@@ -274,7 +274,7 @@ const ContactUs: React.FC = () => {
                             placeholder="+91 98765 43210"
                             value={formData.phone}
                             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                            className="w-full px-4 py-3 rounded-xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-750 text-stone-900 dark:text-white text-xs font-semibold focus:outline-none focus:border-amber-500 transition-colors"
+                            className="w-full px-4 py-3 rounded-xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-750 text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 text-xs font-semibold focus:outline-none focus:border-amber-500 transition-colors"
                           />
                         </label>
 
@@ -284,14 +284,14 @@ const ContactUs: React.FC = () => {
                             required
                             value={formData.subject}
                             onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                            className="w-full px-4 py-3 rounded-xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-750 text-stone-900 dark:text-white text-xs font-semibold focus:outline-none focus:border-amber-500 transition-colors"
+                            className="w-full px-4 py-3 rounded-xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-750 text-stone-900 dark:text-white text-xs font-semibold focus:outline-none focus:border-amber-500 transition-colors cursor-pointer"
                           >
-                            <option value="" disabled>Select a subject</option>
-                            <option value="Job application">Job application</option>
-                            <option value="Hiring partnership">Hiring partnership</option>
-                            <option value="Career guidance">Career guidance</option>
-                            <option value="Interview rescheduling">Interview rescheduling</option>
-                            <option value="Other">Other</option>
+                            <option value="" disabled className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Select a subject</option>
+                            <option value="Job application" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Job application</option>
+                            <option value="Hiring partnership" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Hiring partnership</option>
+                            <option value="Career guidance" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Career guidance</option>
+                            <option value="Interview rescheduling" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Interview rescheduling</option>
+                            <option value="Other" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Other</option>
                           </select>
                         </label>
                       </div>
@@ -304,7 +304,7 @@ const ContactUs: React.FC = () => {
                           placeholder="Tell us a little about what you need..."
                           value={formData.message}
                           onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                          className="w-full px-4 py-3 rounded-xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-750 text-stone-900 dark:text-white text-xs font-semibold focus:outline-none focus:border-amber-500 transition-colors"
+                          className="w-full px-4 py-3 rounded-xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-750 text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 text-xs font-semibold focus:outline-none focus:border-amber-500 transition-colors resize-none"
                         />
                       </label>
 
@@ -328,7 +328,7 @@ const ContactUs: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             QUICK ANSWERS / FAQS SECTION
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-20 sm:py-28 border-b border-stone-200/70 dark:border-stone-850 bg-[#faf6f0] dark:bg-[#181715]">
+        <section className="py-20 sm:py-28 border-b border-stone-200/70 dark:border-stone-800 bg-[#faf6f0] dark:bg-[#181715]">
           <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
 

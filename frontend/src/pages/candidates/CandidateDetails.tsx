@@ -659,9 +659,8 @@ const CandidateDetails = () => {
         </div>
 
         {/* Candidate Header */}
-        <div className={`rounded-3xl border p-6 md:p-8 shadow-sm space-y-6 relative overflow-hidden ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+        <div className={`rounded-3xl border p-6 md:p-8 shadow-sm space-y-6 relative overflow-hidden ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-500" />
 
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pt-1">
             <div className="flex items-start gap-4">
@@ -679,7 +678,7 @@ const CandidateDetails = () => {
                     ● {isStudent ? 'Student / Fresher' : `Working (${currentCompanyTenure})`}
                   </span>
                   {isCompleted ? (
-                    <span className="px-2.5 py-0.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/15 rounded-full border border-emerald-500/30">
+                    <span className="px-2.5 py-0.5 text-xs font-bold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 rounded-full border border-slate-200 dark:border-slate-700">
                       ● Interview Completed
                     </span>
                   ) : isScheduled ? (
@@ -733,10 +732,10 @@ const CandidateDetails = () => {
 
               <button
                 onClick={handleOpenScheduleModal}
-                className="py-2 px-2.5 sm:px-3 text-[11px] sm:text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl shadow-md hover:shadow-emerald-600/25 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+                className="py-2 px-2.5 sm:px-3 text-[11px] sm:text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-md hover:shadow-amber-500/25 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
                 title="Schedule interview round with this candidate"
               >
-                <svg className="w-3.5 h-3.5 text-emerald-100 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 <span>Schedule Interview</span>
@@ -758,7 +757,7 @@ const CandidateDetails = () => {
 
         {/* Interview Status Banner Card */}
         <div className={`p-5 rounded-3xl border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${isCompleted
-          ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-950 dark:text-emerald-200'
+          ? 'bg-slate-100 border-slate-200 text-slate-900 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100'
           : isScheduled
             ? 'bg-blue-500/10 border-blue-500/20 text-blue-950 dark:text-blue-200'
             : 'bg-amber-500/10 border-amber-500/20 text-amber-950 dark:text-amber-200'
@@ -819,18 +818,18 @@ const CandidateDetails = () => {
           <div className={`p-4 rounded-2xl border shadow-sm text-center ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
             }`}>
             <span className="text-[10px] font-semibold text-slate-400 block uppercase">Current vs Expected CTC</span>
-            <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 block">{currentCtc} → {expectedCtc}</span>
+            <span className="text-sm font-bold text-slate-900 dark:text-white block">{currentCtc} → {expectedCtc}</span>
           </div>
 
           <div className={`p-4 rounded-2xl border shadow-sm text-center relative ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
             }`}>
             <span className="text-[10px] font-semibold text-slate-400 block uppercase">AI ATS Match Score</span>
-            <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{aiScore}%</span>
+            <span className="text-xl font-bold text-slate-900 dark:text-white">{aiScore}%</span>
           </div>
         </div>
 
         {/* 6-Dimensional ATS Audit Architecture Breakdown */}
-        <div className={`p-6 rounded-3xl border shadow-sm space-y-4 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+        <div className={`p-6 rounded-3xl border shadow-sm space-y-4 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
             <div className="flex items-center gap-2.5">
@@ -842,7 +841,7 @@ const CandidateDetails = () => {
                 </p>
               </div>
             </div>
-            <span className="px-3.5 py-1 text-xs font-extrabold rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-300 self-start sm:self-auto shrink-0">
+            <span className="px-3.5 py-1 text-xs font-extrabold rounded-full bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 self-start sm:self-auto shrink-0">
               Deterministic Score: {aiScore}%
             </span>
           </div>
@@ -882,10 +881,10 @@ const CandidateDetails = () => {
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 font-normal">Core skill overlap & verified stack</p>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-slate-900 dark:text-white space-y-1">
+                <div className="p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white space-y-1">
                   <div className="flex items-center justify-between">
                     <span>Experience Matching</span>
-                    <span className="text-emerald-700 dark:text-emerald-300 font-bold">{expPts} / 20 Pts</span>
+                    <span className="text-slate-900 dark:text-white font-bold">{expPts} / 20 Pts</span>
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 font-normal">Experience duration vs required years</p>
                 </div>
@@ -950,7 +949,7 @@ const CandidateDetails = () => {
             const verdict = evalDetails.hiringVerdict || candidate.hiringVerdict || (aiScore >= 85 ? 'HIGH RETURN / LOW RISK HIRE ' : (aiScore >= 70 ? 'MODERATE RETURN / MANAGEABLE RISK ' : 'CONDITIONAL HIRE / REQUIRES UPSKILLING '));
 
             return (
-              <div className={`p-5 rounded-3xl border shadow-md space-y-4 transition-all ${theme === 'dark' ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-amber-300/80 text-slate-900'
+              <div className={`p-5 rounded-3xl border shadow-md space-y-4 transition-all ${theme === 'dark' ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                 }`}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
                   <div className="flex items-center gap-2.5">
@@ -971,11 +970,11 @@ const CandidateDetails = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                   {/* Expected Business Profit / Pros Card */}
-                  <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-slate-900 dark:text-white space-y-2">
-                    <div className="font-extrabold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5 text-xs uppercase tracking-wide">
+                  <div className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white space-y-2">
+                    <div className="font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5 text-xs uppercase tracking-wide">
                       <span> Expected Business Profit & Pros (Why Hire)</span>
                     </div>
-                    <ul className="space-y-2 text-slate-800 dark:text-emerald-100 text-xs list-disc list-inside font-medium leading-relaxed">
+                    <ul className="space-y-2 text-slate-800 dark:text-slate-200 text-xs list-disc list-inside font-medium leading-relaxed">
                       {profitList.map((p, i) => (
                         <li key={i}>{p}</li>
                       ))}
@@ -1007,19 +1006,19 @@ const CandidateDetails = () => {
                   ATS Resume Keyword Extraction & Density Engine
                 </h4>
               </div>
-              <span className="px-3 py-0.5 text-xs font-bold rounded-full bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
+              <span className="px-3 py-0.5 text-xs font-bold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
                 {(candidate.aiBreakdown?.matchedSkills || (Array.isArray(candidate.skills) && candidate.skills.length > 0 ? candidate.skills : ['EdTech Sales', 'Student Counselling', 'Telesales', 'Target Handling'])).length} Target Keywords Found
               </span>
             </div>
 
             {/* Matched Keywords Grid */}
             <div className="space-y-1.5">
-              <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide block">
+              <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide block">
                 Matched Keywords Found in Resume
               </span>
               <div className="flex flex-wrap gap-2">
                 {(candidate.aiBreakdown?.matchedSkills || (Array.isArray(candidate.skills) && candidate.skills.length > 0 ? candidate.skills : ['EdTech Sales', 'Student Counselling', 'Telesales', 'Target Handling', 'Communication'])).map((kw, idx) => (
-                  <span key={idx} className="px-3 py-1 text-xs font-semibold rounded-xl bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20 flex items-center gap-1.5">
+                  <span key={idx} className="px-3 py-1 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 flex items-center gap-1.5">
                     {kw}
                   </span>
                 ))}
@@ -1054,7 +1053,7 @@ const CandidateDetails = () => {
               <div>
                 <h2 className="text-base font-bold flex items-center gap-2">
                   <span>Candidate Official Offer Letter & Package</span>
-                  <span className="px-2 py-0.5 text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 rounded-md">
+                  <span className="px-2 py-0.5 text-[10px] font-bold bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 rounded-md">
                     Synced with Offers Page
                   </span>
                 </h2>
@@ -1067,14 +1066,14 @@ const CandidateDetails = () => {
             <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={handleViewCandidatePdfPreview}
-                className="px-3.5 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 hover:bg-emerald-100 rounded-xl transition-all flex items-center gap-1.5"
+                className="px-3.5 py-2 text-xs font-semibold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 View Offer PDF Preview
               </button>
 
               <button
                 onClick={handleOpenEditOfferModal}
-                className="px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition-all flex items-center gap-1.5"
+                className="px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 Edit Offer Terms & Salary
               </button>
@@ -1084,7 +1083,7 @@ const CandidateDetails = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-medium">
             <div className={`p-3.5 rounded-xl border ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
               <span className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Fixed Base Compensation</span>
-              <span className="text-base font-extrabold text-emerald-600 dark:text-emerald-400">₹{Number(offerSalary).toLocaleString()}</span>
+              <span className="text-base font-extrabold text-slate-900 dark:text-white">₹{Number(offerSalary).toLocaleString()}</span>
             </div>
 
             <div className={`p-3.5 rounded-xl border ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
@@ -1168,7 +1167,7 @@ const CandidateDetails = () => {
             </div>
 
             <div className="flex items-center gap-3 shrink-0">
-              <div className="px-3.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center gap-1.5">
+              <div className="px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5">
                 <span>ATS Match:</span>
                 <span className="text-sm font-extrabold">{aiScore}%</span>
               </div>
@@ -1192,7 +1191,7 @@ const CandidateDetails = () => {
               <div className="grid grid-cols-3 p-3 border-b border-slate-100 dark:border-slate-800">
                 <div className="font-semibold text-slate-600 dark:text-slate-400">Domain Skills</div>
                 <div>EdTech Sales, Student Counselling, Lead Conversion, CRM</div>
-                <div className="font-semibold text-emerald-600 dark:text-emerald-400">
+                <div className="font-semibold text-slate-900 dark:text-white">
                   {skills.join(', ') || 'Sales, Counselling, Communication'}
                 </div>
               </div>
@@ -1200,7 +1199,7 @@ const CandidateDetails = () => {
               <div className="grid grid-cols-3 p-3 border-b border-slate-100 dark:border-slate-800">
                 <div className="font-semibold text-slate-600 dark:text-slate-400">Total Experience</div>
                 <div>2.0+ Years Minimum</div>
-                <div className="font-semibold text-emerald-600 dark:text-emerald-400">
+                <div className="font-semibold text-slate-900 dark:text-white">
                   {totalExperience} Years ({totalExperience >= 2 ? ' Exceeds Requirement' : (isStudent ? 'Student / Fresher Applicant' : ' Below Ideal')})
                 </div>
               </div>
@@ -1217,21 +1216,21 @@ const CandidateDetails = () => {
 
           {/* Section 2: Verified Matched Skills vs Missing Skills */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className={`p-4 rounded-xl border space-y-2 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-emerald-50/50 border-emerald-200'
+            <div className={`p-4 rounded-xl border space-y-2 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'
               }`}>
-              <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider block">
                 Verified Matched Skills & Capabilities:
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {skills.map((sk) => (
-                  <span key={sk} className="px-2.5 py-1 text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 rounded-lg border border-emerald-200 dark:border-emerald-900">
+                  <span key={sk} className="px-2.5 py-1 text-xs font-semibold bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 rounded-lg border border-slate-200 dark:border-slate-700">
                     {sk}
                   </span>
                 ))}
               </div>
             </div>
 
-            <div className={`p-4 rounded-xl border space-y-2 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-white border-amber-200'
+            <div className={`p-4 rounded-xl border space-y-2 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-white border-slate-200'
               }`}>
               <span className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider block">
                 Skills Gaps / To Probe in Interview:
@@ -1249,22 +1248,22 @@ const CandidateDetails = () => {
           {/* Section 3: Why Hire vs Why Not Hire Analysis */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Why Hire This Candidate */}
-            <div className={`p-4 rounded-xl border space-y-2 border-l-4 border-l-emerald-500 ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+            <div className={`p-4 rounded-xl border space-y-2 border-l-4 border-l-slate-400 dark:border-l-slate-600 ${theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
               }`}>
-              <h4 className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+              <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
                 <span>Why Hire {firstName}? (Key Hiring Pros & Strengths)</span>
               </h4>
               <ul className="space-y-1.5 text-xs text-slate-700 dark:text-slate-300 font-medium">
                 <li className="flex items-start gap-1.5">
-                  <span className="text-emerald-500 font-bold shrink-0"></span>
+                  <span className="text-slate-500 font-bold shrink-0">•</span>
                   <span><strong>Proven Domain Experience:</strong> Brings {totalExperience} years direct hands-on experience in EdTech sales and student admissions counselling.</span>
                 </li>
                 <li className="flex items-start gap-1.5">
-                  <span className="text-emerald-500 font-bold shrink-0"></span>
+                  <span className="text-slate-500 font-bold shrink-0">•</span>
                   <span><strong>Short Training Curve:</strong> Demonstrated strong candidate pitch capability with immediate capability to manage telesales pipeline.</span>
                 </li>
                 <li className="flex items-start gap-1.5">
-                  <span className="text-emerald-500 font-bold shrink-0"></span>
+                  <span className="text-slate-500 font-bold shrink-0">•</span>
                   <span><strong>Strong AI Audit Score:</strong> {aiReason}</span>
                 </li>
               </ul>
@@ -1313,7 +1312,7 @@ const CandidateDetails = () => {
             </Link>
             <Link
               to={`/offers?candidateId=${candidate.id}`}
-              className="px-3.5 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm"
+              className="px-3.5 py-2 text-xs font-semibold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm"
             >
               Manage Offer in Offers Section →
             </Link>
@@ -1475,7 +1474,7 @@ const CandidateDetails = () => {
                 <a
                   href={viewingPdfUrl}
                   download={`${firstName}_${lastName}_Official_Offer_Letter.pdf`}
-                  className="px-3.5 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition-all flex items-center gap-1.5"
+                  className="px-3.5 py-1.5 text-xs font-semibold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all flex items-center gap-1.5"
                 >
                   Download Copy
                 </a>

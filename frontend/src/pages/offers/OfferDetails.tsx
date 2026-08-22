@@ -124,9 +124,8 @@ const OfferDetails = () => {
       <div className="space-y-6">
         {/* Header */}
         <div className={`p-6 rounded-3xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden shadow-sm ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-amber-200/80 text-slate-900'
+          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}>
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500" />
 
           <div className="space-y-1.5 pt-1">
             <BackButton label="Back to Offers & Agreements" to="/offers" />
@@ -191,7 +190,7 @@ const OfferDetails = () => {
 
         {activeTab === 'adyapan4page' ? (
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-white dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-2xl">
+            <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl">
               <div className="flex items-center gap-3">
                 <span className="text-2xl"></span>
                 <div>
@@ -240,7 +239,7 @@ const OfferDetails = () => {
                 <span
                   className={`px-3 py-1 text-xs font-medium rounded-full border ${
                     offer.status === 'ACCEPTED'
-                      ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200'
+                      ? 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
                       : 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border-blue-200'
                   }`}
                 >
@@ -263,7 +262,7 @@ const OfferDetails = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <span className="text-xs text-slate-500 font-medium block">Fixed Base Salary</span>
-                    <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">₹{Number(offer.salary || 0).toLocaleString()} / yr</span>
+                    <span className="text-lg font-bold text-slate-900 dark:text-white">₹{Number(offer.salary || 0).toLocaleString()} / yr</span>
                   </div>
                   <div>
                     <span className="text-xs text-slate-500 font-medium block">Variable Performance Bonus</span>
@@ -279,7 +278,7 @@ const OfferDetails = () => {
                     <li key={b} className={`text-xs font-medium flex items-center gap-2 p-2.5 rounded-xl border ${
                       theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-slate-50 border-slate-200 text-slate-700'
                     }`}>
-                      <span className="text-emerald-500 font-bold"></span> {b}
+                      <span className="text-slate-500 font-bold shrink-0">•</span> {b}
                     </li>
                   ))}
                 </ul>
