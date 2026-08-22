@@ -469,13 +469,13 @@ export const PublicJobs: React.FC = () => {
               <div className="lg:col-span-7 space-y-6">
 
                 {/* Direct Opportunities Pill */}
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-900 dark:text-amber-300 font-black text-xs tracking-wider uppercase shadow-xs">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-900 dark:text-amber-300 font-bold text-xs tracking-wider uppercase shadow-xs">
                   <Sparkles size={14} className="text-amber-600 dark:text-amber-400 fill-amber-500" />
                   <span>DIRECT ADYAPAN OPENINGS · FAST-TRACK HIRING · TOP COMPENSATION</span>
                 </div>
 
                 {/* Main Headline */}
-                <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-[76px] font-black text-stone-950 dark:text-white tracking-tight leading-[1.05]">
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-[76px] font-bold text-stone-950 dark:text-white tracking-tight leading-[1.05]">
                   Unlock your <br />
                   <span className="text-amber-600 dark:text-amber-400">career potential</span> <br />
                   at Adyapan.
@@ -573,7 +573,7 @@ export const PublicJobs: React.FC = () => {
                     {/* Search CTA Button */}
                     <button
                       onClick={() => setCurrentPage(1)}
-                      className="px-7 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-xs sm:text-sm shadow-xl shadow-amber-500/25 hover:scale-105 transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+                      className="px-7 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs sm:text-sm shadow-xl shadow-amber-500/25 hover:scale-105 transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer"
                     >
                       <span>Search Jobs</span>
                       <ArrowRight size={15} />
@@ -617,10 +617,10 @@ export const PublicJobs: React.FC = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
                   <div className="absolute bottom-4 left-4 right-4 text-white pointer-events-none">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 block">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 block">
                       Direct Hiring
                     </span>
-                    <b className="text-sm sm:text-base font-black text-white">
+                    <b className="text-sm sm:text-base font-bold text-white">
                       Adyapan Edutech Headquarters
                     </b>
                   </div>
@@ -628,31 +628,31 @@ export const PublicJobs: React.FC = () => {
 
                 {/* Floating Cards */}
                 <div className="absolute -top-4 left-0 sm:-left-8 z-20 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-stone-200/80 dark:border-stone-800 px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl shadow-xl flex items-center gap-2 sm:gap-3 animate-float">
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center font-black">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center font-bold">
                     <CheckCircle2 size={16} />
                   </div>
                   <div>
-                    <b className="text-xs font-black text-stone-900 dark:text-white block">Verified Jobs</b>
+                    <b className="text-xs font-bold text-stone-900 dark:text-white block">Verified Jobs</b>
                     <small className="text-[10px] font-semibold text-stone-500 dark:text-stone-400">Updated Daily</small>
                   </div>
                 </div>
 
                 <div className="absolute top-1/2 right-0 sm:-right-8 -translate-y-1/2 z-20 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-stone-200/80 dark:border-stone-800 px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl shadow-xl flex items-center gap-2 sm:gap-3 animate-float-delayed">
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-500/15 text-amber-600 flex items-center justify-center font-black">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-500/15 text-amber-600 flex items-center justify-center font-bold">
                     <Star size={16} className="fill-amber-500" />
                   </div>
                   <div>
-                    <b className="text-xs font-black text-stone-900 dark:text-white block">4.8 / 5.0</b>
+                    <b className="text-xs font-bold text-stone-900 dark:text-white block">4.8 / 5.0</b>
                     <small className="text-[10px] font-semibold text-stone-500 dark:text-stone-400">Candidate Rating</small>
                   </div>
                 </div>
 
                 <div className="absolute -bottom-4 left-0 sm:-left-6 z-20 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border border-amber-200 dark:border-amber-800/40 px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl shadow-xl flex items-center gap-2 sm:gap-3 animate-float bento-glow-orange">
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center font-black shadow-md">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center font-bold shadow-md">
                     <Zap size={16} />
                   </div>
                   <div>
-                    <b className="text-xs font-black text-stone-900 dark:text-white block">48 - 72 Hours</b>
+                    <b className="text-xs font-bold text-stone-900 dark:text-white block">48 - 72 Hours</b>
                     <small className="text-[10px] font-semibold text-stone-500 dark:text-stone-400">Fast-Track Hiring</small>
                   </div>
                 </div>
@@ -686,7 +686,7 @@ export const PublicJobs: React.FC = () => {
                 {/* Filter Control Box */}
                 <div className={`bg-white dark:bg-stone-900 p-6 rounded-3xl border border-stone-200/80 dark:border-stone-800 shadow-lg space-y-6 ${showMobileFilters ? 'block' : 'hidden lg:block'}`}>
                   <div className="flex items-center justify-between pb-4 border-b border-stone-100 dark:border-stone-800">
-                    <span className="font-black text-base text-stone-900 dark:text-white flex items-center gap-2">
+                    <span className="font-bold text-base text-stone-900 dark:text-white flex items-center gap-2">
                       <SlidersHorizontal size={18} className="text-amber-500" />
                       <span>Filters</span>
                     </span>
@@ -806,7 +806,7 @@ export const PublicJobs: React.FC = () => {
                   <div className="pt-2 border-t border-amber-100 dark:border-stone-800">
                     <Link
                       to="/life-at-adyapan"
-                      className="inline-flex items-center gap-1.5 text-xs font-black text-amber-600 dark:text-amber-400 hover:text-amber-700 hover:underline group"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400 hover:text-amber-700 hover:underline group"
                     >
                       <span>Explore Life at Adyapan</span>
                       <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
@@ -817,7 +817,7 @@ export const PublicJobs: React.FC = () => {
                 {/* ── CAREER GUIDANCE & HR SUPPORT SIDEBAR CARD (NO SIGNUP) ── */}
                 <div className="bg-[#fffdfa] dark:bg-stone-900 p-6 rounded-3xl border border-amber-200/80 dark:border-amber-900/40 shadow-sm space-y-3.5">
                   <div className="flex items-center gap-2">
-                    <span className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xs font-black">
+                    <span className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xs font-bold">
                       <MessageSquare size={16} />
                     </span>
                     <h3 className="font-extrabold text-base text-stone-900 dark:text-white tracking-tight">
@@ -847,7 +847,7 @@ export const PublicJobs: React.FC = () => {
                 {/* Results Header: Count, Sort Dropdown, and View Toggle */}
                 <div className="bg-white dark:bg-stone-900 p-4 sm:p-5 rounded-3xl border border-stone-200/80 dark:border-stone-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <span className="font-black text-base text-stone-900 dark:text-white">
+                    <span className="font-bold text-base text-stone-900 dark:text-white">
                       <b className="text-amber-500">{filteredJobs.length}</b> Opportunities Available
                     </span>
                     <p className="text-xs text-stone-500 font-medium">
@@ -909,7 +909,7 @@ export const PublicJobs: React.FC = () => {
                       <Search size={26} />
                     </div>
                     <div className="space-y-1">
-                      <h3 className="font-black text-lg text-stone-900 dark:text-white">
+                      <h3 className="font-bold text-lg text-stone-900 dark:text-white">
                         No matching opportunities found
                       </h3>
                       <p className="text-xs text-stone-500 max-w-sm mx-auto font-medium">
@@ -918,7 +918,7 @@ export const PublicJobs: React.FC = () => {
                     </div>
                     <button
                       onClick={clearAllFilters}
-                      className="px-6 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-black shadow-lg shadow-amber-500/25 transition-all cursor-pointer"
+                      className="px-6 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-lg shadow-amber-500/25 transition-all cursor-pointer"
                     >
                       View All Opportunities
                     </button>
@@ -952,7 +952,7 @@ export const PublicJobs: React.FC = () => {
                                   <div className="flex items-center gap-2.5 flex-wrap">
                                     <Link
                                       to={`/careers/${job.slug || job.id}`}
-                                      className="font-black text-base sm:text-lg text-stone-900 dark:text-white hover:text-amber-500 transition-colors"
+                                      className="font-bold text-base sm:text-lg text-stone-900 dark:text-white hover:text-amber-500 transition-colors"
                                     >
                                       {job.title}
                                     </Link>
@@ -998,7 +998,7 @@ export const PublicJobs: React.FC = () => {
                               {/* Right Side: Salary, Date & Actions */}
                               <div className="flex sm:flex-col items-center sm:items-end justify-between border-t sm:border-t-0 pt-3 sm:pt-0 border-stone-100 dark:border-stone-800 gap-3 shrink-0">
                                 <div className="text-left sm:text-right">
-                                  <b className="text-base font-black text-stone-900 dark:text-white block">
+                                  <b className="text-base font-bold text-stone-900 dark:text-white block">
                                     {job.salary}
                                   </b>
                                   <small className="text-[11px] font-semibold text-stone-400">
@@ -1052,7 +1052,7 @@ export const PublicJobs: React.FC = () => {
                       <button
                         key={pageNum}
                         onClick={() => setCurrentPage(pageNum)}
-                        className={`w-10 h-10 rounded-2xl font-black text-xs transition-all flex items-center justify-center cursor-pointer ${currentPage === pageNum
+                        className={`w-10 h-10 rounded-2xl font-bold text-xs transition-all flex items-center justify-center cursor-pointer ${currentPage === pageNum
                           ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/25 scale-105'
                           : 'bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:bg-amber-500/10 hover:text-amber-600'
                           }`}

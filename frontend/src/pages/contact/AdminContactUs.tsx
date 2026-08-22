@@ -58,7 +58,7 @@ const AdminContactUs = () => {
   };
 
   return (
-    <div className={`min-h-screen font-sans antialiased flex flex-col transition-colors ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-[#fdf6ee] text-slate-900'
+    <div className={`min-h-screen font-sans antialiased flex flex-col transition-colors ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-white text-slate-900'
       }`}>
       {/* Admin Dedicated Glassmorphic Navbar */}
       <nav className={`sticky top-0 z-50 px-3 sm:px-8 py-2.5 sm:py-3.5 backdrop-blur-xl border-b transition-all ${theme === 'dark'
@@ -73,7 +73,7 @@ const AdminContactUs = () => {
           <div className="flex items-center gap-2 sm:gap-3">
             <Link
               to="/dashboard"
-              className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-black text-slate-950 bg-amber-400 hover:bg-amber-500 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer shrink-0"
+              className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-bold text-slate-950 bg-amber-400 hover:bg-amber-500 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer shrink-0"
             >
               <span className="hidden sm:inline">← Back to Dashboard</span>
               <span className="sm:hidden">← Dashboard</span>
@@ -118,7 +118,7 @@ const AdminContactUs = () => {
             </div>
             <div>
               <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 block">PHONE</span>
-              <a href="tel:+918179124566" className="text-sm font-black hover:text-amber-500 transition-colors">
+              <a href="tel:+918179124566" className="text-sm font-bold hover:text-amber-500 transition-colors">
                 +91 81791 24566
               </a>
             </div>
@@ -134,7 +134,7 @@ const AdminContactUs = () => {
             </div>
             <div>
               <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 block">EMAIL</span>
-              <a href="mailto:support@adyapan.com" className="text-sm font-black hover:text-amber-500 transition-colors">
+              <a href="mailto:support@adyapan.com" className="text-sm font-bold hover:text-amber-500 transition-colors">
                 support@adyapan.com
               </a>
             </div>
@@ -150,7 +150,7 @@ const AdminContactUs = () => {
             </div>
             <div>
               <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 block">HOURS</span>
-              <span className="text-sm font-black">Mon - Sat, 11 AM - 8 PM</span>
+              <span className="text-sm font-bold">Mon - Sat, 11 AM - 8 PM</span>
             </div>
           </div>
         </div>
@@ -255,7 +255,7 @@ const AdminContactUs = () => {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-4 text-xs font-black text-slate-950 bg-amber-500 hover:bg-amber-400 rounded-2xl transition-all shadow-lg shadow-amber-500/20 uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-4 text-xs font-bold text-slate-950 bg-amber-500 hover:bg-amber-400 rounded-2xl transition-all shadow-lg shadow-amber-500/20 uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -309,7 +309,7 @@ const AdminContactUs = () => {
                   className="w-full py-3 px-4 rounded-2xl font-bold text-white text-xs bg-[#ff0000] hover:bg-[#cc0000] transition-all flex items-center justify-center gap-2 shadow-md"
                 >
                   <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                   </svg>
                   <span>YouTube Channel</span>
                 </a>

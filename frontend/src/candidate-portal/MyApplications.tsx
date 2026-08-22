@@ -122,11 +122,11 @@ const MyApplications = () => {
         <div className="absolute bottom-0 right-1/4 w-[350px] h-[350px] bg-orange-500/25 rounded-full blur-2xl pointer-events-none" />
 
         <div className="max-w-7xl mx-auto space-y-3 relative z-10">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-amber-400 text-slate-950 rounded-full text-[11px] font-black uppercase tracking-wider shadow-md">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-amber-400 text-slate-950 rounded-full text-[11px] font-bold uppercase tracking-wider shadow-md">
             ● CANDIDATE DASHBOARD
           </div>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-tight drop-shadow-sm">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight drop-shadow-sm">
             Welcome back, {candidate.firstName}!
           </h1>
 
@@ -145,18 +145,18 @@ const MyApplications = () => {
             }`}>
             <button
               onClick={() => setActiveTab('applications')}
-              className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer ${activeTab === 'applications'
-                  ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 scale-[1.02]'
-                  : theme === 'dark' ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
+              className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${activeTab === 'applications'
+                ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 scale-[1.02]'
+                : theme === 'dark' ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
                 }`}
             >
               My Applications ({applications.length})
             </button>
             <button
               onClick={() => setActiveTab('profile')}
-              className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer ${activeTab === 'profile'
-                  ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 scale-[1.02]'
-                  : theme === 'dark' ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
+              className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${activeTab === 'profile'
+                ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 scale-[1.02]'
+                : theme === 'dark' ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
                 }`}
             >
               My Profile & Resume
@@ -197,7 +197,7 @@ const MyApplications = () => {
                 </p>
                 <Link
                   to="/open-positions"
-                  className="inline-block px-7 py-3 rounded-full text-xs font-black text-slate-950 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:from-amber-300 hover:to-orange-400 shadow-lg shadow-amber-500/25 uppercase tracking-wider"
+                  className="inline-block px-7 py-3 rounded-full text-xs font-bold text-slate-950 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:from-amber-300 hover:to-orange-400 shadow-lg shadow-amber-500/25 uppercase tracking-wider"
                 >
                   Explore Open Positions →
                 </Link>
@@ -213,18 +213,18 @@ const MyApplications = () => {
                     <div
                       key={app.id}
                       className={`p-6 sm:p-8 rounded-3xl border transition-all space-y-6 ${theme === 'dark'
-                          ? 'bg-slate-900/90 border-slate-800 shadow-xl'
-                          : 'bg-white border-amber-200/80 shadow-xl shadow-amber-500/5'
+                        ? 'bg-slate-900/90 border-slate-800 shadow-xl'
+                        : 'bg-white border-amber-200/80 shadow-xl shadow-amber-500/5'
                         }`}
                     >
                       {/* Top Header info */}
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
                           <div className="flex flex-wrap items-center gap-2 mb-2">
-                            <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30">
+                            <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30">
                               {targetJob.department || 'EdTech Growth'}
                             </span>
-                            <span className={`px-3 py-1 rounded-full text-[10px] font-black border ${statusInfo.badgeBg} ${statusInfo.color}`}>
+                            <span className={`px-3 py-1 rounded-full text-[10px] font-bold border ${statusInfo.badgeBg} ${statusInfo.color}`}>
                               ● {statusInfo.label}
                             </span>
                           </div>
@@ -253,8 +253,8 @@ const MyApplications = () => {
                           <Link
                             to={`/careers/${(targetJob as any).slug || (targetJob as any).id || ''}`}
                             className={`px-4 py-2 rounded-xl text-xs font-bold border transition-colors ${theme === 'dark'
-                                ? 'border-slate-700 text-slate-300 hover:bg-slate-800'
-                                : 'border-slate-200 text-slate-700 hover:bg-slate-100'
+                              ? 'border-slate-700 text-slate-300 hover:bg-slate-800'
+                              : 'border-slate-200 text-slate-700 hover:bg-slate-100'
                               }`}
                           >
                             View Role Specifications ↗
@@ -271,14 +271,14 @@ const MyApplications = () => {
                             return (
                               <div key={stepName} className="space-y-1.5 text-center">
                                 <div className={`h-2.5 rounded-full transition-all ${isCompleted || isCurrent
-                                    ? 'bg-gradient-to-r from-amber-400 to-orange-500 shadow-md shadow-amber-500/20'
-                                    : theme === 'dark' ? 'bg-slate-800' : 'bg-slate-200'
+                                  ? 'bg-gradient-to-r from-amber-400 to-orange-500 shadow-md shadow-amber-500/20'
+                                  : theme === 'dark' ? 'bg-slate-800' : 'bg-slate-200'
                                   }`} />
-                                <span className={`text-[10px] font-black uppercase tracking-wider block truncate ${isCurrent
-                                    ? 'text-amber-500 font-black'
-                                    : isCompleted
-                                      ? theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
-                                      : 'text-slate-400'
+                                <span className={`text-[10px] font-bold uppercase tracking-wider block truncate ${isCurrent
+                                  ? 'text-amber-500 font-bold'
+                                  : isCompleted
+                                    ? theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
+                                    : 'text-slate-400'
                                   }`}>
                                   {stepName}
                                 </span>
@@ -293,7 +293,7 @@ const MyApplications = () => {
                         <div className={`p-5 rounded-2xl border space-y-3 ${theme === 'dark' ? 'bg-slate-950/80 border-purple-500/40 text-white' : 'bg-purple-50/50 border-purple-200 text-slate-900'
                           }`}>
                           <div className="flex items-center gap-2">
-                            <h4 className="text-xs font-black uppercase tracking-wider text-purple-600 dark:text-purple-400">
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">
                               Interview Rounds Scheduled:
                             </h4>
                           </div>
@@ -316,7 +316,7 @@ const MyApplications = () => {
                                     href={iv.meetingLink}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-black text-center transition-all shadow-md"
+                                    className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-center transition-all shadow-md"
                                   >
                                     Join Meeting ↗
                                   </a>
@@ -333,11 +333,11 @@ const MyApplications = () => {
                           }`}>
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <h4 className="text-xs font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                              <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                                 Official Offer Letter Extended
                               </h4>
                             </div>
-                            <span className="px-3 py-1 rounded-full text-[10px] font-black bg-emerald-500 text-slate-950">
+                            <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-500 text-slate-950">
                               {app.offer.status}
                             </span>
                           </div>
@@ -444,7 +444,7 @@ const MyApplications = () => {
                 <button
                   type="submit"
                   disabled={savingProfile}
-                  className="px-7 py-3 rounded-xl text-xs font-black text-slate-950 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:from-amber-300 hover:to-orange-400 transition-all shadow-md uppercase tracking-wider cursor-pointer"
+                  className="px-7 py-3 rounded-xl text-xs font-bold text-slate-950 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:from-amber-300 hover:to-orange-400 transition-all shadow-md uppercase tracking-wider cursor-pointer"
                 >
                   {savingProfile ? 'Saving Changes...' : 'Save Profile Changes'}
                 </button>

@@ -258,7 +258,7 @@ const AdminProfile = () => {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <BackButton label="Back to Dashboard" to="/dashboard" />
           <span className="px-2.5 sm:px-3.5 py-1 text-[10px] sm:text-xs font-extrabold rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-             Recruiter Profile & Security
+            Recruiter Profile & Security
           </span>
         </div>
 
@@ -268,13 +268,13 @@ const AdminProfile = () => {
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 pt-1">
             <div className="flex flex-row items-center gap-3 sm:gap-5">
-              <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-amber-600 via-amber-500 to-amber-500 text-white font-black text-2xl sm:text-3xl flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/25">
+              <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-amber-600 via-amber-500 to-amber-500 text-white font-bold text-2xl sm:text-3xl flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/25">
                 {profileData.name.charAt(0)}
               </div>
 
               <div className="space-y-1 overflow-hidden">
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                  <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-slate-900 dark:text-white truncate">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white truncate">
                     {profileData.name}
                   </h1>
                   <span className="px-2.5 py-0.5 text-[10px] sm:text-xs font-bold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0">
@@ -285,7 +285,7 @@ const AdminProfile = () => {
                   {profileData.designation} • {profileData.department}
                 </p>
                 <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
-                   {profileData.email} •  {profileData.company}
+                  {profileData.email} •  {profileData.company}
                 </p>
               </div>
             </div>
@@ -386,7 +386,7 @@ const AdminProfile = () => {
                 {(user?.role === 'ADMIN' || user?.email === 'admin@adyapan.com') && (
                   <button
                     onClick={() => setShowCreateHRModal(true)}
-                    className="px-3 py-1.5 text-xs font-black text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-xl transition-all shadow-md flex items-center gap-1 uppercase tracking-wider shrink-0"
+                    className="px-3 py-1.5 text-xs font-bold text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-xl transition-all shadow-md flex items-center gap-1 uppercase tracking-wider shrink-0"
                   >
                     + Generate HR Account
                   </button>
@@ -420,7 +420,7 @@ const AdminProfile = () => {
                         <>
                           <div className="flex items-center justify-between">
                             <span className="font-extrabold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                               List of HR Accounts ({hrOnlyUsers.length})
+                              List of HR Accounts ({hrOnlyUsers.length})
                             </span>
                             <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
                               Admin Access Controls
@@ -438,7 +438,7 @@ const AdminProfile = () => {
                                   <div className="space-y-0.5 min-w-0">
                                     <div className="font-bold text-slate-900 dark:text-white truncate flex items-center gap-2">
                                       <span>{u.name}</span>
-                                      <span className="px-2 py-0.5 text-[10px] font-black rounded-full uppercase bg-blue-500/20 text-blue-700 dark:text-blue-300">
+                                      <span className="px-2 py-0.5 text-[10px] font-bold rounded-full uppercase bg-blue-500/20 text-blue-700 dark:text-blue-300">
                                         HR
                                       </span>
                                     </div>
@@ -709,7 +709,7 @@ const AdminProfile = () => {
                       navigator.clipboard.writeText(`Work Email: ${generatedCreds.email}\nPassword: ${generatedCreds.password}`);
                       toast.success('Credentials copied to clipboard! ');
                     }}
-                    className="px-2.5 py-1 text-[10px] font-black bg-amber-500 text-white rounded-lg hover:bg-amber-600 uppercase tracking-wider cursor-pointer"
+                    className="px-2.5 py-1 text-[10px] font-bold bg-amber-500 text-white rounded-lg hover:bg-amber-600 uppercase tracking-wider cursor-pointer"
                   >
                     Copy Credentials
                   </button>
@@ -798,7 +798,7 @@ const AdminProfile = () => {
                 <button
                   type="submit"
                   disabled={creatingHR}
-                  className="flex-1 py-3 text-xs font-black text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl shadow-lg transition-all uppercase tracking-wider"
+                  className="flex-1 py-3 text-xs font-bold text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl shadow-lg transition-all uppercase tracking-wider"
                 >
                   {creatingHR ? 'Generating HR Account...' : 'Generate & Issue HR Account →'}
                 </button>
@@ -868,7 +868,7 @@ const AdminProfile = () => {
                 <button
                   type="submit"
                   disabled={updatingHRPassword}
-                  className="flex-1 py-3 text-xs font-black text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl shadow-lg transition-all uppercase tracking-wider"
+                  className="flex-1 py-3 text-xs font-bold text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl shadow-lg transition-all uppercase tracking-wider"
                 >
                   {updatingHRPassword ? 'Updating Password...' : 'Save New HR Password'}
                 </button>

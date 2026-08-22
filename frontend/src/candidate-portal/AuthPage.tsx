@@ -1,36 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import {
-  ArrowRight,
-  CheckCircle2,
-  Sparkles,
-  Heart,
-  Eye,
-  EyeOff,
-  BriefcaseBusiness,
-  Lock,
-  Mail,
-  User,
-  Phone,
-} from 'lucide-react';
+import { ArrowRight, Lock, Mail, User, Phone, CheckCircle2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import logo from '../assets/adyapan-logo.png';
-import { useCandidateAuth } from '../context/CandidateAuthContext';
 import api from '../services/api';
 import toast from 'react-hot-toast';
+import { useCandidateAuth } from '../context/CandidateAuthContext';
+import { useAuth } from '../context/AuthContext';
 
 const AuthPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
-  // Signup mode temporarily commented out for future release (defaults to direct Sign In)
-  const isSignup = false; // params.get('mode') === 'signup';
+  const isSignup = params.get('mode') === 'signup';
   const redirectUrl = params.get('redirect') || '';
 
-  // const { register: registerCandidate } = useCandidateAuth();
+  const { register: registerCandidate, login: loginCandidate } = useCandidateAuth();
+  const { login: loginAdmin } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [reveal, setReveal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -41,9 +32,22 @@ const AuthPage: React.FC = () => {
     agreeTerms: true,
   });
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => setReveal(true), 2850);
+    return () => window.clearTimeout(timer);
+  }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError('');
+  };
+
+  const goBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,15 +55,14 @@ const AuthPage: React.FC = () => {
     setError('');
     setLoading(true);
 
-    if (!formData.email.trim() || !formData.password.trim()) {
-      setError('Please fill in email and password.');
+    const emailTrimmed = formData.email.trim().toLowerCase();
+
+    if (!emailTrimmed || !formData.password.trim()) {
+      setError('Please enter your email and password.');
       setLoading(false);
       return;
     }
 
-    /* ══════════════════════════════════════════════════════════
-       SIGNUP FLOW (COMMENTED OUT FOR FUTURE RELEASE)
-       ══════════════════════════════════════════════════════════
     if (isSignup) {
       if (!formData.fullName.trim()) {
         setError('Please enter your full name.');
@@ -72,311 +75,301 @@ const AuthPage: React.FC = () => {
         return;
       }
 
-      const nameParts = formData.fullName.trim().split(' ');
-      const firstName = nameParts[0];
-      const lastName = nameParts.slice(1).join(' ') || '';
+      try {
+        const nameParts = formData.fullName.trim().split(' ');
+        const firstName = nameParts[0];
+        const lastName = nameParts.slice(1).join(' ') || '';
 
-      const res = await registerCandidate({
-        firstName,
-        lastName,
-        email: formData.email.trim().toLowerCase(),
-        password: formData.password,
-        phone: formData.phone.trim(),
-      });
+        const res = await registerCandidate({
+          firstName,
+          lastName,
+          email: emailTrimmed,
+          password: formData.password,
+          phone: formData.phone.trim(),
+        });
 
-      setLoading(false);
-      if (res.success) {
-        toast.success('Account created successfully!');
-        if (redirectUrl) {
-          navigate(redirectUrl);
-        } else {
-          navigate('/my-applications');
-        }
-      } else {
-        setError(res.error || 'Failed to create account.');
-      }
-      return;
-    }
-    ══════════════════════════════════════════════════════════ */
-
-    // Sign In Flow
-    try {
-      const response = await api.post('/auth/login', {
-        email: formData.email.trim().toLowerCase(),
-        password: formData.password,
-      });
-        const data = response.data;
-
-        if (data.success) {
-          const role = data.role || data.user?.role;
-
-          if (role === 'CANDIDATE') {
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('candidateToken', data.token);
-            if (data.candidate) {
-              localStorage.setItem('candidate', JSON.stringify(data.candidate));
-            } else if (data.user) {
-              localStorage.setItem('candidate', JSON.stringify(data.user));
-            }
-            toast.success('Welcome back!');
-            if (redirectUrl) {
-              window.location.href = redirectUrl;
-            } else {
-              window.location.href = '/my-applications';
-            }
+        if (res.success) {
+          toast.success('Account created successfully!');
+          if (redirectUrl) {
+            navigate(redirectUrl);
           } else {
-            localStorage.setItem('token', data.token);
-            localStorage.setItem(
-              'user',
-              JSON.stringify(
-                data.user || {
-                  id: 'admin-1',
-                  email: formData.email.trim().toLowerCase(),
-                  name: 'Recruiter Admin',
-                  role: 'ADMIN',
-                }
-              )
-            );
-            toast.success('Welcome back, Admin!');
-            window.location.href = '/dashboard';
+            navigate('/my-applications');
           }
         } else {
-          setError(data.message || 'Invalid email or password.');
+          setError(res.error || 'Failed to create account. Please try again.');
         }
       } catch (err: any) {
-        console.error('Login error:', err);
-        const msg = err.response?.data?.message || 'Invalid email or password. Please try again.';
+        const msg = err.response?.data?.message || 'Failed to create account. Please try again.';
         setError(msg);
       } finally {
         setLoading(false);
       }
+      return;
+    }
+
+    // SIGN IN FLOW
+    try {
+      const response = await api.post('/auth/login', {
+        email: emailTrimmed,
+        password: formData.password,
+      });
+
+      const data = response.data;
+
+      if (data.success) {
+        const role = data.role || data.user?.role;
+
+        if (role === 'CANDIDATE') {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('candidateToken', data.token);
+          if (data.candidate) {
+            localStorage.setItem('candidate', JSON.stringify(data.candidate));
+          } else if (data.user) {
+            localStorage.setItem('candidate', JSON.stringify(data.user));
+          }
+          toast.success('Welcome back!');
+          if (redirectUrl) {
+            window.location.href = redirectUrl;
+          } else {
+            window.location.href = '/my-applications';
+          }
+        } else {
+          // Admin / Recruiter
+          localStorage.setItem('token', data.token);
+          localStorage.setItem(
+            'user',
+            JSON.stringify(
+              data.user || {
+                id: 'admin-1',
+                email: emailTrimmed,
+                name: 'Recruiter Admin',
+                role: 'ADMIN',
+              }
+            )
+          );
+          toast.success('Welcome back, Admin!');
+          window.location.href = '/dashboard';
+        }
+      } else {
+        setError(data.message || 'Invalid email or password.');
+      }
+    } catch (err: any) {
+      console.error('Login error:', err);
+      const msg = err.response?.data?.message || 'Invalid email or password. Please try again.';
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-[#090806] text-white">
-      {/* Left Column: Visual Brand Experience */}
-      <div className="relative hidden lg:flex lg:col-span-6 xl:col-span-7 flex-col justify-between p-12 overflow-hidden">
-        {/* Background Image with Deep Overlay */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage:
-              'url("https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1800&q=90")',
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#090806] via-[#090806]/80 to-[#090806]/30" />
+    <div className={`auth-scene ${isSignup ? 'auth-signup' : 'auth-signin'} ${reveal ? 'auth-revealed' : ''}`}>
+      <div className="auth-stars" aria-hidden="true" />
+      <div className="auth-haze" aria-hidden="true" />
 
-        {/* Brand Top */}
-        <div className="relative z-10">
-          <Link to="/" className="inline-flex items-center gap-3">
-            <img src={logo} alt="Adyapan Logo" className="w-12 h-12 rounded-full object-contain bg-white/10 p-1" />
-            <span className="text-xl font-black tracking-tight">
-              Adyapan <span className="text-amber-500">Hiring</span>
-            </span>
-          </Link>
-        </div>
+      {/* Brand Top Left */}
+      <Link to="/" className="auth-scene-brand" aria-label="Adyapan Hiring home">
+        <img src={logo} alt="Adyapan" />
+        <span>
+          Adyapan <b>Hiring</b>
+        </span>
+      </Link>
 
-        {/* Hero Message Middle */}
-        <div className="relative z-10 max-w-xl space-y-4 my-auto py-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/40">
-            <Sparkles className="w-3.5 h-3.5" />
-            YOUR NEXT OPPORTUNITY
+      {/* Back Button Top Right */}
+      <button type="button" className="auth-back" onClick={goBack} aria-label="Go back to previous page">
+        <span aria-hidden="true">←</span> Go back
+      </button>
+
+      {/* Animated Lighthouse Area */}
+      <div className="auth-lighthouse-area" aria-hidden="true">
+        <div className="auth-beam auth-beam-1" />
+        <div className="auth-beam auth-beam-2" />
+        <div className="auth-beam auth-beam-3" />
+        <div className="auth-lamp-glow" />
+
+        <div className="auth-lighthouse">
+          <div className="auth-spire" />
+          <div className="auth-dome" />
+          <div className="auth-lantern">
+            <span className="lantern-frame f1" />
+            <span className="lantern-frame f2" />
+            <span className="lantern-frame f3" />
+            <span className="lantern-frame f4" />
+            <span className="lantern-glass" />
+            <span className="lantern-fire" />
           </div>
+          <div className="auth-gallery-roof" />
+          <div className="auth-gallery-deck" />
+          <div className="auth-gallery-rail rail-back" />
+          <div className="auth-gallery-rail rail-front" />
 
-          <h1 className="text-4xl sm:text-5xl xl:text-6xl font-black tracking-tight leading-tight">
-            {isSignup ? (
-              <>
-                Your skills deserve <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500">
-                  to be seen.
-                </span>
-              </>
-            ) : (
-              <>
-                Welcome <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500">
-                  back.
-                </span>
-              </>
-            )}
-          </h1>
-
-          <p className="text-base text-slate-300 leading-relaxed">
-            {isSignup
-              ? 'Create your candidate profile and discover career opportunities built around your skills, ambition, and real potential.'
-              : 'Sign in to manage your applications, review interview schedules, and explore new openings with Adyapan.'}
-          </p>
-        </div>
-
-        {/* Feature Badges Bottom */}
-        <div className="relative z-10 flex flex-wrap gap-3">
-          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white/10 border border-white/15 backdrop-blur-md">
-            <CheckCircle2 className="w-4 h-4 text-amber-400" />
-            Simple Applications
-          </span>
-          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white/10 border border-white/15 backdrop-blur-md">
-            <Sparkles className="w-4 h-4 text-amber-400" />
-            Skills-First ATS Scoring
-          </span>
-          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white/10 border border-white/15 backdrop-blur-md">
-            <Heart className="w-4 h-4 text-rose-400" />
-            Human-Centered Hiring
-          </span>
+          <div className="auth-tower">
+            <i className="tower-band band-light" />
+            <i className="tower-band band-dark" />
+            <i className="tower-band band-light" />
+            <i className="tower-band band-dark" />
+            <i className="tower-band band-light" />
+            <span className="tower-window w1" />
+            <span className="tower-window w2" />
+            <span className="tower-window w3" />
+          </div>
+          <div className="auth-door" />
+          <div className="auth-ground" />
+          <div className="auth-water" />
         </div>
       </div>
 
-      {/* Right Column: Clean Form Container */}
-      <div className="lg:col-span-6 xl:col-span-5 flex flex-col justify-center p-6 sm:p-12 lg:p-16 bg-[#14120e]">
-        <div className="w-full max-w-md mx-auto space-y-6">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-amber-400 transition-colors mb-2"
-          >
-            ← Back to Home
-          </Link>
+      {/* Auth Card Container */}
+      <div className="auth-card-wrap">
+        <div className="auth-card-glow" />
+        <div className="auth-card">
+          <div className="auth-card-top">
+            <span className="auth-mini-label">{isSignup ? 'CREATE PROFILE' : 'MEMBER ACCESS'}</span>
+            <button type="button" className="auth-close" onClick={goBack} aria-label="Go back">
+              ×
+            </button>
+          </div>
 
-          <div className="space-y-2">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-500">
-              {isSignup ? 'CREATE YOUR PROFILE' : 'WELCOME BACK'}
-            </span>
-            <h2 className="text-3xl font-black tracking-tight text-white">
-              {isSignup ? 'Join Adyapan Hiring' : 'Sign in to Adyapan'}
+          <div className="auth-card-heading">
+            <h2>
+              {isSignup ? (
+                <>
+                  Create your
+                  <br />
+                  <span>Adyapan account.</span>
+                </>
+              ) : (
+                <>
+                  Welcome
+                  <br />
+                  <span>back.</span>
+                </>
+              )}
             </h2>
-            <p className="text-xs text-slate-400">
-              {isSignup ? 'One profile. Unlimited career opportunities.' : 'Continue your career journey.'}
+            <p>
+              {isSignup
+                ? 'Your next opportunity is closer than you think.'
+                : 'Sign in to continue your journey.'}
             </p>
           </div>
 
           {error && (
-            <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-semibold">
-              {error}
+            <div className="mb-4 p-3 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs font-semibold flex items-center gap-2">
+              <AlertCircle size={15} className="text-red-400 shrink-0" />
+              <span>{error}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit}>
             {isSignup && (
-              <>
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-300">Full Name</label>
-                  <div className="relative">
-                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <input
-                      type="text"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleChange}
-                      required
-                      placeholder="e.g. Rahul Sharma"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#1e1a14] border border-[#332d24] text-white text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all placeholder-slate-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-300">Phone Number (Optional)</label>
-                  <div className="relative">
-                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      placeholder="+91 98765 43210"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#1e1a14] border border-[#332d24] text-white text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all placeholder-slate-500"
-                    />
-                  </div>
-                </div>
-              </>
+              <label>
+                FULL NAME
+                <input
+                  required
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  placeholder="Your full name"
+                  disabled={loading}
+                />
+              </label>
             )}
 
-            <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-slate-300">Email Address</label>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  placeholder="you@example.com"
-                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#1e1a14] border border-[#332d24] text-white text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all placeholder-slate-500"
-                />
-              </div>
-            </div>
+            <label>
+              EMAIL ADDRESS
+              <input
+                required
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="you@example.com"
+                disabled={loading}
+              />
+            </label>
 
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="block text-xs font-bold text-slate-300">Password</label>
-              </div>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            {isSignup && (
+              <label>
+                PHONE NUMBER
                 <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder="+91 98765 43210 (Optional)"
+                  disabled={loading}
+                />
+              </label>
+            )}
+
+            <label>
+              PASSWORD
+              <div className="auth-password">
+                <input
+                  required
                   type={showPassword ? 'text' : 'password'}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  required
-                  placeholder="••••••••"
-                  className="w-full pl-10 pr-12 py-3 rounded-xl bg-[#1e1a14] border border-[#332d24] text-white text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all placeholder-slate-500"
+                  placeholder="Enter your password"
+                  disabled={loading}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-400 text-xs font-bold"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                <button type="button" onClick={() => setShowPassword((v) => !v)} tabIndex={-1}>
+                  {showPassword ? 'Hide' : 'Show'}
                 </button>
               </div>
-            </div>
+            </label>
+
+            {!isSignup && (
+              <div className="auth-form-row">
+                <label className="auth-check">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                  />
+                  <span>Remember me</span>
+                </label>
+                <a href="mailto:support@adyapan.com?subject=Password%20Reset%20Request" className="auth-forgot">
+                  Forgot password?
+                </a>
+              </div>
+            )}
 
             {isSignup && (
-              <label className="flex items-center gap-2 pt-1 text-xs text-slate-400 cursor-pointer select-none">
+              <label className="auth-check">
                 <input
                   type="checkbox"
-                  name="agreeTerms"
+                  required
                   checked={formData.agreeTerms}
                   onChange={(e) => setFormData({ ...formData, agreeTerms: e.target.checked })}
-                  required
-                  className="rounded border-[#332d24] text-amber-500 focus:ring-amber-500 bg-[#1e1a14]"
                 />
-                <span>I agree to the Terms of Service and Privacy Policy.</span>
+                <span>I agree to the terms and privacy policy.</span>
               </label>
             )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3.5 rounded-xl font-extrabold text-sm text-slate-950 bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:from-amber-300 hover:to-orange-400 transition-all shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
-            >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  <span>{isSignup ? 'Create Account' : 'Sign In'}</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
+            <button className="auth-submit" type="submit" disabled={loading}>
+              <span>{loading ? 'Processing...' : isSignup ? 'Create account' : 'Sign in'}</span>
+              <ArrowRight size={17} />
             </button>
           </form>
 
-          <div className="pt-4 text-center text-xs text-slate-400 border-t border-[#26211a]">
-            {/* ══════════════════════════════════════════════════════════
-                SIGNUP SWITCH LINK (COMMENTED OUT FOR FUTURE RELEASE)
-                ══════════════════════════════════════════════════════════
-            <p>
-              New to Adyapan?{' '}
-              <Link to="/auth?mode=signup" className="font-bold text-amber-400 hover:underline">
-                Create an account
-              </Link>
-            </p>
-            ══════════════════════════════════════════════════════════ */}
-            <p className="text-slate-500 text-xs">
-              Need assistance?{' '}
-              <Link to="/contact" className="font-bold text-amber-400 hover:underline">
-                Contact Recruitment Team
-              </Link>
-            </p>
+          <div className="auth-switch-dark">
+            {isSignup ? (
+              <>
+                Already have an account?{' '}
+                <Link to={redirectUrl ? `/auth?mode=signin&redirect=${encodeURIComponent(redirectUrl)}` : '/auth?mode=signin'}>
+                  Sign in
+                </Link>
+              </>
+            ) : (
+              <>
+                New here?{' '}
+                <Link to={redirectUrl ? `/auth?mode=signup&redirect=${encodeURIComponent(redirectUrl)}` : '/auth?mode=signup'}>
+                  Create an account
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

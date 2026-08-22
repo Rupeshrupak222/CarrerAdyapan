@@ -8,7 +8,7 @@ const LegalPrivacy = () => {
 
   return (
     <div className={`min-h-screen font-sans antialiased flex flex-col transition-colors ${
-      theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-[#fdf6ee] text-slate-900'
+      theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-white text-slate-900'
     }`}>
       {/* Header Bar */}
       <header className={`border-b sticky top-0 z-40 backdrop-blur-md ${

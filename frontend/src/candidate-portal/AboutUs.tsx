@@ -181,7 +181,7 @@ const AboutUs: React.FC = () => {
                     {item.icon}
                   </div>
                   <div>
-                    <h3 className="text-xl font-black text-white">{item.title}</h3>
+                    <h3 className="text-xl font-bold text-white">{item.title}</h3>
                     <p className="text-xs sm:text-sm text-amber-100 mt-2 leading-relaxed font-medium">
                       {item.text}
                     </p>
@@ -204,7 +204,7 @@ const AboutUs: React.FC = () => {
                 <UsersRound size={14} className="text-amber-500" />
                 <span>THE HEART OF ADYAPAN</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-stone-950 dark:text-white tracking-tight leading-tight">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-stone-950 dark:text-white tracking-tight leading-tight">
                 Teams That Build, <br />
                 <span className="text-amber-500">Create &amp; Inspire.</span>
               </h2>
@@ -234,7 +234,7 @@ const AboutUs: React.FC = () => {
                         className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700"
                         loading={idx === 0 ? 'eager' : 'lazy'}
                       />
-                      <span className="absolute top-4 left-4 w-9 h-9 rounded-full bg-black/70 backdrop-blur-md text-white font-black text-xs flex items-center justify-center border border-white/20">
+                      <span className="absolute top-4 left-4 w-9 h-9 rounded-full bg-black/70 backdrop-blur-md text-white font-bold text-xs flex items-center justify-center border border-white/20">
                         {team.number}
                       </span>
                     </div>
@@ -249,7 +249,7 @@ const AboutUs: React.FC = () => {
                           {team.icon}
                         </div>
                         <div>
-                          <span className="text-xs font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 block">
+                          <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block">
                             {team.eyebrow}
                           </span>
                           <span className="text-xs text-stone-500 dark:text-stone-400 font-semibold">
@@ -258,7 +258,7 @@ const AboutUs: React.FC = () => {
                         </div>
                       </div>
 
-                      <h3 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-white leading-snug">
+                      <h3 className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-white leading-snug">
                         {team.title}
                       </h3>
 
@@ -309,7 +309,7 @@ const AboutUs: React.FC = () => {
                   THE ADYAPAN PEOPLE
                 </span>
 
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight">
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
                   Built by people who <br />
                   <span className="text-amber-100">believe in people.</span>
                 </h2>
@@ -355,10 +355,10 @@ const AboutUs: React.FC = () => {
           <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
 
             <div className="text-center max-w-2xl mx-auto mb-14" data-reveal="up">
-              <span className="text-xs font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 block mb-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block mb-2">
                 LIFE AT ADYAPAN
               </span>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-stone-950 dark:text-white">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-stone-950 dark:text-white">
                 A culture of ownership, growth &amp; meaningful impact.
               </h2>
             </div>
@@ -375,7 +375,7 @@ const AboutUs: React.FC = () => {
                   <div className="w-12 h-12 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4">
                     {item.icon}
                   </div>
-                  <h3 className="text-base font-black text-stone-900 dark:text-white">
+                  <h3 className="text-base font-bold text-stone-900 dark:text-white">
                     {item.title}
                   </h3>
                   <p className="text-xs text-stone-500 dark:text-stone-400 mt-2 leading-relaxed">
@@ -391,7 +391,7 @@ const AboutUs: React.FC = () => {
               className="p-8 sm:p-10 rounded-3xl bg-white dark:bg-stone-900 border border-amber-200 dark:border-stone-800 shadow-md flex flex-col md:flex-row items-center justify-between gap-6"
             >
               <div>
-                <h3 className="text-2xl sm:text-3xl font-black text-stone-900 dark:text-white">
+                <h3 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-white">
                   Be a part of something <span className="text-amber-500">bigger than a job.</span>
                 </h3>
                 <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-1 font-medium">

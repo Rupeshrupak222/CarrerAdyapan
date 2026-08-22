@@ -59,23 +59,46 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
 }));
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 50000,
-  message: 'Too many requests from this IP',
-  skip: () => true,
+// Security-Hardened Rate Limiting
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many requests from this IP, please try again after 15 minutes.' },
 });
 
-// Middleware
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30, // 30 attempts per 15 mins for login / auth / contact
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many requests from this IP. Please try again in 15 minutes.' },
+});
+
+// Middleware & Security Headers
 app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  xContentTypeOptions: true,
+  xFrameOptions: { action: "deny" },
+  xXssProtection: true,
+  hsts: process.env.NODE_ENV === 'production' ? {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  } : false,
 }));
 app.use(compression());
 app.use(morgan('dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use('/api', limiter);
+app.use('/api', apiLimiter);
+
+// Strict Rate Limiting on Authentication & Public Form Endpoints
+app.use('/api/auth/login', authLimiter);
+app.use('/api/candidate-auth/login', authLimiter);
+app.use('/api/candidate-auth/register', authLimiter);
+app.use('/api/contact', authLimiter);
 
 // Static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -114,9 +137,9 @@ app.post('/api/contact', async (req, res) => {
       message: `Your message has been sent successfully to support@adyapan.com!`,
       emailResult,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Contact form submission error:', error);
-    return res.status(500).json({ success: false, message: 'Failed to send message: ' + error.message });
+    return res.status(500).json({ success: false, message: 'Failed to send your message. Please try again or email us directly at support@adyapan.com.' });
   }
 });
 

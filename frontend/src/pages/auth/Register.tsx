@@ -46,8 +46,8 @@ const Register = () => {
       }`}>
       {/* Premium Glassmorphic Navbar Header */}
       <nav className={`sticky top-0 z-50 px-3.5 sm:px-6 py-3 sm:py-4 backdrop-blur-xl border-b transition-all ${theme === 'dark'
-          ? 'bg-slate-950/95 border-slate-800 shadow-2xl shadow-slate-950'
-          : 'bg-white/95 border-slate-300 shadow-md'
+        ? 'bg-slate-950/95 border-slate-800 shadow-2xl shadow-slate-950'
+        : 'bg-white/95 border-slate-300 shadow-md'
         }`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
 
@@ -61,9 +61,9 @@ const Register = () => {
             {/* Global Theme Mode Toggle Switch Button */}
             <button
               onClick={toggleTheme}
-              className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 border shadow-sm ${theme === 'dark'
-                  ? 'bg-slate-900 text-amber-300 border-slate-700 hover:bg-slate-800'
-                  : 'bg-slate-100 text-slate-900 border-slate-300 hover:bg-slate-200'
+              className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border shadow-sm ${theme === 'dark'
+                ? 'bg-slate-900 text-amber-300 border-slate-700 hover:bg-slate-800'
+                : 'bg-slate-100 text-slate-900 border-slate-300 hover:bg-slate-200'
                 }`}
               title="Click to Switch Light / Dark Mode"
             >
@@ -74,7 +74,7 @@ const Register = () => {
             {/* Already Have Account Button */}
             <Link
               to="/login"
-              className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-black text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition-all shadow-md shadow-amber-400/20 uppercase tracking-wider flex items-center gap-1.5 shrink-0"
+              className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition-all shadow-md shadow-amber-400/20 uppercase tracking-wider flex items-center gap-1.5 shrink-0"
             >
               <span className="hidden sm:inline">Sign In to Dashboard →</span>
               <span className="sm:hidden">Sign In →</span>
@@ -86,15 +86,15 @@ const Register = () => {
       {/* Main Register Card Container */}
       <div className="flex-1 flex items-center justify-center py-8 sm:py-12 px-4 sm:px-6">
         <div className={`w-full max-w-md p-6 sm:p-8 rounded-3xl space-y-6 shadow-2xl border transition-all ${theme === 'dark'
-            ? 'bg-slate-900 border-slate-800 shadow-slate-950'
-            : 'bg-white border-slate-300 shadow-xl'
+          ? 'bg-slate-900 border-slate-800 shadow-slate-950'
+          : 'bg-white border-slate-300 shadow-xl'
           }`}>
           {/* Header Title */}
           <div className="text-center space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 text-[11px] font-black bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 rounded-full uppercase tracking-wider">
-               ADMIN-ISSUED HR CREDENTIALS ONLY
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 text-[11px] font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 rounded-full uppercase tracking-wider">
+              ADMIN-ISSUED HR CREDENTIALS ONLY
             </div>
-            <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               HR Account Portal
             </h1>
             <p className="text-xs font-semibold text-slate-600 dark:text-slate-300 leading-relaxed">
@@ -114,7 +114,7 @@ const Register = () => {
           <div className="space-y-3 pt-2">
             <Link
               to="/login"
-              className="w-full py-4 text-xs font-black text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl transition-all shadow-xl shadow-amber-400/20 uppercase tracking-wider flex items-center justify-center gap-2"
+              className="w-full py-4 text-xs font-bold text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 rounded-xl transition-all shadow-xl shadow-amber-400/20 uppercase tracking-wider flex items-center justify-center gap-2"
             >
               Sign In to Dashboard with Admin Credentials →
             </Link>

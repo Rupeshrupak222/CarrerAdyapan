@@ -34,23 +34,32 @@ export const authMiddleware = async (req: any, res: any, next: any) => {
         }
       });
 
-      if (user) {
-        req.user = user;
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: 'Unauthorized - User account does not exist or has been deactivated'
+        });
+      }
+
+      req.user = user;
+      return next();
+    } catch (dbError: any) {
+      console.warn('Prisma auth DB warning, checking decoded token:', dbError.message);
+      if (decoded.id && (decoded.email || decoded.role)) {
+        req.user = {
+          id: decoded.id,
+          name: decoded.name || 'Recruiter Admin',
+          email: decoded.email || 'admin@adyapan.com',
+          role: decoded.role || 'HR',
+          company: decoded.company || 'Adyapan Edutech Pvt Ltd'
+        };
         return next();
       }
-    } catch (dbError: any) {
-      console.warn('Prisma auth DB warning, falling back to token payload:', dbError.message);
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized - Unable to verify user session'
+      });
     }
-
-    req.user = {
-      id: decoded.id,
-      name: decoded.name || (decoded.email ? decoded.email.split('@')[0] : 'Recruiter Admin'),
-      email: decoded.email || 'admin@adyapan.com',
-      role: decoded.role || 'HR',
-      company: decoded.company || 'Adyapan Edutech Pvt Ltd'
-    };
-
-    next();
   } catch (error: any) {
     console.error('Auth Middleware Error:', error.message);
     return res.status(401).json({

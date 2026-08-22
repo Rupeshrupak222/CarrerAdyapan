@@ -420,10 +420,10 @@ const Candidates = () => {
 
     const fullCandName = `${schedulingCandidate.firstName || ''} ${schedulingCandidate.lastName || ''}`.trim() || 'Candidate';
     const isGeneric = (p: any) => !p || ['student / fresher', 'student', 'fresher', 'applicant'].includes(String(p).toLowerCase().trim());
-    const appliedRole = schedulingCandidate.jobTitle 
-      || schedulingCandidate.appliedRole 
-      || schedulingCandidate.applications?.[0]?.job?.title 
-      || (!isGeneric(schedulingCandidate.currentPosition) ? schedulingCandidate.currentPosition : '') 
+    const appliedRole = schedulingCandidate.jobTitle
+      || schedulingCandidate.appliedRole
+      || schedulingCandidate.applications?.[0]?.job?.title
+      || (!isGeneric(schedulingCandidate.currentPosition) ? schedulingCandidate.currentPosition : '')
       || 'Business Development Associate';
 
     const newInterviewData = {
@@ -829,14 +829,14 @@ const Candidates = () => {
                       <div className="flex flex-wrap items-center gap-2.5">
                         <Link
                           to={`/candidates/${cand.id}`}
-                          className="text-base font-black text-slate-900 dark:text-white hover:text-amber-500 dark:hover:text-amber-400 transition-colors cursor-pointer group/name"
+                          className="text-base font-bold text-slate-900 dark:text-white hover:text-amber-500 dark:hover:text-amber-400 transition-colors cursor-pointer group/name"
                           title={`View ${cand.firstName}'s Profile`}
                         >
                           <span className="group-hover/name:underline">{cand.firstName} {cand.lastName}</span>
                         </Link>
-                        
+
                         {/* Target Applied Role Badge */}
-                        <span className="px-3 py-1 text-xs font-black rounded-xl bg-amber-500/20 text-amber-900 dark:text-amber-200 border border-amber-500/50 shadow-sm flex items-center gap-1.5">
+                        <span className="px-3 py-1 text-xs font-bold rounded-xl bg-amber-500/20 text-amber-900 dark:text-amber-200 border border-amber-500/50 shadow-sm flex items-center gap-1.5">
                           <span>🎯 Applied Post:</span>
                           <span className="underline decoration-amber-500/50">{appliedRole}</span>
                         </span>
@@ -866,7 +866,7 @@ const Candidates = () => {
                       {/* Prominent Applied Position Row */}
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs pt-0.5">
                         <span className="text-slate-700 dark:text-slate-200 font-bold">
-                          Applied Post: <strong className="text-amber-600 dark:text-amber-400 font-black text-sm">{appliedRole}</strong>
+                          Applied Post: <strong className="text-amber-600 dark:text-amber-400 font-bold text-sm">{appliedRole}</strong>
                         </span>
                         <span className="text-slate-400">•</span>
                         <span className="text-slate-600 dark:text-slate-300">

@@ -54,18 +54,18 @@ export const ApplicationSuccess: React.FC = () => {
 
             {/* Headings & Context */}
             <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-700 dark:text-emerald-300 font-black text-xs uppercase tracking-wider">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-700 dark:text-emerald-300 font-bold text-xs uppercase tracking-wider">
                 <Sparkles size={14} className="text-emerald-500" />
                 <span>APPLICATION RECEIVED</span>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl font-black text-stone-900 dark:text-white tracking-tight">
+              <h1 className="text-3xl sm:text-4xl font-bold text-stone-900 dark:text-white tracking-tight">
                 You're officially in. 🎉
               </h1>
 
               <p className="text-sm sm:text-base text-stone-600 dark:text-stone-300 font-medium max-w-lg mx-auto leading-relaxed">
                 Thank you, <strong className="text-stone-900 dark:text-white font-extrabold">{state.candidateName || 'Applicant'}</strong>. Your application for{' '}
-                <strong className="text-amber-600 dark:text-amber-400 font-black">{state.jobTitle || 'Career Opportunity'}</strong> has been submitted to the Adyapan talent acquisition team.
+                <strong className="text-amber-600 dark:text-amber-400 font-bold">{state.jobTitle || 'Career Opportunity'}</strong> has been submitted to the Adyapan talent acquisition team.
               </p>
             </div>
 
@@ -75,7 +75,7 @@ export const ApplicationSuccess: React.FC = () => {
                 <span className="text-stone-400 font-bold uppercase text-[10px] tracking-wider block">
                   Application Reference
                 </span>
-                <b className="font-mono font-black text-amber-600 dark:text-amber-400 text-sm">
+                <b className="font-mono font-bold text-amber-600 dark:text-amber-400 text-sm">
                   {refId}
                 </b>
               </div>
@@ -92,7 +92,7 @@ export const ApplicationSuccess: React.FC = () => {
 
             {/* ── VERTICAL NEXT STEPS TIMELINE ── */}
             <div className="space-y-4 text-left pt-2 border-t border-stone-100 dark:border-stone-800">
-              <span className="text-xs font-black uppercase tracking-wider text-stone-500 dark:text-stone-400 block">
+              <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 block">
                 What happens next?
               </span>
 
@@ -108,18 +108,17 @@ export const ApplicationSuccess: React.FC = () => {
                   return (
                     <div key={item.step} className="flex items-start gap-3.5 p-3 rounded-xl bg-stone-50/70 dark:bg-stone-800/70 border border-stone-200/40 dark:border-stone-700">
                       <div
-                        className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${
-                          item.isDone
+                        className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[11px] shrink-0 ${item.isDone
                             ? 'bg-emerald-500 text-white'
                             : item.isCurrent
-                            ? 'bg-amber-500 text-white animate-pulse'
-                            : 'bg-stone-200 dark:bg-stone-700 text-stone-500'
-                        }`}
+                              ? 'bg-amber-500 text-white animate-pulse'
+                              : 'bg-stone-200 dark:bg-stone-700 text-stone-500'
+                          }`}
                       >
                         {item.isDone ? '✓' : item.step}
                       </div>
                       <div className="space-y-0.5">
-                        <b className={`text-xs font-black block ${item.isCurrent ? 'text-amber-600 dark:text-amber-400' : 'text-stone-900 dark:text-white'}`}>
+                        <b className={`text-xs font-bold block ${item.isCurrent ? 'text-amber-600 dark:text-amber-400' : 'text-stone-900 dark:text-white'}`}>
                           {item.title}
                         </b>
                         <p className="text-[11px] text-stone-500 font-medium">

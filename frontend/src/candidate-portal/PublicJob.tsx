@@ -210,16 +210,16 @@ export const PublicJob: React.FC = () => {
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center gap-2.5">
-                  <span className="px-3.5 py-1 rounded-full text-xs font-black bg-white/20 text-white border border-white/30 backdrop-blur-md uppercase tracking-wider">
+                  <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-white/20 text-white border border-white/30 backdrop-blur-md uppercase tracking-wider">
                     {job.department || 'EdTech Career'}
                   </span>
-                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-black bg-emerald-950/40 text-emerald-200 border border-emerald-300/30 backdrop-blur-md">
+                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold bg-emerald-950/40 text-emerald-200 border border-emerald-300/30 backdrop-blur-md">
                     <ShieldCheck size={14} className="text-emerald-300" />
                     <span>Verified Official Hiring</span>
                   </span>
                 </div>
 
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight">
                   {job.title}
                 </h1>
 
@@ -236,7 +236,7 @@ export const PublicJob: React.FC = () => {
                     <Briefcase size={16} className="text-amber-200" />
                     <span>{job.type}</span>
                   </span>
-                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white text-stone-900 font-black shadow-lg shadow-black/10">
+                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white text-stone-900 font-bold shadow-lg shadow-black/10">
                     <IndianRupee size={15} className="text-amber-600" />
                     <span>{job.salary ? String(job.salary).replace(/^₹\s*/, '') : 'Competitive'}</span>
                   </span>
@@ -247,11 +247,10 @@ export const PublicJob: React.FC = () => {
               <div className="flex flex-wrap items-center gap-3 pt-2 lg:pt-0">
                 <button
                   onClick={toggleSaveJob}
-                  className={`p-3.5 rounded-2xl border transition-all flex items-center justify-center cursor-pointer ${
-                    isSaved
+                  className={`p-3.5 rounded-2xl border transition-all flex items-center justify-center cursor-pointer ${isSaved
                       ? 'bg-white text-rose-600 border-white shadow-md'
                       : 'bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-md'
-                  }`}
+                    }`}
                   title={isSaved ? 'Job Saved' : 'Save Job'}
                 >
                   <Heart size={18} className={isSaved ? 'fill-rose-600 text-rose-600' : ''} />
@@ -267,7 +266,7 @@ export const PublicJob: React.FC = () => {
 
                 <Link
                   to={applyUrl}
-                  className="px-8 py-3.5 rounded-2xl bg-white hover:bg-stone-100 text-stone-900 font-black text-sm shadow-2xl hover:scale-105 transition-all inline-flex items-center gap-2"
+                  className="px-8 py-3.5 rounded-2xl bg-white hover:bg-stone-100 text-stone-900 font-bold text-sm shadow-2xl hover:scale-105 transition-all inline-flex items-center gap-2"
                 >
                   <span>Apply For This Position</span>
                   <ArrowRight size={16} />
@@ -288,7 +287,7 @@ export const PublicJob: React.FC = () => {
                   <Sparkles size={13} />
                   <span>ROLE OVERVIEW</span>
                 </div>
-                <h2 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-white">
+                <h2 className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-white">
                   About The Opportunity
                 </h2>
                 <div className="text-stone-600 dark:text-stone-300 text-sm sm:text-base leading-relaxed whitespace-pre-line font-medium">
@@ -302,7 +301,7 @@ export const PublicJob: React.FC = () => {
                   <Zap size={13} />
                   <span>RESPONSIBILITIES</span>
                 </div>
-                <h2 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-white">
+                <h2 className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-white">
                   What You Will Do
                 </h2>
                 <div className="space-y-3 pt-1">
@@ -324,7 +323,7 @@ export const PublicJob: React.FC = () => {
                   <GraduationCap size={13} />
                   <span>REQUIREMENTS</span>
                 </div>
-                <h2 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-white">
+                <h2 className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-white">
                   What We Look For
                 </h2>
                 <div className="space-y-3 pt-1">
@@ -346,7 +345,7 @@ export const PublicJob: React.FC = () => {
                   <Heart size={13} />
                   <span>BENEFITS & PERKS</span>
                 </div>
-                <h2 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-white">
+                <h2 className="text-xl sm:text-2xl font-bold text-stone-900 dark:text-white">
                   Life & Growth at Adyapan
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
@@ -365,14 +364,14 @@ export const PublicJob: React.FC = () => {
               {/* Bottom Apply CTA Card */}
               <div className="p-8 rounded-3xl bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 text-white shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-6">
                 <div className="space-y-1 text-center sm:text-left">
-                  <h3 className="text-2xl font-black">Ready to apply?</h3>
+                  <h3 className="text-2xl font-bold">Ready to apply?</h3>
                   <p className="text-xs sm:text-sm text-white/90 font-medium">
                     Submit your application in 2 minutes. Our recruitment team reviews resumes within 48 hours.
                   </p>
                 </div>
                 <Link
                   to={applyUrl}
-                  className="px-8 py-4 rounded-2xl bg-white hover:bg-stone-100 text-stone-900 font-black text-sm shadow-xl transition-all hover:scale-105 shrink-0 inline-flex items-center gap-2"
+                  className="px-8 py-4 rounded-2xl bg-white hover:bg-stone-100 text-stone-900 font-bold text-sm shadow-xl transition-all hover:scale-105 shrink-0 inline-flex items-center gap-2"
                 >
                   <span>Apply Now</span>
                   <ArrowRight size={16} />
@@ -386,7 +385,7 @@ export const PublicJob: React.FC = () => {
 
               {/* Primary Floating Action Box */}
               <div className="bg-white dark:bg-stone-900 rounded-3xl p-6 border border-stone-200/80 dark:border-stone-800 shadow-xl space-y-5">
-                <h3 className="text-base font-black text-stone-900 dark:text-white">
+                <h3 className="text-base font-bold text-stone-900 dark:text-white">
                   Join The Team
                 </h3>
 
@@ -416,7 +415,7 @@ export const PublicJob: React.FC = () => {
 
               {/* Role Snapshot Summary Card */}
               <div className="bg-white dark:bg-stone-900 rounded-3xl p-6 border border-stone-200/80 dark:border-stone-800 shadow-md space-y-4">
-                <h4 className="text-xs font-black uppercase tracking-wider text-amber-500">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-500">
                   Role Snapshot
                 </h4>
 
@@ -443,7 +442,7 @@ export const PublicJob: React.FC = () => {
 
                   <div className="flex items-center justify-between py-2">
                     <span className="text-stone-500 dark:text-stone-400 font-medium">Compensation</span>
-                    <span className="font-black text-emerald-600 dark:text-emerald-400">{job.salary}</span>
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400">{job.salary}</span>
                   </div>
                 </div>
               </div>

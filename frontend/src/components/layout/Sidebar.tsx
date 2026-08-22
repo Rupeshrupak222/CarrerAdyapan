@@ -82,7 +82,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         className={`fixed top-0 left-0 bottom-0 z-50 w-64 flex flex-col justify-between transition-all duration-300 shadow-xl border-r lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
         style={theme === 'dark'
           ? { background: '#14162a', borderColor: 'rgba(245, 158, 11,0.2)', color: '#f1f5f9' }
-          : { background: '#ffffff', borderColor: '#e8e0d8', color: '#1a1a2e' }
+          : { background: '#ffffff', borderColor: '#e2e8f0', color: '#1a1a2e' }
         }
       >
         <div>
@@ -90,7 +90,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             className="h-16 px-5 flex items-center justify-between border-b"
             style={theme === 'dark'
               ? { borderColor: 'rgba(245, 158, 11,0.2)', background: '#0d0d1a' }
-              : { borderColor: '#f0e8df', background: '#fdfaf6' }
+              : { borderColor: '#f1f5f9', background: '#ffffff' }
             }
           >
             <Link to="/dashboard">
@@ -166,7 +166,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           className="p-4 border-t"
           style={theme === 'dark'
             ? { borderColor: 'rgba(245, 158, 11,0.15)', background: 'rgba(13,13,26,0.6)' }
-            : { borderColor: '#f0e8df', background: '#fdfaf6' }
+            : { borderColor: '#f1f5f9', background: '#ffffff' }
           }
         >
 
@@ -176,7 +176,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium rounded-xl transition-colors border"
             style={theme === 'dark'
               ? { color: '#94a3b8', borderColor: 'rgba(245, 158, 11,0.2)' }
-              : { color: '#6b7280', borderColor: '#e8e0d8' }
+              : { color: '#6b7280', borderColor: '#e2e8f0' }
             }
             onMouseEnter={(e) => {
               e.currentTarget.style.background = 'rgba(239,68,68,0.08)';
@@ -186,7 +186,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'transparent';
               e.currentTarget.style.color = theme === 'dark' ? '#94a3b8' : '#6b7280';
-              e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(245, 158, 11,0.2)' : '#e8e0d8';
+              e.currentTarget.style.borderColor = theme === 'dark' ? 'rgba(245, 158, 11,0.2)' : '#e2e8f0';
             }}
           >
             Sign Out

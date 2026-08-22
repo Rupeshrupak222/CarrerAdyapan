@@ -389,18 +389,18 @@ export const ApplyJob: React.FC = () => {
 
               {/* Left Role Details */}
               <div className="space-y-3">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-400 font-black text-xs uppercase tracking-wider">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-400 font-bold text-xs uppercase tracking-wider">
                   <Sparkles size={13} className="text-amber-500 fill-amber-500" />
                   <span>DIRECT APPLICATION</span>
                 </div>
 
                 <div>
-                  <h1 className="text-2xl sm:text-3xl lg:text-5xl font-black text-stone-900 dark:text-white tracking-tight">
+                  <h1 className="text-2xl sm:text-3xl lg:text-5xl font-bold text-stone-900 dark:text-white tracking-tight">
                     Build your next career move.
                   </h1>
                   <p className="text-xs sm:text-sm text-stone-500 font-semibold pt-0.5">
                     You are applying for:{' '}
-                    <strong className="text-amber-600 dark:text-amber-400 font-black">
+                    <strong className="text-amber-600 dark:text-amber-400 font-bold">
                       {displayJobTitle}
                     </strong>{' '}
                     at {job?.company || 'Adyapan Technologies'}
@@ -416,7 +416,7 @@ export const ApplyJob: React.FC = () => {
                     <Clock3 size={13} className="text-amber-500" />
                     <span>{job?.type || 'Full Time'}</span>
                   </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-400 font-black">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-400 font-bold">
                     <IndianRupee size={13} />
                     <span>{displaySalary}</span>
                   </span>
@@ -432,13 +432,13 @@ export const ApplyJob: React.FC = () => {
                     className="w-full h-full object-cover object-center"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <span className="absolute bottom-2 left-2 text-[10px] font-black text-white">
+                  <span className="absolute bottom-2 left-2 text-[10px] font-bold text-white">
                     Hyderabad Hub
                   </span>
                 </div>
 
                 <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-3 rounded-2xl shadow-md space-y-1">
-                  <div className="flex items-center gap-1.5 text-xs font-black text-emerald-600 dark:text-emerald-400">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
                     <ShieldCheck size={16} />
                     <span>Verified Official Opening</span>
                   </div>
@@ -473,11 +473,11 @@ export const ApplyJob: React.FC = () => {
                         }`}
                     >
                       <div
-                        className={`w-9 h-9 rounded-2xl flex items-center justify-center font-black text-xs transition-all shadow-sm ${isCompleted
-                            ? 'bg-emerald-500 text-white'
-                            : isCurrent
-                              ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white scale-110 shadow-amber-500/30'
-                              : 'bg-stone-100 dark:bg-stone-800 text-stone-500'
+                        className={`w-9 h-9 rounded-2xl flex items-center justify-center font-bold text-xs transition-all shadow-sm ${isCompleted
+                          ? 'bg-emerald-500 text-white'
+                          : isCurrent
+                            ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white scale-110 shadow-amber-500/30'
+                            : 'bg-stone-100 dark:bg-stone-800 text-stone-500'
                           }`}
                       >
                         {isCompleted ? <Check size={16} /> : `0${step.id}`}
@@ -485,11 +485,11 @@ export const ApplyJob: React.FC = () => {
 
                       <div>
                         <b
-                          className={`text-xs block font-black ${isCurrent
-                              ? 'text-amber-500'
-                              : isCompleted
-                                ? 'text-stone-900 dark:text-white'
-                                : 'text-stone-400'
+                          className={`text-xs block font-bold ${isCurrent
+                            ? 'text-amber-500'
+                            : isCompleted
+                              ? 'text-stone-900 dark:text-white'
+                              : 'text-stone-400'
                             }`}
                         >
                           {step.label}
@@ -503,8 +503,8 @@ export const ApplyJob: React.FC = () => {
                     {idx < STEPS.length - 1 && (
                       <div
                         className={`flex-1 h-0.5 mx-3 rounded-full transition-all ${currentStep > step.id
-                            ? 'bg-emerald-500'
-                            : 'bg-stone-200 dark:bg-stone-800'
+                          ? 'bg-emerald-500'
+                          : 'bg-stone-200 dark:bg-stone-800'
                           }`}
                       />
                     )}
@@ -516,10 +516,10 @@ export const ApplyJob: React.FC = () => {
             {/* Mobile Compact Progress Bar */}
             <div className="lg:hidden flex items-center justify-between gap-4">
               <div className="space-y-1">
-                <span className="text-[10px] font-black uppercase tracking-wider text-amber-500 block">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500 block">
                   STEP {currentStep} OF {STEPS.length}
                 </span>
-                <b className="text-sm font-black text-stone-900 dark:text-white block">
+                <b className="text-sm font-bold text-stone-900 dark:text-white block">
                   {STEPS[currentStep - 1]?.label}: {STEPS[currentStep - 1]?.desc}
                 </b>
               </div>
@@ -547,10 +547,10 @@ export const ApplyJob: React.FC = () => {
               {currentStep === 1 && (
                 <div className="space-y-6 animate-fadeIn">
                   <div className="space-y-1.5">
-                    <span className="text-xs font-black uppercase tracking-wider text-amber-500">
+                    <span className="text-xs font-bold uppercase tracking-wider text-amber-500">
                       Step 01 of 07
                     </span>
-                    <h2 className="text-2xl sm:text-3xl font-black text-stone-900 dark:text-white">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-white">
                       Let's get to know you.
                     </h2>
                     <p className="text-xs sm:text-sm text-stone-500 font-medium">
@@ -639,10 +639,10 @@ export const ApplyJob: React.FC = () => {
               {currentStep === 2 && (
                 <div className="space-y-6 animate-fadeIn">
                   <div className="space-y-1.5">
-                    <span className="text-xs font-black uppercase tracking-wider text-amber-500">
+                    <span className="text-xs font-bold uppercase tracking-wider text-amber-500">
                       Step 02 of 07
                     </span>
-                    <h2 className="text-2xl sm:text-3xl font-black text-stone-900 dark:text-white">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-white">
                       Tell us about your experience.
                     </h2>
                     <p className="text-xs sm:text-sm text-stone-500 font-medium">
@@ -670,18 +670,18 @@ export const ApplyJob: React.FC = () => {
                             key={card.id}
                             onClick={() => handleChange('employmentStatus', card.id)}
                             className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-start gap-3.5 select-none ${isSelected
-                                ? 'border-amber-500 bg-amber-500/10 shadow-md shadow-amber-500/10'
-                                : 'border-stone-200 dark:border-stone-700 hover:border-amber-400 bg-stone-50/50 dark:bg-stone-800/80'
+                              ? 'border-amber-500 bg-amber-500/10 shadow-md shadow-amber-500/10'
+                              : 'border-stone-200 dark:border-stone-700 hover:border-amber-400 bg-stone-50/50 dark:bg-stone-800/80'
                               }`}
                           >
                             <div
-                              className={`w-10 h-10 rounded-xl flex items-center justify-center font-black shrink-0 ${isSelected ? 'bg-amber-500 text-white' : 'bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-300'
+                              className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${isSelected ? 'bg-amber-500 text-white' : 'bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-300'
                                 }`}
                             >
                               <Icon size={18} />
                             </div>
                             <div className="space-y-0.5 flex-1">
-                              <b className={`text-xs sm:text-sm block font-black ${isSelected ? 'text-amber-600 dark:text-amber-400' : 'text-stone-900 dark:text-white'}`}>
+                              <b className={`text-xs sm:text-sm block font-bold ${isSelected ? 'text-amber-600 dark:text-amber-400' : 'text-stone-900 dark:text-white'}`}>
                                 {card.title}
                               </b>
                               <small className="text-[11px] text-stone-500 dark:text-stone-400 font-semibold block">
@@ -770,10 +770,10 @@ export const ApplyJob: React.FC = () => {
               {currentStep === 3 && (
                 <div className="space-y-6 animate-fadeIn">
                   <div className="space-y-1.5">
-                    <span className="text-xs font-black uppercase tracking-wider text-amber-500">
+                    <span className="text-xs font-bold uppercase tracking-wider text-amber-500">
                       Step 03 of 07
                     </span>
-                    <h2 className="text-2xl sm:text-3xl font-black text-stone-900 dark:text-white">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-white">
                       Your learning journey.
                     </h2>
                     <p className="text-xs sm:text-sm text-stone-500 font-medium">
@@ -846,10 +846,10 @@ export const ApplyJob: React.FC = () => {
               {currentStep === 4 && (
                 <div className="space-y-6 animate-fadeIn">
                   <div className="space-y-1.5">
-                    <span className="text-xs font-black uppercase tracking-wider text-amber-500">
+                    <span className="text-xs font-bold uppercase tracking-wider text-amber-500">
                       Step 04 of 07
                     </span>
-                    <h2 className="text-2xl sm:text-3xl font-black text-stone-900 dark:text-white">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-white">
                       What are you great at?
                     </h2>
                     <p className="text-xs sm:text-sm text-stone-500 font-medium">
@@ -869,7 +869,7 @@ export const ApplyJob: React.FC = () => {
                     />
                     <button
                       type="submit"
-                      className="px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-xs shadow-md shadow-amber-500/20 transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+                      className="px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-md shadow-amber-500/20 transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
                     >
                       <Plus size={15} />
                       <span>Add</span>
@@ -890,8 +890,8 @@ export const ApplyJob: React.FC = () => {
                             type="button"
                             onClick={() => toggleSkill(skill)}
                             className={`px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all flex items-center gap-1.5 cursor-pointer ${isSelected
-                                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md shadow-amber-500/20 scale-105'
-                                : 'bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 hover:border-amber-400'
+                              ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md shadow-amber-500/20 scale-105'
+                              : 'bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 hover:border-amber-400'
                               }`}
                           >
                             <span>{skill}</span>
@@ -935,10 +935,10 @@ export const ApplyJob: React.FC = () => {
               {currentStep === 5 && (
                 <div className="space-y-6 animate-fadeIn">
                   <div className="space-y-1.5">
-                    <span className="text-xs font-black uppercase tracking-wider text-amber-500">
+                    <span className="text-xs font-bold uppercase tracking-wider text-amber-500">
                       Step 05 of 07
                     </span>
-                    <h2 className="text-2xl sm:text-3xl font-black text-stone-900 dark:text-white">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-white">
                       Let's add your resume.
                     </h2>
                     <p className="text-xs sm:text-sm text-stone-500 font-medium">
@@ -962,7 +962,7 @@ export const ApplyJob: React.FC = () => {
                           <FileCheck2 size={32} />
                         </div>
                         <div className="space-y-1">
-                          <b className="text-sm font-black text-stone-900 dark:text-white block truncate">
+                          <b className="text-sm font-bold text-stone-900 dark:text-white block truncate">
                             {formData.resumeFileName}
                           </b>
                           <small className="text-xs text-stone-500 font-bold block">
@@ -983,7 +983,7 @@ export const ApplyJob: React.FC = () => {
                           <FileUp size={30} />
                         </div>
                         <div className="space-y-1">
-                          <b className="text-base font-black text-stone-900 dark:text-white block">
+                          <b className="text-base font-bold text-stone-900 dark:text-white block">
                             Upload your resume
                           </b>
                           <p className="text-xs text-stone-500 font-medium">
@@ -1008,10 +1008,10 @@ export const ApplyJob: React.FC = () => {
               {currentStep === 6 && (
                 <div className="space-y-6 animate-fadeIn">
                   <div className="space-y-1.5">
-                    <span className="text-xs font-black uppercase tracking-wider text-amber-500">
+                    <span className="text-xs font-bold uppercase tracking-wider text-amber-500">
                       Step 06 of 07
                     </span>
-                    <h2 className="text-2xl sm:text-3xl font-black text-stone-900 dark:text-white">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-white">
                       One last thing.
                     </h2>
                     <p className="text-xs sm:text-sm text-stone-500 font-medium">
@@ -1075,10 +1075,10 @@ export const ApplyJob: React.FC = () => {
               {currentStep === 7 && (
                 <div className="space-y-6 animate-fadeIn">
                   <div className="space-y-1.5">
-                    <span className="text-xs font-black uppercase tracking-wider text-amber-500">
+                    <span className="text-xs font-bold uppercase tracking-wider text-amber-500">
                       Step 07 of 07
                     </span>
-                    <h2 className="text-2xl sm:text-3xl font-black text-stone-900 dark:text-white">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-white">
                       Review your application.
                     </h2>
                     <p className="text-xs sm:text-sm text-stone-500 font-medium">
@@ -1089,11 +1089,11 @@ export const ApplyJob: React.FC = () => {
                   {/* Readiness Card */}
                   <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-black">
+                      <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold">
                         <Check size={16} />
                       </div>
                       <div>
-                        <b className="text-xs sm:text-sm font-black text-emerald-800 dark:text-emerald-300 block">
+                        <b className="text-xs sm:text-sm font-bold text-emerald-800 dark:text-emerald-300 block">
                           APPLICATION READY
                         </b>
                         <small className="text-[11px] text-emerald-700/80 dark:text-emerald-400 font-semibold block">
@@ -1101,7 +1101,7 @@ export const ApplyJob: React.FC = () => {
                         </small>
                       </div>
                     </div>
-                    <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full bg-emerald-500/20">
+                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full bg-emerald-500/20">
                       100% Complete
                     </span>
                   </div>
@@ -1112,10 +1112,10 @@ export const ApplyJob: React.FC = () => {
                     {/* Profile Summary */}
                     <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 flex items-start justify-between">
                       <div className="space-y-1">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-amber-500">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500">
                           01 Profile
                         </span>
-                        <b className="text-sm font-black text-stone-900 dark:text-white block">
+                        <b className="text-sm font-bold text-stone-900 dark:text-white block">
                           {formData.firstName} {formData.lastName}
                         </b>
                         <p className="text-xs text-stone-600 dark:text-stone-300 font-semibold">
@@ -1133,10 +1133,10 @@ export const ApplyJob: React.FC = () => {
                     {/* Experience Summary */}
                     <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 flex items-start justify-between">
                       <div className="space-y-1">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-amber-500">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500">
                           02 Experience
                         </span>
-                        <b className="text-sm font-black text-stone-900 dark:text-white block">
+                        <b className="text-sm font-bold text-stone-900 dark:text-white block">
                           {formData.employmentStatus === 'FRESHER' ? 'Fresher / Student' : `${formData.experience} Experience`}
                         </b>
                         <p className="text-xs text-stone-600 dark:text-stone-300 font-semibold">
@@ -1156,10 +1156,10 @@ export const ApplyJob: React.FC = () => {
                     {/* Resume & Skills Summary */}
                     <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 flex items-start justify-between">
                       <div className="space-y-1">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-amber-500">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500">
                           05 Resume & Skills
                         </span>
-                        <b className="text-sm font-black text-stone-900 dark:text-white block">
+                        <b className="text-sm font-bold text-stone-900 dark:text-white block">
                           📄 {formData.resumeFileName || 'Resume.pdf'}
                         </b>
                         <p className="text-xs text-stone-600 dark:text-stone-300 font-semibold">
@@ -1203,7 +1203,7 @@ export const ApplyJob: React.FC = () => {
                   <button
                     type="button"
                     onClick={nextStep}
-                    className="inline-flex items-center gap-2 px-6 sm:px-8 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-xs sm:text-sm shadow-xl shadow-amber-500/25 hover:scale-105 transition-all cursor-pointer shrink-0"
+                    className="inline-flex items-center gap-2 px-6 sm:px-8 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs sm:text-sm shadow-xl shadow-amber-500/25 hover:scale-105 transition-all cursor-pointer shrink-0"
                   >
                     <span>Continue</span>
                     <ArrowRight size={16} />
@@ -1213,7 +1213,7 @@ export const ApplyJob: React.FC = () => {
                     type="button"
                     onClick={handleSubmitApplication}
                     disabled={submitting}
-                    className="inline-flex items-center gap-2 px-6 sm:px-10 py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-xs sm:text-sm shadow-2xl shadow-amber-500/30 hover:scale-105 transition-all cursor-pointer disabled:opacity-50 shrink-0"
+                    className="inline-flex items-center gap-2 px-6 sm:px-10 py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs sm:text-sm shadow-2xl shadow-amber-500/30 hover:scale-105 transition-all cursor-pointer disabled:opacity-50 shrink-0"
                   >
                     <span>Submit Application</span>
                     <ArrowRight size={16} />
@@ -1227,12 +1227,12 @@ export const ApplyJob: React.FC = () => {
             <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-28">
 
               <div className="bg-white dark:bg-stone-900 rounded-3xl p-6 border border-stone-200/80 dark:border-stone-800 shadow-xl space-y-5">
-                <span className="text-[10px] font-black uppercase tracking-wider text-amber-500 block">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500 block">
                   YOUR APPLICATION
                 </span>
 
                 <div className="space-y-1 pb-3 border-b border-stone-100 dark:border-stone-800">
-                  <h3 className="font-black text-lg text-stone-900 dark:text-white leading-tight">
+                  <h3 className="font-bold text-lg text-stone-900 dark:text-white leading-tight">
                     {displayJobTitle}
                   </h3>
                   <p className="text-xs font-bold text-stone-500">
@@ -1249,7 +1249,7 @@ export const ApplyJob: React.FC = () => {
 
                 {/* Live Progress Bar */}
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs font-black">
+                  <div className="flex items-center justify-between text-xs font-bold">
                     <span className="text-stone-700 dark:text-stone-300">Application Progress</span>
                     <span className="text-amber-500">{progressPercent}%</span>
                   </div>
@@ -1271,10 +1271,10 @@ export const ApplyJob: React.FC = () => {
                       <div
                         key={s.id}
                         className={`flex items-center gap-2.5 ${isDone
-                            ? 'text-emerald-600 dark:text-emerald-400'
-                            : isCurrent
-                              ? 'text-amber-500 font-black'
-                              : 'text-stone-400'
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : isCurrent
+                            ? 'text-amber-500 font-bold'
+                            : 'text-stone-400'
                           }`}
                       >
                         <span className="text-sm">{isDone ? '✓' : isCurrent ? '●' : '○'}</span>
@@ -1304,7 +1304,7 @@ export const ApplyJob: React.FC = () => {
               <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto" />
 
               <div className="space-y-2">
-                <h3 className="font-black text-xl text-stone-900 dark:text-white">
+                <h3 className="font-bold text-xl text-stone-900 dark:text-white">
                   Submitting your application...
                 </h3>
                 <p className="text-xs text-stone-500 font-medium">

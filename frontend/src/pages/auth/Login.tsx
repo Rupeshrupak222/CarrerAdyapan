@@ -65,23 +65,21 @@ const Login = () => {
   };
 
   return (
-    <div className={`min-h-screen font-sans antialiased flex flex-col justify-between transition-colors ${
-      theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'
-    }`}>
-      
+    <div className={`min-h-screen font-sans antialiased flex flex-col justify-between transition-colors ${theme === 'dark' ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'
+      }`}>
+
       {/* Main Login Card Container */}
       <div className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6">
-        <div className={`w-full max-w-md p-6 sm:p-10 rounded-3xl space-y-6 shadow-2xl border transition-all ${
-          theme === 'dark'
+        <div className={`w-full max-w-md p-6 sm:p-10 rounded-3xl space-y-6 shadow-2xl border transition-all ${theme === 'dark'
             ? 'bg-slate-900 border-slate-800 shadow-slate-950'
             : 'bg-white border-slate-200 shadow-xl'
-        }`}>
+          }`}>
           {/* Header Logo & Title */}
           <div className="text-center space-y-2">
             <div className="flex justify-center mb-3">
               <AdyapanLogo variant={theme === 'dark' ? 'dark' : 'light'} size="normal" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
               Sign In
             </h1>
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
@@ -101,11 +99,10 @@ const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="Enter your email address..."
-                className={`w-full px-4 py-3 rounded-xl text-xs font-medium focus:outline-none border transition-all ${
-                  theme === 'dark'
+                className={`w-full px-4 py-3 rounded-xl text-xs font-medium focus:outline-none border transition-all ${theme === 'dark'
                     ? 'bg-slate-950 border-slate-700 text-white focus:border-amber-400'
                     : 'bg-white border-slate-300 text-slate-900 focus:border-amber-500 shadow-sm'
-                }`}
+                  }`}
               />
             </div>
 
@@ -120,11 +117,10 @@ const Login = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder="Enter your account password..."
-                  className={`w-full pl-4 pr-11 py-3 rounded-xl text-xs font-medium focus:outline-none border transition-all ${
-                    theme === 'dark'
+                  className={`w-full pl-4 pr-11 py-3 rounded-xl text-xs font-medium focus:outline-none border transition-all ${theme === 'dark'
                       ? 'bg-slate-950 border-slate-700 text-white focus:border-amber-400'
                       : 'bg-white border-slate-300 text-slate-900 focus:border-amber-500 shadow-sm'
-                  }`}
+                    }`}
                 />
                 <button
                   type="button"

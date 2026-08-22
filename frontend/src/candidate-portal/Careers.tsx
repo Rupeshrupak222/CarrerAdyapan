@@ -12,7 +12,9 @@ import {
   ChevronDown,
   ChevronRight,
   Clock3,
+  Code2,
   Compass,
+  Cpu,
   Flame,
   Globe2,
   GraduationCap,
@@ -34,6 +36,7 @@ import {
   Sparkles,
   Star,
   Target,
+  Terminal,
   TrendingUp,
   Trophy,
   User,
@@ -237,13 +240,13 @@ const Careers: React.FC = () => {
               <div data-reveal="left" className="lg:col-span-7 space-y-6">
 
                 {/* Small uppercase animated badge */}
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-900 dark:text-amber-300 font-black text-xs tracking-wider uppercase shadow-xs">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-900 dark:text-amber-300 font-bold text-xs tracking-wider uppercase shadow-xs">
                   <Sparkles size={14} className="text-amber-600 dark:text-amber-400 fill-amber-500" />
                   <span>JOIN ADYAPAN · FAST-TRACK HIRING · EXPONENTIAL GROWTH</span>
                 </div>
 
                 {/* Very Large Editorial Heading */}
-                <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-[76px] font-black tracking-tight text-stone-950 dark:text-white leading-[1.05]">
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-[76px] font-bold tracking-tight text-stone-950 dark:text-white leading-[1.05]">
                   Accelerate <br />
                   <span className="relative inline-block text-amber-600 dark:text-amber-400">
                     your career
@@ -320,7 +323,7 @@ const Careers: React.FC = () => {
                     <span className="inline-block px-2.5 py-1 rounded-md bg-amber-500/90 text-[10px] font-extrabold uppercase tracking-widest text-stone-950 mb-1">
                       Hyderabad Hub · Sattva Magnus
                     </span>
-                    <h3 className="text-lg sm:text-xl font-black text-white">Work Hard. Win Together.</h3>
+                    <h3 className="text-lg sm:text-xl font-bold text-white">Work Hard. Win Together.</h3>
                   </div>
                 </div>
 
@@ -330,7 +333,7 @@ const Careers: React.FC = () => {
                     <CheckCircle2 size={18} />
                   </div>
                   <div>
-                    <b className="text-xs sm:text-sm font-black text-stone-900 dark:text-white block">
+                    <b className="text-xs sm:text-sm font-bold text-stone-900 dark:text-white block">
                       Verified Jobs
                     </b>
                     <small className="text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-400 font-semibold">Updated Daily</small>
@@ -343,7 +346,7 @@ const Careers: React.FC = () => {
                     <Star size={16} className="fill-amber-500 text-amber-500" />
                   </div>
                   <div>
-                    <b className="text-xs sm:text-sm font-black text-stone-900 dark:text-white block">
+                    <b className="text-xs sm:text-sm font-bold text-stone-900 dark:text-white block">
                       4.8 / 5.0
                     </b>
                     <small className="text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-400 font-semibold">Team Satisfaction</small>
@@ -356,7 +359,7 @@ const Careers: React.FC = () => {
                     <Zap size={16} />
                   </div>
                   <div>
-                    <b className="text-xs sm:text-sm font-black text-stone-900 dark:text-white block">
+                    <b className="text-xs sm:text-sm font-bold text-stone-900 dark:text-white block">
                       ⚡ 24 - 48 Hours
                     </b>
                     <small className="text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-400 font-semibold">Fast Recruiter Reply</small>
@@ -382,7 +385,7 @@ const Careers: React.FC = () => {
                   <Zap size={22} />
                 </div>
                 <div>
-                  <b className="text-2xl sm:text-4xl font-black text-stone-900 dark:text-white block tracking-tight">
+                  <b className="text-2xl sm:text-4xl font-bold text-stone-900 dark:text-white block tracking-tight">
                     <AnimatedCounter end={24} suffix="h" />
                   </b>
                   <span className="text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider">
@@ -397,7 +400,7 @@ const Careers: React.FC = () => {
                   <Flame size={22} />
                 </div>
                 <div>
-                  <b className="text-2xl sm:text-4xl font-black text-stone-900 dark:text-white block tracking-tight">
+                  <b className="text-2xl sm:text-4xl font-bold text-stone-900 dark:text-white block tracking-tight">
                     <AnimatedCounter end={48} suffix="-72h" />
                   </b>
                   <span className="text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider">
@@ -412,7 +415,7 @@ const Careers: React.FC = () => {
                   <ShieldCheck size={22} />
                 </div>
                 <div>
-                  <b className="text-2xl sm:text-4xl font-black text-stone-900 dark:text-white block tracking-tight">
+                  <b className="text-2xl sm:text-4xl font-bold text-stone-900 dark:text-white block tracking-tight">
                     <AnimatedCounter end={100} suffix="%" />
                   </b>
                   <span className="text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider">
@@ -427,7 +430,7 @@ const Careers: React.FC = () => {
                   <IndianRupee size={22} />
                 </div>
                 <div>
-                  <b className="text-2xl sm:text-4xl font-black text-stone-900 dark:text-white block tracking-tight">
+                  <b className="text-2xl sm:text-4xl font-bold text-stone-900 dark:text-white block tracking-tight">
                     ₹0 Fee
                   </b>
                   <span className="text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider">
@@ -459,7 +462,7 @@ const Careers: React.FC = () => {
                   <span>LIFE AT ADYAPAN · CULTURE</span>
                 </div>
 
-                <h2 className="text-4xl sm:text-5xl lg:text-7xl font-black text-stone-900 dark:text-white tracking-tight leading-[1.08]">
+                <h2 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-stone-900 dark:text-white tracking-tight leading-[1.08]">
                   Come for the opportunity. <br />
                   <span className="text-amber-500">Stay for the people.</span>
                 </h2>
@@ -471,13 +474,13 @@ const Careers: React.FC = () => {
                 <div className="flex flex-wrap items-center gap-5 pt-3">
                   <Link
                     to="/life-at-adyapan"
-                    className="inline-flex items-center gap-2.5 px-8 py-4 rounded-full text-sm sm:text-base font-black text-white bg-amber-500 hover:bg-amber-600 shadow-xl shadow-amber-500/25 hover:scale-105 transition-all"
+                    className="inline-flex items-center gap-2.5 px-8 py-4 rounded-full text-sm sm:text-base font-bold text-white bg-amber-500 hover:bg-amber-600 shadow-xl shadow-amber-500/25 hover:scale-105 transition-all"
                   >
                     <span>Explore Life at Adyapan</span>
                     <ArrowRight size={17} />
                   </Link>
 
-                  <span className="text-sm font-black text-stone-600 dark:text-stone-300 flex items-center gap-1.5">
+                  <span className="text-sm font-bold text-stone-600 dark:text-stone-300 flex items-center gap-1.5">
                     <span>✨</span>
                     <span>94% Retention Rate</span>
                   </span>
@@ -503,10 +506,10 @@ const Careers: React.FC = () => {
                     </div>
 
                     <div className="absolute bottom-4 left-4 right-4 text-white pointer-events-none">
-                      <span className="text-xs font-black uppercase tracking-wider text-amber-400 block mb-0.5">
+                      <span className="text-xs font-bold uppercase tracking-wider text-amber-400 block mb-0.5">
                         Adyapan Culture
                       </span>
-                      <h4 className="text-base sm:text-2xl font-black text-white leading-tight">
+                      <h4 className="text-base sm:text-2xl font-bold text-white leading-tight">
                         Work Hard. Laugh Harder.
                       </h4>
                     </div>
@@ -606,7 +609,7 @@ const Careers: React.FC = () => {
                   <PartyPopper size={14} />
                   <span>FUN DAYS AT ADYAPAN · REAL MOMENTS</span>
                 </div>
-                <h2 className="text-3xl sm:text-4xl lg:text-6xl font-black text-white">
+                <h2 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-white">
                   Work hard. <span className="text-amber-400">Laugh harder.</span> Win together.
                 </h2>
               </div>
@@ -685,7 +688,7 @@ const Careers: React.FC = () => {
                   <Rocket size={13} className="text-amber-500" />
                   <span>CAREER ACCELERATION</span>
                 </div>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-stone-900 dark:text-white leading-tight">
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-stone-900 dark:text-white leading-tight">
                   More than a job. <br />
                   <span className="text-amber-500">A place to grow.</span>
                 </h2>
@@ -705,12 +708,12 @@ const Careers: React.FC = () => {
                     <div className="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shadow-xs">
                       <Rocket size={24} />
                     </div>
-                    <span className="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-wider">
+                    <span className="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-bold uppercase tracking-wider">
                       MERIT-DRIVEN GROWTH
                     </span>
                   </div>
 
-                  <h3 className="text-xl font-black text-stone-900 dark:text-white">Fast-Track 6-Month Appraisals</h3>
+                  <h3 className="text-xl font-bold text-stone-900 dark:text-white">Fast-Track 6-Month Appraisals</h3>
                   <p className="text-stone-500 dark:text-stone-400 text-xs sm:text-sm mt-2 leading-relaxed">
                     At Adyapan, meritocracy drives everything. Every 2 quarters, performance is evaluated with transparent KPIs for immediate salary escalations, milestone bonuses, and promotions.
                   </p>
@@ -718,19 +721,19 @@ const Careers: React.FC = () => {
                   {/* Bullet Points */}
                   <div className="space-y-2.5 mt-5 pt-4 border-t border-stone-100 dark:border-stone-800">
                     <div className="flex items-start gap-2 text-xs font-bold text-stone-800 dark:text-stone-200">
-                      <span className="text-amber-500 font-black">✦</span>
+                      <span className="text-amber-500 font-bold">✦</span>
                       <span>100% Objective & Transparent KPI Metrics</span>
                     </div>
                     <div className="flex items-start gap-2 text-xs font-bold text-stone-800 dark:text-stone-200">
-                      <span className="text-amber-500 font-black">✦</span>
+                      <span className="text-amber-500 font-bold">✦</span>
                       <span>Direct 1-on-1 Quarterly Founder Alignment</span>
                     </div>
                     <div className="flex items-start gap-2 text-xs font-bold text-stone-800 dark:text-stone-200">
-                      <span className="text-amber-500 font-black">✦</span>
+                      <span className="text-amber-500 font-bold">✦</span>
                       <span>Avg. 14 Months Fast-Track to Leadership</span>
                     </div>
                     <div className="flex items-start gap-2 text-xs font-bold text-stone-800 dark:text-stone-200">
-                      <span className="text-amber-500 font-black">✦</span>
+                      <span className="text-amber-500 font-bold">✦</span>
                       <span>Up to 45% Annual CTC Hikes for Top Talent</span>
                     </div>
                   </div>
@@ -751,12 +754,12 @@ const Careers: React.FC = () => {
                     <div className="w-12 h-12 rounded-2xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-xs">
                       <GraduationCap size={24} />
                     </div>
-                    <span className="px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-wider">
+                    <span className="px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase tracking-wider">
                       UPSKILLING
                     </span>
                   </div>
 
-                  <h3 className="text-xl font-black text-stone-900 dark:text-white">Masterclasses & Mentorship</h3>
+                  <h3 className="text-xl font-bold text-stone-900 dark:text-white">Masterclasses & Mentorship</h3>
                   <p className="text-stone-500 dark:text-stone-400 text-xs sm:text-sm mt-2 leading-relaxed">
                     Gain exclusive access to high-impact executive communication workshops, AI ATS tooling coaching, and leadership masterclasses designed to accelerate your mastery.
                   </p>
@@ -764,19 +767,19 @@ const Careers: React.FC = () => {
                   {/* Bullet Points */}
                   <div className="space-y-2.5 mt-5 pt-4 border-t border-stone-100 dark:border-stone-800">
                     <div className="flex items-start gap-2 text-xs font-bold text-stone-800 dark:text-stone-200">
-                      <span className="text-blue-500 font-black">✦</span>
+                      <span className="text-blue-500 font-bold">✦</span>
                       <span>AI ATS Tooling & Automated Screening Pipelines</span>
                     </div>
                     <div className="flex items-start gap-2 text-xs font-bold text-stone-800 dark:text-stone-200">
-                      <span className="text-blue-500 font-black">✦</span>
+                      <span className="text-blue-500 font-bold">✦</span>
                       <span>Executive Client Pitching & Negotiation Training</span>
                     </div>
                     <div className="flex items-start gap-2 text-xs font-bold text-stone-800 dark:text-stone-200">
-                      <span className="text-blue-500 font-black">✦</span>
+                      <span className="text-blue-500 font-bold">✦</span>
                       <span>1-on-1 Weekly Coaching with Industry Directors</span>
                     </div>
                     <div className="flex items-start gap-2 text-xs font-bold text-stone-800 dark:text-stone-200">
-                      <span className="text-blue-500 font-black">✦</span>
+                      <span className="text-blue-500 font-bold">✦</span>
                       <span>100% Company-Sponsored Global Certifications</span>
                     </div>
                   </div>
@@ -797,12 +800,12 @@ const Careers: React.FC = () => {
                     <div className="w-12 h-12 rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center shadow-xs">
                       <Building2 size={24} />
                     </div>
-                    <span className="px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 text-[10px] font-black uppercase tracking-wider">
+                    <span className="px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 text-[10px] font-bold uppercase tracking-wider">
                       C-SUITE ACCESS
                     </span>
                   </div>
 
-                  <h3 className="text-xl font-black text-stone-900 dark:text-white">Leadership Shadowing</h3>
+                  <h3 className="text-xl font-bold text-stone-900 dark:text-white">Leadership Shadowing</h3>
                   <p className="text-stone-500 dark:text-stone-400 text-xs sm:text-sm mt-2 leading-relaxed">
                     Work alongside seasoned founders and recruitment directors with zero bureaucratic barriers. Gain real-world insights into business scaling, client acquisition, and operations.
                   </p>
@@ -810,15 +813,15 @@ const Careers: React.FC = () => {
                   {/* Bullet Points */}
                   <div className="space-y-2.5 mt-5 pt-4 border-t border-stone-100 dark:border-stone-800">
                     <div className="flex items-start gap-2 text-xs font-bold text-stone-800 dark:text-stone-200">
-                      <span className="text-purple-500 font-black">✦</span>
+                      <span className="text-purple-500 font-bold">✦</span>
                       <span>Quarterly Executive Strategy & Planning Offsites</span>
                     </div>
                     <div className="flex items-start gap-2 text-xs font-bold text-stone-800 dark:text-stone-200">
-                      <span className="text-purple-500 font-black">✦</span>
+                      <span className="text-purple-500 font-bold">✦</span>
                       <span>Zero Hierarchical Barriers & Direct Slack Access</span>
                     </div>
                     <div className="flex items-start gap-2 text-xs font-bold text-stone-800 dark:text-stone-200">
-                      <span className="text-purple-500 font-black">✦</span>
+                      <span className="text-purple-500 font-bold">✦</span>
                       <span>Cross-Functional High-Impact Project Ownership</span>
                     </div>
                   </div>
@@ -839,12 +842,12 @@ const Careers: React.FC = () => {
                     <div className="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shadow-xs">
                       <Trophy size={24} />
                     </div>
-                    <span className="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-wider">
+                    <span className="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-bold uppercase tracking-wider">
                       SPOT CASH
                     </span>
                   </div>
 
-                  <h3 className="text-xl font-black text-stone-900 dark:text-white">Weekly Spot Incentives</h3>
+                  <h3 className="text-xl font-bold text-stone-900 dark:text-white">Weekly Spot Incentives</h3>
                   <p className="text-stone-500 dark:text-stone-400 text-xs sm:text-sm mt-2 leading-relaxed">
                     Hard work gets celebrated immediately. Enjoy transparent weekly performance incentives and milestone cash payouts on top of your fixed competitive salary.
                   </p>
@@ -852,15 +855,15 @@ const Careers: React.FC = () => {
                   {/* Bullet Points */}
                   <div className="space-y-2.5 mt-5 pt-4 border-t border-stone-100 dark:border-stone-800">
                     <div className="flex items-start gap-2 text-xs font-bold text-stone-800 dark:text-stone-200">
-                      <span className="text-amber-500 font-black">✦</span>
+                      <span className="text-amber-500 font-bold">✦</span>
                       <span>Friday Spot Bonuses: ₹5,000 to ₹25,000 Instant Rewards</span>
                     </div>
                     <div className="flex items-start gap-2 text-xs font-bold text-stone-800 dark:text-stone-200">
-                      <span className="text-amber-500 font-black">✦</span>
+                      <span className="text-amber-500 font-bold">✦</span>
                       <span>Monthly Performer Trophies & Recognition Spotlight</span>
                     </div>
                     <div className="flex items-start gap-2 text-xs font-bold text-stone-800 dark:text-stone-200">
-                      <span className="text-amber-500 font-black">✦</span>
+                      <span className="text-amber-500 font-bold">✦</span>
                       <span>Annual All-Expenses-Paid International Team Trips</span>
                     </div>
                   </div>
@@ -881,12 +884,12 @@ const Careers: React.FC = () => {
                     <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-xs">
                       <UsersRound size={24} />
                     </div>
-                    <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase tracking-wider">
+                    <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
                       4.9/5 RATING
                     </span>
                   </div>
 
-                  <h3 className="text-xl font-black text-stone-900 dark:text-white">Collaborative Squads</h3>
+                  <h3 className="text-xl font-bold text-stone-900 dark:text-white">Collaborative Squads</h3>
                   <p className="text-stone-500 dark:text-stone-400 text-xs sm:text-sm mt-2 leading-relaxed">
                     Work in empowered, agile pods where your voice matters. We foster a positive, supportive work environment with zero micromanagement and zero toxic stress.
                   </p>
@@ -894,15 +897,15 @@ const Careers: React.FC = () => {
                   {/* Bullet Points */}
                   <div className="space-y-2.5 mt-5 pt-4 border-t border-stone-100 dark:border-stone-800">
                     <div className="flex items-start gap-2 text-xs font-bold text-stone-800 dark:text-stone-200">
-                      <span className="text-emerald-500 font-black">✦</span>
+                      <span className="text-emerald-500 font-bold">✦</span>
                       <span>No Micromanagement & Autonomous Ownership</span>
                     </div>
                     <div className="flex items-start gap-2 text-xs font-bold text-stone-800 dark:text-stone-200">
-                      <span className="text-emerald-500 font-black">✦</span>
+                      <span className="text-emerald-500 font-bold">✦</span>
                       <span>Daily Fun Syncs, Snack Breaks & Team Games</span>
                     </div>
                     <div className="flex items-start gap-2 text-xs font-bold text-stone-800 dark:text-stone-200">
-                      <span className="text-emerald-500 font-black">✦</span>
+                      <span className="text-emerald-500 font-bold">✦</span>
                       <span>Mental Wellbeing First & Comprehensive Health Benefits</span>
                     </div>
                   </div>
@@ -923,12 +926,12 @@ const Careers: React.FC = () => {
                     <div className="w-12 h-12 rounded-2xl bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center shadow-xs">
                       <Zap size={24} />
                     </div>
-                    <span className="px-2.5 py-1 rounded-full bg-teal-500/10 text-teal-600 dark:text-teal-400 text-[10px] font-black uppercase tracking-wider">
+                    <span className="px-2.5 py-1 rounded-full bg-teal-500/10 text-teal-600 dark:text-teal-400 text-[10px] font-bold uppercase tracking-wider">
                       FAST-TRACK
                     </span>
                   </div>
 
-                  <h3 className="text-xl font-black text-stone-900 dark:text-white">48-72h Direct Hiring Pipeline</h3>
+                  <h3 className="text-xl font-bold text-stone-900 dark:text-white">48-72h Direct Hiring Pipeline</h3>
                   <p className="text-stone-500 dark:text-stone-400 text-xs sm:text-sm mt-2 leading-relaxed">
                     Experience a transparent, frictionless recruitment process with direct hiring manager interviews, instant AI ATS reviews, and rapid offer letters.
                   </p>
@@ -936,19 +939,19 @@ const Careers: React.FC = () => {
                   {/* Bullet Points */}
                   <div className="space-y-2.5 mt-5 pt-4 border-t border-stone-100 dark:border-stone-800">
                     <div className="flex items-start gap-2 text-xs font-bold text-stone-800 dark:text-stone-200">
-                      <span className="text-teal-500 font-black">✦</span>
+                      <span className="text-teal-500 font-bold">✦</span>
                       <span>Instant AI Resume & ATS Match Scoring</span>
                     </div>
                     <div className="flex items-start gap-2 text-xs font-bold text-stone-800 dark:text-stone-200">
-                      <span className="text-teal-500 font-black">✦</span>
+                      <span className="text-teal-500 font-bold">✦</span>
                       <span>Direct Recruiter WhatsApp & Candidate Portal Sync</span>
                     </div>
                     <div className="flex items-start gap-2 text-xs font-bold text-stone-800 dark:text-stone-200">
-                      <span className="text-teal-500 font-black">✦</span>
+                      <span className="text-teal-500 font-bold">✦</span>
                       <span>24-Hour Interview Feedback & Next Round Routing</span>
                     </div>
                     <div className="flex items-start gap-2 text-xs font-bold text-stone-800 dark:text-stone-200">
-                      <span className="text-teal-500 font-black">✦</span>
+                      <span className="text-teal-500 font-bold">✦</span>
                       <span>Formal Offer Letter Rollout in 48 to 72 Hours</span>
                     </div>
                   </div>
@@ -980,7 +983,7 @@ const Careers: React.FC = () => {
                   <span>FREEDOM & WELLBEING</span>
                 </div>
 
-                <h2 className="text-3xl sm:text-4xl lg:text-6xl font-black text-stone-900 dark:text-white leading-tight">
+                <h2 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-stone-900 dark:text-white leading-tight">
                   Flexible Working Hours, <br />
                   <span className="text-amber-500">Zero Pressure Culture</span> <br />
                   & Uncapped Growth.
@@ -1090,7 +1093,7 @@ const Careers: React.FC = () => {
                   <span>YOUR CAREER · YOUR OPPORTUNITY</span>
                 </div>
 
-                <h2 className="text-3xl sm:text-4xl lg:text-6xl font-black text-stone-900 dark:text-white leading-tight">
+                <h2 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-stone-900 dark:text-white leading-tight">
                   Where ambitious talent <br />
                   <span className="text-amber-500">applies directly & lands</span> <br />
                   their dream job.
@@ -1173,7 +1176,7 @@ const Careers: React.FC = () => {
                 <Compass size={14} className="text-amber-500" />
                 <span>STEP-BY-STEP HIRING ROADMAP</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-6xl font-black text-stone-900 dark:text-white leading-tight">
+              <h2 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-stone-900 dark:text-white leading-tight">
                 From learning <br />
                 <span className="text-amber-500">to earning.</span>
               </h2>
@@ -1196,8 +1199,8 @@ const Careers: React.FC = () => {
                   <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                     <Search size={26} />
                   </div>
-                  <span className="text-xs font-black uppercase tracking-widest text-amber-500">STAGE 01</span>
-                  <h4 className="font-black text-lg text-stone-900 dark:text-white mt-1">Discover</h4>
+                  <span className="text-xs font-bold uppercase tracking-widest text-amber-500">STAGE 01</span>
+                  <h4 className="font-bold text-lg text-stone-900 dark:text-white mt-1">Discover</h4>
                   <p className="text-xs text-stone-500 dark:text-stone-400 mt-2 leading-relaxed font-medium">
                     Explore curated roles that match your passion, skills, and growth ambition.
                   </p>
@@ -1210,8 +1213,8 @@ const Careers: React.FC = () => {
                   <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                     <BookOpen size={26} />
                   </div>
-                  <span className="text-xs font-black uppercase tracking-widest text-emerald-500">STAGE 02</span>
-                  <h4 className="font-black text-lg text-stone-900 dark:text-white mt-1">Prepare</h4>
+                  <span className="text-xs font-bold uppercase tracking-widest text-emerald-500">STAGE 02</span>
+                  <h4 className="font-bold text-lg text-stone-900 dark:text-white mt-1">Prepare</h4>
                   <p className="text-xs text-stone-500 dark:text-stone-400 mt-2 leading-relaxed font-medium">
                     Hone your resume with our instant AI ATS evaluation and guidance.
                   </p>
@@ -1224,8 +1227,8 @@ const Careers: React.FC = () => {
                   <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 text-white shadow-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                     <Laptop size={26} />
                   </div>
-                  <span className="text-xs font-black uppercase tracking-widest text-purple-500">STAGE 03</span>
-                  <h4 className="font-black text-lg text-stone-900 dark:text-white mt-1">Apply</h4>
+                  <span className="text-xs font-bold uppercase tracking-widest text-purple-500">STAGE 03</span>
+                  <h4 className="font-bold text-lg text-stone-900 dark:text-white mt-1">Apply</h4>
                   <p className="text-xs text-stone-500 dark:text-stone-400 mt-2 leading-relaxed font-medium">
                     Submit in 1-click and get direct recruiter visibility within 24 hours.
                   </p>
@@ -1238,8 +1241,8 @@ const Careers: React.FC = () => {
                   <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-rose-500 text-white shadow-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                     <MessageSquare size={26} />
                   </div>
-                  <span className="text-xs font-black uppercase tracking-widest text-amber-500">STAGE 04</span>
-                  <h4 className="font-black text-lg text-stone-900 dark:text-white mt-1">Interview</h4>
+                  <span className="text-xs font-bold uppercase tracking-widest text-amber-500">STAGE 04</span>
+                  <h4 className="font-bold text-lg text-stone-900 dark:text-white mt-1">Interview</h4>
                   <p className="text-xs text-stone-500 dark:text-stone-400 mt-2 leading-relaxed font-medium">
                     Connect directly with friendly hiring teams and ace your interview rounds.
                   </p>
@@ -1252,8 +1255,8 @@ const Careers: React.FC = () => {
                   <div className="w-16 h-16 rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 text-white shadow-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                     <Trophy size={26} />
                   </div>
-                  <span className="text-xs font-black uppercase tracking-widest text-teal-500">STAGE 05</span>
-                  <h4 className="font-black text-lg text-stone-900 dark:text-white mt-1">Get Hired</h4>
+                  <span className="text-xs font-bold uppercase tracking-widest text-teal-500">STAGE 05</span>
+                  <h4 className="font-bold text-lg text-stone-900 dark:text-white mt-1">Get Hired</h4>
                   <p className="text-xs text-stone-500 dark:text-stone-400 mt-2 leading-relaxed font-medium">
                     Receive formal offer rollout and start your high-growth career journey!
                   </p>
@@ -1276,7 +1279,7 @@ const Careers: React.FC = () => {
                 <Quote size={13} className="text-amber-500" />
                 <span>REAL PEOPLE · REAL CAREERS</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-6xl font-black text-stone-900 dark:text-white">
+              <h2 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-stone-900 dark:text-white">
                 Real people. <br />
                 <span className="text-amber-500">Real careers.</span>
               </h2>
@@ -1304,11 +1307,11 @@ const Careers: React.FC = () => {
 
                 <div className="flex items-center justify-between pt-8 border-t border-stone-100 dark:border-stone-800 mt-8">
                   <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white font-black text-2xl flex items-center justify-center shadow-lg shadow-amber-500/25 flex-shrink-0">
+                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white font-bold text-2xl flex items-center justify-center shadow-lg shadow-amber-500/25 flex-shrink-0">
                       {testimonials[0].name.charAt(0)}
                     </div>
                     <div>
-                      <b className="text-base font-black text-stone-900 dark:text-white block">{testimonials[0].name}</b>
+                      <b className="text-base font-bold text-stone-900 dark:text-white block">{testimonials[0].name}</b>
                       <span className="text-xs text-stone-500 dark:text-stone-400">{testimonials[0].role} · {testimonials[0].company}</span>
                     </div>
                   </div>
@@ -1328,14 +1331,14 @@ const Careers: React.FC = () => {
                     </p>
                     <div className="flex items-center justify-between pt-4 border-t border-stone-100 dark:border-stone-800 mt-4">
                       <div className="flex items-center gap-3">
-                        <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white font-black text-lg flex-shrink-0 shadow-md ${idx === 0
+                        <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0 shadow-md ${idx === 0
                           ? 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/20'
                           : 'bg-gradient-to-br from-purple-500 to-indigo-600 shadow-purple-500/20'
                           }`}>
                           {t.name.charAt(0)}
                         </div>
                         <div>
-                          <b className="text-xs font-black text-stone-900 dark:text-white block">{t.name}</b>
+                          <b className="text-xs font-bold text-stone-900 dark:text-white block">{t.name}</b>
                           <span className="text-[11px] text-stone-500 dark:text-stone-400">{t.role}</span>
                         </div>
                       </div>
@@ -1372,11 +1375,12 @@ const Careers: React.FC = () => {
                   <div className="relative w-full h-[460px] sm:h-[500px] rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-stone-800 bg-stone-900 group">
                     <img
                       src="/Rupesh.jpeg"
-                      alt="Rupesh - Leadership at Adyapan"
+                      alt="Rupesh Kumar Rupak - Head of Technology at Adyapan"
                       className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700"
                     />
+
                     {/* Subtle Gradient Shade */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none" />
 
                     {/* Leader Info Tag inside Image */}
                     <div className="absolute bottom-6 left-6 right-6 text-white pointer-events-none">
@@ -1384,7 +1388,10 @@ const Careers: React.FC = () => {
                         <Sparkles size={13} className="fill-stone-950" />
                         <span>Executive Leadership</span>
                       </span>
-                      <h3 className="text-xl sm:text-2xl font-black text-white">Rupesh Kumar Rupak</h3>
+                      <h3 className="text-xl sm:text-2xl font-bold text-white">Rupesh Kumar Rupak</h3>
+                      <p className="text-amber-400 text-sm sm:text-base font-bold tracking-wide mt-1">
+                        Head of Technology
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -1400,7 +1407,7 @@ const Careers: React.FC = () => {
                 </div>
 
                 {/* Editorial Heading */}
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-stone-900 dark:text-white leading-tight tracking-tight">
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-stone-900 dark:text-white leading-tight tracking-tight">
                   "We don't just hire for jobs — <br />
                   <span className="text-amber-500">we build leaders of tomorrow.</span>"
                 </h2>
@@ -1416,31 +1423,39 @@ const Careers: React.FC = () => {
                   <p className="text-stone-600 dark:text-stone-400 text-xs sm:text-sm leading-relaxed font-medium">
                     Whether you are starting as an intern, counselor, or senior specialist, your voice matters from day one. You will have direct access to leadership, transparent quarterly reviews, and an environment built to celebrate your wins every single week.
                   </p>
+
+                  {/* Leader Byline inside Quote Card */}
+                  <div className="pt-3 border-t border-amber-200/60 dark:border-stone-800 flex items-center justify-between gap-3">
+                    <div>
+                      <h4 className="text-sm font-bold text-stone-900 dark:text-white">Rupesh Kumar Rupak</h4>
+                      <p className="text-xs font-bold text-amber-600 dark:text-amber-400">Head of Technology, Adyapan</p>
+                    </div>
+                  </div>
                 </div>
 
                 {/* 3 Leadership Commitment Pillars */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-1">
                   <div className="p-4 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 shadow-xs">
-                    <div className="w-8 h-8 rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center font-black text-sm mb-2">
+                    <div className="w-8 h-8 rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-sm mb-2">
                       01
                     </div>
-                    <h4 className="font-black text-xs sm:text-sm text-stone-900 dark:text-white">Zero Gatekeeping</h4>
+                    <h4 className="font-bold text-xs sm:text-sm text-stone-900 dark:text-white">Zero Gatekeeping</h4>
                     <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-1 leading-snug">Promotions based solely on merit and execution.</p>
                   </div>
 
                   <div className="p-4 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 shadow-xs">
-                    <div className="w-8 h-8 rounded-lg bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-black text-sm mb-2">
+                    <div className="w-8 h-8 rounded-lg bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-sm mb-2">
                       02
                     </div>
-                    <h4 className="font-black text-xs sm:text-sm text-stone-900 dark:text-white">Direct Access</h4>
+                    <h4 className="font-bold text-xs sm:text-sm text-stone-900 dark:text-white">Direct Access</h4>
                     <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-1 leading-snug">Open Slack channels and weekly founder 1-on-1s.</p>
                   </div>
 
                   <div className="p-4 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 shadow-xs">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black text-sm mb-2">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-sm mb-2">
                       03
                     </div>
-                    <h4 className="font-black text-xs sm:text-sm text-stone-900 dark:text-white">Continuous Growth</h4>
+                    <h4 className="font-bold text-xs sm:text-sm text-stone-900 dark:text-white">Continuous Growth</h4>
                     <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-1 leading-snug">Sponsored certifications & leadership grooming.</p>
                   </div>
                 </div>
@@ -1482,7 +1497,7 @@ const Careers: React.FC = () => {
                 <Sparkles size={14} className="text-amber-500" />
                 <span>PHOTO STORIES & MEMORIES</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-6xl font-black text-stone-900 dark:text-white leading-tight">
+              <h2 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-stone-900 dark:text-white leading-tight">
                 Come for the opportunity. <br />
                 <span className="text-amber-500">Stay for the people.</span>
               </h2>
@@ -1523,7 +1538,7 @@ const Careers: React.FC = () => {
                       <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-black/60 backdrop-blur-md text-xs font-bold text-amber-400 w-fit mb-2 border border-white/10">
                         {story.tag}
                       </div>
-                      <h3 className="text-lg sm:text-xl font-black text-white leading-snug">
+                      <h3 className="text-lg sm:text-xl font-bold text-white leading-snug">
                         {story.title}
                       </h3>
                       {isActive && (
@@ -1547,19 +1562,19 @@ const Careers: React.FC = () => {
                     onMouseEnter={() => setActivePhoto(idx)}
                     onClick={() => setActivePhoto(idx)}
                     className={`p-5 rounded-2xl border transition-all duration-300 cursor-pointer ${isActive
-                        ? 'bg-amber-500/10 dark:bg-amber-500/15 border-amber-500/60 shadow-lg -translate-y-1'
-                        : 'bg-white dark:bg-stone-900 border-stone-200/80 dark:border-stone-800 shadow-sm hover:border-amber-500/30'
+                      ? 'bg-amber-500/10 dark:bg-amber-500/15 border-amber-500/60 shadow-lg -translate-y-1'
+                      : 'bg-white dark:bg-stone-900 border-stone-200/80 dark:border-stone-800 shadow-sm hover:border-amber-500/30'
                       }`}
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                      <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
                         {story.tag}
                       </span>
                       <span className="text-[11px] font-bold text-stone-500 dark:text-stone-400">
                         Photo 0{idx + 1}
                       </span>
                     </div>
-                    <h4 className="text-base font-black text-stone-900 dark:text-white">
+                    <h4 className="text-base font-bold text-stone-900 dark:text-white">
                       {story.title}
                     </h4>
                     <p className="text-xs text-stone-600 dark:text-stone-300 mt-1.5 leading-relaxed">
@@ -1582,7 +1597,7 @@ const Careers: React.FC = () => {
            ══════════════════════════════════════════════════════════ */}
         <section className="py-20 sm:py-24 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white relative overflow-hidden">
           {/* Giant Transparent Watermark in Background */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white/10 font-black text-[120px] sm:text-[200px] select-none pointer-events-none uppercase tracking-tighter">
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white/10 font-bold text-[120px] sm:text-[200px] select-none pointer-events-none uppercase tracking-tighter">
             ADYAPAN
           </div>
 
@@ -1594,7 +1609,7 @@ const Careers: React.FC = () => {
                 <span className="inline-block px-3.5 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-extrabold uppercase tracking-widest text-white mb-2">
                   DON'T WAIT FOR THE RIGHT MOMENT
                 </span>
-                <h2 className="text-4xl sm:text-6xl lg:text-7xl font-black text-white leading-tight">
+                <h2 className="text-4xl sm:text-6xl lg:text-7xl font-bold text-white leading-tight">
                   Your next chapter <br />
                   starts here.
                 </h2>
@@ -1616,15 +1631,15 @@ const Careers: React.FC = () => {
               {/* Right Column: 3 Stat Highlights */}
               <div data-reveal="right" className="lg:col-span-5 grid grid-cols-3 gap-4 text-center">
                 <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20">
-                  <b className="text-2xl sm:text-3xl lg:text-4xl font-black text-white block">24h</b>
+                  <b className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white block">24h</b>
                   <span className="text-xs text-amber-100 font-bold uppercase tracking-wider">Fast Reply</span>
                 </div>
                 <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20">
-                  <b className="text-2xl sm:text-3xl lg:text-4xl font-black text-white block">48-72h</b>
+                  <b className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white block">48-72h</b>
                   <span className="text-xs text-amber-100 font-bold uppercase tracking-wider">Interviews</span>
                 </div>
                 <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20">
-                  <b className="text-2xl sm:text-3xl lg:text-4xl font-black text-white block">₹0 Fee</b>
+                  <b className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white block">₹0 Fee</b>
                   <span className="text-xs text-amber-100 font-bold uppercase tracking-wider">Free Apply</span>
                 </div>
               </div>
@@ -1647,7 +1662,7 @@ const Careers: React.FC = () => {
                     <HelpCircle size={13} className="text-amber-500" />
                     <span>EVERYTHING YOU NEED TO KNOW</span>
                   </div>
-                  <h2 className="text-3xl sm:text-4xl lg:text-6xl font-black text-stone-900 dark:text-white leading-tight">
+                  <h2 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-stone-900 dark:text-white leading-tight">
                     Still curious? <br />
                     <span className="text-amber-500">We've got answers.</span>
                   </h2>
@@ -1658,7 +1673,7 @@ const Careers: React.FC = () => {
                   <div className="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-600 flex items-center justify-center font-bold">
                     <Phone size={22} />
                   </div>
-                  <h4 className="font-black text-base text-stone-900 dark:text-white">Have specific questions?</h4>
+                  <h4 className="font-bold text-base text-stone-900 dark:text-white">Have specific questions?</h4>
                   <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 leading-relaxed font-medium">
                     Our team is here to assist you with applications, resume reviews, or technical positions.
                   </p>
@@ -1689,7 +1704,7 @@ const Careers: React.FC = () => {
                         className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-sm sm:text-base text-stone-900 dark:text-white"
                       >
                         <span className="flex items-center gap-3">
-                          <span className="text-xs font-black text-amber-500">0{idx + 1}</span>
+                          <span className="text-xs font-bold text-amber-500">0{idx + 1}</span>
                           <span>{item.q}</span>
                         </span>
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold transition-transform ${isOpen ? 'bg-amber-500 text-white rotate-180' : 'bg-stone-100 dark:bg-stone-800 text-stone-500'

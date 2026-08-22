@@ -44,20 +44,20 @@ const AdyapanOfferDocument = ({ data = {} as any, printMode = false }: { data?: 
   // Background Watermark emblem matching exact PDF watermark styling
   const PageWatermark = () => (
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden z-0">
-      <div 
+      <div
         className="w-[440px] h-[440px] rounded-full flex flex-col items-center justify-center transform -rotate-12"
         style={{
           border: '22px solid rgba(251, 191, 36, 0.14)',
           backgroundColor: 'rgba(254, 243, 199, 0.08)',
         }}
       >
-        <span 
-          className="font-black text-9xl tracking-tighter select-none"
+        <span
+          className="font-bold text-9xl tracking-tighter select-none"
           style={{ color: 'rgba(217, 119, 6, 0.10)', fontFamily: 'sans-serif' }}
         >
           ady.
         </span>
-        <span 
+        <span
           className="font-bold text-2xl tracking-[0.4em] uppercase mt-2 select-none"
           style={{ color: 'rgba(180, 83, 9, 0.10)', fontFamily: 'sans-serif' }}
         >
@@ -73,7 +73,7 @@ const AdyapanOfferDocument = ({ data = {} as any, printMode = false }: { data?: 
       <div className="flex items-center gap-4">
         <AdyapanLogo />
         <div className="flex flex-col justify-center">
-          <h1 className="text-xl sm:text-2xl font-black tracking-wide text-[#E58A00] font-sans uppercase">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-wide text-[#E58A00] font-sans uppercase">
             SR’S ADYAPAN EDUTECH PRIVATE LIMITED
           </h1>
           <h2 className="text-sm font-bold tracking-[0.4em] text-[#C00000] uppercase text-center mt-1">
@@ -232,11 +232,11 @@ const AdyapanOfferDocument = ({ data = {} as any, printMode = false }: { data?: 
         <div className="relative z-10 flex-1 flex flex-col space-y-3 pt-2 text-justify">
           <ul className="space-y-3">
             <li className="flex items-start gap-2">
-              <span className="font-black text-slate-800 text-sm leading-none mt-1">▪</span>
+              <span className="font-bold text-slate-800 text-sm leading-none mt-1">▪</span>
               <span>By accepting this training offer you agree to perform all responsibilities assigned to you with due care and diligence and in compliance with the management norms.</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="font-black text-slate-800 text-sm leading-none mt-1">▪</span>
+              <span className="font-bold text-slate-800 text-sm leading-none mt-1">▪</span>
               <span>You are also required to substantially use all of your time and effort to perform these tasks during business hours and such reasonable additional time as may be necessary.</span>
             </li>
           </ul>
@@ -251,35 +251,35 @@ const AdyapanOfferDocument = ({ data = {} as any, printMode = false }: { data?: 
 
           <ul className="space-y-3">
             <li className="flex items-start gap-2">
-              <span className="font-black text-slate-800 text-sm leading-none mt-1">▪</span>
+              <span className="font-bold text-slate-800 text-sm leading-none mt-1">▪</span>
               <span>As a Trainee you will not receive any of the employee benefits that regular employees receive.</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="font-black text-slate-800 text-sm leading-none mt-1">▪</span>
+              <span className="font-bold text-slate-800 text-sm leading-none mt-1">▪</span>
               <span>During the Training period, the company will have all the rights to terminate your services without offering any reason and you are required to give 15 Days notice should you wish to terminate your training before the end of your tenure.</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="font-black text-slate-800 text-sm leading-none mt-1">▪</span>
+              <span className="font-bold text-slate-800 text-sm leading-none mt-1">▪</span>
               <span>At any time if you wish to discontinue the training due to personal reasons , you will have to pay a compensation equal to 1 month stipend or you will have to serve 1 month notice period.</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="font-black text-slate-800 text-sm leading-none mt-1">▪</span>
+              <span className="font-bold text-slate-800 text-sm leading-none mt-1">▪</span>
               <span>All the information acquired during the course shall be strictly confidential and you shall refrain from using it for your own purpose or from disclosing it to anyone outside of the Company.</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="font-black text-slate-800 text-sm leading-none mt-1">▪</span>
+              <span className="font-bold text-slate-800 text-sm leading-none mt-1">▪</span>
               <span>Upon conclusion of your tenure, you will immediately return to the Company all of its property, equipment and documents including electronically stored information.</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="font-black text-slate-800 text-sm leading-none mt-1">▪</span>
+              <span className="font-bold text-slate-800 text-sm leading-none mt-1">▪</span>
               <span>You will observe all policies and practices governing the conduct of our business and employees.</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="font-black text-slate-800 text-sm leading-none mt-1">▪</span>
+              <span className="font-bold text-slate-800 text-sm leading-none mt-1">▪</span>
               <span>Official communication either within the company or outside the company should be through the company Email of your manager only.</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="font-black text-slate-800 text-sm leading-none mt-1">▪</span>
+              <span className="font-bold text-slate-800 text-sm leading-none mt-1">▪</span>
               <span>Post successful completion of the tenure, the candidate will be prone to performance based pre-placement offers by the company.</span>
             </li>
           </ul>

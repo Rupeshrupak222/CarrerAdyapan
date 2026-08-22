@@ -114,12 +114,12 @@ const ContactUs: React.FC = () => {
 
           <div className="relative z-10 max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 w-full">
             <div data-reveal="up" className="max-w-3xl space-y-4">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-amber-400 font-black text-xs uppercase tracking-wider backdrop-blur-md shadow-xs">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-amber-400 font-bold text-xs uppercase tracking-wider backdrop-blur-md shadow-xs">
                 <Sparkles size={14} className="text-amber-400 fill-amber-400" />
                 <span>CONTACT ADYAPAN · WE'RE HERE TO HELP</span>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black tracking-tight text-white leading-[1.05]">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-white leading-[1.05]">
                 Let's start a <br />
                 <span className="text-amber-500">conversation.</span>
               </h1>
@@ -141,10 +141,10 @@ const ContactUs: React.FC = () => {
               {/* Left Column: Info & Channels */}
               <div data-reveal="left" className="lg:col-span-5 space-y-6">
                 <div>
-                  <span className="text-xs font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 block mb-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block mb-2">
                     GET IN TOUCH
                   </span>
-                  <h2 className="text-3xl sm:text-4xl font-black text-stone-950 dark:text-white tracking-tight">
+                  <h2 className="text-3xl sm:text-4xl font-bold text-stone-950 dark:text-white tracking-tight">
                     We'd love to <br />
                     <span className="text-amber-500">hear from you.</span>
                   </h2>
@@ -207,10 +207,10 @@ const ContactUs: React.FC = () => {
               <div data-reveal="right" className="lg:col-span-7">
                 <div className="p-8 sm:p-10 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 shadow-2xl">
                   <div className="mb-6">
-                    <span className="text-xs font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 block mb-1">
+                    <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block mb-1">
                       SEND US A MESSAGE
                     </span>
-                    <h3 className="text-2xl font-black text-stone-900 dark:text-white">
+                    <h3 className="text-2xl font-bold text-stone-900 dark:text-white">
                       Tell us how we can help.
                     </h3>
                     <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
@@ -221,7 +221,7 @@ const ContactUs: React.FC = () => {
                   {sent ? (
                     <div className="p-8 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-center space-y-3">
                       <CheckCircle2 size={42} className="text-emerald-500 mx-auto" />
-                      <h4 className="text-xl font-black text-emerald-900 dark:text-emerald-300">
+                      <h4 className="text-xl font-bold text-emerald-900 dark:text-emerald-300">
                         Message received.
                       </h4>
                       <p className="text-xs text-emerald-700 dark:text-emerald-400 max-w-sm mx-auto">
@@ -333,10 +333,10 @@ const ContactUs: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
 
               <div data-reveal="up" className="lg:col-span-4 space-y-3">
-                <span className="text-xs font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 block">
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block">
                   QUICK ANSWERS
                 </span>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-stone-950 dark:text-white leading-tight">
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-stone-950 dark:text-white leading-tight">
                   Before you <br />
                   <span className="text-amber-500">write to us.</span>
                 </h2>
@@ -358,14 +358,13 @@ const ContactUs: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setOpenFaq(isOpen ? null : idx)}
-                        className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 font-black text-sm sm:text-base text-stone-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 transition-colors cursor-pointer"
+                        className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 font-bold text-sm sm:text-base text-stone-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 transition-colors cursor-pointer"
                       >
                         <span>{faq.q}</span>
                         <ChevronDown
                           size={18}
-                          className={`text-stone-400 transform transition-transform duration-300 ${
-                            isOpen ? 'rotate-180 text-amber-500' : ''
-                          }`}
+                          className={`text-stone-400 transform transition-transform duration-300 ${isOpen ? 'rotate-180 text-amber-500' : ''
+                            }`}
                         />
                       </button>
 
@@ -391,10 +390,10 @@ const ContactUs: React.FC = () => {
 
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12" data-reveal="up">
               <div>
-                <span className="text-xs font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 block mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block mb-2">
                   COME MEET US
                 </span>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-stone-950 dark:text-white">
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-stone-950 dark:text-white">
                   Three locations. <span className="text-amber-500">One Adyapan.</span>
                 </h2>
               </div>
@@ -415,7 +414,7 @@ const ContactUs: React.FC = () => {
                 <span className="text-[11px] font-extrabold uppercase tracking-widest text-amber-400 block mb-1">
                   ADYAPAN · HYDERABAD
                 </span>
-                <b className="text-2xl sm:text-3xl font-black text-white">
+                <b className="text-2xl sm:text-3xl font-bold text-white">
                   Where people and ideas come together.
                 </b>
               </div>
@@ -431,7 +430,7 @@ const ContactUs: React.FC = () => {
                 <div className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-3">
                   <MapPin size={18} />
                 </div>
-                <b className="text-lg font-black text-stone-900 dark:text-white block">Head Office</b>
+                <b className="text-lg font-bold text-stone-900 dark:text-white block">Head Office</b>
                 <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed font-medium">
                   Sattva Magnus, Sabza Colony, Toli Chowki, Hyderabad, Telangana 500008
                 </p>
@@ -445,7 +444,7 @@ const ContactUs: React.FC = () => {
                 <div className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-3">
                   <MapPin size={18} />
                 </div>
-                <b className="text-lg font-black text-stone-900 dark:text-white block">Second Office</b>
+                <b className="text-lg font-bold text-stone-900 dark:text-white block">Second Office</b>
                 <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed font-medium">
                   Khajaguda – Nanakramguda Road, Rai Durg, Telangana 500104
                 </p>
@@ -459,7 +458,7 @@ const ContactUs: React.FC = () => {
                 <div className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-3">
                   <MapPin size={18} />
                 </div>
-                <b className="text-lg font-black text-stone-900 dark:text-white block">Third Office</b>
+                <b className="text-lg font-bold text-stone-900 dark:text-white block">Third Office</b>
                 <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed font-medium">
                   IndiQube Pearl, Mindspace Road, Gachibowli, Hyderabad, Telangana 500032
                 </p>

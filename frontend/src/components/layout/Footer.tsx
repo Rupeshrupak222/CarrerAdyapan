@@ -20,7 +20,7 @@ const Footer: React.FC<FooterProps> = () => {
                 alt="Adyapan"
                 className="w-11 h-11 object-contain rounded-full ring-2 ring-amber-500/30 group-hover:ring-amber-500 group-hover:scale-105 transition-all duration-300"
               />
-              <span className="font-black text-2xl tracking-tight text-white group-hover:text-amber-500 font-['Manrope'] transition-colors duration-300">
+              <span className="font-bold text-2xl tracking-tight text-white group-hover:text-amber-500 font-['Inter'] transition-colors duration-300">
                 Adyapan
               </span>
             </Link>
@@ -69,7 +69,7 @@ const Footer: React.FC<FooterProps> = () => {
 
           {/* Column 2: Contact */}
           <div className="lg:col-span-2 space-y-3">
-            <h4 className="text-xs font-black uppercase tracking-widest text-white mb-4">
+            <h4 className="text-xs font-bold uppercase tracking-widest text-white mb-4">
               Contact
             </h4>
             <a
@@ -91,7 +91,7 @@ const Footer: React.FC<FooterProps> = () => {
           {/* Column 3: Head Office & Second Office */}
           <div className="lg:col-span-3 space-y-4">
             <div>
-              <h4 className="text-xs font-black uppercase tracking-widest text-white mb-2">
+              <h4 className="text-xs font-bold uppercase tracking-widest text-white mb-2">
                 Head Office
               </h4>
               <a
@@ -108,7 +108,7 @@ const Footer: React.FC<FooterProps> = () => {
             </div>
 
             <div className="pt-2">
-              <h4 className="text-xs font-black uppercase tracking-widest text-white mb-2">
+              <h4 className="text-xs font-bold uppercase tracking-widest text-white mb-2">
                 Second Office
               </h4>
               <a
@@ -127,7 +127,7 @@ const Footer: React.FC<FooterProps> = () => {
 
           {/* Column 4: Third Office */}
           <div className="lg:col-span-3 space-y-3">
-            <h4 className="text-xs font-black uppercase tracking-widest text-white mb-2">
+            <h4 className="text-xs font-bold uppercase tracking-widest text-white mb-2">
               Third Office
             </h4>
             <a

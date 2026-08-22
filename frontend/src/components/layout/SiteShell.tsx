@@ -145,13 +145,19 @@ export const SiteShell: React.FC<SiteShellProps> = ({ children }) => {
                 </button>
               </div>
             ) : (
-              <div className="hidden sm:flex items-center gap-2">
+              <div className="hidden sm:flex items-center gap-2.5">
                 <Link
                   to="/auth?mode=signin"
+                  className="px-3.5 py-1.5 text-xs font-bold text-stone-200 hover:text-white transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/auth?mode=signup"
                   className="px-4 py-2 text-xs font-extrabold rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-md shadow-amber-500/20 transition-all flex items-center gap-1.5 hover:scale-105 active:scale-95"
                 >
-                  <User size={14} />
-                  <span>Sign In</span>
+                  <span>Sign Up</span>
+                  <ArrowRight size={13} />
                 </Link>
               </div>
             )}
@@ -219,14 +225,21 @@ export const SiteShell: React.FC<SiteShellProps> = ({ children }) => {
                   </button>
                 </div>
               ) : (
-                <div>
+                <div className="grid grid-cols-2 gap-2">
                   <Link
                     to="/auth?mode=signin"
                     onClick={() => setOpen(false)}
+                    className="w-full py-2.5 text-center text-xs font-bold rounded-xl bg-stone-800 text-white flex items-center justify-center gap-1.5"
+                  >
+                    <span>Sign In</span>
+                  </Link>
+                  <Link
+                    to="/auth?mode=signup"
+                    onClick={() => setOpen(false)}
                     className="w-full py-2.5 text-center text-xs font-extrabold rounded-xl bg-amber-500 text-stone-950 shadow-md flex items-center justify-center gap-1.5"
                   >
-                    <User size={14} />
-                    <span>Sign In</span>
+                    <span>Sign Up</span>
+                    <ArrowRight size={13} />
                   </Link>
                 </div>
               )}

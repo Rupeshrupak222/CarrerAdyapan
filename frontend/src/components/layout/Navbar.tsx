@@ -166,7 +166,7 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
 
   const navStyle = theme === 'dark'
     ? { background: 'rgba(13,13,26,0.95)', borderColor: 'rgba(245, 158, 11,0.2)', color: '#f1f5f9' }
-    : { background: 'rgba(255,255,255,0.97)', borderColor: '#e8e0d8', color: '#1a1a2e', boxShadow: '0 1px 12px rgba(26,26,46,0.08)' };
+    : { background: 'rgba(255,255,255,0.97)', borderColor: '#e2e8f0', color: '#1a1a2e', boxShadow: '0 1px 12px rgba(26,26,46,0.08)' };
 
   return (
     <header
@@ -177,7 +177,7 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
 
         {/* Left: Mobile Toggle, Brand & Global Search */}
         <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-          
+
           {/* Mobile Sidebar & Menu Toggle Button */}
           <button
             onClick={() => {
@@ -187,7 +187,7 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
             className="p-2 rounded-xl lg:hidden transition-all border shadow-sm shrink-0 active:scale-95"
             style={theme === 'dark'
               ? { background: 'rgba(245, 158, 11,0.15)', borderColor: 'rgba(245, 158, 11,0.3)', color: '#f59e0b' }
-              : { background: '#fdfaf6', borderColor: '#e0d8d0', color: '#f59e0b' }
+              : { background: '#f8fafc', borderColor: '#e2e8f0', color: '#f59e0b' }
             }
             aria-label="Toggle menu"
           >
@@ -221,8 +221,8 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
                   color: '#f1f5f9',
                 }
                 : {
-                  background: '#fdfaf6',
-                  borderColor: '#e0d8d0',
+                  background: '#f8fafc',
+                  borderColor: '#e2e8f0',
                   color: '#1a1a2e',
                 }
               }
@@ -231,7 +231,7 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
                 e.target.style.boxShadow = '0 0 0 3px rgba(245, 158, 11,0.2)';
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = theme === 'dark' ? 'rgba(245, 158, 11,0.25)' : '#e0d8d0';
+                e.target.style.borderColor = theme === 'dark' ? 'rgba(245, 158, 11,0.25)' : '#e2e8f0';
                 e.target.style.boxShadow = 'none';
               }}
             />
@@ -247,7 +247,7 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
             className="p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border shrink-0 hover:scale-105 active:scale-95"
             style={theme === 'dark'
               ? { background: 'rgba(245, 158, 11,0.15)', color: '#f59e0b', borderColor: 'rgba(245, 158, 11,0.3)' }
-              : { background: '#fdfaf6', color: '#1a1a2e', borderColor: '#e0d8d0' }
+              : { background: '#f8fafc', color: '#1a1a2e', borderColor: '#e2e8f0' }
             }
             title="Switch Theme Mode"
           >
@@ -274,7 +274,7 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
             }}
           >
             <span className="hidden sm:inline">AI Copilot</span>
-            <span className="px-1.5 py-0.5 text-[9px] font-black rounded-full bg-white/30 text-white">AI</span>
+            <span className="px-1.5 py-0.5 text-[9px] font-bold rounded-full bg-white/30 text-white">AI</span>
           </Link>
 
           {/* Contact Us Page Button */}
@@ -283,7 +283,7 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
             className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-all border cursor-pointer shrink-0 hover:scale-105"
             style={theme === 'dark'
               ? { background: 'rgba(245, 158, 11,0.15)', color: '#f59e0b', borderColor: 'rgba(245, 158, 11,0.3)' }
-              : { background: '#fdfaf6', color: '#1a1a2e', borderColor: '#e0d8d0' }
+              : { background: '#f8fafc', color: '#1a1a2e', borderColor: '#e2e8f0' }
             }
           >
             Contact Us
@@ -310,7 +310,7 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
               className="p-2 rounded-xl transition-all relative border shrink-0 hover:scale-105 active:scale-95"
               style={theme === 'dark'
                 ? { background: 'rgba(245, 158, 11,0.15)', borderColor: 'rgba(245, 158, 11,0.3)', color: '#f59e0b' }
-                : { background: '#fdfaf6', borderColor: '#e0d8d0', color: '#d97706' }
+                : { background: '#f8fafc', borderColor: '#e2e8f0', color: '#d97706' }
               }
               title="Notifications & Applicant Alerts"
             >
@@ -319,7 +319,7 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
               </svg>
               {unreadCount > 0 && (
                 <span
-                  className="absolute -top-1 -right-1 px-1.5 py-0.2 font-black text-[10px] rounded-full text-white shadow-md animate-pulse"
+                  className="absolute -top-1 -right-1 px-1.5 py-0.2 font-bold text-[10px] rounded-full text-white shadow-md animate-pulse"
                   style={{ background: '#f59e0b' }}
                 >
                   {unreadCount}
@@ -333,7 +333,7 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
                 className="absolute right-0 mt-2 w-80 sm:w-96 max-w-[calc(100vw-1.5rem)] rounded-2xl shadow-2xl border overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200"
                 style={theme === 'dark'
                   ? { background: '#14162a', borderColor: 'rgba(245, 158, 11,0.35)', color: '#f1f5f9', boxShadow: '0 12px 40px rgba(0,0,0,0.6)' }
-                  : { background: '#ffffff', borderColor: '#e8e0d8', boxShadow: '0 12px 36px rgba(26,26,46,0.16)' }
+                  : { background: '#ffffff', borderColor: '#e2e8f0', boxShadow: '0 12px 36px rgba(26,26,46,0.16)' }
                 }
               >
                 {/* Dropdown Header */}
@@ -341,7 +341,7 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
                   className="px-4 py-3 border-b flex items-center justify-between gap-2"
                   style={theme === 'dark'
                     ? { borderColor: 'rgba(245, 158, 11,0.2)', background: 'rgba(13,13,26,0.8)' }
-                    : { borderColor: '#f0e8df', background: '#fdfaf6' }
+                    : { borderColor: '#f1f5f9', background: '#ffffff' }
                   }
                 >
                   <div className="flex items-center gap-1.5 min-w-0">
@@ -353,14 +353,14 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
                   <div className="flex items-center gap-1.5 shrink-0">
                     {unreadCount > 0 ? (
                       <span
-                        className="text-[10px] font-black px-2 py-0.5 rounded-full border"
+                        className="text-[10px] font-bold px-2 py-0.5 rounded-full border"
                         style={{ background: 'rgba(245, 158, 11,0.2)', color: '#f59e0b', borderColor: 'rgba(245, 158, 11,0.4)' }}
                       >
                         {unreadCount} New
                       </span>
                     ) : (
                       <span
-                        className="text-[10px] font-black px-2 py-0.5 rounded-full border"
+                        className="text-[10px] font-bold px-2 py-0.5 rounded-full border"
                         style={{ background: 'rgba(100, 116, 139, 0.15)', color: theme === 'dark' ? '#94a3b8' : '#64748b', borderColor: 'rgba(100, 116, 139, 0.25)' }}
                       >
                         {notifications.length} Total
@@ -375,18 +375,17 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
                     className="px-4 py-2 border-b flex items-center justify-between gap-2 text-xs"
                     style={theme === 'dark'
                       ? { borderColor: 'rgba(245, 158, 11,0.12)', background: 'rgba(20,22,42,0.9)' }
-                      : { borderColor: '#f4ede4', background: '#faf6f0' }
+                      : { borderColor: '#f1f5f9', background: '#f8fafc' }
                     }
                   >
                     <button
                       type="button"
                       onClick={handleMarkAllRead}
                       disabled={unreadCount === 0}
-                      className={`inline-flex items-center gap-1.5 text-[11px] font-bold transition-all cursor-pointer ${
-                        unreadCount === 0
+                      className={`inline-flex items-center gap-1.5 text-[11px] font-bold transition-all cursor-pointer ${unreadCount === 0
                           ? 'opacity-40 cursor-not-allowed text-slate-400 dark:text-slate-500'
                           : 'text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300'
-                      }`}
+                        }`}
                       title="Mark all notifications as read in database"
                     >
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -412,7 +411,7 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
                 {/* Notifications List */}
                 <div
                   className="max-h-80 overflow-y-auto divide-y custom-scrollbar"
-                  style={{ borderColor: theme === 'dark' ? 'rgba(245, 158, 11,0.12)' : '#f0e8df' }}
+                  style={{ borderColor: theme === 'dark' ? 'rgba(245, 158, 11,0.12)' : '#f1f5f9' }}
                 >
                   {notifications.length === 0 ? (
                     <div className="py-8 px-4 text-center space-y-2">
@@ -434,9 +433,9 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
                         key={n.id}
                         className="group relative transition-all"
                         style={{
-                          borderColor: theme === 'dark' ? 'rgba(245, 158, 11,0.1)' : '#f0e8df',
+                          borderColor: theme === 'dark' ? 'rgba(245, 158, 11,0.1)' : '#f1f5f9',
                           background: n.unread
-                            ? (theme === 'dark' ? 'rgba(245, 158, 11,0.06)' : '#fffdf8')
+                            ? (theme === 'dark' ? 'rgba(245, 158, 11,0.06)' : '#fafafa')
                             : 'transparent'
                         }}
                       >
@@ -445,7 +444,7 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
                           onClick={() => handleNotificationClick(n)}
                           className="block p-3.5 pr-8 transition-all hover:pl-4"
                           onMouseEnter={(e) => {
-                            e.currentTarget.style.background = theme === 'dark' ? 'rgba(245, 158, 11,0.12)' : '#fdfaf6';
+                            e.currentTarget.style.background = theme === 'dark' ? 'rgba(245, 158, 11,0.12)' : '#f8fafc';
                           }}
                           onMouseLeave={(e) => {
                             e.currentTarget.style.background = 'transparent';
@@ -499,7 +498,7 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
                 {/* Dropdown Footer */}
                 <div
                   className="p-2.5 border-t text-center"
-                  style={theme === 'dark' ? { borderColor: 'rgba(245, 158, 11,0.15)', background: 'rgba(13,13,26,0.6)' } : { borderColor: '#f0e8df', background: '#fdfaf6' }}
+                  style={theme === 'dark' ? { borderColor: 'rgba(245, 158, 11,0.15)', background: 'rgba(13,13,26,0.6)' } : { borderColor: '#f1f5f9', background: '#ffffff' }}
                 >
                   <Link
                     to="/candidates"
@@ -523,11 +522,11 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
               className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl border transition-all hover:scale-105 active:scale-95"
               style={theme === 'dark'
                 ? { background: 'rgba(245, 158, 11,0.15)', borderColor: 'rgba(245, 158, 11,0.3)' }
-                : { background: '#fdfaf6', borderColor: '#e0d8d0' }
+                : { background: '#f8fafc', borderColor: '#e2e8f0' }
               }
             >
               <div
-                className="w-7 h-7 rounded-lg font-black flex items-center justify-center text-xs shadow-md shrink-0"
+                className="w-7 h-7 rounded-lg font-bold flex items-center justify-center text-xs shadow-md shrink-0"
                 style={{ background: 'linear-gradient(135deg, #d97706, #f59e0b)', color: '#ffffff' }}
               >
                 {user?.name?.charAt(0) || 'A'}
@@ -548,12 +547,12 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
                 className="absolute right-0 mt-2 w-60 max-w-[calc(100vw-1.5rem)] rounded-2xl shadow-2xl border py-2.5 z-[100] animate-in fade-in slide-in-from-top-2 duration-200"
                 style={theme === 'dark'
                   ? { background: '#14162a', borderColor: 'rgba(245, 158, 11,0.35)', color: '#f1f5f9', boxShadow: '0 12px 40px rgba(0,0,0,0.6)' }
-                  : { background: '#ffffff', borderColor: '#e8e0d8', boxShadow: '0 12px 36px rgba(26,26,46,0.16)' }
+                  : { background: '#ffffff', borderColor: '#e2e8f0', boxShadow: '0 12px 36px rgba(26,26,46,0.16)' }
                 }
               >
                 <div
                   className="px-4 py-2.5 border-b"
-                  style={theme === 'dark' ? { borderColor: 'rgba(245, 158, 11,0.15)' } : { borderColor: '#f0e8df' }}
+                  style={theme === 'dark' ? { borderColor: 'rgba(245, 158, 11,0.15)' } : { borderColor: '#f1f5f9' }}
                 >
                   <p className="text-xs font-extrabold" style={{ color: theme === 'dark' ? '#f1f5f9' : '#1a1a2e' }}>
                     {user?.name ? (user.name.toLowerCase() === 'admin' ? 'Admin' : user.name.charAt(0).toUpperCase() + user.name.slice(1)) : 'Admin'}
@@ -568,7 +567,7 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
                   className="flex items-center gap-2 px-4 py-2.5 text-xs font-extrabold transition-all hover:pl-5"
                   style={{ color: '#f59e0b' }}
                   onClick={() => setShowProfileMenu(false)}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = theme === 'dark' ? 'rgba(245, 158, 11,0.12)' : '#fdfaf6'; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = theme === 'dark' ? 'rgba(245, 158, 11,0.12)' : '#f8fafc'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                 >
                   <span>👤 View Profile & Account</span>
@@ -579,7 +578,7 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
                   className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition-all hover:pl-5"
                   style={{ color: theme === 'dark' ? '#cbd5e1' : '#4b5563' }}
                   onClick={() => setShowProfileMenu(false)}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = theme === 'dark' ? 'rgba(245, 158, 11,0.12)' : '#fdfaf6'; e.currentTarget.style.color = '#f59e0b'; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = theme === 'dark' ? 'rgba(245, 158, 11,0.12)' : '#f8fafc'; e.currentTarget.style.color = '#f59e0b'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = theme === 'dark' ? '#cbd5e1' : '#4b5563'; }}
                 >
                   <span>📞 Contact Us Support</span>
@@ -591,7 +590,7 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
                   className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition-all hover:pl-5"
                   style={{ color: theme === 'dark' ? '#cbd5e1' : '#4b5563' }}
                   onClick={() => setShowProfileMenu(false)}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = theme === 'dark' ? 'rgba(245, 158, 11,0.12)' : '#fdfaf6'; e.currentTarget.style.color = '#f59e0b'; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = theme === 'dark' ? 'rgba(245, 158, 11,0.12)' : '#f8fafc'; e.currentTarget.style.color = '#f59e0b'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = theme === 'dark' ? '#cbd5e1' : '#4b5563'; }}
                 >
                   <span>🌐 Public Careers Portal ↗</span>
@@ -602,13 +601,13 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
                   className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition-all hover:pl-5"
                   style={{ color: theme === 'dark' ? '#cbd5e1' : '#4b5563' }}
                   onClick={() => setShowProfileMenu(false)}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = theme === 'dark' ? 'rgba(245, 158, 11,0.12)' : '#fdfaf6'; e.currentTarget.style.color = '#f59e0b'; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = theme === 'dark' ? 'rgba(245, 158, 11,0.12)' : '#f8fafc'; e.currentTarget.style.color = '#f59e0b'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = theme === 'dark' ? '#cbd5e1' : '#4b5563'; }}
                 >
                   <span>🤖 AI Hiring Copilot</span>
                 </Link>
 
-                <div className="border-t my-1.5" style={theme === 'dark' ? { borderColor: 'rgba(245, 158, 11,0.15)' } : { borderColor: '#f0e8df' }} />
+                <div className="border-t my-1.5" style={theme === 'dark' ? { borderColor: 'rgba(245, 158, 11,0.15)' } : { borderColor: '#f1f5f9' }} />
 
                 <button
                   onClick={() => { setShowProfileMenu(false); logout(); }}
@@ -632,10 +631,10 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
           className="lg:hidden border-t px-4 py-3 space-y-2 z-[100] animate-in fade-in slide-in-from-top-2 duration-200"
           style={theme === 'dark'
             ? { background: 'rgba(20,22,42,0.98)', borderColor: 'rgba(245, 158, 11,0.25)', color: '#f1f5f9' }
-            : { background: '#ffffff', borderColor: '#e8e0d8', boxShadow: '0 8px 24px rgba(26,26,46,0.12)' }
+            : { background: '#ffffff', borderColor: '#e2e8f0', boxShadow: '0 8px 24px rgba(26,26,46,0.12)' }
           }
         >
-          <div className="flex items-center justify-between pb-2 border-b" style={theme === 'dark' ? { borderColor: 'rgba(245, 158, 11,0.15)' } : { borderColor: '#f0e8df' }}>
+          <div className="flex items-center justify-between pb-2 border-b" style={theme === 'dark' ? { borderColor: 'rgba(245, 158, 11,0.15)' } : { borderColor: '#f1f5f9' }}>
             <span className="text-xs font-extrabold text-amber-500 uppercase tracking-widest">Navigation Menu</span>
             <button onClick={() => setMobileMenuOpen(false)} className="text-xs font-bold text-slate-400 hover:text-amber-500">✕ Close</button>
           </div>
@@ -656,7 +655,7 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
               className="flex items-center justify-center gap-1.5 p-2.5 rounded-xl font-bold text-xs border"
               style={theme === 'dark'
                 ? { background: 'rgba(245, 158, 11,0.15)', color: '#f59e0b', borderColor: 'rgba(245, 158, 11,0.3)' }
-                : { background: '#fdfaf6', color: '#1a1a2e', borderColor: '#e0d8d0' }
+                : { background: '#f8fafc', color: '#1a1a2e', borderColor: '#e2e8f0' }
               }
             >
               📞 Contact Us
@@ -669,7 +668,7 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
               className="flex items-center justify-center gap-1.5 p-2.5 rounded-xl font-bold text-xs border"
               style={theme === 'dark'
                 ? { background: 'rgba(245, 158, 11,0.15)', color: '#f59e0b', borderColor: 'rgba(245, 158, 11,0.3)' }
-                : { background: '#fdfaf6', color: '#1a1a2e', borderColor: '#e0d8d0' }
+                : { background: '#f8fafc', color: '#1a1a2e', borderColor: '#e2e8f0' }
               }
             >
               🌐 Careers Portal ↗
@@ -681,7 +680,7 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
               className="flex items-center justify-center gap-1.5 p-2.5 rounded-xl font-bold text-xs border"
               style={theme === 'dark'
                 ? { background: 'rgba(245, 158, 11,0.15)', color: '#f59e0b', borderColor: 'rgba(245, 158, 11,0.3)' }
-                : { background: '#fdfaf6', color: '#1a1a2e', borderColor: '#e0d8d0' }
+                : { background: '#f8fafc', color: '#1a1a2e', borderColor: '#e2e8f0' }
               }
             >
               👤 Profile & Account

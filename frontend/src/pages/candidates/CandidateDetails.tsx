@@ -302,10 +302,10 @@ const CandidateDetails = () => {
 
     const fullCandName = `${candidate.firstName || ''} ${candidate.lastName || ''}`.trim() || 'Candidate';
     const isGeneric = (p: any) => !p || ['student / fresher', 'student', 'fresher', 'applicant'].includes(String(p).toLowerCase().trim());
-    const appliedRole = candidate.jobTitle 
-      || candidate.appliedRole 
-      || candidate.applications?.[0]?.job?.title 
-      || (!isGeneric(candidate.currentPosition) ? candidate.currentPosition : '') 
+    const appliedRole = candidate.jobTitle
+      || candidate.appliedRole
+      || candidate.applications?.[0]?.job?.title
+      || (!isGeneric(candidate.currentPosition) ? candidate.currentPosition : '')
       || 'Business Development Associate';
 
     const newInterviewData = {
@@ -963,7 +963,7 @@ const CandidateDetails = () => {
                       </p>
                     </div>
                   </div>
-                  <span className="px-3.5 py-1 text-xs font-black rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/40 shrink-0 self-start sm:self-auto">
+                  <span className="px-3.5 py-1 text-xs font-bold rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/40 shrink-0 self-start sm:self-auto">
                     {verdict}
                   </span>
                 </div>

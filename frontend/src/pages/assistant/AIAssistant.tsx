@@ -139,8 +139,8 @@ const AIAssistant = () => {
             <button
               onClick={handleClearHistory}
               className={`px-3.5 py-2 text-xs font-bold rounded-xl border transition-all flex items-center gap-1.5 self-start sm:self-center shrink-0 shadow-sm ${theme === 'dark'
-                  ? 'bg-slate-950 text-slate-300 border-slate-700 hover:border-amber-400'
-                  : 'bg-white text-slate-700 border-slate-200 hover:border-amber-400 hover:bg-slate-50'
+                ? 'bg-slate-950 text-slate-300 border-slate-700 hover:border-amber-400'
+                : 'bg-white text-slate-700 border-slate-200 hover:border-amber-400 hover:bg-slate-50'
                 }`}
               title="Reset conversation context"
             >
@@ -165,8 +165,8 @@ const AIAssistant = () => {
                 onClick={() => handleSend(prompt)}
                 disabled={loading}
                 className={`px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all text-left shadow-sm ${theme === 'dark'
-                    ? 'bg-slate-950 text-slate-200 hover:border-amber-400 border-slate-800'
-                    : 'bg-white text-slate-800 hover:bg-slate-100 hover:border-slate-300 border-slate-200'
+                  ? 'bg-slate-950 text-slate-200 hover:border-amber-400 border-slate-800'
+                  : 'bg-white text-slate-800 hover:bg-slate-100 hover:border-slate-300 border-slate-200'
                   }`}
               >
                 {prompt}
@@ -187,10 +187,10 @@ const AIAssistant = () => {
               >
                 <div
                   className={`max-w-2xl p-4 sm:p-5 rounded-2xl text-xs sm:text-sm font-normal leading-relaxed shadow-sm transition-all ${msg.sender === 'user'
-                      ? 'bg-amber-400 text-slate-950 font-semibold rounded-br-none whitespace-pre-line'
-                      : theme === 'dark'
-                        ? 'bg-slate-950 text-slate-100 border border-slate-800 rounded-bl-none'
-                        : 'bg-slate-50 text-slate-800 border border-slate-200 rounded-bl-none'
+                    ? 'bg-amber-400 text-slate-950 font-semibold rounded-br-none whitespace-pre-line'
+                    : theme === 'dark'
+                      ? 'bg-slate-950 text-slate-100 border border-slate-800 rounded-bl-none'
+                      : 'bg-slate-50 text-slate-800 border border-slate-200 rounded-bl-none'
                     }`}
                 >
                   {/* Markdown Renderer Simple Parser */}
@@ -224,15 +224,15 @@ const AIAssistant = () => {
               onKeyDown={handleKeyDown}
               placeholder="Ask HireAI: e.g. Analyze Rahul's resume. What are his missing skills? Compare him with Priya..."
               className={`flex-1 px-4 py-3 text-xs sm:text-sm font-normal border rounded-2xl focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 resize-none max-h-24 ${theme === 'dark'
-                  ? 'bg-slate-900 border-slate-700 text-white placeholder-slate-500'
-                  : 'bg-white border-slate-200 text-slate-800 placeholder-slate-400'
+                ? 'bg-slate-900 border-slate-700 text-white placeholder-slate-500'
+                : 'bg-white border-slate-200 text-slate-800 placeholder-slate-400'
                 }`}
             />
 
             <button
               onClick={() => handleSend()}
               disabled={loading || !input.trim()}
-              className={`px-5 py-3 text-xs font-black text-slate-950 bg-amber-400 hover:bg-amber-500 rounded-2xl transition-all shadow-md shrink-0 uppercase tracking-wider flex items-center gap-1.5 ${loading || !input.trim() ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-[1.02]'
+              className={`px-5 py-3 text-xs font-bold text-slate-950 bg-amber-400 hover:bg-amber-500 rounded-2xl transition-all shadow-md shrink-0 uppercase tracking-wider flex items-center gap-1.5 ${loading || !input.trim() ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-[1.02]'
                 }`}
             >
               <span>Send</span>
