@@ -1,15 +1,24 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
-import BackButton from '../../components/common/BackButton';
 import { jobService } from '../../services/jobService';
-import { useTheme } from '../../context/ThemeContext';
 import toast from 'react-hot-toast';
+import { 
+  Briefcase, 
+  ArrowLeft, 
+  Sparkles, 
+  Plus, 
+  Trash2, 
+  Calendar, 
+  CheckCircle2, 
+  Building2, 
+  MapPin, 
+  DollarSign 
+} from 'lucide-react';
 
 const EDTECH_TEMPLATES = [
   {
     name: 'Business Development Associate (BDA)',
-    role: 'BDA',
     title: 'Business Development Associate (EdTech Sales)',
     department: 'Sales & Growth',
     location: 'Mumbai / Hybrid',
@@ -17,13 +26,17 @@ const EDTECH_TEMPLATES = [
     experienceLevel: '1-3 Years',
     salaryMin: 350000,
     salaryMax: 600000,
-    description: 'We are seeking an energetic Business Development Associate to drive student course enrolments, manage sales pipelines, conduct counselling calls, and achieve monthly revenue targets.',
-    requirements: '1-3 years sales or telesales experience in EdTech or education; excellent English & Hindi communication; strong target achievement mindset; negotiation skills.',
-    responsibilities: 'Connect with prospective student leads; conduct detailed course counselling sessions; meet monthly enrolment targets; maintain CRM lead status.',
+    description: 'Drive student course enrolments, conduct counselling calls, and achieve monthly revenue targets.',
+    requirements: '1-3 years sales experience; fluent communication; target orientation.',
+    responsibilities: 'Connect with prospective students; counsel on career choices; achieve monthly admissions quota.',
+    rounds: [
+      { roundNumber: 1, name: 'Round 1: Screening / HR Call', type: 'PHONE' },
+      { roundNumber: 2, name: 'Round 2: Technical & Sales Pitch Round', type: 'VIDEO' },
+      { roundNumber: 3, name: 'Round 3: Final Culture & Management HR', type: 'VIDEO' },
+    ],
   },
   {
-    name: 'Academic Counsellor',
-    role: 'Counsellor',
+    name: 'Academic Counsellor / Student Advisor',
     title: 'Academic Counsellor / Student Advisor',
     department: 'Student Admissions',
     location: 'Delhi NCR / Remote',
@@ -31,329 +44,310 @@ const EDTECH_TEMPLATES = [
     experienceLevel: '2+ Years',
     salaryMin: 300000,
     salaryMax: 500000,
-    description: 'Provide personalized academic guidance to prospective students and parents, understand their career goals, recommend suitable learning programs, and assist with enrolment.',
-    requirements: '2+ years experience in academic counselling, student advisement, or education sales; empathetic active listening; objection handling skills; CRM knowledge.',
-    responsibilities: 'Guide students on career choices and course curricula; follow up on inbound leads; resolve parent queries; achieve monthly student admissions goals.',
-  },
-  {
-    name: 'Telecaller / Inside Sales',
-    role: 'Telecaller',
-    title: 'Inside Sales Executive / Telecaller',
-    department: 'Inside Sales',
-    location: 'Bangalore / On-site',
-    type: 'FULL_TIME',
-    experienceLevel: '0-2 Years',
-    salaryMin: 250000,
-    salaryMax: 400000,
-    description: 'Responsible for high-volume outbound calling to verified student leads, introducing course programs, scheduling counselling webinars, and closing course admissions.',
-    requirements: '0-2 years outbound telecalling or customer service experience; fluent verbal communication; ability to handle high daily call volume (80+ calls/day).',
-    responsibilities: 'Make 80-100 calls daily to inbound leads; pitch course offerings; book product demos for Senior Counsellors; maintain daily call logs.',
-  },
-  {
-    name: 'Full Stack Software Engineer',
-    role: 'Tech',
-    title: 'Senior Full Stack Developer (React & Node.js)',
-    department: 'Engineering',
-    location: 'Remote',
-    type: 'FULL_TIME',
-    experienceLevel: '3+ Years',
-    salaryMin: 1200000,
-    salaryMax: 1800000,
-    description: 'Build and scale our next-gen AI-powered learning management and recruitment platform using React, Node.js, Express, and PostgreSQL.',
-    requirements: '3+ years experience with React.js, Node.js, REST APIs, and SQL; experience integrating LLM APIs or AI algorithms; strong problem solving skills.',
-    responsibilities: 'Develop reusable React UI components; build secure Node.js microservices; integrate AI resume screening APIs; write unit tests.',
+    description: 'Provide personalized academic guidance to prospective students and parents.',
+    requirements: '2+ years academic counselling experience; empathetic communication.',
+    responsibilities: 'Guide students on career choices; follow up on inbound leads; meet enrolment goals.',
+    rounds: [
+      { roundNumber: 1, name: 'Round 1: HR Screening Call', type: 'PHONE' },
+      { roundNumber: 2, name: 'Round 2: Counselling Roleplay Round', type: 'VIDEO' },
+    ],
   },
 ];
 
-const EXPERIENCE_PRESETS = [
-  'Fresher / 0 Yrs',
-  '0 - 1 Year',
-  '1 - 2 Years',
-  '1 - 3 Years',
-  '2 - 4 Years',
-  '3 - 5 Years',
-  '5+ Years',
-];
-
-const CreateJob = () => {
+const CreateJob: React.FC = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const { theme } = useTheme();
+  const [submitting, setSubmitting] = useState(false);
+
   const [formData, setFormData] = useState({
-    title: '',
-    department: '',
-    description: '',
-    requirements: '',
-    responsibilities: '',
+    title: 'Business Development Associate (EdTech Sales)',
+    department: 'Sales & Growth',
+    location: 'Mumbai / Hybrid',
     type: 'FULL_TIME',
-    experienceLevel: '0-2 Years',
-    salaryMin: '',
-    salaryMax: '',
-    location: '',
+    experienceLevel: '1-3 Years',
+    salaryMin: '350000',
+    salaryMax: '600000',
+    description: 'We are seeking an energetic Business Development Associate to drive student course enrolments, conduct counselling calls, and achieve monthly revenue targets for Adyapan Edutech.',
+    requirements: '1-3 years sales or telesales experience in EdTech; excellent English & Hindi communication; strong target achievement mindset.',
+    responsibilities: 'Connect with prospective student leads; conduct detailed course counselling sessions; meet monthly enrolment targets.',
+    interviewRounds: [
+      { roundNumber: 1, name: 'Round 1: Screening / HR Call', type: 'PHONE' },
+      { roundNumber: 2, name: 'Round 2: Technical & Sales Pitch Round', type: 'VIDEO' },
+      { roundNumber: 3, name: 'Round 3: Final Culture & Management HR', type: 'VIDEO' },
+    ],
   });
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const applyTemplate = (tpl) => {
+  const handleApplyTemplate = (tpl: typeof EDTECH_TEMPLATES[0]) => {
     setFormData({
       title: tpl.title,
       department: tpl.department,
       location: tpl.location,
       type: tpl.type,
       experienceLevel: tpl.experienceLevel,
-      salaryMin: tpl.salaryMin,
-      salaryMax: tpl.salaryMax,
+      salaryMin: String(tpl.salaryMin),
+      salaryMax: String(tpl.salaryMax),
       description: tpl.description,
       requirements: tpl.requirements,
       responsibilities: tpl.responsibilities,
+      interviewRounds: tpl.rounds,
     });
-    toast.success(`Loaded "${tpl.title}" template! `);
+    toast.success(`Template applied: ${tpl.name}`);
   };
 
-  const handleSubmit = async (e) => {
+  const handleAddRound = () => {
+    const nextNum = formData.interviewRounds.length + 1;
+    setFormData({
+      ...formData,
+      interviewRounds: [
+        ...formData.interviewRounds,
+        { roundNumber: nextNum, name: `Round ${nextNum}: Evaluation Round`, type: 'VIDEO' },
+      ],
+    });
+  };
+
+  const handleRemoveRound = (index: number) => {
+    if (formData.interviewRounds.length <= 1) {
+      toast.error('At least 1 interview round is required.');
+      return;
+    }
+    const updated = formData.interviewRounds.filter((_, i) => i !== index).map((r, i) => ({
+      ...r,
+      roundNumber: i + 1,
+    }));
+    setFormData({ ...formData, interviewRounds: updated });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    if (!formData.title || !formData.department || !formData.location) {
+      toast.error('Please fill in required fields');
+      return;
+    }
+
+    setSubmitting(true);
+    const toastId = toast.loading('Publishing job requisition with interview rounds...');
 
     try {
-      if (!formData.title || !formData.department || !formData.description || !formData.location) {
-        toast.error('Please fill all required fields');
-        setLoading(false);
-        return;
-      }
-
-      const payload = {
+      await jobService.createJob({
         ...formData,
-        requirements: formData.requirements || formData.responsibilities || formData.description || '',
-      };
+        totalRounds: formData.interviewRounds.length,
+        status: 'PUBLISHED',
+      });
 
-      const response = await jobService.createJob(payload);
-
-      if (response.success) {
-        toast.success('Job created successfully! ');
-        navigate('/jobs');
-      } else {
-        toast.error(response.message || 'Failed to create job');
-      }
-    } catch (error) {
-      console.error('Create Job Error:', error);
-      toast.error(error.response?.data?.message || 'Failed to create job');
+      toast.success('Job requisition published successfully!', { id: toastId });
+      navigate('/jobs');
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Failed to create job', { id: toastId });
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
-  const inputClass = theme === 'dark'
-    ? 'w-full px-4 py-2.5 rounded-xl text-xs font-normal bg-slate-950 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400'
-    : 'w-full px-4 py-2.5 rounded-xl text-xs font-normal bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20';
-
-  const labelClass = theme === 'dark'
-    ? 'text-xs font-semibold text-slate-200 block mb-1'
-    : 'text-xs font-semibold text-slate-800 block mb-1';
-
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="space-y-2">
-          <BackButton label="Back to Job Directory" to="/jobs" />
-          
-          <div className={`p-6 rounded-3xl border transition-all space-y-1 relative overflow-hidden shadow-sm ${
-            theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
-          }`}>
-            <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-              Adyapan Job Creation Studio
+      <div className="space-y-6 max-w-4xl mx-auto animate-fadeIn">
+        {/* Navigation Header */}
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => navigate('/jobs')}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition-all border border-slate-200 shadow-sm"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to Requisitions
+          </button>
+        </div>
+
+        {/* Form Container */}
+        <div className="p-6 sm:p-10 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-8">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold uppercase tracking-wider mb-2">
+              <Briefcase className="w-3.5 h-3.5 text-amber-600" />
+              New Requisition Builder
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Create & Publish Job Opening
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+              Create Job Opening
             </h1>
-            <p className="text-xs text-slate-600 dark:text-slate-300 font-normal">
-              Post a new role opening for Adyapan Edutech or use 1-Click Quick Templates below.
+            <p className="text-slate-500 text-xs sm:text-sm mt-1">
+              Configure job parameters, salary bands, and multi-round interview pipeline.
             </p>
           </div>
-        </div>
 
-        {/* 1-Click Quick Templates Bar */}
-        <div className={`p-5 rounded-3xl shadow-sm border space-y-3 ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
-        }`}>
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">1-Click EdTech Role Templates</span>
-            <span className="text-[11px] text-slate-500 font-medium">Click to auto-fill form</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {EDTECH_TEMPLATES.map((tpl) => (
-              <button
-                key={tpl.title}
-                type="button"
-                onClick={() => applyTemplate(tpl)}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all text-left shadow-sm ${
-                  theme === 'dark'
-                    ? 'bg-slate-950 text-slate-200 border-slate-800 hover:border-slate-600'
-                    : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-50'
-                }`}
-              >
-                {tpl.name}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit} className={`rounded-3xl border p-6 md:p-8 space-y-5 shadow-sm ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
-        }`}>
-          <div>
-            <label className={labelClass}>Job Title *</label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              className={inputClass}
-              placeholder="e.g., Business Development Associate (BDA)"
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className={labelClass}>Department *</label>
-              <input
-                type="text"
-                name="department"
-                value={formData.department}
-                onChange={handleChange}
-                className={inputClass}
-                placeholder="e.g., Sales & Growth"
-                required
-              />
-            </div>
-            <div>
-              <label className={labelClass}>Location *</label>
-              <input
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                className={inputClass}
-                placeholder="e.g., Mumbai, Remote"
-                required
-              />
+          {/* 1-Click Role Templates */}
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+            <span className="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-amber-600" /> Fast Role Templates
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {EDTECH_TEMPLATES.map((tpl, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => handleApplyTemplate(tpl)}
+                  className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 text-xs font-semibold border border-slate-200 shadow-sm transition-all"
+                >
+                  + {tpl.name}
+                </button>
+              ))}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className={labelClass}>Job Type</label>
-              <select
-                name="type"
-                value={formData.type}
-                onChange={handleChange}
-                className={inputClass}
-              >
-                <option value="FULL_TIME">Full Time</option>
-                <option value="PART_TIME">Part Time</option>
-                <option value="CONTRACT">Contract</option>
-                <option value="INTERNSHIP">Internship</option>
-                <option value="REMOTE">Remote</option>
-              </select>
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className={labelClass}>Required Experience *</label>
-                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Type manually or select below</span>
+          <form onSubmit={handleSubmit} className="space-y-6 text-xs">
+            {/* Core Job Details */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-slate-600 font-semibold uppercase">Job Title</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  className="mt-1 w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium outline-none focus:border-amber-500 text-sm"
+                />
               </div>
-              <input
-                type="text"
-                name="experienceLevel"
-                value={formData.experienceLevel}
-                onChange={handleChange}
-                className={inputClass}
-                placeholder="e.g., 0-1 Years, 2+ Years, Fresher, 3-5 Years"
-                required
-              />
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {EXPERIENCE_PRESETS.map((preset) => (
-                  <button
-                    key={preset}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, experienceLevel: preset })}
-                    className={`px-2 py-0.5 text-[11px] font-medium rounded-lg border transition-all ${
-                      formData.experienceLevel === preset
-                        ? 'bg-amber-500 text-white border-amber-500 shadow-sm'
-                        : theme === 'dark'
-                        ? 'bg-slate-950 text-slate-300 border-slate-800 hover:border-amber-400'
-                        : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-amber-50 hover:border-amber-300'
-                    }`}
-                  >
-                    {preset}
-                  </button>
+
+              <div>
+                <label className="text-slate-600 font-semibold uppercase">Department</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.department}
+                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                  className="mt-1 w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium outline-none focus:border-amber-500 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-600 font-semibold uppercase">Location</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.location}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  className="mt-1 w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium outline-none focus:border-amber-500 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-600 font-semibold uppercase">Employment Type</label>
+                <select
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                  className="mt-1 w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium outline-none focus:border-amber-500 text-sm"
+                >
+                  <option value="FULL_TIME">Full Time</option>
+                  <option value="INTERNSHIP">Internship</option>
+                  <option value="CONTRACT">Contract</option>
+                  <option value="PART_TIME">Part Time</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Description & Requirements */}
+            <div className="space-y-4">
+              <div>
+                <label className="text-slate-600 font-semibold uppercase">Job Description</label>
+                <textarea
+                  rows={3}
+                  required
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="mt-1 w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 outline-none focus:border-amber-500 text-xs sm:text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-600 font-semibold uppercase">Key Requirements & Skills</label>
+                <textarea
+                  rows={2}
+                  value={formData.requirements}
+                  onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
+                  className="mt-1 w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 outline-none focus:border-amber-500 text-xs sm:text-sm"
+                />
+              </div>
+            </div>
+
+            {/* Multi-Round Interview Pipeline Builder */}
+            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-amber-600" /> Multi-Round Interview Pipeline Configuration
+                  </h3>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Define the rounds required for candidates applying to this role.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleAddRound}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold border border-amber-300 transition-all text-xs"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Add Round
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {formData.interviewRounds.map((round, idx) => (
+                  <div key={idx} className="flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-200 shadow-sm">
+                    <span className="w-6 h-6 rounded-lg bg-amber-50 text-amber-700 font-black text-xs flex items-center justify-center shrink-0">
+                      {idx + 1}
+                    </span>
+                    <input
+                      type="text"
+                      value={round.name}
+                      onChange={(e) => {
+                        const updated = [...formData.interviewRounds];
+                        updated[idx].name = e.target.value;
+                        setFormData({ ...formData, interviewRounds: updated });
+                      }}
+                      className="flex-1 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 font-medium outline-none focus:border-amber-500"
+                    />
+                    <select
+                      value={round.type}
+                      onChange={(e) => {
+                        const updated = [...formData.interviewRounds];
+                        updated[idx].type = e.target.value;
+                        setFormData({ ...formData, interviewRounds: updated });
+                      }}
+                      className="px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 font-semibold outline-none"
+                    >
+                      <option value="PHONE">Phone</option>
+                      <option value="VIDEO">Google Meet Video</option>
+                      <option value="ON_SITE">In-Office</option>
+                    </select>
+
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveRound(idx)}
+                      className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all"
+                      title="Remove Round"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 ))}
               </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className={labelClass}>Min Annual Salary (₹)</label>
-              <input
-                type="number"
-                name="salaryMin"
-                value={formData.salaryMin}
-                onChange={handleChange}
-                className={inputClass}
-                placeholder="e.g., 350000"
-              />
+            {/* Form Actions */}
+            <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => navigate('/jobs')}
+                className="px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="px-8 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-extrabold text-sm shadow-md shadow-amber-500/25 hover:scale-105 active:scale-95 disabled:opacity-50"
+              >
+                {submitting ? 'Publishing...' : 'Publish Job Requisition'}
+              </button>
             </div>
-            <div>
-              <label className={labelClass}>Max Annual Salary (₹)</label>
-              <input
-                type="number"
-                name="salaryMax"
-                value={formData.salaryMax}
-                onChange={handleChange}
-                className={inputClass}
-                placeholder="e.g., 600000"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className={labelClass}>Job Overview & Description *</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows={3}
-              className={inputClass}
-              placeholder="Describe the company mission and high-level role summary..."
-              required
-            />
-          </div>
-
-          <div>
-            <label className={labelClass}>Key Responsibilities & Daily Tasks *</label>
-            <textarea
-              name="responsibilities"
-              value={formData.responsibilities}
-              onChange={handleChange}
-              rows={3}
-              className={inputClass}
-              placeholder="List core daily responsibilities (e.g. Conduct student counselling sessions; Meet monthly enrolment targets; Maintain CRM leads)..."
-              required
-            />
-          </div>
-
-          <div className="pt-2">
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition-all shadow-md shadow-amber-400/20 text-center"
-            >
-              {loading ? 'Publishing Job Opening...' : 'Publish Job & Generate Public Shareable Link →'}
-            </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </DashboardLayout>
   );

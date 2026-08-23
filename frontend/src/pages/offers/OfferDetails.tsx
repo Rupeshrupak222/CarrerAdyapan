@@ -23,15 +23,19 @@ const OfferDetails = () => {
 
   const loadOfferData = async () => {
     try {
-      const dbRes = await offerService.getAllOffers().catch(() => null);
-      const dbOffers = dbRes?.offers || [];
-      const localOffers = getStoredOffers();
-      const allOffers = [...localOffers, ...dbOffers];
+      if (!id) return;
+      const dbRes = await offerService.getOfferById(id).catch(() => null);
+      if (dbRes?.offer) {
+        setOffer(dbRes.offer);
+        return;
+      }
 
+      const allRes = await offerService.getAllOffers().catch(() => null);
+      const dbOffers = allRes?.offers || [];
       const decodedId = decodeURIComponent(id || '').toLowerCase().trim();
 
-      let found = allOffers.find(
-        (o) =>
+      const found = dbOffers.find(
+        (o: any) =>
           o &&
           (o.id === id ||
             o.candidateId === id ||
@@ -40,46 +44,10 @@ const OfferDetails = () => {
             (o.candidateName && o.candidateName.toLowerCase().trim() === decodedId))
       );
 
-      if (found) {
-        setOffer(found);
-        return;
-      }
-
-      // Check candidates store
-      const localCandidates = getStoredCandidates();
-      const candMatch = localCandidates.find(
-        (c) =>
-          c &&
-          (c.id === id ||
-            c.email?.toLowerCase().trim() === decodedId ||
-            `${c.firstName || ''} ${c.lastName || ''}`.trim().toLowerCase() === decodedId)
-      );
-
-      if (candMatch) {
-        setOffer({
-          id: candMatch.id,
-          candidateId: candMatch.id,
-          candidateName: `${candMatch.firstName || ''} ${candMatch.lastName || ''}`.trim() || 'Candidate Name',
-          candidateEmail: candMatch.email || 'candidate@example.com',
-          jobTitle: (candMatch as any).currentPosition || (candMatch as any).jobTitle || 'Senior Business Development Associate',
-          salary: candMatch.offerDetails?.salary || (candMatch as any).salary || 'INR 20000/-PerMonth',
-          stipend: candMatch.offerDetails?.stipend || 'INR 20000/-PerMonth',
-          bonus: candMatch.offerDetails?.bonus || 100000,
-          joiningDate: candMatch.offerDetails?.joiningDate || (candMatch as any).trainingStartDate || '2026-09-01',
-          expirationDate: candMatch.offerDetails?.expirationDate || '2026-08-30',
-          status: candMatch.status || 'READY_TO_SEND',
-          benefits: candMatch.offerDetails?.benefits || ['Health Insurance', 'Performance Incentives', 'Learning Allowance'],
-          customTerms: candMatch.offerDetails?.customTerms || 'Standard Adyapan Edutech Terms.',
-        });
-        return;
-      }
-
-      // If first offer exists, default to first offer
-      if (allOffers.length > 0) {
-        setOffer(allOffers[0]);
-      }
+      setOffer(found || null);
     } catch (err) {
       console.warn('Failed to load offer details:', err);
+      setOffer(null);
     }
   };
 
@@ -110,6 +78,33 @@ const OfferDetails = () => {
       <DashboardLayout>
         <div className="p-8 text-center">
           <p className="text-slate-500">Loading offer details...</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!offer) {
+    return (
+      <DashboardLayout>
+        <div className="space-y-6">
+          <BackButton label="Back to Offers & Agreements" to="/offers" />
+          <div className={`p-12 rounded-3xl border text-center space-y-4 shadow-sm ${
+            theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+          }`}>
+            <div className="w-16 h-16 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto text-2xl font-bold">
+              📄
+            </div>
+            <h2 className="text-xl font-bold">Offer Record Not Found</h2>
+            <p className="text-xs text-slate-500 max-w-md mx-auto">
+              The requested candidate offer letter does not exist in the database or may have been revoked.
+            </p>
+            <Link
+              to="/offers"
+              className="inline-block px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl transition-all shadow-sm"
+            >
+              Browse All Offer Letters
+            </Link>
+          </div>
         </div>
       </DashboardLayout>
     );

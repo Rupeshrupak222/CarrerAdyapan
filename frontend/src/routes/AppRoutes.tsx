@@ -20,25 +20,32 @@ import AIAssistant from '../pages/assistant/AIAssistant';
 import AdminProfile from '../pages/profile/AdminProfile';
 import AdminContactUs from '../pages/contact/AdminContactUs';
 
+// Dedicated ATS Portals
+import HRDashboard from '../pages/hr/HRDashboard';
+import HRManagerDashboard from '../pages/hr-manager/HRManagerDashboard';
+import AuditLogsPage from '../pages/admin/AuditLogsPage';
+
+// Public Secure Candidate Token Pages (NO LOGIN REQUIRED)
+import SecureInterviewPage from '../candidate-portal/secure/SecureInterviewPage';
+import SecureOfferPage from '../candidate-portal/secure/SecureOfferPage';
+import SecureOnboardingPage from '../candidate-portal/secure/SecureOnboardingPage';
+
 // Auth Pages
 import Login from '../pages/auth/Login';
+import AuthPage from '../candidate-portal/AuthPage';
 
-// Public Candidate Portal Pages
+// Public Career Portal Pages (Intact & Preserved)
 import Careers from '../candidate-portal/Careers';
 import PublicJobs from '../candidate-portal/PublicJobs';
 import PublicJob from '../candidate-portal/PublicJob';
 import ApplyJob from '../candidate-portal/ApplyJob';
 import ApplicationSuccess from '../candidate-portal/ApplicationSuccess';
-import CandidateLogin from '../candidate-portal/CandidateLogin';
-import CandidateRegister from '../candidate-portal/CandidateRegister';
 import MyApplications from '../candidate-portal/MyApplications';
 import AboutUs from '../candidate-portal/AboutUs';
 import LifeAtAdyapan from '../candidate-portal/LifeAtAdyapan';
 import ContactUs from '../pages/contact/ContactUs';
 import LegalPrivacy from '../pages/legal/LegalPrivacy';
 import LegalTerms from '../pages/legal/LegalTerms';
-
-import AuthPage from '../candidate-portal/AuthPage';
 
 // Admin Protected Route
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -76,7 +83,7 @@ const CandidateProtectedRoute = ({ children }: { children: React.ReactNode }) =>
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* ===== PUBLIC CANDIDATE PORTAL ===== */}
+      {/* ===== PUBLIC CANDIDATE PORTAL (PRESERVED) ===== */}
       <Route path="/" element={<Careers />} />
       <Route path="/careers" element={<Careers />} />
       <Route path="/open-positions" element={<PublicJobs />} />
@@ -102,6 +109,13 @@ const AppRoutes = () => {
       <Route path="/terms" element={<LegalTerms />} />
       <Route path="/terms-of-service" element={<LegalTerms />} />
 
+      {/* ===== PUBLIC CANDIDATE SECURE TOKEN PAGES (NO LOGIN REQUIRED) ===== */}
+      <Route path="/secure/interview/:token" element={<SecureInterviewPage />} />
+      <Route path="/secure/offer/:token" element={<SecureOfferPage />} />
+      <Route path="/offers/accept" element={<SecureOfferPage />} />
+      <Route path="/secure/onboarding/:token" element={<SecureOnboardingPage />} />
+      <Route path="/secure/documents/:token" element={<SecureOnboardingPage />} />
+
       {/* ===== AUTH ===== */}
       <Route path="/auth" element={<AuthPage />} />
       <Route path="/login" element={<AuthPage />} />
@@ -118,6 +132,11 @@ const AppRoutes = () => {
           </CandidateProtectedRoute>
         }
       />
+
+      {/* ===== DEDICATED ATS PORTALS ===== */}
+      <Route path="/hr/dashboard" element={<ProtectedRoute><HRDashboard /></ProtectedRoute>} />
+      <Route path="/hr-manager/dashboard" element={<ProtectedRoute><HRManagerDashboard /></ProtectedRoute>} />
+      <Route path="/admin/audit-logs" element={<ProtectedRoute><AuditLogsPage /></ProtectedRoute>} />
 
       {/* ===== ADMIN RECRUITER PROTECTED ===== */}
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

@@ -94,6 +94,26 @@ export const authService = {
     }
   },
 
+  getActiveHRs: async () => {
+    try {
+      const response = await api.get('/auth/active-hrs');
+      return response.data;
+    } catch (error) {
+      console.error('Get Active HRs Error:', error);
+      throw error;
+    }
+  },
+
+  updateHRUser: async (id: string, data: any) => {
+    try {
+      const response = await api.put(`/auth/users/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error('Update HR User Error:', error);
+      throw error;
+    }
+  },
+
   updateHRPassword: async (id: string, newPassword: string) => {
     try {
       console.log(' Update HR Password API call:', id);
@@ -105,3 +125,5 @@ export const authService = {
     }
   },
 };
+
+export default authService;

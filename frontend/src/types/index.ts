@@ -2,7 +2,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'ADMIN' | 'RECRUITER' | 'INTERVIEWER' | string;
+  role: 'ADMIN' | 'RECRUITER' | 'INTERVIEWER' | 'HR' | 'HR_MANAGER' | string;
   avatar?: string;
   phone?: string;
   designation?: string;
@@ -10,6 +10,9 @@ export interface User {
   company?: string;
   location?: string;
   bio?: string;
+  meetLink?: string;
+  isActive?: boolean;
+  status?: string;
   password?: string;
   createdAt?: string;
   updatedAt?: string;

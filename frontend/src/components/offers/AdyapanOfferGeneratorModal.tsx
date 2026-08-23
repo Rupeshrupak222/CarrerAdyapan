@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AdyapanOfferDocument from './AdyapanOfferDocument';
-import { getStoredCandidates, syncUpdateOffer } from '../../utils/applicationStore';
+import { candidateService } from '../../services/candidateService';
 import { offerService } from '../../services/offerService';
 import toast from 'react-hot-toast';
 
@@ -41,59 +41,63 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
 
   useEffect(() => {
     if (isOpen) {
-      const stored = getStoredCandidates();
-      let candidates = stored && stored.length > 0 ? [...stored] : [];
+      const loadModalCandidates = async () => {
+        try {
+          const res = await candidateService.getAllCandidates();
+          const candidates = res?.candidates || [];
+          setCandidatesList(candidates);
 
-      setCandidatesList(candidates);
+          if (initialCandidate) {
+            setOfferFields((prev) => ({
+              ...prev,
+              olPrefix: initialCandidate.olNo ? initialCandidate.olNo.substring(0, 3) : prev.olPrefix,
+              olStartNumber: initialCandidate.olNo ? (parseInt(String(initialCandidate.olNo).replace(/[^0-9]/g, '')) || 428) : prev.olStartNumber,
+              offerDate: initialCandidate.offerDate || prev.offerDate,
+              duration: initialCandidate.duration || prev.duration,
+              jobTitle: initialCandidate.jobTitle || prev.jobTitle,
+              trainingStartDate: initialCandidate.trainingStartDate || initialCandidate.joiningDate || prev.trainingStartDate,
+              trainingEndDate: initialCandidate.trainingEndDate || prev.trainingEndDate,
+              ojtStartDate: initialCandidate.ojtStartDate || prev.ojtStartDate,
+              ojtEndDate: initialCandidate.ojtEndDate || prev.ojtEndDate,
+              location: initialCandidate.location || prev.location,
+              stipend: initialCandidate.stipend || (typeof initialCandidate.salary === 'number' ? `INR ${initialCandidate.salary}/-PerMonth` : initialCandidate.salary) || prev.stipend,
+              incentives: initialCandidate.incentives || prev.incentives,
+              postProbationCtc: initialCandidate.postProbationCtc || prev.postProbationCtc,
+              reportingDate: initialCandidate.reportingDate || initialCandidate.joiningDate || prev.reportingDate,
+              unpaidDays: initialCandidate.unpaidDays || prev.unpaidDays,
+              stipendStartDay: initialCandidate.stipendStartDay || prev.stipendStartDay,
+              workingHours: initialCandidate.workingHours || prev.workingHours,
+              workTiming: initialCandidate.workTiming || prev.workTiming,
+              jobType: initialCandidate.jobType || prev.jobType,
+              hrEmail: initialCandidate.hrEmail || prev.hrEmail,
+              hrPhone: initialCandidate.hrPhone || prev.hrPhone,
+              companyWebsite: initialCandidate.companyWebsite || prev.companyWebsite,
+              hrManagerName: initialCandidate.hrManagerName || prev.hrManagerName,
+            }));
 
-      if (initialCandidate) {
-        // Load initialCandidate's saved custom offer fields into modal form state!
-        setOfferFields((prev) => ({
-          ...prev,
-          olPrefix: initialCandidate.olNo ? initialCandidate.olNo.substring(0, 3) : prev.olPrefix,
-          olStartNumber: initialCandidate.olNo ? (parseInt(String(initialCandidate.olNo).replace(/[^0-9]/g, '')) || 428) : prev.olStartNumber,
-          offerDate: initialCandidate.offerDate || prev.offerDate,
-          duration: initialCandidate.duration || prev.duration,
-          jobTitle: initialCandidate.jobTitle || prev.jobTitle,
-          trainingStartDate: initialCandidate.trainingStartDate || initialCandidate.joiningDate || prev.trainingStartDate,
-          trainingEndDate: initialCandidate.trainingEndDate || prev.trainingEndDate,
-          ojtStartDate: initialCandidate.ojtStartDate || prev.ojtStartDate,
-          ojtEndDate: initialCandidate.ojtEndDate || prev.ojtEndDate,
-          location: initialCandidate.location || prev.location,
-          stipend: initialCandidate.stipend || (typeof initialCandidate.salary === 'number' ? `INR ${initialCandidate.salary}/-PerMonth` : initialCandidate.salary) || prev.stipend,
-          incentives: initialCandidate.incentives || prev.incentives,
-          postProbationCtc: initialCandidate.postProbationCtc || prev.postProbationCtc,
-          reportingDate: initialCandidate.reportingDate || initialCandidate.joiningDate || prev.reportingDate,
-          unpaidDays: initialCandidate.unpaidDays || prev.unpaidDays,
-          stipendStartDay: initialCandidate.stipendStartDay || prev.stipendStartDay,
-          workingHours: initialCandidate.workingHours || prev.workingHours,
-          workTiming: initialCandidate.workTiming || prev.workTiming,
-          jobType: initialCandidate.jobType || prev.jobType,
-          hrEmail: initialCandidate.hrEmail || prev.hrEmail,
-          hrPhone: initialCandidate.hrPhone || prev.hrPhone,
-          companyWebsite: initialCandidate.companyWebsite || prev.companyWebsite,
-          hrManagerName: initialCandidate.hrManagerName || prev.hrManagerName,
-        }));
-
-        const found = candidates.find(c => c.id === initialCandidate.id || c.id === initialCandidate.candidateId);
-        if (found) {
-          setSelectedCandidateIds([found.id]);
-        } else {
-          // If initial candidate is a custom object
-          const customCand = {
-            id: initialCandidate.id || `cand-custom-${Date.now()}`,
-            firstName: initialCandidate.candidateName?.split(' ')[0] || initialCandidate.firstName || 'Candidate',
-            lastName: initialCandidate.candidateName?.split(' ').slice(1).join(' ') || initialCandidate.lastName || '',
-            email: initialCandidate.email || initialCandidate.candidateEmail || '',
-            currentPosition: initialCandidate.jobTitle || 'COMMUNITY DEVELOPMENT INTERN',
-          };
-          setCandidatesList([customCand, ...candidates]);
-          setSelectedCandidateIds([customCand.id]);
+            const found = candidates.find((c: any) => c.id === initialCandidate.id || c.id === initialCandidate.candidateId);
+            if (found) {
+              setSelectedCandidateIds([found.id]);
+            } else {
+              const customCand = {
+                id: initialCandidate.id || `cand-custom-${Date.now()}`,
+                firstName: initialCandidate.candidateName?.split(' ')[0] || initialCandidate.firstName || 'Candidate',
+                lastName: initialCandidate.candidateName?.split(' ').slice(1).join(' ') || initialCandidate.lastName || '',
+                email: initialCandidate.email || initialCandidate.candidateEmail || '',
+                currentPosition: initialCandidate.jobTitle || 'COMMUNITY DEVELOPMENT INTERN',
+              };
+              setCandidatesList([customCand, ...candidates]);
+              setSelectedCandidateIds([customCand.id]);
+            }
+          } else {
+            setSelectedCandidateIds(candidates.map((c: any) => c.id));
+          }
+        } catch (e) {
+          console.warn('Failed to load candidates for offer generator modal:', e);
         }
-      } else {
-        // Select all candidates by default for bulk generation
-        setSelectedCandidateIds(candidates.map(c => c.id));
-      }
+      };
+
+      loadModalCandidates();
     }
   }, [isOpen, initialCandidate]);
 
@@ -187,24 +191,28 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
       return;
     }
 
-    // Save/sync to system state & PostgreSQL database
+    // Save/sync to database
     for (let idx = 0; idx < selectedCandidates.length; idx++) {
       const cand = selectedCandidates[idx];
       const data = getCandidateOfferData(cand, idx);
-      await syncUpdateOffer({
-        ...data,
-        candidateId: cand.id,
-        candidateName: data.candidateName,
-        email: data.candidateEmail,
-        jobTitle: data.jobTitle,
-        salary: data.stipend,
-        joiningDate: data.trainingStartDate,
-        status: 'READY_TO_SEND',
-      });
+      try {
+        await offerService.createOffer({
+          ...data,
+          candidateId: cand.id,
+          candidateName: data.candidateName,
+          candidateEmail: data.candidateEmail,
+          jobTitle: data.jobTitle,
+          salary: data.stipend,
+          joiningDate: data.trainingStartDate,
+          status: 'READY_TO_SEND',
+        });
+      } catch (e) {
+        console.warn('DB create offer notice:', e);
+      }
     }
 
     if (onOfferSaved) onOfferSaved();
-    toast.success(`Offer Letter details saved successfully for ${selectedCandidates.length} candidate(s)! `);
+    toast.success(`Offer Letter details saved successfully for ${selectedCandidates.length} candidate(s)!`);
     onClose();
   };
 
@@ -222,16 +230,18 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
         const cand = selectedCandidates[i];
         const data = getCandidateOfferData(cand, i);
 
-        await syncUpdateOffer({
-          ...data,
-          candidateId: cand.id,
-          candidateName: data.candidateName,
-          email: data.candidateEmail,
-          jobTitle: data.jobTitle,
-          salary: data.stipend,
-          joiningDate: data.trainingStartDate,
-          status: 'APPROVED',
-        });
+        try {
+          await offerService.createOffer({
+            ...data,
+            candidateId: cand.id,
+            candidateName: data.candidateName,
+            candidateEmail: data.candidateEmail,
+            jobTitle: data.jobTitle,
+            salary: data.stipend,
+            joiningDate: data.trainingStartDate,
+            status: 'APPROVED',
+          });
+        } catch (e) {}
 
         const blob = await offerService.generatePDF(data);
         const pdfBlob = new Blob([blob], { type: 'application/pdf' });
@@ -247,7 +257,7 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
       }
 
       if (onOfferSaved) onOfferSaved();
-      toast.success(`Downloaded official Adyapan Offer Letter PDF for ${selectedCandidates.length} candidate(s)! `, { id: toastId });
+      toast.success(`Downloaded official Adyapan Offer Letter PDF for ${selectedCandidates.length} candidate(s)!`, { id: toastId });
     } catch (err) {
       toast.error('Failed to download PDF offer letter', { id: toastId });
     } finally {
@@ -280,11 +290,11 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
           companyTemplateName: 'Adyapan_Edutech_Official_Offer_Letter.pdf',
         }).catch(() => null);
 
-        await syncUpdateOffer({
+        await offerService.createOffer({
           ...data,
           candidateId: cand.id,
           candidateName: data.candidateName,
-          email: data.candidateEmail,
+          candidateEmail: data.candidateEmail,
           jobTitle: data.jobTitle,
           salary: data.stipend,
           joiningDate: data.trainingStartDate,
@@ -297,22 +307,24 @@ const AdyapanOfferGeneratorModal = ({ isOpen, onClose, initialCandidate = null, 
 
     setIsSendingEmails(false);
     if (onOfferSaved) onOfferSaved();
-    toast.success(`Successfully dispatched official Adyapan Offer Letters to ${successCount} candidate(s)! `);
+    toast.success(`Successfully dispatched official Adyapan Offer Letters to ${successCount} candidate(s)!`);
   };
 
   const handleCloseAndSave = async () => {
     for (let idx = 0; idx < selectedCandidates.length; idx++) {
       const cand = selectedCandidates[idx];
       const data = getCandidateOfferData(cand, idx);
-      await syncUpdateOffer({
-        ...data,
-        candidateId: cand.id,
-        candidateName: data.candidateName,
-        email: data.candidateEmail,
-        jobTitle: data.jobTitle,
-        salary: data.stipend,
-        joiningDate: data.trainingStartDate,
-      });
+      try {
+        await offerService.createOffer({
+          ...data,
+          candidateId: cand.id,
+          candidateName: data.candidateName,
+          candidateEmail: data.candidateEmail,
+          jobTitle: data.jobTitle,
+          salary: data.stipend,
+          joiningDate: data.trainingStartDate,
+        });
+      } catch (e) {}
     }
     if (onOfferSaved) onOfferSaved();
     onClose();

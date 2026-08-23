@@ -2,16 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { jobService } from '../../services/jobService';
-import { useTheme } from '../../context/ThemeContext';
 import toast from 'react-hot-toast';
+import { 
+  Briefcase, 
+  Plus, 
+  MapPin, 
+  DollarSign, 
+  Calendar, 
+  Users, 
+  Trash2, 
+  Edit3, 
+  ExternalLink, 
+  Sparkles, 
+  RefreshCw,
+  Search,
+  CheckCircle2,
+  Clock
+} from 'lucide-react';
 
-const Jobs = () => {
+const Jobs: React.FC = () => {
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingJob, setEditingJob] = useState<any | null>(null);
-  const [editFormData, setEditFormData] = useState<any>({});
-  const [savingEdit, setSavingEdit] = useState(false);
-  const { theme } = useTheme();
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     fetchJobs(true);
@@ -19,6 +31,7 @@ const Jobs = () => {
 
   const fetchJobs = async (forceRefresh: boolean = false) => {
     try {
+      setLoading(true);
       const response = await jobService.getAllJobs(forceRefresh);
       if (response && Array.isArray(response.jobs)) {
         setJobs(response.jobs);
@@ -30,490 +43,157 @@ const Jobs = () => {
     }
   };
 
-  const handleDeleteJob = async (jobOrId: any, jobTitle?: string) => {
-    const id = typeof jobOrId === 'string' ? jobOrId : jobOrId?.id || jobOrId?._id;
-    const title = typeof jobOrId === 'object' ? jobOrId.title : (jobTitle || 'Job Opening');
-    const slug = typeof jobOrId === 'object' ? jobOrId.slug : undefined;
-
-    if (!window.confirm(`Are you sure you want to delete the job opening "${title}"? This will permanently remove it from database and frontend.`)) {
-      return;
-    }
+  const handleDeleteJob = async (job: any) => {
+    if (!window.confirm(`Are you sure you want to delete "${job.title}"?`)) return;
+    const toastId = toast.loading(`Deleting ${job.title}...`);
     try {
-      await jobService.deleteJob(id, slug, title);
-      setJobs((prev) => prev.filter((j) => j.id !== id && j._id !== id && j.slug !== slug));
-      toast.success(`Job "${title}" deleted from database & frontend!`);
-      fetchJobs(true);
-    } catch (err) {
-      setJobs((prev) => prev.filter((j) => j.id !== id && j._id !== id && j.slug !== slug));
-      toast.success(`Job "${title}" removed!`);
-      fetchJobs(true);
+      await jobService.deleteJob(job.id, job.slug, job.title);
+      setJobs((prev) => prev.filter((j) => j.id !== job.id && j.slug !== job.slug));
+      toast.success(`Job "${job.title}" deleted successfully!`, { id: toastId });
+    } catch (err: any) {
+      toast.error('Failed to delete job', { id: toastId });
     }
   };
 
-  const handleEditJob = (job) => {
-    setEditingJob(job);
-    setEditFormData({
-      title: job.title || '',
-      department: job.department || '',
-      type: job.type || 'FULL_TIME',
-      experienceLevel: job.experienceLevel || '0-2 Years',
-      location: job.location || '',
-      salaryMin: job.salaryMin || '',
-      salaryMax: job.salaryMax || '',
-      status: job.status || 'PUBLISHED',
-      description: job.description || '',
-      responsibilities: job.responsibilities || '',
-      requirements: job.requirements || '',
-    });
-  };
-
-  const handleSaveEdit = async (e) => {
-    e.preventDefault();
-    if (!editingJob) return;
-
-    setSavingEdit(true);
-    const id = editingJob.id || editingJob._id;
-
-    try {
-      const payload = {
-        ...editFormData,
-        salaryMin: editFormData.salaryMin ? parseFloat(editFormData.salaryMin) : null,
-        salaryMax: editFormData.salaryMax ? parseFloat(editFormData.salaryMax) : null,
-      };
-
-      const res = await jobService.updateJob(id, payload);
-      const updatedJob = res.job || { ...editingJob, ...payload };
-
-      setJobs((prev) => prev.map((j) => (j.id === id || j._id === id ? updatedJob : j)));
-      toast.success(`Job opening "${editFormData.title}" updated successfully!`);
-      setEditingJob(null);
-    } catch (err) {
-      // Fallback local state update
-      const payload = {
-        ...editFormData,
-        salaryMin: editFormData.salaryMin ? parseFloat(editFormData.salaryMin) : null,
-        salaryMax: editFormData.salaryMax ? parseFloat(editFormData.salaryMax) : null,
-      };
-      setJobs((prev) => prev.map((j) => (j.id === id || j._id === id ? { ...j, ...payload } : j)));
-      toast.success(`Job opening "${editFormData.title}" updated!`);
-      setEditingJob(null);
-    } finally {
-      setSavingEdit(false);
-    }
-  };
-
-  const formatFullJobPosting = (job) => {
-    const directJobSlugOrId = job.slug || job.id || job._id || '';
-    const publicCareersUrl = `${window.location.origin}/careers/${directJobSlugOrId}`;
-    const salaryText = job.salaryMin && job.salaryMax
-      ? `₹${(job.salaryMin / 100000).toFixed(job.salaryMin % 100000 === 0 ? 0 : 1)}L - ₹${(job.salaryMax / 100000).toFixed(job.salaryMax % 100000 === 0 ? 0 : 1)}L PA`
-      : (job.salary || 'Competitive / Best in Industry');
-
-    const cleanResp = job.responsibilities ? job.responsibilities.replace(/\n+/g, ' • ') : '';
-
-    let text = `🚀 WE ARE HIRING AT ADYAPAN EDUTECH PVT. LTD.! 🎓\n\n`;
-    text += `📌 Position: ${job.title}\n`;
-    text += `🏢 Department: ${job.department || 'EdTech Sales & Growth'}\n`;
-    text += `💼 Job Type: ${job.type === 'FULL_TIME' ? 'Full Time' : job.type || 'Full Time'}\n`;
-    text += `🎯 Experience: ${job.experienceLevel || 'Fresher / Experienced'}\n`;
-    text += `📍 Location: ${job.location || 'Hyderabad / Pan-India'}\n`;
-    text += `💰 Compensation: ${salaryText}\n\n`;
-
-    if (job.description) {
-      text += `📖 Role Overview:\n${job.description}\n\n`;
-    }
-
-    if (cleanResp) {
-      text += `🔑 Key Responsibilities:\n• ${cleanResp}\n\n`;
-    }
-
-    text += `⚡ DIRECT CANDIDATE APPLICATION LINK:\nApply directly on our Official Public Careers Portal:\n👉 ${publicCareersUrl}\n\n`;
-    text += `#Hiring #JobOpening #AdyapanEdutech #Careers #Jobs #Recruitment`;
-
-    return { text, publicCareersUrl };
-  };
-
-  const copyShareLink = (job) => {
-    const directJobSlugOrId = job?.slug || job?.id || job?._id || '';
-    const publicCareersUrl = `${window.location.origin}/careers/${directJobSlugOrId}`;
-    navigator.clipboard.writeText(publicCareersUrl);
-    toast.success('Direct Public Careers Link copied to clipboard!');
-  };
-
-  const shareWhatsApp = (job) => {
-    const { text } = formatFullJobPosting(job);
-    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
-  };
-
-  const shareLinkedIn = (job) => {
-    const { text } = formatFullJobPosting(job);
-
-    try {
-      navigator.clipboard.writeText(text);
-      toast.success('Complete Job Description & Direct Careers Link copied to clipboard!');
-    } catch (e) {
-      toast.success('Opening LinkedIn Job Share...');
-    }
-
-    // Official LinkedIn Post Creation Web Intent with complete text
-    const linkedInUrl = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(text)}`;
-    window.open(linkedInUrl, '_blank');
-  };
+  const filteredJobs = jobs.filter((j) => {
+    const q = search.toLowerCase();
+    return !q || (j.title || '').toLowerCase().includes(q) || (j.department || '').toLowerCase().includes(q) || (j.location || '').toLowerCase().includes(q);
+  });
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        {/* Header Section */}
-        <div className={`p-6 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden shadow-sm ${
-          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
-        }`}>
-          
-          <div className="pt-1 space-y-1">
-            <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-              Adyapan Job Postings Control
+      <div className="space-y-6 animate-fadeIn">
+        {/* Top Header Banner */}
+        <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-sm relative overflow-hidden">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold uppercase tracking-wider mb-2">
+                <Briefcase className="w-3.5 h-3.5 text-amber-600" />
+                Job Requisitions Center
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+                Active Job Openings
+              </h1>
+              <p className="text-slate-500 text-sm mt-1">
+                Configure job descriptions, salary brackets, and multi-round interview pipelines.
+              </p>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Job Openings Directory
-            </h1>
-            <p className="text-xs text-slate-600 dark:text-slate-300 font-normal">
-              Manage active postings, edit details & requirements, share links, and monitor applicants.
-            </p>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                to="/jobs/new"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-extrabold text-xs transition-all shadow-md shadow-amber-500/25"
+              >
+                <Plus className="w-4 h-4" /> Post New Job
+              </Link>
+
+              <button
+                onClick={() => fetchJobs(true)}
+                className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all border border-slate-200"
+                title="Refresh"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Search Bar */}
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 flex items-center justify-between gap-3 shadow-sm">
+          <div className="relative w-full sm:w-80">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search by title, department, location..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs placeholder:text-slate-400 focus:border-amber-500 outline-none"
+            />
           </div>
 
-          <Link
-            to="/jobs/create"
-            className="flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all shrink-0"
-          >
-            <span>+</span> Post New Opening
-          </Link>
+          <span className="text-xs text-slate-500 font-semibold">
+            {filteredJobs.length} Positions Published
+          </span>
         </div>
 
-        {/* Job Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {jobs.length === 0 && !loading ? (
-            <div className={`p-8 rounded-3xl border text-center col-span-full space-y-3 ${
-              theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-800 shadow-sm'
-            }`}>
-              <h3 className="text-sm font-bold">No Active Job Openings</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">There are currently no active job postings in the database.</p>
-              <Link
-                to="/jobs/create"
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition-all shadow-sm"
-              >
-                + Post New Role Opening
-              </Link>
-            </div>
-          ) : (
-            jobs.map((job) => (
-              <div
-                key={job.id || job._id}
-                className={`rounded-3xl p-6 transition-all duration-200 flex flex-col justify-between space-y-4 border shadow-sm hover:shadow-md relative overflow-hidden group ${
-                  theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
-                }`}
-              >
-
-                <div className="space-y-3 pt-1">
-                  <div className="flex items-center justify-between">
-                    <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                      {job.department || 'EdTech Growth'}
-                    </span>
-                    <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                      ● {job.status || 'PUBLISHED'}
-                    </span>
-                  </div>
-
-                  <h2 className="text-base font-bold leading-snug text-slate-900 dark:text-white">{job.title}</h2>
-
-                  <div className="flex flex-wrap gap-2 text-xs font-medium">
-                    <span className={`px-2.5 py-1 rounded-xl border ${
-                      theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
-                    }`}>
-                      📍 {job.location || 'India'}
-                    </span>
-                    <span className={`px-2.5 py-1 rounded-xl border ${
-                      theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
-                    }`}>
-                      💼 {job.type === 'FULL_TIME' ? 'Full Time' : job.type || 'Full Time'}
-                    </span>
-                    <span className={`px-2.5 py-1 rounded-xl border ${
-                      theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
-                    }`}>
-                      🎯 {job.experienceLevel || 'Fresher / Exp'}
-                    </span>
-                  </div>
-
-                  <div className="text-xs font-medium space-y-1 pt-2 border-t border-slate-100 dark:border-slate-800">
-                    <p className="text-slate-600 dark:text-slate-300">
-                      Applicants: <strong className="text-slate-900 dark:text-white font-bold">{job.applications?.length || 0} Candidates</strong>
-                    </p>
-                    {job.salaryMin && (
-                      <p className="text-slate-600 dark:text-slate-300">
-                        <strong className="text-slate-900 dark:text-white font-bold">₹{job.salaryMin.toLocaleString()} - ₹{job.salaryMax.toLocaleString()} / yr</strong>
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Share & Actions */}
-                <div className="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-800">
-                  <div className="grid grid-cols-3 gap-2">
-                    <button
-                      onClick={() => shareWhatsApp(job)}
-                      className={`py-1.5 text-[11px] font-semibold rounded-xl border transition-colors text-center cursor-pointer ${
-                        theme === 'dark' ? 'bg-slate-950 text-slate-200 border-slate-800 hover:bg-slate-900' : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
-                      }`}
-                      title="Share on WhatsApp"
-                    >
-                      WhatsApp
-                    </button>
-                    <button
-                      onClick={() => shareLinkedIn(job)}
-                      className={`py-1.5 text-[11px] font-semibold rounded-xl border transition-colors text-center cursor-pointer ${
-                        theme === 'dark' ? 'bg-slate-950 text-slate-200 border-slate-800 hover:bg-slate-900' : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
-                      }`}
-                      title="Share on LinkedIn"
-                    >
-                      LinkedIn
-                    </button>
-                    <button
-                      onClick={() => copyShareLink(job)}
-                      className={`py-1.5 text-[11px] font-semibold rounded-xl border transition-colors text-center cursor-pointer ${
-                        theme === 'dark' ? 'bg-slate-950 text-slate-300 border-slate-800 hover:bg-slate-900' : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
-                      }`}
-                      title="Copy direct shareable link"
-                    >
-                      Link
-                    </button>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Link
-                      to={`/careers/${job.slug || 'bda-role'}`}
-                      target="_blank"
-                      className="flex-1 text-center py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition-all shadow-sm"
-                    >
-                      Public Candidate View ↗
-                    </Link>
-
-                    <button
-                      onClick={() => handleEditJob(job)}
-                      className="px-3 py-2 text-xs font-bold text-slate-800 dark:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl transition-all flex items-center gap-1 cursor-pointer"
-                      title="Edit job opening details & requirements"
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      onClick={() => handleDeleteJob(job.id || job._id, job.title)}
-                      className="px-3 py-2 text-xs font-semibold text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 rounded-xl transition-all flex items-center gap-1 cursor-pointer"
-                      title="Delete this job posting permanently from database & frontend"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        {/* Edit Job Modal */}
-        {editingJob && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
-            <div className={`w-full max-w-2xl p-6 sm:p-8 rounded-3xl border shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto ${
-              theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
-            }`}>
-              <div className="flex items-center justify-between border-b pb-4 border-slate-200 dark:border-slate-800">
-                <div>
-                  <h2 className="text-xl font-bold tracking-tight">Edit Job Opening</h2>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Update job specifications, requirements, salary, and status</p>
-                </div>
-                <button
-                  onClick={() => setEditingJob(null)}
-                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-xl text-lg font-bold"
+        {/* Jobs Grid */}
+        {loading ? (
+          <div className="py-20 text-center text-slate-400">
+            <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+            Loading job requisitions...
+          </div>
+        ) : filteredJobs.length === 0 ? (
+          <div className="py-16 text-center text-slate-400 font-medium bg-white border border-slate-200 rounded-3xl">
+            No job openings found matching your search.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {filteredJobs.map((job) => {
+              const appCount = job.applications?.length || 0;
+              const totalRounds = job.totalRounds || (Array.isArray(job.interviewRounds) ? job.interviewRounds.length : 3);
+              return (
+                <div
+                  key={job.id}
+                  className="p-6 rounded-3xl bg-white border border-slate-200 hover:border-amber-400 transition-all shadow-sm space-y-4 flex flex-col justify-between"
                 >
-                  ✕
-                </button>
-              </div>
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-700 block mb-1">
+                          {job.department || 'EdTech Growth'}
+                        </span>
+                        <h3 className="text-base font-extrabold text-slate-900">
+                          {job.title}
+                        </h3>
+                      </div>
 
-              <form onSubmit={handleSaveEdit} className="space-y-4 text-xs font-semibold">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block mb-1 text-slate-500 uppercase text-[10px] tracking-wider font-bold">JOB TITLE *</label>
-                    <input
-                      type="text"
-                      required
-                      value={editFormData.title}
-                      onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
-                      className={`w-full p-3 rounded-2xl border outline-none font-medium ${
-                        theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
-                      }`}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block mb-1 text-slate-500 uppercase text-[10px] tracking-wider font-bold">DEPARTMENT *</label>
-                    <input
-                      type="text"
-                      required
-                      value={editFormData.department}
-                      onChange={(e) => setEditFormData({ ...editFormData, department: e.target.value })}
-                      className={`w-full p-3 rounded-2xl border outline-none font-medium ${
-                        theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
-                      }`}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block mb-1 text-slate-500 uppercase text-[10px] tracking-wider font-bold">EMPLOYMENT TYPE</label>
-                    <select
-                      value={editFormData.type}
-                      onChange={(e) => setEditFormData({ ...editFormData, type: e.target.value })}
-                      className={`w-full p-3 rounded-2xl border outline-none font-medium ${
-                        theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
-                      }`}
-                    >
-                      <option value="FULL_TIME">Full Time</option>
-                      <option value="PART_TIME">Part Time</option>
-                      <option value="INTERNSHIP">Internship</option>
-                      <option value="CONTRACT">Contract</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="block text-slate-500 uppercase text-[10px] tracking-wider font-bold">EXPERIENCE REQUIRED</label>
-                      <span className="text-[9px] text-amber-600 dark:text-amber-400 font-medium">Manual or click preset</span>
+                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-extrabold uppercase">
+                        {job.status || 'Active'}
+                      </span>
                     </div>
-                    <input
-                      type="text"
-                      value={editFormData.experienceLevel}
-                      onChange={(e) => setEditFormData({ ...editFormData, experienceLevel: e.target.value })}
-                      placeholder="e.g., 0-1 Years, 2+ Years, Fresher, 3-5 Years"
-                      className={`w-full p-3 rounded-2xl border outline-none font-medium text-xs ${
-                        theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
-                      }`}
-                    />
-                    <div className="flex flex-wrap gap-1 mt-1.5">
-                      {['Fresher', '0-1 Yr', '1-3 Yrs', '2-4 Yrs', '3-5 Yrs', '5+ Yrs'].map((p) => (
-                        <button
-                          key={p}
-                          type="button"
-                          onClick={() => setEditFormData({ ...editFormData, experienceLevel: p })}
-                          className={`px-1.5 py-0.5 text-[10px] rounded-md border font-medium transition-all ${
-                            editFormData.experienceLevel === p
-                              ? 'bg-amber-500 text-white border-amber-500'
-                              : theme === 'dark'
-                              ? 'bg-slate-900 text-slate-300 border-slate-800 hover:border-amber-400'
-                              : 'bg-white text-slate-600 border-slate-200 hover:bg-amber-50'
-                          }`}
-                        >
-                          {p}
-                        </button>
-                      ))}
+
+                    <div className="space-y-1.5 text-xs text-slate-600">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                        <span>{job.location || 'Mumbai / Hybrid'}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        <span>{job.type === 'FULL_TIME' ? 'Full Time' : job.type || 'Full Time'}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-3.5 h-3.5 text-amber-600" />
+                        <span className="text-amber-700 font-semibold">{totalRounds} Interview Rounds Configured</span>
+                      </div>
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block mb-1 text-slate-500 uppercase text-[10px] tracking-wider font-bold">STATUS</label>
-                    <select
-                      value={editFormData.status}
-                      onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value })}
-                      className={`w-full p-3 rounded-2xl border outline-none font-medium ${
-                        theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
-                      }`}
-                    >
-                      <option value="PUBLISHED">PUBLISHED</option>
-                      <option value="DRAFT">DRAFT</option>
-                      <option value="CLOSED">CLOSED</option>
-                    </select>
+                  <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-xs text-slate-700">
+                      <Users className="w-3.5 h-3.5 text-amber-600" />
+                      <span><strong>{appCount}</strong> Candidates</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Link
+                        to={`/jobs/${job.id}`}
+                        className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all border border-slate-200"
+                      >
+                        View & Edit
+                      </Link>
+
+                      <button
+                        onClick={() => handleDeleteJob(job)}
+                        className="p-1.5 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-600 transition-all border border-slate-200"
+                        title="Delete Requisition"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block mb-1 text-slate-500 uppercase text-[10px] tracking-wider font-bold">LOCATION *</label>
-                    <input
-                      type="text"
-                      required
-                      value={editFormData.location}
-                      onChange={(e) => setEditFormData({ ...editFormData, location: e.target.value })}
-                      className={`w-full p-3 rounded-2xl border outline-none font-medium ${
-                        theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
-                      }`}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block mb-1 text-slate-500 uppercase text-[10px] tracking-wider font-bold">MIN SALARY (₹)</label>
-                    <input
-                      type="number"
-                      value={editFormData.salaryMin}
-                      onChange={(e) => setEditFormData({ ...editFormData, salaryMin: e.target.value })}
-                      className={`w-full p-3 rounded-2xl border outline-none font-medium ${
-                        theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
-                      }`}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block mb-1 text-slate-500 uppercase text-[10px] tracking-wider font-bold">MAX SALARY (₹)</label>
-                    <input
-                      type="number"
-                      value={editFormData.salaryMax}
-                      onChange={(e) => setEditFormData({ ...editFormData, salaryMax: e.target.value })}
-                      className={`w-full p-3 rounded-2xl border outline-none font-medium ${
-                        theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
-                      }`}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block mb-1 text-slate-500 uppercase text-[10px] tracking-wider font-bold">ROLE OVERVIEW / DESCRIPTION *</label>
-                  <textarea
-                    rows={3}
-                    required
-                    value={editFormData.description}
-                    onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
-                    className={`w-full p-3 rounded-2xl border outline-none font-medium ${
-                      theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
-                    }`}
-                  />
-                </div>
-
-                <div>
-                  <label className="block mb-1 text-slate-500 uppercase text-[10px] tracking-wider font-bold">KEY RESPONSIBILITIES</label>
-                  <textarea
-                    rows={3}
-                    value={editFormData.responsibilities}
-                    onChange={(e) => setEditFormData({ ...editFormData, responsibilities: e.target.value })}
-                    className={`w-full p-3 rounded-2xl border outline-none font-medium ${
-                      theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
-                    }`}
-                  />
-                </div>
-
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
-                  <button
-                    type="button"
-                    onClick={() => setEditingJob(null)}
-                    className="px-5 py-2.5 text-xs font-bold rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={savingEdit}
-                    className="px-6 py-2.5 text-xs font-bold text-slate-950 bg-amber-400 hover:bg-amber-500 rounded-xl transition-all shadow-md cursor-pointer"
-                  >
-                    {savingEdit ? 'Saving Changes...' : 'Save Job Changes'}
-                  </button>
-                </div>
-              </form>
-            </div>
+              );
+            })}
           </div>
         )}
       </div>

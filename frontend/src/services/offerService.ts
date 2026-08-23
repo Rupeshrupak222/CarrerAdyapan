@@ -16,6 +16,11 @@ export const offerService = {
     return response.data;
   },
 
+  updateOffer: async (id: string, data: any) => {
+    const response = await api.put(`/offers/${id}`, data);
+    return response.data;
+  },
+
   updateOfferStatus: async (id: string, status: string) => {
     const response = await api.patch(`/offers/${id}/status`, { status });
     return response.data;

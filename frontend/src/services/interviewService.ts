@@ -66,6 +66,18 @@ export const interviewService = {
     }
   },
 
+  updateInterviewFeedback: async (id: string, data: { feedback?: string; rating?: number; status?: string; result?: string }) => {
+    try {
+      const response = await api.patch(`/interviews/${id}/feedback`, data);
+      cacheService.invalidate('all_interviews');
+      cacheService.invalidate('dashboard_stats');
+      return response.data;
+    } catch (error) {
+      console.error(' Update Interview Feedback Error:', error);
+      throw error;
+    }
+  },
+
   deleteInterview: async (id: string) => {
     try {
       const response = await api.delete(`/interviews/${id}`);

@@ -285,12 +285,15 @@ export const sendApplicationConfirmationEmail = async (payload: any) => {
 };
 
 /**
- * 2. Send Interview Invitation Email to Candidate
+ * 2. Send Interview Invitation Email to Candidate (Round & Assigned HR Specific)
  */
 export const sendInterviewScheduledEmail = async (payload: any) => {
   const targetEmail = payload?.candidateEmail || payload?.email || payload?.candidate?.email;
   const candidateName = payload?.candidateName || payload?.name || (payload?.candidate ? `${payload.candidate.firstName} ${payload.candidate.lastName}` : 'Candidate');
   const jobTitle = payload?.jobTitle || payload?.job?.title || 'Business Development Associate';
+  const roundNumber = payload?.roundNumber || 1;
+  const roundName = payload?.roundName || `Round ${roundNumber}`;
+  const assignedHrName = payload?.assignedHrName || payload?.hr?.name || 'Talent Acquisition Team';
   const scheduledAt = payload?.scheduledAt;
   const meetingLink = payload?.meetingLink;
   const companyName = 'Adyapan Edutech Pvt. Ltd.';
@@ -310,45 +313,53 @@ export const sendInterviewScheduledEmail = async (payload: any) => {
     hour12: true,
   });
 
-  const meetingLocation = meetingLink || payload?.location || 'https://meet.google.com';
+  const meetingLocation = meetingLink || payload?.location || 'https://meet.google.com/adyapan-interview';
 
   const emailHtml = `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #fed7aa; box-shadow: 0 4px 14px rgba(217,119,6,0.12);">
-      ${renderEmailHeader(companyName)}
+      ${renderEmailHeader(companyName, 'INTERVIEW INVITATION')}
       
       <div style="padding: 32px 32px 28px 32px; font-size: 15px; color: #334155; line-height: 1.7;">
         <p style="margin: 0 0 16px 0;">Dear <strong>${candidateName}</strong>,</p>
         
         <p style="margin: 0 0 16px 0;">
-          Thank you for your interest in the <strong>${jobTitle}</strong> position at <strong>${companyName}</strong>.
+          Congratulations! You have been shortlisted for the <strong>${roundName}</strong> interview for the position of <strong>${jobTitle}</strong> at <strong>${companyName}</strong>.
         </p>
         
-        <p style="margin: 0 0 16px 0;">
-          We are pleased to inform you that your interview has been scheduled. Please find the interview details below:
-        </p>
-        
-        <div style="background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 20px; margin: 20px 0; font-size: 14px; line-height: 1.8;">
-          <p style="margin: 0 0 6px 0; color: #92400e;"><strong>Position:</strong> <span style="color: #1e293b;">${jobTitle}</span></p>
-          <p style="margin: 0 0 6px 0; color: #92400e;"><strong>Interview Date:</strong> <span style="color: #1e293b;">${interviewDate}</span></p>
-          <p style="margin: 0 0 6px 0; color: #92400e;"><strong>Interview Time:</strong> <span style="color: #1e293b;">${interviewTime}</span></p>
-          <p style="margin: 0; color: #92400e;"><strong>Meeting Link / Location:</strong> ${meetingLocation.startsWith('http') ? `<a href="${meetingLocation}" style="color: #d97706; font-weight: 700; text-decoration: underline;">${meetingLocation}</a>` : `<span style="color: #1e293b;">${meetingLocation}</span>`}</p>
+        <div style="background-color: #fffbeb; border: 1.5px solid #fde68a; border-radius: 14px; padding: 22px; margin: 24px 0; font-size: 14px; line-height: 1.8; box-shadow: 0 2px 8px rgba(245,158,11,0.06);">
+          <p style="margin: 0 0 8px 0; color: #92400e;"><strong>🎯 Interview Stage:</strong> <span style="color: #0f172a; font-weight: 700; background: #fef3c7; padding: 3px 8px; border-radius: 6px;">${roundName}</span></p>
+          <p style="margin: 0 0 8px 0; color: #92400e;"><strong>💼 Position:</strong> <span style="color: #1e293b;">${jobTitle}</span></p>
+          <p style="margin: 0 0 8px 0; color: #92400e;"><strong>👤 Assigned HR Interviewer:</strong> <span style="color: #1e293b; font-weight: 600;">${assignedHrName}</span></p>
+          <p style="margin: 0 0 8px 0; color: #92400e;"><strong>📅 Interview Date:</strong> <span style="color: #1e293b; font-weight: 600;">${interviewDate}</span></p>
+          <p style="margin: 0 0 10px 0; color: #92400e;"><strong>⏰ Interview Time:</strong> <span style="color: #1e293b; font-weight: 600;">${interviewTime}</span></p>
+          <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed #fcd34d;">
+            <p style="margin: 0 0 6px 0; color: #92400e; font-weight: 700;">🔗 Join Google Meet Video Call:</p>
+            <a href="${meetingLocation}" target="_blank" style="display: inline-block; background: #d97706; color: #ffffff; text-decoration: none; font-weight: 700; padding: 10px 20px; border-radius: 8px; font-size: 13px; letter-spacing: 0.2px; box-shadow: 0 2px 6px rgba(217,119,6,0.3);">
+              Join Video Interview Now &rarr;
+            </a>
+            <p style="margin: 6px 0 0 0; font-size: 12px; color: #78350f;">Direct Link: <a href="${meetingLocation}" style="color: #d97706; word-break: break-all;">${meetingLocation}</a></p>
+            ${payload?.secureToken ? `
+            <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dotted #fde68a;">
+              <p style="margin: 0; font-size: 11px; color: #92400e;">
+                Candidate Portal Link: <a href="${(process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '')}/secure/interview/${payload.secureToken}" style="color: #b45309; text-decoration: underline;">View Interview Details & Instructions</a>
+              </p>
+            </div>
+            ` : ''}
+          </div>
         </div>
 
         <p style="margin: 0 0 16px 0;">
-          Please make sure you are available at the scheduled time. For an online interview, we recommend joining a few minutes early and ensuring that your internet connection, microphone, and camera are working properly.
-        </p>
-
-        <p style="margin: 0 0 16px 0;">
-          If you are unable to attend at the scheduled time, please contact our recruitment team as soon as possible.
+          Please make sure you are available 5 minutes prior to the scheduled time. Ensure that your internet connection, camera, and microphone are functioning smoothly.
         </p>
 
         <p style="margin: 0 0 24px 0;">
-          We look forward to speaking with you and learning more about your experience and skills.
+          We look forward to speaking with you!
         </p>
         
         <div style="border-top: 1px solid #e2e8f0; margin-top: 28px; padding-top: 20px; font-size: 14px; color: #475569;">
           <p style="margin: 0 0 4px 0;">Best regards,</p>
-          <p style="margin: 0;"><strong style="color: #0f172a;">Adyapan HR Team</strong></p>
+          <p style="margin: 0;"><strong style="color: #0f172a;">${assignedHrName}</strong> (Talent Acquisition)</p>
+          <p style="margin: 0; font-size: 12px; color: #94a3b8;">${companyName}</p>
         </div>
       </div>
     </div>
@@ -356,13 +367,13 @@ export const sendInterviewScheduledEmail = async (payload: any) => {
 
   return await dispatchEmailToCandidate({
     to: targetEmail,
-    subject: `Interview Scheduled: ${jobTitle} at ${companyName}`,
+    subject: `Interview Invitation (${roundName}): ${jobTitle} at ${companyName}`,
     html: emailHtml,
   });
 };
 
 /**
- * 3. Send Official Offer Letter Email via Gmail SMTP with PDF Attachment
+ * 3. Send Official Offer Letter Email via Gmail SMTP with PDF Attachment & Token Acceptance Link
  */
 export const sendOfferLetterEmail = async (offerPayload: any = {}) => {
   const candidateEmail = offerPayload.candidateEmail || offerPayload.email || offerPayload.candidate?.email || offerPayload.application?.candidate?.email;
@@ -373,9 +384,14 @@ export const sendOfferLetterEmail = async (offerPayload: any = {}) => {
   const joiningDate = offerPayload.joiningDate || '2026-09-01';
   const customTerms = offerPayload.customTerms;
   const companyTemplateName = offerPayload.companyTemplateName;
+  const acceptanceToken = offerPayload.acceptanceToken;
   const companyName = 'Adyapan Edutech Pvt. Ltd.';
 
   const targetEmail = candidateEmail;
+  const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '');
+  const acceptUrl = acceptanceToken
+    ? `${frontendUrl}/offers/accept?token=${acceptanceToken}`
+    : `${frontendUrl}/careers`;
 
   let pdfBuffer = null;
   try {
@@ -413,41 +429,48 @@ export const sendOfferLetterEmail = async (offerPayload: any = {}) => {
 
   const emailHtml = `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #fed7aa; box-shadow: 0 4px 14px rgba(217,119,6,0.12);">
-      ${renderEmailHeader(companyName)}
+      ${renderEmailHeader(companyName, 'OFFICIAL OFFER OF EMPLOYMENT')}
       
       <div style="padding: 32px 32px 28px 32px; font-size: 15px; color: #334155; line-height: 1.7;">
         <p style="margin: 0 0 16px 0;">Dear <strong>${candidateName}</strong>,</p>
         
         <p style="margin: 0 0 16px 0;">
-          We are pleased to inform you that you have been selected for the position of <strong>${jobTitle}</strong> at <strong>${companyName}</strong>.
+          We are pleased to inform you that following your outstanding performance across all interview rounds, you have been selected for the position of <strong>${jobTitle}</strong> at <strong>${companyName}</strong>!
         </p>
         
+        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%); border: 1.5px solid #fde68a; border-radius: 14px; padding: 22px; margin: 24px 0; text-align: center; box-shadow: 0 4px 12px rgba(217,119,6,0.08);">
+          <span style="font-size: 24px; display: block; margin-bottom: 8px;">🎉</span>
+          <h3 style="margin: 0 0 6px 0; color: #92400e; font-size: 18px; font-weight: 800;">Congratulations on Your Selection!</h3>
+          <p style="margin: 0 0 16px 0; color: #78350f; font-size: 13px;">Please review your attached 4-Page Offer Letter and confirm your acceptance below.</p>
+          
+          <a href="${acceptUrl}" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: #ffffff; text-decoration: none; font-weight: 800; font-size: 15px; padding: 14px 32px; border-radius: 10px; box-shadow: 0 4px 14px rgba(22,163,74,0.35); letter-spacing: 0.3px;">
+            ✓ Accept Offer of Employment
+          </a>
+          
+          <p style="margin: 12px 0 0 0; font-size: 11px; color: #64748b;">
+            Secure Token Verification Link: <a href="${acceptUrl}" style="color: #d97706; text-decoration: underline;">${acceptUrl}</a>
+          </p>
+        </div>
+
         <p style="margin: 0 0 16px 0;">
-          Based on your qualifications, skills, and performance throughout the selection process, we are delighted to extend this offer of employment to you.
+          Your official <strong>Offer Letter PDF</strong> is attached to this email. It outlines your compensation, joining date, training curriculum, and terms of employment.
         </p>
-        
-        <p style="margin: 0 0 16px 0;">
-          Please find your <strong>Offer Letter</strong> attached to this email. It contains important information regarding your position, compensation, joining date, terms of employment, and other relevant details.
-        </p>
-        
-        <p style="margin: 0 0 16px 0;">
-          We request you to carefully review the offer letter and complete the required acceptance formalities within the specified timeline.
-        </p>
-        
+
         <p style="margin: 0 0 24px 0;">
-          Congratulations on your selection, and we look forward to welcoming you to <strong>${companyName}</strong>.
+          We are thrilled to welcome you to the Adyapan family and look forward to building exceptional educational solutions together!
         </p>
         
         <div style="border-top: 1px solid #e2e8f0; margin-top: 28px; padding-top: 20px; font-size: 14px; color: #475569;">
-          <p style="margin: 0 0 4px 0;">Best regards,</p>
-          <p style="margin: 0;"><strong style="color: #0f172a;">Adyapan HR Team</strong></p>
+          <p style="margin: 0 0 4px 0;">Warm regards,</p>
+          <p style="margin: 0;"><strong style="color: #0f172a;">Executive HR & Talent Acquisition</strong></p>
+          <p style="margin: 0; font-size: 12px; color: #94a3b8;">${companyName}</p>
         </div>
       </div>
     </div>
   `;
 
   const attachments = pdfBuffer
-    ? [{ filename: `${candidateName.replace(/\s+/g, '_')}_Official_Offer_Letter.pdf`, content: pdfBuffer }]
+    ? [{ filename: `${candidateName.replace(/\s+/g, '_')}_Official_Adyapan_Offer_Letter.pdf`, content: pdfBuffer }]
     : [];
 
   return await dispatchEmailToCandidate({
@@ -515,11 +538,15 @@ export const sendRejectionEmail = async ({ candidateName, candidateEmail, jobTit
 /**
  * 5. Send Welcome Onboarding Email
  */
-export const sendWelcomeOnboardingEmail = async ({ candidateName, candidateEmail, jobTitle, joiningDate }: any) => {
+export const sendWelcomeOnboardingEmail = async ({ candidateName, candidateEmail, jobTitle, joiningDate, onboardingToken }: any) => {
   const targetEmail = candidateEmail;
   const targetName = candidateName || 'Selected Candidate';
   const targetRole = jobTitle || 'Business Development Associate (BDA)';
   const companyName = 'Adyapan Edutech Pvt. Ltd.';
+  const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '');
+  const onboardingUrl = onboardingToken
+    ? `${frontendUrl}/secure/onboarding/${onboardingToken}`
+    : `${frontendUrl}/careers`;
 
   const emailHtml = `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #fed7aa; box-shadow: 0 4px 14px rgba(217,119,6,0.12);">
@@ -539,6 +566,15 @@ export const sendWelcomeOnboardingEmail = async ({ candidateName, candidateEmail
             <li>Adyapan Work Account & IT Provisioning (In Progress)</li>
             <li>Day 1 Orientation & HR Welcome Briefing</li>
           </ul>
+        </div>
+
+        <div style="text-align: center; margin: 26px 0;">
+          <a href="${onboardingUrl}" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: #ffffff; text-decoration: none; font-weight: 800; font-size: 14px; padding: 13px 28px; border-radius: 10px; box-shadow: 0 4px 12px rgba(217,119,6,0.3);">
+            Complete Candidate Onboarding & Upload Documents &rarr;
+          </a>
+          <p style="margin: 8px 0 0 0; font-size: 11px; color: #64748b;">
+            Secure Link: <a href="${onboardingUrl}" style="color: #d97706;">${onboardingUrl}</a>
+          </p>
         </div>
 
         <p style="margin: 0 0 24px 0;">

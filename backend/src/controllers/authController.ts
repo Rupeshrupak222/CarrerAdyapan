@@ -404,7 +404,7 @@ export const changePassword = async (req, res) => {
 // Admin: Create HR User Account directly with Credentials
 export const createHRUser = async (req, res) => {
   try {
-    const { name, email, password, company, designation, department, phone } = req.body;
+    const { name, email, password, company, designation, department, phone, meetLink, isActive } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({
@@ -434,6 +434,8 @@ export const createHRUser = async (req, res) => {
           designation: designation || 'Talent Acquisition HR',
           department: department || 'HR & Recruitment',
           phone: phone || '',
+          meetLink: meetLink || 'https://meet.google.com/adyapan-interview',
+          isActive: isActive !== undefined ? Boolean(isActive) : true,
           role: 'HR',
         }
       });
@@ -445,7 +447,7 @@ export const createHRUser = async (req, res) => {
         message: `HR Account created successfully for ${email}! Credentials ready to issue.`,
         user: userWithoutPassword
       });
-    } catch (dbErr) {
+    } catch (dbErr: any) {
       console.warn('Prisma DB error during createHRUser:', dbErr.message);
       const fallbackHR = {
         id: `hr-${Date.now()}`,
@@ -454,6 +456,8 @@ export const createHRUser = async (req, res) => {
         company: company || 'Adyapan Edutech Pvt. Ltd.',
         designation: designation || 'Talent Acquisition HR',
         department: department || 'HR & Recruitment',
+        meetLink: meetLink || 'https://meet.google.com/adyapan-interview',
+        isActive: true,
         role: 'HR',
         createdAt: new Date().toISOString()
       };
@@ -463,9 +467,84 @@ export const createHRUser = async (req, res) => {
         user: fallbackHR
       });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Create HR User Error:', error);
     res.status(500).json({ success: false, message: 'Failed to create HR account: ' + error.message });
+  }
+};
+
+// Admin: Update HR Team Member (meetLink, active status, details)
+export const updateHRUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, phone, designation, department, company, meetLink, isActive, role } = req.body;
+
+    const updated = await prisma.user.update({
+      where: { id },
+      data: {
+        ...(name && { name }),
+        ...(phone !== undefined && { phone }),
+        ...(designation && { designation }),
+        ...(department && { department }),
+        ...(company && { company }),
+        ...(meetLink !== undefined && { meetLink }),
+        ...(isActive !== undefined && { isActive: Boolean(isActive) }),
+        ...(role && { role }),
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        company: true,
+        designation: true,
+        department: true,
+        phone: true,
+        meetLink: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      }
+    });
+
+    return res.json({ success: true, message: 'HR details updated successfully!', user: updated });
+  } catch (error: any) {
+    console.error('Update HR User Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to update HR details: ' + error.message });
+  }
+};
+
+// Admin / System: Get Active HRs for Dynamic Interview Allocation
+export const getActiveHRs = async (req, res) => {
+  try {
+    const activeHRs = await prisma.user.findMany({
+      where: {
+        isActive: true,
+        role: { in: ['HR', 'ADMIN', 'RECRUITER'] },
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        designation: true,
+        department: true,
+        phone: true,
+        meetLink: true,
+        isActive: true,
+        _count: {
+          select: {
+            assignedInterviews: true,
+          }
+        }
+      },
+      orderBy: { name: 'asc' },
+    });
+
+    return res.json({ success: true, count: activeHRs.length, activeHRs });
+  } catch (error: any) {
+    console.error('Get Active HRs Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch active HR list: ' + error.message });
   }
 };
 
@@ -483,12 +562,19 @@ export const getAllUsers = async (req, res) => {
           designation: true,
           department: true,
           phone: true,
+          meetLink: true,
+          isActive: true,
           createdAt: true,
+          _count: {
+            select: {
+              assignedInterviews: true,
+            }
+          }
         },
         orderBy: { createdAt: 'desc' }
       });
       return res.json({ success: true, users });
-    } catch (dbErr) {
+    } catch (dbErr: any) {
       console.warn('DB getAllUsers catch:', dbErr.message);
       return res.json({
         success: true,
@@ -501,12 +587,14 @@ export const getAllUsers = async (req, res) => {
             company: 'Adyapan Edutech Pvt. Ltd.',
             designation: 'Head of Talent Acquisition',
             department: 'Executive HR',
+            meetLink: 'https://meet.google.com/adyapan-interview',
+            isActive: true,
             createdAt: new Date().toISOString()
           }
         ]
       });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Get All Users Error:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch users list' });
   }
