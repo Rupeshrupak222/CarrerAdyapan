@@ -3,17 +3,19 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { 
   LayoutDashboard, 
-  Briefcase, 
+  Target, 
   Users, 
-  Calendar, 
   Award, 
+  Mail, 
   TrendingUp, 
-  Bot, 
   ShieldCheck, 
-  UserCheck, 
+  Settings, 
   LogOut, 
   ExternalLink, 
-  Video 
+  Video, 
+  CircleDot, 
+  FileCheck, 
+  Briefcase 
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -31,39 +33,42 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
   // Dynamic Navigation based on strict Role-Based Access Control
   const getNavigationLinks = () => {
+    // 1. ADMIN SIDEBAR (Same Base Structure + More Access)
     if (isAdmin) {
       return [
-        { path: '/dashboard', label: 'Overview', icon: <LayoutDashboard className="w-4 h-4" /> },
-        { path: '/hr/dashboard', label: 'HR Workspace', icon: <UserCheck className="w-4 h-4" /> },
-        { path: '/hr-manager/dashboard', label: 'Manager Approvals', icon: <Award className="w-4 h-4" /> },
-        { path: '/candidates', label: 'Candidate Pipeline', icon: <Users className="w-4 h-4" /> },
-        { path: '/interviews', label: 'Interviews Hub', icon: <Calendar className="w-4 h-4" /> },
-        { path: '/offers', label: 'Offers & Joining', icon: <Award className="w-4 h-4" /> },
-        { path: '/jobs', label: 'Job Openings', icon: <Briefcase className="w-4 h-4" /> },
-        { path: '/analytics', label: 'Analytics & Funnel', icon: <TrendingUp className="w-4 h-4" /> },
-        { path: '/assistant', label: 'AI Recruiter Copilot', icon: <Bot className="w-4 h-4" /> },
+        { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
+        { path: '/admin/screening', label: 'Screening & Approvals', icon: <Target className="w-4 h-4" /> },
+        { path: '/admin/workload', label: 'Workload Distribution', icon: <Users className="w-4 h-4" /> },
+        { path: '/admin/final-selected', label: 'Final Round Selected', icon: <Award className="w-4 h-4" /> },
+        { path: '/admin/jobs', label: 'Job Openings', icon: <Briefcase className="w-4 h-4" /> },
+        { path: '/admin/communications', label: 'Communication History', icon: <Mail className="w-4 h-4" /> },
+        { path: '/admin/reports', label: 'Hiring Reports', icon: <TrendingUp className="w-4 h-4" /> },
         { path: '/admin/audit-logs', label: 'Audit Trail', icon: <ShieldCheck className="w-4 h-4" /> },
+        { path: '/profile', label: 'Settings', icon: <Settings className="w-4 h-4" /> },
       ];
     }
 
+    // 2. HR MANAGER SIDEBAR (Exact Specification)
     if (isManager) {
       return [
-        { path: '/hr-manager/dashboard', label: 'Manager Approvals', icon: <Award className="w-4 h-4" /> },
-        { path: '/candidates', label: 'Candidate Pipeline', icon: <Users className="w-4 h-4" /> },
-        { path: '/interviews', label: 'Interviews Hub', icon: <Calendar className="w-4 h-4" /> },
-        { path: '/offers', label: 'Offers & Joining', icon: <Award className="w-4 h-4" /> },
-        { path: '/jobs', label: 'Job Openings', icon: <Briefcase className="w-4 h-4" /> },
-        { path: '/analytics', label: 'Analytics & Funnel', icon: <TrendingUp className="w-4 h-4" /> },
-        { path: '/admin/audit-logs', label: 'Audit Trail', icon: <ShieldCheck className="w-4 h-4" /> },
+        { path: '/hr-manager/dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
+        { path: '/hr-manager/screening', label: 'Screening & Approvals', icon: <Target className="w-4 h-4" /> },
+        { path: '/hr-manager/workload', label: 'Workload Distribution', icon: <Users className="w-4 h-4" /> },
+        { path: '/hr-manager/final-selected', label: 'Final Round Selected', icon: <Award className="w-4 h-4" /> },
+        { path: '/hr-manager/communications', label: 'Communication History', icon: <Mail className="w-4 h-4" /> },
+        { path: '/hr-manager/reports', label: 'Hiring Reports', icon: <TrendingUp className="w-4 h-4" /> },
+        { path: '/profile', label: 'Profile & Settings', icon: <Settings className="w-4 h-4" /> },
       ];
     }
 
-    // Regular HR Specialist (Pavitra, Charitha, Nitisha, Aravind, Veena)
+    // 3. HR SPECIALIST SIDEBAR (Exact Specification)
     return [
-      { path: '/hr/dashboard', label: 'My Assigned Candidates', icon: <UserCheck className="w-4 h-4" /> },
-      { path: '/candidates', label: 'Candidate Directory', icon: <Users className="w-4 h-4" /> },
-      { path: '/interviews', label: 'My Interview Schedule', icon: <Calendar className="w-4 h-4" /> },
-      { path: '/offers', label: 'Offer Letters', icon: <Award className="w-4 h-4" /> },
+      { path: '/hr/dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
+      { path: '/hr/candidates', label: 'My Candidates', icon: <Users className="w-4 h-4" /> },
+      { path: '/hr/round-1', label: 'Round 1', icon: <CircleDot className="w-4 h-4 text-amber-500" /> },
+      { path: '/hr/round-2', label: 'Round 2', icon: <CircleDot className="w-4 h-4 text-blue-500" /> },
+      { path: '/hr/evaluations', label: 'Interview Evaluations', icon: <FileCheck className="w-4 h-4" /> },
+      { path: '/profile', label: 'Profile', icon: <Settings className="w-4 h-4" /> },
     ];
   };
 
@@ -71,6 +76,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
   const isActive = (path: string) => {
     if (path === '/dashboard') return location.pathname === '/dashboard';
+    if (path === '/hr-manager/dashboard') return location.pathname === '/hr-manager/dashboard';
+    if (path === '/hr/dashboard') return location.pathname === '/hr/dashboard';
     return location.pathname.startsWith(path);
   };
 
@@ -111,7 +118,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           {/* Saffron & White Navigation Links */}
           <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-1 scrollbar-thin">
             <div className="px-2 pb-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              {isHR ? 'HR Workspace' : isManager ? 'Manager Operations' : 'Administration'}
+              {isHR ? 'HR Specialist' : isManager ? 'HR Manager' : 'Administration'}
             </div>
 
             {navLinks.map((item) => {

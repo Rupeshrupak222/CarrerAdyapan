@@ -31,6 +31,36 @@ export const applicationService = {
     return response.data;
   },
 
+  assignHr: async (id: string, hrId: string, reason?: string) => {
+    const response = await api.post(`/applications/${id}/assign-hr`, { hrId, reason });
+    return response.data;
+  },
+
+  getWorkloadStats: async () => {
+    const response = await api.get('/applications/workload/stats');
+    return response.data;
+  },
+
+  getFinalRoundSelected: async () => {
+    const response = await api.get('/applications/final-selected/list');
+    return response.data;
+  },
+
+  sendOfficialOffer: async (id: string, offerData: any) => {
+    const response = await api.post(`/applications/${id}/send-offer`, offerData);
+    return response.data;
+  },
+
+  getCommunicationHistory: async () => {
+    const response = await api.get('/applications/communications/history');
+    return response.data;
+  },
+
+  getHiringReports: async () => {
+    const response = await api.get('/applications/reports/hiring-funnel');
+    return response.data;
+  },
+
   approveOffer: async (id: string) => {
     const response = await api.post(`/applications/${id}/approve-offer`);
     return response.data;
@@ -38,6 +68,41 @@ export const applicationService = {
 
   triggerScreening: async (forceAll: boolean = false) => {
     const response = await api.post('/applications/trigger-screening', { forceAll });
+    return response.data;
+  },
+
+  runAtsCheck: async (id: string) => {
+    const response = await api.post(`/applications/${id}/ats-check`);
+    return response.data;
+  },
+
+  getAtsResult: async (id: string) => {
+    const response = await api.get(`/applications/${id}/ats-result`);
+    return response.data;
+  },
+
+  rerunAtsCheck: async (id: string) => {
+    const response = await api.post(`/applications/${id}/ats-rerun`);
+    return response.data;
+  },
+
+  shortlistApplication: async (id: string) => {
+    const response = await api.post(`/applications/${id}/shortlist`);
+    return response.data;
+  },
+
+  rejectApplication: async (id: string, reason?: string) => {
+    const response = await api.post(`/applications/${id}/reject`, { reason });
+    return response.data;
+  },
+
+  bulkShortlist: async (applicationIds: string[]) => {
+    const response = await api.post('/applications/bulk-shortlist', { applicationIds });
+    return response.data;
+  },
+
+  bulkReject: async (applicationIds: string[], reason?: string) => {
+    const response = await api.post('/applications/bulk-reject', { applicationIds, reason });
     return response.data;
   },
 

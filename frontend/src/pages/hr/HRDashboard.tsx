@@ -433,8 +433,14 @@ const HRDashboard: React.FC = () => {
 
         {/* Schedule Round Modal */}
         {scheduleModalOpen && (
-          <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="max-w-md w-full bg-white border border-slate-300 rounded-2xl p-6 shadow-xl animate-fadeIn">
+          <div 
+            className="fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn"
+            onClick={() => setScheduleModalOpen(false)}
+          >
+            <div 
+              className="max-w-md w-full bg-white border border-slate-300 rounded-2xl p-6 shadow-2xl animate-scaleUp my-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <h3 className="text-lg font-bold text-slate-900 mb-1">
                 Schedule {scheduleData.roundName}
               </h3>
@@ -495,8 +501,14 @@ const HRDashboard: React.FC = () => {
 
         {/* Scorecard Modal */}
         {feedbackModalOpen && (
-          <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="max-w-lg w-full bg-white border border-slate-300 rounded-2xl p-6 shadow-xl animate-fadeIn max-h-[90vh] overflow-y-auto">
+          <div 
+            className="fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn"
+            onClick={() => setFeedbackModalOpen(false)}
+          >
+            <div 
+              className="max-w-lg w-full bg-white border border-slate-300 rounded-2xl p-6 shadow-2xl animate-scaleUp max-h-[90vh] overflow-y-auto my-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <h3 className="text-lg font-bold text-slate-900 mb-1">
                 Scorecard Evaluation
               </h3>

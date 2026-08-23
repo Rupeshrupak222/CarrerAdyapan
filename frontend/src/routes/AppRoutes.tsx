@@ -20,10 +20,21 @@ import AIAssistant from '../pages/assistant/AIAssistant';
 import AdminProfile from '../pages/profile/AdminProfile';
 import AdminContactUs from '../pages/contact/AdminContactUs';
 
-// Dedicated ATS Portals
-import HRDashboard from '../pages/hr/HRDashboard';
+// Dedicated ATS Workflow Pages (HR Manager & Admin)
 import HRManagerDashboard from '../pages/hr-manager/HRManagerDashboard';
+import ScreeningApprovalsPage from '../pages/hr-manager/ScreeningApprovalsPage';
+import WorkloadDistributionPage from '../pages/hr-manager/WorkloadDistributionPage';
+import FinalRoundSelectedPage from '../pages/hr-manager/FinalRoundSelectedPage';
+import CommunicationHistoryPage from '../pages/hr-manager/CommunicationHistoryPage';
+import HiringReportsPage from '../pages/hr-manager/HiringReportsPage';
 import AuditLogsPage from '../pages/admin/AuditLogsPage';
+
+// Dedicated ATS Workflow Pages (HR Specialist)
+import HRDashboard from '../pages/hr/HRDashboard';
+import HRSpecialistCandidatesPage from '../pages/hr/HRSpecialistCandidatesPage';
+import HRSpecialistRound1Page from '../pages/hr/HRSpecialistRound1Page';
+import HRSpecialistRound2Page from '../pages/hr/HRSpecialistRound2Page';
+import HRSpecialistEvaluationsPage from '../pages/hr/HRSpecialistEvaluationsPage';
 
 // Public Secure Candidate Token Pages (NO LOGIN REQUIRED)
 import SecureInterviewPage from '../candidate-portal/secure/SecureInterviewPage';
@@ -83,7 +94,7 @@ const CandidateProtectedRoute = ({ children }: { children: React.ReactNode }) =>
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* ===== PUBLIC CANDIDATE PORTAL (PRESERVED) ===== */}
+      {/* ===== PUBLIC CANDIDATE PORTAL (100% PRESERVED & UNTOUCHED) ===== */}
       <Route path="/" element={<Careers />} />
       <Route path="/careers" element={<Careers />} />
       <Route path="/open-positions" element={<PublicJobs />} />
@@ -133,13 +144,31 @@ const AppRoutes = () => {
         }
       />
 
-      {/* ===== DEDICATED ATS PORTALS ===== */}
-      <Route path="/hr/dashboard" element={<ProtectedRoute><HRDashboard /></ProtectedRoute>} />
+      {/* ===== HR MANAGER DEDICATED ATS WORKFLOW ROUTES ===== */}
       <Route path="/hr-manager/dashboard" element={<ProtectedRoute><HRManagerDashboard /></ProtectedRoute>} />
+      <Route path="/hr-manager/screening" element={<ProtectedRoute><ScreeningApprovalsPage /></ProtectedRoute>} />
+      <Route path="/hr-manager/workload" element={<ProtectedRoute><WorkloadDistributionPage /></ProtectedRoute>} />
+      <Route path="/hr-manager/final-selected" element={<ProtectedRoute><FinalRoundSelectedPage /></ProtectedRoute>} />
+      <Route path="/hr-manager/communications" element={<ProtectedRoute><CommunicationHistoryPage /></ProtectedRoute>} />
+      <Route path="/hr-manager/reports" element={<ProtectedRoute><HiringReportsPage /></ProtectedRoute>} />
+
+      {/* ===== HR SPECIALIST DEDICATED WORKFLOW ROUTES ===== */}
+      <Route path="/hr/dashboard" element={<ProtectedRoute><HRDashboard /></ProtectedRoute>} />
+      <Route path="/hr/candidates" element={<ProtectedRoute><HRSpecialistCandidatesPage /></ProtectedRoute>} />
+      <Route path="/hr/round-1" element={<ProtectedRoute><HRSpecialistRound1Page /></ProtectedRoute>} />
+      <Route path="/hr/round-2" element={<ProtectedRoute><HRSpecialistRound2Page /></ProtectedRoute>} />
+      <Route path="/hr/evaluations" element={<ProtectedRoute><HRSpecialistEvaluationsPage /></ProtectedRoute>} />
+
+      {/* ===== ADMIN RECRUITER & MANAGEMENT ROUTES ===== */}
+      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/admin/screening" element={<ProtectedRoute><ScreeningApprovalsPage /></ProtectedRoute>} />
+      <Route path="/admin/workload" element={<ProtectedRoute><WorkloadDistributionPage /></ProtectedRoute>} />
+      <Route path="/admin/final-selected" element={<ProtectedRoute><FinalRoundSelectedPage /></ProtectedRoute>} />
+      <Route path="/admin/communications" element={<ProtectedRoute><CommunicationHistoryPage /></ProtectedRoute>} />
+      <Route path="/admin/reports" element={<ProtectedRoute><HiringReportsPage /></ProtectedRoute>} />
       <Route path="/admin/audit-logs" element={<ProtectedRoute><AuditLogsPage /></ProtectedRoute>} />
 
-      {/* ===== ADMIN RECRUITER PROTECTED ===== */}
-      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      {/* Job Management */}
       <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
       <Route path="/jobs/new" element={<ProtectedRoute><CreateJob /></ProtectedRoute>} />
       <Route path="/jobs/create" element={<ProtectedRoute><CreateJob /></ProtectedRoute>} />
@@ -148,6 +177,8 @@ const AppRoutes = () => {
       <Route path="/admin/jobs/new" element={<ProtectedRoute><CreateJob /></ProtectedRoute>} />
       <Route path="/admin/jobs/create" element={<ProtectedRoute><CreateJob /></ProtectedRoute>} />
       <Route path="/admin/jobs/:id" element={<ProtectedRoute><JobDetails /></ProtectedRoute>} />
+
+      {/* Candidate Hub & Directory */}
       <Route path="/candidates" element={<ProtectedRoute><Candidates /></ProtectedRoute>} />
       <Route path="/candidates/compare" element={<ProtectedRoute><CompareCandidates /></ProtectedRoute>} />
       <Route path="/candidates/:id" element={<ProtectedRoute><CandidateDetails /></ProtectedRoute>} />
