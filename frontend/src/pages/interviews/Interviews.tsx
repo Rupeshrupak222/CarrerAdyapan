@@ -418,8 +418,14 @@ const Interviews: React.FC = () => {
 
         {/* Schedule Interview Modal (Strictly Shows Only Assigned Candidates) */}
         {showAddModal && (
-          <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="max-w-md w-full bg-white border border-orange-200 rounded-3xl p-6 shadow-2xl animate-fadeIn">
+          <div 
+            className="fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn"
+            onClick={() => setShowAddModal(false)}
+          >
+            <div 
+              className="max-w-md w-full bg-white border border-orange-200 rounded-3xl p-6 shadow-2xl animate-scaleUp my-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <h3 className="text-xl font-extrabold text-slate-900 mb-1">Schedule Interview Call</h3>
               <p className="text-xs text-slate-500 mb-4">
                 {isHR ? 'Select from your assigned candidates only.' : 'Select candidate and configure interview parameters.'}
@@ -498,8 +504,14 @@ const Interviews: React.FC = () => {
 
         {/* Scorecard Modal */}
         {feedbackModalOpen && (
-          <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="max-w-lg w-full bg-white border border-orange-200 rounded-3xl p-6 shadow-2xl animate-fadeIn max-h-[90vh] overflow-y-auto">
+          <div 
+            className="fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn"
+            onClick={() => setFeedbackModalOpen(false)}
+          >
+            <div 
+              className="max-w-lg w-full bg-white border border-orange-200 rounded-3xl p-6 shadow-2xl animate-scaleUp max-h-[90vh] overflow-y-auto my-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <h3 className="text-xl font-extrabold text-slate-900 mb-1">
                 Interview Scorecard Evaluation
               </h3>

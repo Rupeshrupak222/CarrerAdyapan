@@ -533,8 +533,14 @@ const Candidates: React.FC = () => {
 
         {/* Schedule Round Modal */}
         {scheduleModalOpen && (
-          <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="max-w-md w-full bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl animate-fadeIn">
+          <div 
+            className="fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn"
+            onClick={() => setScheduleModalOpen(false)}
+          >
+            <div 
+              className="max-w-md w-full bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl animate-scaleUp my-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <h3 className="text-xl font-extrabold text-slate-900 mb-1">
                 Schedule {scheduleFormData.roundName}
               </h3>
@@ -595,8 +601,14 @@ const Candidates: React.FC = () => {
 
         {/* Add Candidate Modal */}
         {showAddModal && (
-          <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="max-w-md w-full bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl animate-fadeIn">
+          <div 
+            className="fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn"
+            onClick={() => setShowAddModal(false)}
+          >
+            <div 
+              className="max-w-md w-full bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl animate-scaleUp my-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <h3 className="text-xl font-extrabold text-slate-900 mb-1">Add Candidate Profile</h3>
               <p className="text-xs text-slate-500 mb-5">Create a candidate profile in the ATS database.</p>
 

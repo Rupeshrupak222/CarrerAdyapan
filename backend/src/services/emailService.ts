@@ -285,6 +285,52 @@ export const sendApplicationConfirmationEmail = async (payload: any) => {
 };
 
 /**
+ * Send Candidate Shortlist Notification Email
+ */
+export const sendShortlistEmail = async ({ candidateName, candidateEmail, jobTitle }: any) => {
+  const targetEmail = candidateEmail;
+  const targetName = candidateName || 'Candidate';
+  const targetRole = jobTitle || 'Business Development Associate (BDA)';
+  const companyName = 'Adyapan Edutech Pvt. Ltd.';
+
+  const emailHtml = `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #fed7aa; box-shadow: 0 4px 14px rgba(217,119,6,0.12);">
+      ${renderEmailHeader(companyName, 'APPLICATION SHORTLISTED')}
+      
+      <div style="padding: 32px 32px 28px 32px; font-size: 15px; color: #334155; line-height: 1.7;">
+        <p style="margin: 0 0 16px 0;">Dear <strong>${targetName}</strong>,</p>
+        
+        <p style="margin: 0 0 16px 0;">
+          Great news! Your profile has been reviewed and <strong>SHORTLISTED</strong> for the position of <strong>${targetRole}</strong> at <strong>${companyName}</strong>.
+        </p>
+        
+        <div style="background-color: #fffbeb; border: 1.5px solid #fde68a; border-radius: 14px; padding: 20px; margin: 24px 0; font-size: 14px; line-height: 1.8;">
+          <p style="margin: 0 0 6px 0; color: #92400e;"><strong>🎯 Next Steps:</strong></p>
+          <p style="margin: 0; color: #78350f;">
+            An HR Talent Specialist is being assigned to your application. You will receive an official interview invitation with your Google Meet link shortly.
+          </p>
+        </div>
+
+        <p style="margin: 0 0 24px 0;">
+          Thank you for choosing Adyapan Edutech. We look forward to connecting with you soon!
+        </p>
+        
+        <div style="border-top: 1px solid #e2e8f0; margin-top: 28px; padding-top: 20px; font-size: 14px; color: #475569;">
+          <p style="margin: 0 0 4px 0;">Best regards,</p>
+          <p style="margin: 0;"><strong style="color: #0f172a;">Adyapan Talent Acquisition Team</strong></p>
+        </div>
+      </div>
+    </div>
+  `;
+
+  return await dispatchEmailToCandidate({
+    to: targetEmail,
+    subject: `Application Shortlisted: ${targetRole} at ${companyName}`,
+    html: emailHtml,
+  });
+};
+
+/**
  * 2. Send Interview Invitation Email to Candidate (Round & Assigned HR Specific)
  */
 export const sendInterviewScheduledEmail = async (payload: any) => {

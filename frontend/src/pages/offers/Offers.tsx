@@ -504,8 +504,14 @@ const Offers: React.FC = () => {
 
         {/* 1. VIEW OFFER MODAL */}
         {showViewModal && selectedOffer && (
-          <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
-            <div className="max-w-2xl w-full bg-white border border-orange-200 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto space-y-6">
+          <div 
+            className="fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn"
+            onClick={() => setShowViewModal(false)}
+          >
+            <div 
+              className="max-w-2xl w-full bg-white border border-orange-200 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto space-y-6 animate-scaleUp my-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="flex items-center justify-between border-b border-orange-100 pb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white font-black text-lg flex items-center justify-center shadow-sm">
@@ -615,8 +621,14 @@ const Offers: React.FC = () => {
 
         {/* 2. EDIT OFFER MODAL */}
         {showEditModal && (
-          <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
-            <div className="max-w-md w-full bg-white border border-orange-200 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto space-y-5">
+          <div 
+            className="fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn"
+            onClick={() => setShowEditModal(false)}
+          >
+            <div 
+              className="max-w-md w-full bg-white border border-orange-200 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto space-y-5 animate-scaleUp my-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="flex items-center justify-between border-b border-orange-100 pb-3">
                 <div>
                   <h3 className="text-xl font-extrabold text-slate-900">Edit Offer Letter</h3>
@@ -719,8 +731,14 @@ const Offers: React.FC = () => {
 
         {/* 3. ISSUE NEW OFFER MODAL */}
         {showAddModal && (
-          <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
-            <div className="max-w-md w-full bg-white border border-orange-200 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4">
+          <div 
+            className="fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn"
+            onClick={() => setShowAddModal(false)}
+          >
+            <div 
+              className="max-w-md w-full bg-white border border-orange-200 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4 animate-scaleUp my-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="flex items-center justify-between border-b border-orange-100 pb-3">
                 <h3 className="text-xl font-extrabold text-slate-900">Issue Official Offer Letter</h3>
                 <button

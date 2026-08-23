@@ -130,6 +130,20 @@ model Application {
   recommendations        String[]        
   notes                  String?
   
+  // Manual On-Demand ATS Evaluation Fields
+  atsScore               Int?
+  atsStatus              String          @default("ATS_NOT_CHECKED") // ATS_NOT_CHECKED, ATS_PROCESSING, ATS_COMPLETED, ATS_FAILED
+  atsAnalyzedAt          DateTime?
+  atsAnalyzedBy          String?
+  atsResult              Json?
+  atsMatchedSkills       String[]        @default([])
+  atsPartialSkills       String[]        @default([])
+  atsMissingSkills       String[]        @default([])
+  atsExperienceMatch     Json?
+  atsEducationMatch      Json?
+  atsKeywordMatch        Json?
+  atsAnalysisHistory     ATSAnalysis[]
+
   // Assigned HR
   assignedHrId           String?
   assignedHr             User?           @relation("AssignedHRCandidates", fields: [assignedHrId], references: [id], onDelete: SetNull)
@@ -159,6 +173,27 @@ model Application {
   @@index([overallStatus])
   @@index([currentRound])
   @@index([finalSelected])
+}
+
+model ATSAnalysis {
+  id              String      @id @default(cuid())
+  applicationId   String
+  application     Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  runNumber       Int         @default(1)
+  score           Int
+  result          Json?
+  matchedSkills   String[]    @default([])
+  partialSkills   String[]    @default([])
+  missingSkills   String[]    @default([])
+  experienceMatch Json?
+  educationMatch  Json?
+  keywordMatch    Json?
+  recommendation  String?
+  analyzedBy      String?
+  createdAt       DateTime    @default(now())
+
+  @@index([applicationId])
+  @@index([createdAt])
 }
 
 model HRAssignment {
