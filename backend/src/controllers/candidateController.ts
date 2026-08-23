@@ -421,7 +421,14 @@ export const getCandidateById = async (req, res) => {
         applications: {
           include: {
             job: true,
-            interviews: true,
+            interviews: {
+              include: {
+                hr: {
+                  select: { id: true, name: true, email: true, designation: true, meetLink: true, phone: true },
+                },
+              },
+              orderBy: { roundNumber: 'asc' },
+            },
             offer: true,
           },
         },

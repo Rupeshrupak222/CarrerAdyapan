@@ -117,9 +117,14 @@ app.use('/api/applications', applicationRoutes);
 app.use('/api/interviews', interviewRoutes);
 app.use('/api/offers', offerRoutes);
 app.use('/api/analytics', analyticsRoutes);
+import onboardingRoutes from './src/routes/onboardingRoutes.js';
+import auditRoutes from './src/routes/auditRoutes.js';
+
 app.use('/api/ai', aiRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/onboarding', onboardingRoutes);
+app.use('/api/audit', auditRoutes);
 import { sendContactUsSupportEmail } from './src/services/emailService.js';
 
 // Contact Us Form Submission API (Delivers to support@adyapan.com)

@@ -1,1033 +1,803 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
-import AdyapanOfferGeneratorModal from '../../components/offers/AdyapanOfferGeneratorModal';
 import { offerService } from '../../services/offerService';
-import { candidateService } from '../../services/candidateService';
-import { useTheme } from '../../context/ThemeContext';
-import {
-  getGlobalOfferTemplate,
-  saveGlobalOfferTemplate,
-} from '../../utils/applicationStore';
+import { applicationService } from '../../services/applicationService';
+import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
+import { 
+  Award, 
+  Download, 
+  Send, 
+  CheckCircle2, 
+  Clock, 
+  Search, 
+  Filter, 
+  FileText, 
+  Sparkles, 
+  Calendar, 
+  Plus, 
+  RefreshCw,
+  Eye,
+  Edit3,
+  ExternalLink,
+  MapPin,
+  Building2,
+  Mail,
+  User,
+  ShieldCheck,
+  X
+} from 'lucide-react';
+import axios from 'axios';
 
-const Offers = () => {
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+const Offers: React.FC = () => {
+  const { user } = useAuth();
+  const isHR = user?.role === 'HR';
+
   const [offers, setOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [sendingId, setSendingId] = useState<string | null>(null);
+
+  // Modals
   const [showAddModal, setShowAddModal] = useState(false);
-  const [editingOffer, setEditingOffer] = useState<any | null>(null);
-  const [showAdyapanModal, setShowAdyapanModal] = useState(false);
-  const [selectedCandidateForAdyapan, setSelectedCandidateForAdyapan] = useState<any | null>(null);
-  const [activeDropdownId, setActiveDropdownId] = useState<string | number | null>(null);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedOffer, setSelectedOffer] = useState<any>(null);
 
-  const initialGlobalTemplate = getGlobalOfferTemplate();
-  const [companyTemplate, setCompanyTemplate] = useState(initialGlobalTemplate.templateName);
-  const [companyTemplateUrl, setCompanyTemplateUrl] = useState(initialGlobalTemplate.templateDataUrl);
+  const [eligibleApplications, setEligibleApplications] = useState<any[]>([]);
 
-  const { theme } = useTheme();
-  const location = useLocation();
+  // Create Form Data
+  const [offerFormData, setOfferFormData] = useState({
+    applicationId: '',
+    stipend: 'INR 20,000/- Per Month (During 6-Month Training)',
+    salary: 20000,
+    trainingStartDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    location: 'Hyderabad / Hybrid',
+    notes: 'Approved by Talent Acquisition Team',
+  });
 
-  const [formData, setFormData] = useState({
+  // Edit Form Data
+  const [editFormData, setEditFormData] = useState({
+    id: '',
     candidateName: '',
-    email: '',
-    phone: '',
+    candidateEmail: '',
     jobTitle: '',
-    salary: '',
-    bonus: '',
-    benefits: '',
-    joiningDate: '',
-    expirationDate: '',
-    customTerms: '',
+    stipend: '',
+    salary: 20000,
+    trainingStartDate: '',
+    location: '',
+    notes: '',
   });
 
   useEffect(() => {
-    fetchOffers();
+    fetchOffersData();
+  }, [user]);
 
-    const handleOutsideClick = () => setActiveDropdownId(null);
-    window.addEventListener('click', handleOutsideClick);
-    return () => window.removeEventListener('click', handleOutsideClick);
-  }, [location.search]);
-
-  const fetchOffers = async () => {
+  const fetchOffersData = async () => {
     try {
-      const dbResponse = await offerService.getAllOffers().catch(() => null);
-      const dbList = dbResponse?.offers || [];
+      setLoading(true);
+      const [offersRes, appsRes] = await Promise.all([
+        offerService.getAllOffers().catch(() => null),
+        applicationService.getAllApplications().catch(() => null),
+      ]);
 
-      const sanitizeOfferTerms = (off: any) => {
-        let terms = off.customTerms;
-        if (typeof terms === 'string' && (terms.trim().startsWith('{') || terms.includes('"olPrefix"'))) {
-          try {
-            const parsed = JSON.parse(terms);
-            terms = parsed.customTermsText || parsed.notes || '';
-          } catch (e) {
-            terms = '';
-          }
-        }
-        return { ...off, customTerms: terms };
-      };
+      let fetchedOffers = offersRes?.offers || [];
+      let fetchedApps = appsRes?.applications || [];
 
-      const sanitized = dbList.map(sanitizeOfferTerms);
-      setOffers(sanitized);
+      // STRICT HR ISOLATION: HR Specialist sees only their assigned candidate offers
+      if (isHR && user?.id) {
+        fetchedOffers = fetchedOffers.filter((o: any) => {
+          const app = o.application;
+          return (
+            app?.assignedHrId === user.id ||
+            app?.assignedHr?.email?.toLowerCase() === user.email?.toLowerCase() ||
+            o.candidateEmail?.toLowerCase() === user.email?.toLowerCase()
+          );
+        });
 
-      const queryParams = new URLSearchParams(location.search);
-      const targetCandidateId = queryParams.get('candidateId');
-      if (targetCandidateId) {
-        const found = sanitized.find((o: any) => o.candidateId === targetCandidateId || o.id === targetCandidateId);
-        if (found) {
-          handleOpenEditModal(found);
-        }
+        fetchedApps = fetchedApps.filter((a: any) => 
+          a.assignedHrId === user.id || 
+          a.assignedHr?.email?.toLowerCase() === user.email?.toLowerCase()
+        );
       }
-    } catch (error) {
-      console.warn('Failed to load offers:', error);
-      setOffers([]);
+
+      setOffers(fetchedOffers);
+      setEligibleApplications(fetchedApps.filter((a: any) => a.managerApproved || a.currentRound >= 2));
+    } catch (err: any) {
+      toast.error('Failed to load offers');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSendEmail = async (offer) => {
-    const candidateEmail = offer.email || offer.candidateEmail || `${offer.candidateName.toLowerCase().replace(/\s+/g, '.')}@example.com`;
+  // 1. Send / Resend Offer Email Action
+  const handleSendOfferEmail = async (offer: any) => {
+    setSendingId(offer.id);
+    const toastId = toast.loading(`Sending official offer letter to ${offer.candidateEmail}...`);
     try {
-      await offerService.sendEmail({
-        olNo: offer.olNo || `ADP04${Math.floor(10 + Math.random() * 90)}`,
-        offerDate: offer.offerDate || '14-May-2026',
-        candidateName: offer.candidateName || 'Valued Candidate',
-        candidateEmail,
-        jobTitle: offer.jobTitle || 'COMMUNITY DEVELOPMENT INTERN',
-        trainingStartDate: offer.trainingStartDate || offer.joiningDate || '25-May-2026',
-        trainingEndDate: offer.trainingEndDate || '06-Jun-2026',
-        ojtStartDate: offer.ojtStartDate || '07-Jun-2026',
-        ojtEndDate: offer.ojtEndDate || '07-Dec-2026',
-        location: offer.location || 'HYDERABAD',
-        stipend: offer.stipend || (typeof offer.salary === 'number' ? `INR ${offer.salary}/-PerMonth` : offer.salary) || 'INR 20000/-PerMonth',
-        incentives: offer.incentives || 'Up to 10,000/- INCENTIVES.',
-        postProbationCtc: offer.postProbationCtc || 'Rs. 8 LPA ( 6 Fixed + 2 Variable )',
-        reportingDate: offer.reportingDate || offer.joiningDate || '25-May-2026',
-        workingHours: offer.workingHours || '9 Hours a day (Inc. Lunch Break).',
-        workTiming: offer.workTiming || '11AM - 8 PM.',
-        jobType: offer.jobType || 'Full Time Training',
-        hrEmail: offer.hrEmail || 'hr@adyapan.com',
-        hrPhone: offer.hrPhone || '8179124566',
-        companyWebsite: offer.companyWebsite || 'www.adyapanschool.com',
-        hrManagerName: offer.hrManagerName || 'HR MANAGER',
-        ...offer,
-      });
-      if (offer.id) {
-        await offerService.updateOfferStatus(offer.id, 'SENT').catch(() => null);
-      }
-      fetchOffers();
-      toast.success(`Official 4-Page Adyapan Offer Letter dispatched via Resend to ${candidateEmail}!`);
-    } catch (e) {
-      toast.error('Failed to send offer email');
-    }
-  };
-
-  const handleDeleteOffer = async (offer) => {
-    const name = offer.candidateName || 'this candidate';
-    if (!window.confirm(`Delete offer for "${name}" permanently from database?`)) return;
-    if (offer.id) {
-      try {
-        await offerService.deleteOffer(offer.id);
-        setOffers((prev) => prev.filter((o) => o.id !== offer.id));
-        toast.success(`Offer for "${name}" deleted from database!`);
-      } catch (e) {
-        console.error('Delete offer error:', e);
-        toast.error('Failed to delete offer');
-      }
-    }
-  };
-
-  const [viewingPdfOffer, setViewingPdfOffer] = useState<any | null>(null);
-  const [viewingPdfUrl, setViewingPdfUrl] = useState<string | null>(null);
-
-  const handleOpenEditModal = (offer: any) => {
-    setEditingOffer(offer);
-    if (offer) {
-      setFormData({
-        candidateName: offer.candidateName || '',
-        email: offer.email || offer.candidateEmail || '',
-        phone: offer.phone || '',
-        jobTitle: offer.jobTitle || '',
-        salary: offer.salary || '',
-        bonus: offer.bonus || '',
-        benefits: Array.isArray(offer.benefits) ? offer.benefits.join(', ') : offer.benefits || '',
-        joiningDate: offer.joiningDate || '',
-        expirationDate: offer.expirationDate || '',
-        customTerms: offer.customTerms || '',
-      });
-    }
-    setShowAddModal(true);
-  };
-
-  const handleViewOfferPdf = async (offer) => {
-    try {
-      toast.loading(`Generating Candidate PDF Offer Letter for ${offer.candidateName}...`, { id: 'pdf-toast' });
-      const globalTpl = getGlobalOfferTemplate();
-
-      const blob = await offerService.generatePDF({
-        olNo: offer.olNo || `ADP04${Math.floor(10 + Math.random() * 90)}`,
-        offerDate: offer.offerDate || '14-May-2026',
-        candidateName: offer.candidateName || 'Valued Candidate',
-        jobTitle: offer.jobTitle || 'COMMUNITY DEVELOPMENT INTERN',
-        trainingStartDate: offer.trainingStartDate || offer.joiningDate || '25-May-2026',
-        trainingEndDate: offer.trainingEndDate || '06-Jun-2026',
-        ojtStartDate: offer.ojtStartDate || '07-Jun-2026',
-        ojtEndDate: offer.ojtEndDate || '07-Dec-2026',
-        location: offer.location || 'HYDERABAD',
-        stipend: offer.stipend || (typeof offer.salary === 'number' ? `INR ${offer.salary}/-PerMonth` : offer.salary) || 'INR 20000/-PerMonth',
-        incentives: offer.incentives || 'Up to 10,000/- INCENTIVES.',
-        postProbationCtc: offer.postProbationCtc || 'Rs. 8 LPA ( 6 Fixed + 2 Variable )',
-        reportingDate: offer.reportingDate || offer.joiningDate || '25-May-2026',
-        workingHours: offer.workingHours || '9 Hours a day (Inc. Lunch Break).',
-        workTiming: offer.workTiming || '11AM - 8 PM.',
-        jobType: offer.jobType || 'Full Time Training',
-        hrEmail: offer.hrEmail || 'hr@adyapan.com',
-        hrPhone: offer.hrPhone || '8179124566',
-        companyWebsite: offer.companyWebsite || 'www.adyapanschool.com',
-        hrManagerName: offer.hrManagerName || 'HR MANAGER',
-        ...offer,
-        companyTemplateName: globalTpl.templateName,
-        templateDataUrl: globalTpl.templateDataUrl,
-      });
-
-      const pdfBlob = new Blob([blob], { type: 'application/pdf' });
-      const targetPdfUrl = window.URL.createObjectURL(pdfBlob);
-
-      setViewingPdfUrl(targetPdfUrl);
-      setViewingPdfOffer(offer);
-
-      toast.success(`Opening Candidate PDF Offer Letter for ${offer.candidateName}!`, { id: 'pdf-toast' });
-    } catch (e) {
-      toast.error('Failed to generate PDF offer letter preview', { id: 'pdf-toast' });
-    }
-  };
-
-  const handleRejectCandidate = async (offer) => {
-    const candidateEmail = offer.email || offer.candidateEmail || (offer.candidateName ? `${offer.candidateName.toLowerCase().replace(/\s+/g, '.')}@example.com` : 'dks241655@gmail.com');
-
-    try {
-      if (offer.id) {
-        await offerService.updateOfferStatus(offer.id, 'REJECTED');
-      }
-      await candidateService.sendRejectionEmail({
+      await offerService.sendEmail(offer.id, {
         candidateName: offer.candidateName,
-        candidateEmail,
-        jobTitle: offer.jobTitle || 'Business Development Associate (BDA)',
+        candidateEmail: offer.candidateEmail,
+        jobTitle: offer.jobTitle,
+        salary: offer.salary,
+        stipend: offer.stipend || (offer.salary ? `INR ${offer.salary}/- Per Month` : 'INR 20,000/- Per Month'),
+        joiningDate: offer.trainingStartDate || offer.joiningDate,
+        location: offer.location || 'Hyderabad',
       });
-      toast.success(`Offer for ${offer.candidateName} marked as Rejected and rejection email sent!`);
-      fetchOffers();
-    } catch (e) {
-      toast.error(`Failed to reject offer`);
+
+      toast.success(`Offer Letter email sent to ${offer.candidateEmail}!`, { id: toastId });
+      fetchOffersData();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Failed to send offer email.', { id: toastId });
+    } finally {
+      setSendingId(null);
     }
   };
 
-  const handleTemplateUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setCompanyTemplate(file.name);
-
-      const reader = new FileReader();
-      reader.onload = (event: ProgressEvent<FileReader>) => {
-        const dataUrl = event.target?.result as string | null;
-        setCompanyTemplateUrl(dataUrl);
-        saveGlobalOfferTemplate(file.name, dataUrl);
-        toast.success(`Global Company Offer Letter Template uploaded: "${file.name}" `);
-
-        // If a PDF is currently being viewed, refresh preview with new global template
-        if (viewingPdfOffer) {
-          handleViewOfferPdf(viewingPdfOffer);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
+  // 2. View Offer Letter Modal
+  const handleOpenViewModal = (offer: any) => {
+    setSelectedOffer(offer);
+    setShowViewModal(true);
   };
 
-  const handleViewTemplate = async () => {
-    const globalTpl = getGlobalOfferTemplate();
-    if (globalTpl.templateDataUrl) {
-      try {
-        let blobUrl = globalTpl.templateDataUrl;
-        if (globalTpl.templateDataUrl.startsWith('data:')) {
-          const response = await fetch(globalTpl.templateDataUrl);
-          const blob = await response.blob();
-          blobUrl = URL.createObjectURL(blob);
-        }
-
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.download = globalTpl.templateName || 'Company_Offer_Template.pdf';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        if (blobUrl.startsWith('blob:')) {
-          setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
-        }
-        toast.success(`Downloaded Active Global Company Offer Letter Template: "${globalTpl.templateName}" `);
-      } catch (err) {
-        toast.error('Failed to open template file');
-      }
-    } else {
-      handleViewOfferPdf({
-        candidateName: '[Company Standard Template]',
-        jobTitle: 'Business Development Associate (BDA)',
-        salary: 550000,
-        bonus: 100000,
-        joiningDate: '2026-09-01',
-        expirationDate: '2026-08-30',
-        customTerms: 'Standard Adyapan Edutech Corporate Offer Terms.',
-      });
-    }
+  // 3. Edit Offer Letter Modal
+  const handleOpenEditModal = (offer: any) => {
+    setSelectedOffer(offer);
+    setEditFormData({
+      id: offer.id,
+      candidateName: offer.candidateName || '',
+      candidateEmail: offer.candidateEmail || '',
+      jobTitle: offer.jobTitle || 'Business Development Associate',
+      stipend: offer.stipend || (offer.salary ? `INR ${offer.salary}/- Per Month` : 'INR 20,000/- Per Month (During 6-Month Training)'),
+      salary: offer.salary || 20000,
+      trainingStartDate: offer.trainingStartDate ? new Date(offer.trainingStartDate).toISOString().split('T')[0] : (offer.joiningDate ? new Date(offer.joiningDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]),
+      location: offer.location || 'Hyderabad / Hybrid',
+      notes: offer.notes || 'Official offer released by Talent Acquisition Team.',
+    });
+    setShowEditModal(true);
   };
 
-  const handleAddOffer = async (e) => {
+  const handleEditSubmit = async (e: React.FormEvent, sendEmailAfterSave = false) => {
     e.preventDefault();
-    const candidateEmail = formData.email || `${formData.candidateName.toLowerCase().replace(/\s+/g, '.')}@example.com`;
-    const globalTpl = getGlobalOfferTemplate();
-
-    const newOffer = {
-      candidateName: formData.candidateName,
-      candidateEmail: candidateEmail,
-      phone: formData.phone || '+91 98765-43210',
-      jobTitle: formData.jobTitle,
-      salary: parseFloat(formData.salary) || 500000,
-      bonus: parseFloat(formData.bonus) || 50000,
-      joiningDate: formData.joiningDate,
-      expirationDate: formData.expirationDate,
-      status: 'SENT',
-      templateName: globalTpl.templateName,
-      benefits: formData.benefits ? formData.benefits.split(',').map((b) => b.trim()) : ['Health Insurance'],
-      customTerms: formData.customTerms,
-    };
+    if (!selectedOffer) return;
+    const toastId = toast.loading('Saving offer letter modifications...');
 
     try {
-      await offerService.createOffer(newOffer);
-      try {
-        await offerService.sendEmail({
-          candidateName: newOffer.candidateName,
-          candidateEmail: newOffer.candidateEmail,
-          jobTitle: newOffer.jobTitle,
-          salary: newOffer.salary,
-          joiningDate: newOffer.joiningDate,
-          companyTemplateName: globalTpl.templateName,
-          templateDataUrl: globalTpl.templateDataUrl,
-        });
-      } catch (err) {
-        console.warn('Email dispatch warning:', err);
-      }
-      toast.success('Offer Letter created and saved to database!');
+      await offerService.createOffer({
+        id: selectedOffer.id,
+        candidateId: selectedOffer.candidateId,
+        candidateName: editFormData.candidateName,
+        candidateEmail: editFormData.candidateEmail,
+        jobTitle: editFormData.jobTitle,
+        salary: editFormData.salary,
+        stipend: editFormData.stipend,
+        joiningDate: editFormData.trainingStartDate,
+        location: editFormData.location,
+        notes: editFormData.notes,
+        sendEmail: sendEmailAfterSave,
+      });
+
+      toast.success(sendEmailAfterSave ? 'Offer updated and re-sent to candidate!' : 'Offer modifications saved!', { id: toastId });
+      setShowEditModal(false);
+      fetchOffersData();
+    } catch (err: any) {
+      toast.error('Failed to update offer letter', { id: toastId });
+    }
+  };
+
+  // 4. Download 4-Page PDF
+  const handleDownloadPdf = async (offer: any) => {
+    setDownloadingId(offer.id);
+    const toastId = toast.loading('Generating 4-Page Adyapan Offer Letter PDF...');
+    try {
+      const res = await axios.post(
+        `${API_BASE}/offers/generate-pdf`,
+        {
+          candidateName: offer.candidateName,
+          jobTitle: offer.jobTitle,
+          stipend: offer.stipend || (offer.salary ? `INR ${offer.salary}/- Per Month` : 'INR 20,000/- Per Month'),
+          location: offer.location || 'Hyderabad',
+          trainingStartDate: offer.trainingStartDate || offer.joiningDate,
+        },
+        { responseType: 'blob' }
+      );
+
+      const blob = new Blob([res.data], { type: 'application/pdf' });
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `${offer.candidateName.replace(/\s+/g, '_')}_Official_Offer_Letter.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+      toast.success('Offer Letter downloaded successfully!', { id: toastId });
+    } catch (err) {
+      toast.error('Failed to download PDF offer letter.', { id: toastId });
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
+  // 5. Create Offer
+  const handleCreateOfferSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!offerFormData.applicationId) {
+      toast.error('Please select an eligible candidate');
+      return;
+    }
+
+    const app = eligibleApplications.find((a) => a.id === offerFormData.applicationId);
+    const toastId = toast.loading('Generating Offer Letter and dispatching email...');
+
+    try {
+      await offerService.createOffer({
+        applicationId: app.id,
+        candidateId: app.candidateId,
+        candidateName: `${app.candidate?.firstName} ${app.candidate?.lastName}`,
+        candidateEmail: app.candidate?.email,
+        jobTitle: app.job?.title || 'Business Development Associate',
+        salary: offerFormData.salary,
+        stipend: offerFormData.stipend,
+        joiningDate: offerFormData.trainingStartDate,
+        location: offerFormData.location,
+        notes: offerFormData.notes,
+        sendEmail: true,
+      });
+
+      toast.success(`Offer Letter email dispatched to ${app.candidate?.email}!`, { id: toastId });
       setShowAddModal(false);
-      fetchOffers();
+      fetchOffersData();
     } catch (err: any) {
-      console.error('Error creating offer:', err);
-      toast.error(err.response?.data?.message || 'Failed to create offer letter');
+      toast.error(err?.response?.data?.message || 'Failed to dispatch offer', { id: toastId });
     }
   };
 
-  const getCleanTermsDisplay = (terms) => {
-    if (!terms) return null;
-    if (typeof terms === 'object' && terms !== null) {
-      if (terms.customTermsText && typeof terms.customTermsText === 'string' && !terms.customTermsText.startsWith('{')) {
-        return terms.customTermsText;
-      }
-      if (terms.notes && typeof terms.notes === 'string' && !terms.notes.startsWith('{')) {
-        return terms.notes;
-      }
-      if (terms.customTerms && typeof terms.customTerms === 'string' && !terms.customTerms.startsWith('{')) {
-        return terms.customTerms;
-      }
-      return null;
-    }
-    if (typeof terms === 'string') {
-      const trimmed = terms.trim();
-      if (trimmed.startsWith('{') || trimmed.startsWith('[') || trimmed.includes('"olPrefix"') || trimmed.includes('"olNo"')) {
-        return null; // Hide system PDF JSON metadata completely
-      }
-      if (trimmed.length > 0 && !trimmed.toLowerCase().includes('standard adyapan')) {
-        return trimmed;
-      }
-    }
-    return null;
-  };
+  const totalOffers = offers.length;
+  const acceptedOffers = offers.filter((o) => o.status === 'ACCEPTED').length;
+  const pendingOffers = offers.filter((o) => o.status === 'SENT' || o.status === 'PENDING' || o.status === 'READY_TO_SEND').length;
 
-  const formatDisplaySalary = (sal, stipend) => {
-    if (stipend) return stipend;
-    if (typeof sal === 'number' && sal > 0) return `₹${sal.toLocaleString()}`;
-    if (typeof sal === 'string' && sal.length > 0) return sal;
-    return 'INR 20000/-PerMonth';
-  };
+  const filteredOffers = offers.filter((off) => {
+    const q = search.toLowerCase();
+    const candName = (off.candidateName || '').toLowerCase();
+    const candEmail = (off.candidateEmail || '').toLowerCase();
+    const jobTitle = (off.jobTitle || '').toLowerCase();
+    const matchesSearch = !q || candName.includes(q) || candEmail.includes(q) || jobTitle.includes(q);
 
-  const handleSaveEditedOffer = async (e) => {
-    e.preventDefault();
-    if (!editingOffer) return;
+    const matchesStatus = statusFilter === 'ALL' || off.status === statusFilter;
 
-    const offerToSave = {
-      ...editingOffer,
-      salary: parseFloat(editingOffer.salary) || 0,
-      bonus: parseFloat(editingOffer.bonus) || 0,
-      benefits: editingOffer.benefitsText ? editingOffer.benefitsText.split(',').map((b) => b.trim()) : editingOffer.benefits,
-    };
-
-    try {
-      if (editingOffer.id) {
-        await offerService.updateOffer(editingOffer.id, offerToSave);
-      }
-      toast.success(`Offer Letter for ${editingOffer.candidateName} updated in database!`);
-      fetchOffers();
-    } catch (err: any) {
-      console.error('Error updating offer:', err);
-      toast.error('Failed to update offer');
-    }
-
-    if (viewingPdfOffer && (viewingPdfOffer.id === editingOffer.id || viewingPdfOffer.email === editingOffer.email)) {
-      handleViewOfferPdf(offerToSave);
-    }
-
-    setEditingOffer(null);
-  };
-
+    return matchesSearch && matchesStatus;
+  });
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        {/* Header Bar */}
-        <div className={`p-6 rounded-3xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden shadow-sm ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
-          }`}>
-
-          <div className="space-y-1.5 pt-1">
-            <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-              Adyapan Offer Letter Management
-            </div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Offer Letters & Hired Candidates
-            </h1>
-            <p className="text-xs text-slate-600 dark:text-slate-300 font-normal">
-              Manage hired candidates, edit salary terms, upload official company offer letter templates, and dispatch offer letters.
-            </p>
-          </div>
-        </div>
-
-        {/* Global Company Offer Letter Template Header Banner */}
-        <div className={`p-6 rounded-3xl border shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
-          }`}>
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 text-xl flex items-center justify-center border border-amber-500/30 shadow-sm shrink-0">
-            </div>
+      <div className="space-y-6 animate-fadeIn">
+        {/* Top Header Banner */}
+        <div className="p-6 sm:p-8 rounded-3xl bg-white border border-orange-200 shadow-sm relative overflow-hidden">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm font-bold">Active Global Company Offer Letter Template</h2>
-                <span className="px-2.5 py-0.5 text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-full border border-slate-200 dark:border-slate-700">
-                  Active
-                </span>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-orange-50 border border-orange-200 text-orange-800 text-xs font-bold uppercase tracking-wider mb-2">
+                <Award className="w-3.5 h-3.5 text-orange-600" />
+                {isHR ? 'My Candidate Offer Letters' : 'Official Offer Letters Management'}
               </div>
-              <p className="text-xs font-normal text-slate-600 dark:text-slate-300 mt-0.5">
-                Uploaded File: <strong className="text-amber-600 dark:text-amber-400 font-bold">{companyTemplate}</strong>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+                Offer Letter & Onboarding Center
+              </h1>
+              <p className="text-slate-500 text-sm mt-1">
+                View, edit, generate 4-page official PDFs, and dispatch secure email offers with 1-click acceptance.
               </p>
             </div>
-          </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
-            <button
-              onClick={handleViewTemplate}
-              className={`px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all flex items-center gap-1.5 ${theme === 'dark' ? 'bg-slate-950 text-slate-200 border-slate-800' : 'bg-slate-100 text-slate-700 border-slate-200'
-                }`}
-              title="Click to view or download the active global company offer letter template"
-            >
-              View / Download Active Template
-            </button>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs transition-all shadow-md shadow-orange-500/25"
+              >
+                <Plus className="w-4 h-4" /> Issue Offer Letter
+              </button>
 
-            <label className="cursor-pointer px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all flex items-center gap-1.5">
-              Upload / Replace Template (PDF/DOCX)
-              <input
-                type="file"
-                accept=".pdf,.docx,.doc"
-                onChange={handleTemplateUpload}
-                className="hidden"
-              />
-            </label>
+              <button
+                onClick={fetchOffersData}
+                className="p-2.5 rounded-xl bg-white hover:bg-orange-50 text-slate-700 transition-all border border-orange-200"
+                title="Refresh"
+              >
+                <RefreshCw className="w-4 h-4 text-orange-600" />
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Candidates Offer Cards List with Clean Layout & Corner Options Button */}
-        <div className="space-y-4 max-h-[780px] overflow-y-auto p-1 pr-3 custom-scrollbar">
-          {offers.map((offer) => {
-            const isMenuOpen = activeDropdownId === offer.id;
-            const candidateProfilePath = offer.candidateId ? `/candidates/${offer.candidateId}` : `/offers/${offer.id}`;
+        {/* Offer KPI Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="p-5 rounded-2xl bg-white border border-orange-200 shadow-sm">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Total Offers Issued</span>
+            <p className="text-2xl font-black text-slate-900 mt-1">{totalOffers}</p>
+          </div>
 
-            return (
-              <div
-                key={offer.id}
-                className={`p-6 rounded-3xl border shadow-sm hover:shadow-md transition-all flex flex-col gap-3 relative overflow-visible ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
-                  }`}
-              >
-                {/* Header Row: Badges & Name + Options Button */}
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 relative">
-                  {/* Left Column: Badges & Candidate Name */}
-                  <div className="space-y-1.5 flex-1 min-w-0">
-                    {/* Status Badges Row */}
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="px-3 py-0.5 text-xs font-semibold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                        ● {offer.jobTitle || 'Student / Fresher'}
-                      </span>
+          <div className="p-5 rounded-2xl bg-white border border-orange-200 shadow-sm">
+            <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider block">Offers Accepted (Hired)</span>
+            <p className="text-2xl font-black text-emerald-600 mt-1">{acceptedOffers}</p>
+          </div>
 
-                      <span className="px-3 py-0.5 text-xs font-bold rounded-full bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
-                        Base: {formatDisplaySalary(offer.salary, offer.stipend)}
-                      </span>
+          <div className="p-5 rounded-2xl bg-white border border-orange-200 shadow-sm">
+            <span className="text-[11px] font-bold text-orange-600 uppercase tracking-wider block">Awaiting Candidate Acceptance</span>
+            <p className="text-2xl font-black text-orange-600 mt-1">{pendingOffers}</p>
+          </div>
+        </div>
 
-                      <span className="px-3 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-900 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-300 dark:border-blue-800">
-                        ● Status: {offer.status}
-                      </span>
-                    </div>
+        {/* Filter Toolbar */}
+        <div className="p-4 rounded-2xl bg-white border border-orange-200 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm">
+          <div className="relative w-full sm:w-80">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search candidate name, role, email..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 rounded-xl bg-orange-50/30 border border-orange-200 text-slate-900 text-xs placeholder:text-slate-400 focus:border-orange-500 outline-none"
+            />
+          </div>
 
-                    {/* Candidate Name (Clickable) & Email */}
-                    <div className="flex flex-wrap items-center gap-2.5 pt-0.5">
-                      <Link
-                        to={candidateProfilePath}
-                        className="text-xl font-bold text-slate-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 transition-colors cursor-pointer tracking-tight"
-                        title="Click to view full candidate details and profile"
-                      >
-                        {offer.candidateName}
-                      </Link>
-                      <span className="text-xs font-normal text-slate-500 dark:text-slate-400">
-                        ({offer.email || offer.candidateEmail || 'candidate@example.com'})
-                      </span>
-                    </div>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-3.5 py-2 rounded-xl bg-white border border-orange-200 text-slate-700 text-xs font-semibold focus:border-orange-500 outline-none"
+          >
+            <option value="ALL">All Statuses</option>
+            <option value="ACCEPTED">Accepted (Hired)</option>
+            <option value="SENT">Sent to Candidate</option>
+            <option value="PENDING">Pending</option>
+          </select>
+        </div>
+
+        {/* Offers Table with View, Edit, Send Offer actions */}
+        <div className="bg-white border border-orange-200 rounded-3xl overflow-hidden shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-orange-50/50 border-b border-orange-100 text-slate-600 font-bold uppercase tracking-wider">
+                  <th className="py-4 px-5">Candidate</th>
+                  <th className="py-4 px-5">Role</th>
+                  <th className="py-4 px-5">Compensation</th>
+                  <th className="py-4 px-5">Joining Date</th>
+                  <th className="py-4 px-5">Acceptance Status</th>
+                  <th className="py-4 px-5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {loading ? (
+                  <tr>
+                    <td colSpan={6} className="py-16 text-center text-slate-400">
+                      <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                      Loading offer letters...
+                    </td>
+                  </tr>
+                ) : filteredOffers.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-16 text-center text-slate-400 font-medium">
+                      No offer letters found matching your criteria.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredOffers.map((off) => (
+                    <tr key={off.id} className="hover:bg-orange-50/30 transition-colors">
+                      <td className="py-4 px-5">
+                        <p className="font-bold text-slate-900 text-sm">{off.candidateName}</p>
+                        <span className="text-[11px] text-slate-400 font-mono">{off.candidateEmail}</span>
+                      </td>
+
+                      <td className="py-4 px-5">
+                        <span className="font-bold text-slate-800 block">{off.jobTitle}</span>
+                        <span className="text-[11px] text-slate-500">{off.location || 'Hyderabad'}</span>
+                      </td>
+
+                      <td className="py-4 px-5">
+                        <span className="font-bold text-orange-700 text-xs">
+                          {off.stipend || (off.salary ? `INR ${off.salary}/- Per Month` : 'INR 20,000/- Per Month')}
+                        </span>
+                      </td>
+
+                      <td className="py-4 px-5">
+                        <div className="flex items-center gap-1.5 text-slate-700">
+                          <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                          <span>{new Date(off.trainingStartDate || off.joiningDate).toLocaleDateString()}</span>
+                        </div>
+                      </td>
+
+                      <td className="py-4 px-5">
+                        {off.status === 'ACCEPTED' ? (
+                          <div>
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                              Accepted & Confirmed
+                            </span>
+                            {off.acceptedAt && (
+                              <span className="text-[10px] text-slate-400 block mt-0.5 pl-1">
+                                On {new Date(off.acceptedAt).toLocaleDateString()}
+                              </span>
+                            )}
+                          </div>
+                        ) : off.status === 'SENT' ? (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                            Sent • Awaiting Response
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                            <Clock className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                            Draft • Ready to Send
+                          </span>
+                        )}
+                      </td>
+
+                      <td className="py-4 px-5 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {/* Send / Already Sent (Resend) / Accepted */}
+                          {off.status === 'ACCEPTED' ? (
+                            <span className="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 font-bold text-xs inline-flex items-center gap-1.5 border border-emerald-200">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                              Hired
+                            </span>
+                          ) : off.status === 'SENT' ? (
+                            <button
+                              onClick={() => handleSendOfferEmail(off)}
+                              disabled={sendingId === off.id}
+                              className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-xs inline-flex items-center gap-1.5 transition-all shadow-2xs disabled:opacity-50"
+                              title="Offer was already sent. Click to re-dispatch email"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>{sendingId === off.id ? 'Sending...' : 'Already Sent (Resend)'}</span>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleSendOfferEmail(off)}
+                              disabled={sendingId === off.id}
+                              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs inline-flex items-center gap-1.5 transition-all shadow-sm shadow-orange-500/25 disabled:opacity-50"
+                              title="Send Official Offer Letter Email to Candidate"
+                            >
+                              <Send className="w-3.5 h-3.5" />
+                              <span>{sendingId === off.id ? 'Sending...' : 'Send Offer'}</span>
+                            </button>
+                          )}
+
+                          {/* View Offer Button */}
+                          <button
+                            onClick={() => handleOpenViewModal(off)}
+                            className="p-2 rounded-xl bg-white hover:bg-orange-50 text-slate-700 hover:text-orange-700 border border-orange-200 transition-all shadow-2xs"
+                            title="View Offer Letter Details"
+                          >
+                            <Eye className="w-3.5 h-3.5 text-orange-600" />
+                          </button>
+
+                          {/* Edit Offer Button */}
+                          <button
+                            onClick={() => handleOpenEditModal(off)}
+                            className="p-2 rounded-xl bg-white hover:bg-orange-50 text-slate-700 hover:text-orange-700 border border-orange-200 transition-all shadow-2xs"
+                            title="Edit Offer Letter Terms"
+                          >
+                            <Edit3 className="w-3.5 h-3.5 text-slate-700" />
+                          </button>
+
+                          {/* Download PDF Button */}
+                          <button
+                            onClick={() => handleDownloadPdf(off)}
+                            disabled={downloadingId === off.id}
+                            className="p-2 rounded-xl bg-white hover:bg-orange-50 text-slate-700 hover:text-orange-700 border border-orange-200 transition-all shadow-2xs disabled:opacity-50"
+                            title="Download 4-Page PDF"
+                          >
+                            <Download className="w-3.5 h-3.5 text-slate-600" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* 1. VIEW OFFER MODAL */}
+        {showViewModal && selectedOffer && (
+          <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+            <div className="max-w-2xl w-full bg-white border border-orange-200 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto space-y-6">
+              <div className="flex items-center justify-between border-b border-orange-100 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white font-black text-lg flex items-center justify-center shadow-sm">
+                    A
                   </div>
-
-                  {/* Right Column: Single Options Button & Floating Dropdown */}
-                  <div className="relative shrink-0 z-30">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setActiveDropdownId(isMenuOpen ? null : offer.id);
-                      }}
-                      className={`px-3 py-1 text-xs font-bold rounded-xl border transition-all flex items-center gap-1.5 shadow-sm cursor-pointer ${isMenuOpen
-                        ? 'bg-amber-500 text-slate-950 border-amber-600'
-                        : theme === 'dark'
-                          ? 'bg-slate-950 text-slate-200 border-slate-800 hover:border-amber-400'
-                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                        }`}
-                    >
-                      <span>Options</span>
-                      <svg className={`w-3 h-3 transition-transform duration-200 ${isMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-
-                    {/* Floating Options Dropdown Menu */}
-                    {isMenuOpen && (
-                      <div
-                        onClick={(e) => e.stopPropagation()}
-                        className={`absolute right-0 top-full mt-1 w-48 rounded-2xl shadow-xl border p-1 z-50 space-y-0.5 animate-in fade-in zoom-in-95 duration-150 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
-                          }`}
-                      >
-                        <Link
-                          to={candidateProfilePath}
-                          onClick={() => setActiveDropdownId(null)}
-                          className="w-full text-left px-2.5 py-1.5 text-xs font-semibold rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-2 block"
-                        >
-                          <span>👤 View Candidate Profile</span>
-                        </Link>
-
-                        <button
-                          onClick={() => {
-                            setActiveDropdownId(null);
-                            setSelectedCandidateForAdyapan(offer);
-                            setShowAdyapanModal(true);
-                          }}
-                          className="w-full text-left px-2.5 py-1.5 text-xs font-bold rounded-lg text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/50 transition-colors flex items-center gap-2 cursor-pointer"
-                        >
-                          <span>📄 View / Edit Offer PDF</span>
-                        </button>
-
-                        {offer.status !== 'REJECTED' && (
-                          <button
-                            onClick={() => {
-                              setActiveDropdownId(null);
-                              handleSendEmail(offer);
-                            }}
-                            className="w-full text-left px-2.5 py-1.5 text-xs font-semibold rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors flex items-center gap-2 cursor-pointer"
-                          >
-                            <span>✉️ Send Offer Email</span>
-                          </button>
-                        )}
-
-                        {offer.status !== 'REJECTED' && (
-                          <button
-                            onClick={() => {
-                              setActiveDropdownId(null);
-                              handleRejectCandidate(offer);
-                            }}
-                            className="w-full text-left px-2.5 py-1.5 text-xs font-semibold rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors flex items-center gap-2 cursor-pointer"
-                          >
-                            <span>❌ Reject Offer</span>
-                          </button>
-                        )}
-
-                        <div className="my-0.5 border-t border-slate-100 dark:border-slate-800" />
-
-                        <button
-                          onClick={() => {
-                            setActiveDropdownId(null);
-                            handleDeleteOffer(offer);
-                          }}
-                          className="w-full text-left px-2.5 py-1.5 text-xs font-semibold rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors flex items-center gap-2 cursor-pointer"
-                        >
-                          <span>🗑️ Delete Offer</span>
-                        </button>
-                      </div>
-                    )}
+                  <div>
+                    <h3 className="text-lg font-extrabold text-slate-900">Official Employment Offer Letter</h3>
+                    <p className="text-xs text-orange-600 font-bold">SR's Adyapan Edutech Pvt. Ltd.</p>
                   </div>
                 </div>
 
-                {/* Metadata Body Text Lines */}
-                <div className="space-y-1.5 text-xs pt-1">
-                  {/* Line 1: Role Offered, Interview Conducted Date & Target Joining Date */}
-                  <div className="font-medium text-slate-700 dark:text-slate-300 flex flex-wrap items-center gap-2">
-                    <span><strong className="font-bold text-slate-900 dark:text-white">Role Offered:</strong> {offer.jobTitle || 'Student / Fresher'}</span>
-                    <span>•</span>
-                    <span><strong className="font-bold text-slate-900 dark:text-white">Interview Conducted Date:</strong> {offer.interviewDate || offer.createdAt ? new Date(offer.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '14 Aug 2026'} (Cleared)</span>
-                    <span>•</span>
-                    <span><strong className="font-bold text-slate-900 dark:text-white">Joining Date:</strong> {offer.trainingStartDate || offer.joiningDate || '2026-08-28'}</span>
+                <button
+                  onClick={() => setShowViewModal(false)}
+                  className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 transition-all"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Offer Letter Body Preview */}
+              <div className="p-6 rounded-2xl bg-orange-50/30 border border-orange-100 space-y-4 text-xs text-slate-700 leading-relaxed">
+                <div className="grid grid-cols-2 gap-4 pb-4 border-b border-orange-200/60">
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Candidate Name</span>
+                    <p className="text-sm font-extrabold text-slate-900">{selectedOffer.candidateName}</p>
+                    <p className="text-[11px] text-slate-500">{selectedOffer.candidateEmail}</p>
                   </div>
 
-                  {/* Line 2: Location, Education & Training/Probation Details */}
-                  <div className="text-slate-600 dark:text-slate-400 flex flex-wrap items-center gap-2">
-                    <span><strong className="font-semibold text-slate-800 dark:text-slate-200">Location:</strong> {offer.location || 'HYDERABAD / Remote'}</span>
-                    <span>•</span>
-                    <span><strong className="font-semibold text-slate-800 dark:text-slate-200">Education:</strong> {offer.degree || offer.education || 'MBA (EdTech & Sales)'}</span>
-                    <span>•</span>
-                    <span><strong className="font-semibold text-slate-800 dark:text-slate-200">Training & Probation:</strong> {offer.duration || '6 MONTHS'} ({offer.jobType || 'Full Time'})</span>
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Designation</span>
+                    <p className="text-sm font-extrabold text-slate-900">{selectedOffer.jobTitle}</p>
+                    <p className="text-[11px] text-slate-500">{selectedOffer.location || 'Hyderabad'}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 pb-4 border-b border-orange-200/60">
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Compensation / Stipend</span>
+                    <p className="text-sm font-extrabold text-orange-800">
+                      {selectedOffer.stipend || (selectedOffer.salary ? `INR ${selectedOffer.salary}/- Per Month` : 'INR 20,000/- Per Month')}
+                    </p>
                   </div>
 
-                  {/* Line 3: Perks / Benefits Pills */}
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {(offer.benefits || ['Health Insurance', 'Performance Incentives', 'Learning Allowance']).map((b) => (
-                      <span
-                        key={b}
-                        className="px-2.5 py-0.5 text-xs font-normal rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
-                      >
-                        {b}
-                      </span>
-                    ))}
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Date of Joining / Training</span>
+                    <p className="text-sm font-extrabold text-slate-900">
+                      {new Date(selectedOffer.trainingStartDate || selectedOffer.joiningDate).toLocaleDateString()}
+                    </p>
                   </div>
+                </div>
 
-                  {/* Line 4 & 5: Candidate Dynamic Positive Strengths & Key Recommendation (2 Lines) */}
-                  {(() => {
-                    const skillsList = Array.isArray(offer.skills) ? offer.skills : (typeof offer.skills === 'string' ? offer.skills.split(',').map((s: string) => s.trim()).filter(Boolean) : []);
-                    const exp = Number(offer.totalExperience || offer.experience || 0);
-                    const pos = (offer.jobTitle || offer.currentPosition || '').toLowerCase();
-                    const company = offer.company || offer.currentCompany ? (offer.company || offer.currentCompany).trim() : '';
-                    const isFresher = exp === 0 || pos.includes('student') || pos.includes('fresher');
-                    const score = parseInt(offer.aiScore) || 88;
-                    const candName = offer.candidateName?.split(' ')[0] || 'Candidate';
+                <div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Key Offer Terms & Conditions</span>
+                  <p className="text-xs text-slate-600 bg-white p-3.5 rounded-xl border border-orange-100">
+                    {selectedOffer.notes || '6-Month Structured Training followed by full-time absorption based on target KPIs. Comprehensive medical insurance and performance incentives included.'}
+                  </p>
+                </div>
 
-                    const pills = [];
-                    if (score >= 85) pills.push(`Top ${score}% AI Score`);
-                    else if (score >= 70) pills.push(`Verified ${score}% Skill Fit`);
-                    else pills.push(`Evaluated ${score}% Match`);
-
-                    if (skillsList.length > 0) {
-                      pills.push(`Expert in ${skillsList.slice(0, 2).join(' & ')}`);
-                    } else if (isFresher) {
-                      pills.push('Quick Learner & Student Pitching');
-                    } else {
-                      pills.push('Established Client Relations');
-                    }
-
-                    if (!isFresher && exp > 0) {
-                      pills.push(`${exp} Year${exp > 1 ? 's' : ''} Exp`);
-                    } else if (company) {
-                      pills.push(`Background at ${company}`);
-                    } else {
-                      pills.push('High Growth Motivation');
-                    }
-
-                    let recommendation = '';
-                    if (isFresher) {
-                      const skillFocus = skillsList.slice(0, 2).join(' and ') || 'student counselling & communication';
-                      recommendation = `${candName} demonstrated high aptitude in ${skillFocus}. Selected and recommended for onboarding.`;
-                    } else if (exp >= 3) {
-                      recommendation = `${candName} brings ${exp} years of proven sales experience${company ? ` at ${company}` : ''}. Cleared executive rounds and recommended for senior placement.`;
-                    } else {
-                      const mainSkill = skillsList[0] || 'sales pitch & counselling';
-                      recommendation = `${candName} verified hands-on expertise in ${mainSkill}. Successfully cleared all interview rounds and approved for offer.`;
-                    }
-
-                    return (
-                      <div className="space-y-1 pt-2 border-t border-slate-100 dark:border-slate-800/80 mt-1">
-                        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200">
-                          <span>● Candidate Positive Strengths:</span>
-                          {pills.slice(0, 2).map((pill, pIdx) => (
-                            <span key={pIdx} className="px-2.5 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-medium text-slate-700 dark:text-slate-300">
-                              {pill}
-                            </span>
-                          ))}
-                        </div>
-                        <p className="text-xs text-slate-600 dark:text-slate-300 font-normal leading-relaxed">
-                          <strong className="font-semibold text-slate-800 dark:text-slate-200">Key Recommendation:</strong> {recommendation}
-                        </p>
-                      </div>
-                    );
-                  })()}
-
-                  {/* Line 4: Recruiter Note & Evaluation Callout Box */}
-                  {getCleanTermsDisplay(offer.customTerms) && (
-                    <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 mt-2">
-                      <span className="font-bold text-slate-900 dark:text-white mr-1.5">Recruiter Note & Evaluation:</span>
-                      {getCleanTermsDisplay(offer.customTerms)}
-                    </div>
+                <div className="flex items-center justify-between pt-2">
+                  <span className="text-[11px] font-semibold text-slate-500">
+                    Acceptance Status: <strong className="text-orange-700">{selectedOffer.status}</strong>
+                  </span>
+                  {selectedOffer.acceptedAt && (
+                    <span className="text-[11px] text-emerald-600 font-bold">
+                      Accepted On: {new Date(selectedOffer.acceptedAt).toLocaleString()}
+                    </span>
                   )}
                 </div>
               </div>
-            );
-          })}
-        </div>
-      </div>
 
-      {/* Add Offer Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className={`rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl border ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
-            }`}>
-            <h2 className="text-base font-bold border-b border-slate-100 dark:border-slate-800 pb-3">Create New Candidate Offer Letter</h2>
-            <form onSubmit={handleAddOffer} className="space-y-3 text-xs font-medium">
-              <div>
-                <label className="block mb-1 font-semibold">Candidate Name *</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.candidateName}
-                  onChange={(e) => setFormData({ ...formData, candidateName: e.target.value })}
-                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                    }`}
-                />
-              </div>
-
-              <div>
-                <label className="block mb-1 font-semibold">Candidate Email Address *</label>
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="rahul.s@example.com"
-                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                    }`}
-                />
-              </div>
-
-              <div>
-                <label className="block mb-1 font-semibold">Job Role Title *</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.jobTitle}
-                  onChange={(e) => setFormData({ ...formData, jobTitle: e.target.value })}
-                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                    }`}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block mb-1 font-semibold">Fixed Base Salary (₹) *</label>
-                  <input
-                    type="number"
-                    required
-                    value={formData.salary}
-                    onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
-                    className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                      }`}
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1 font-semibold">Variable Bonus (₹)</label>
-                  <input
-                    type="number"
-                    value={formData.bonus}
-                    onChange={(e) => setFormData({ ...formData, bonus: e.target.value })}
-                    className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                      }`}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block mb-1 font-semibold">Benefits (comma-separated)</label>
-                <input
-                  type="text"
-                  value={formData.benefits}
-                  onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
-                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                    }`}
-                />
-              </div>
-
-              <div>
-                <label className="block mb-1 font-semibold">Custom Terms / Probation Rules</label>
-                <textarea
-                  rows={2}
-                  value={formData.customTerms}
-                  onChange={(e) => setFormData({ ...formData, customTerms: e.target.value })}
-                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                    }`}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block mb-1 font-semibold">Joining Date *</label>
-                  <input
-                    type="date"
-                    required
-                    value={formData.joiningDate}
-                    onChange={(e) => setFormData({ ...formData, joiningDate: e.target.value })}
-                    className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                      }`}
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1 font-semibold">Expiration Date *</label>
-                  <input
-                    type="date"
-                    required
-                    value={formData.expirationDate}
-                    onChange={(e) => setFormData({ ...formData, expirationDate: e.target.value })}
-                    className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                      }`}
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <button type="submit" className="flex-1 py-2.5 font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm">
-                  Approve & Create Offer
-                </button>
+              {/* Modal Footer Actions */}
+              <div className="flex items-center justify-between pt-2">
                 <button
-                  type="button"
+                  onClick={() => handleDownloadPdf(selectedOffer)}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-orange-50 text-slate-800 font-bold text-xs border border-orange-200 transition-all shadow-sm"
+                >
+                  <Download className="w-3.5 h-3.5 text-orange-600" />
+                  Download 4-Page PDF
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      setShowViewModal(false);
+                      handleOpenEditModal(selectedOffer);
+                    }}
+                    className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all"
+                  >
+                    Edit Terms
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setShowViewModal(false);
+                      handleSendOfferEmail(selectedOffer);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-extrabold text-xs shadow-md shadow-orange-500/25"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    Dispatch Offer Email
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 2. EDIT OFFER MODAL */}
+        {showEditModal && (
+          <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+            <div className="max-w-md w-full bg-white border border-orange-200 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto space-y-5">
+              <div className="flex items-center justify-between border-b border-orange-100 pb-3">
+                <div>
+                  <h3 className="text-xl font-extrabold text-slate-900">Edit Offer Letter</h3>
+                  <p className="text-xs text-slate-500">Candidate: <strong className="text-orange-600">{editFormData.candidateName}</strong></p>
+                </div>
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 transition-all"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <form onSubmit={(e) => handleEditSubmit(e, false)} className="space-y-4 text-xs">
+                <div>
+                  <label className="text-slate-600 font-semibold uppercase">Job Title / Designation</label>
+                  <input
+                    type="text"
+                    required
+                    value={editFormData.jobTitle}
+                    onChange={(e) => setEditFormData({ ...editFormData, jobTitle: e.target.value })}
+                    className="mt-1 w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium outline-none focus:border-orange-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-slate-600 font-semibold uppercase">Stipend / CTC Terms</label>
+                  <input
+                    type="text"
+                    required
+                    value={editFormData.stipend}
+                    onChange={(e) => setEditFormData({ ...editFormData, stipend: e.target.value })}
+                    className="mt-1 w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium outline-none focus:border-orange-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-slate-600 font-semibold uppercase">Date of Joining / Training</label>
+                  <input
+                    type="date"
+                    required
+                    value={editFormData.trainingStartDate}
+                    onChange={(e) => setEditFormData({ ...editFormData, trainingStartDate: e.target.value })}
+                    className="mt-1 w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium outline-none focus:border-orange-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-slate-600 font-semibold uppercase">Work Location</label>
+                  <input
+                    type="text"
+                    required
+                    value={editFormData.location}
+                    onChange={(e) => setEditFormData({ ...editFormData, location: e.target.value })}
+                    className="mt-1 w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium outline-none focus:border-orange-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-slate-600 font-semibold uppercase">Terms & Notes</label>
+                  <textarea
+                    rows={3}
+                    value={editFormData.notes}
+                    onChange={(e) => setEditFormData({ ...editFormData, notes: e.target.value })}
+                    className="mt-1 w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 outline-none focus:border-orange-500"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setShowEditModal(false)}
+                    className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold"
+                  >
+                    Cancel
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="submit"
+                      className="px-4 py-2.5 rounded-xl bg-white hover:bg-orange-50 border border-orange-200 text-orange-800 font-bold text-xs transition-all shadow-2xs"
+                    >
+                      Save Only
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={(e) => handleEditSubmit(e, true)}
+                      className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-extrabold text-xs shadow-md shadow-orange-500/25"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      Save & Send
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* 3. ISSUE NEW OFFER MODAL */}
+        {showAddModal && (
+          <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+            <div className="max-w-md w-full bg-white border border-orange-200 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4">
+              <div className="flex items-center justify-between border-b border-orange-100 pb-3">
+                <h3 className="text-xl font-extrabold text-slate-900">Issue Official Offer Letter</h3>
+                <button
                   onClick={() => setShowAddModal(false)}
-                  className={`flex-1 py-2.5 font-medium rounded-xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
-                    }`}
+                  className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 transition-all"
                 >
-                  Cancel
+                  <X className="w-4 h-4" />
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
 
-      {/* Edit Offer Letter Modal */}
-      {editingOffer && (
-        <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className={`rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl border ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
-            }`}>
-            <h2 className="text-base font-bold border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">
-              <span>Edit Offer Letter for {editingOffer.candidateName}</span>
-              <button onClick={() => setEditingOffer(null)} className="text-slate-400 hover:text-slate-600"></button>
-            </h2>
-
-            <form onSubmit={handleSaveEditedOffer} className="space-y-3 text-xs font-medium">
-              <div>
-                <label className="block mb-1 font-semibold">Candidate Name</label>
-                <input
-                  type="text"
-                  required
-                  value={editingOffer.candidateName}
-                  onChange={(e) => setEditingOffer({ ...editingOffer, candidateName: e.target.value })}
-                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                    }`}
-                />
-              </div>
-
-              <div>
-                <label className="block mb-1 font-semibold">Candidate Email Address</label>
-                <input
-                  type="email"
-                  required
-                  value={editingOffer.email}
-                  onChange={(e) => setEditingOffer({ ...editingOffer, email: e.target.value })}
-                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                    }`}
-                />
-              </div>
-
-              <div>
-                <label className="block mb-1 font-semibold">Job Role Title</label>
-                <input
-                  type="text"
-                  required
-                  value={editingOffer.jobTitle}
-                  onChange={(e) => setEditingOffer({ ...editingOffer, jobTitle: e.target.value })}
-                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                    }`}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
+              <form onSubmit={handleCreateOfferSubmit} className="space-y-4 text-xs">
                 <div>
-                  <label className="block mb-1 font-semibold">Fixed Base Salary (₹)</label>
+                  <label className="text-slate-600 font-semibold uppercase">Candidate</label>
+                  <select
+                    value={offerFormData.applicationId}
+                    onChange={(e) => setOfferFormData({ ...offerFormData, applicationId: e.target.value })}
+                    className="mt-1 w-full px-3.5 py-2.5 rounded-xl bg-orange-50/40 border border-orange-200 text-slate-900 font-bold outline-none focus:border-orange-500"
+                  >
+                    <option value="">-- Select Candidate --</option>
+                    {eligibleApplications.map((app) => (
+                      <option key={app.id} value={app.id}>
+                        {app.candidate?.firstName} {app.candidate?.lastName} ({app.job?.title})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-slate-600 font-semibold uppercase">Stipend / CTC Terms</label>
                   <input
-                    type="number"
-                    required
-                    value={editingOffer.salary}
-                    onChange={(e) => setEditingOffer({ ...editingOffer, salary: e.target.value })}
-                    className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                      }`}
+                    type="text"
+                    value={offerFormData.stipend}
+                    onChange={(e) => setOfferFormData({ ...offerFormData, stipend: e.target.value })}
+                    className="mt-1 w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium outline-none focus:border-orange-500"
                   />
                 </div>
+
                 <div>
-                  <label className="block mb-1 font-semibold">Variable Bonus (₹)</label>
-                  <input
-                    type="number"
-                    value={editingOffer.bonus}
-                    onChange={(e) => setEditingOffer({ ...editingOffer, bonus: e.target.value })}
-                    className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                      }`}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block mb-1 font-semibold">Benefits (comma-separated)</label>
-                <input
-                  type="text"
-                  value={editingOffer.benefitsText}
-                  onChange={(e) => setEditingOffer({ ...editingOffer, benefitsText: e.target.value })}
-                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                    }`}
-                />
-              </div>
-
-              <div>
-                <label className="block mb-1 font-semibold">Custom Terms & Conditions</label>
-                <textarea
-                  rows={2}
-                  value={editingOffer.customTerms || ''}
-                  onChange={(e) => setEditingOffer({ ...editingOffer, customTerms: e.target.value })}
-                  className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                    }`}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block mb-1 font-semibold">Joining Date</label>
+                  <label className="text-slate-600 font-semibold uppercase">Joining Date</label>
                   <input
                     type="date"
-                    required
-                    value={editingOffer.joiningDate}
-                    onChange={(e) => setEditingOffer({ ...editingOffer, joiningDate: e.target.value })}
-                    className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                      }`}
+                    value={offerFormData.trainingStartDate}
+                    onChange={(e) => setOfferFormData({ ...offerFormData, trainingStartDate: e.target.value })}
+                    className="mt-1 w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium outline-none focus:border-orange-500"
                   />
                 </div>
+
                 <div>
-                  <label className="block mb-1 font-semibold">Expiration Date</label>
+                  <label className="text-slate-600 font-semibold uppercase">Location</label>
                   <input
-                    type="date"
-                    required
-                    value={editingOffer.expirationDate}
-                    onChange={(e) => setEditingOffer({ ...editingOffer, expirationDate: e.target.value })}
-                    className={`w-full p-2.5 rounded-xl font-medium border ${theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-                      }`}
+                    type="text"
+                    value={offerFormData.location}
+                    onChange={(e) => setOfferFormData({ ...offerFormData, location: e.target.value })}
+                    className="mt-1 w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium outline-none focus:border-orange-500"
                   />
                 </div>
-              </div>
 
-              <div className="flex gap-3 pt-2">
-                <button type="submit" className="flex-1 py-2.5 font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm">
-                  Save Changes
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEditingOffer(null)}
-                  className={`flex-1 py-2.5 font-medium rounded-xl border ${theme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
-                    }`}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Full-screen Candidate PDF Viewer Modal */}
-      {viewingPdfOffer && viewingPdfUrl && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className={`rounded-2xl max-w-5xl w-full h-[90vh] p-6 space-y-4 shadow-2xl border flex flex-col ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
-            }`}>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3 shrink-0">
-              <div>
-                <h2 className="text-base font-bold flex items-center gap-2">
-                  <span>Candidate Official Offer Agreement: {viewingPdfOffer.candidateName}</span>
-                </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                  Active Corporate Template: <strong className="text-indigo-600 dark:text-indigo-400">{companyTemplate}</strong>
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <a
-                  href={viewingPdfUrl}
-                  download={`${viewingPdfOffer.candidateName.replace(/\s+/g, '_')}_Official_Offer_Letter.pdf`}
-                  className="px-3.5 py-1.5 text-xs font-semibold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-all flex items-center gap-1.5"
-                >
-                  Download Copy
-                </a>
-                <button onClick={() => setViewingPdfOffer(null)} className="text-slate-400 hover:text-slate-600 font-bold text-base px-2"></button>
-              </div>
-            </div>
-
-            {/* Candidate Appointment Header Card */}
-            <div className={`p-4 rounded-xl border space-y-2 text-xs font-medium shrink-0 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-100 border-slate-200 text-slate-900'
-              }`}>
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-2">
-                <div>
-                  <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block">Candidate Name</span>
-                  <span className="text-sm font-bold text-slate-900 dark:text-white">{viewingPdfOffer.candidateName}</span>
+                <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddModal(false)}
+                    className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-extrabold shadow-md shadow-orange-500/25"
+                  >
+                    Generate PDF & Dispatch Email
+                  </button>
                 </div>
-                <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Offered Position</span>
-                  <span className="font-bold text-indigo-600 dark:text-indigo-400">{viewingPdfOffer.jobTitle}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Offered Base CTC</span>
-                  <span className="font-bold text-slate-900 dark:text-white">₹{viewingPdfOffer.salary?.toLocaleString()}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Target Joining Date</span>
-                  <span className="font-bold text-slate-800 dark:text-slate-200">{viewingPdfOffer.joiningDate}</span>
-                </div>
-              </div>
-
-              {viewingPdfOffer.customTerms && (
-                <p className="text-slate-700 dark:text-slate-300 italic pt-1">
-                  <strong> Customized Agreement Terms:</strong> {viewingPdfOffer.customTerms}
-                </p>
-              )}
-            </div>
-
-            {/* Embedded Active Company Offer Template PDF */}
-            <div className="flex-1 w-full h-full rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 shadow-inner">
-              <iframe
-                src={viewingPdfUrl}
-                className="w-full h-full rounded-xl"
-                title={`Candidate PDF Offer Letter Preview - ${viewingPdfOffer.candidateName}`}
-              />
+              </form>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Adyapan Official 4-Page Offer Letter Generator Modal */}
-      <AdyapanOfferGeneratorModal
-        isOpen={showAdyapanModal}
-        onClose={() => setShowAdyapanModal(false)}
-        initialCandidate={selectedCandidateForAdyapan}
-        onOfferSaved={fetchOffers}
-      />
+        )}
+      </div>
     </DashboardLayout>
   );
 };

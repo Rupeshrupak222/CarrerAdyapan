@@ -8,6 +8,7 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password?: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
+  switchRoleAccount: (email: string) => Promise<boolean>;
   register: (formData: any) => Promise<any>;
   createHRUser: (data: any) => Promise<any>;
   getAllUsers: () => Promise<User[]>;
@@ -69,6 +70,35 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const switchRoleAccount = async (targetEmail: string) => {
+    try {
+      const defaultPasswords: Record<string, string> = {
+        'rupesh@adyapan.com': 'Admin@123',
+        'nandini@adyapan.com': 'Manager@123',
+        'pavitra@adyapan.com': 'Hr@12345',
+        'charitha@adyapan.com': 'Hr@12345',
+        'nitisha@adyapan.com': 'Hr@12345',
+        'aravind@adyapan.com': 'Hr@12345',
+        'veena@adyapan.com': 'Hr@12345',
+      };
+
+      const pass = defaultPasswords[targetEmail] || 'Hr@12345';
+      const response = await authService.login(targetEmail, pass);
+      if (response?.success && response?.user) {
+        if (response.token) localStorage.setItem('token', response.token);
+        setUser(response.user);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        toast.success(`Switched role to: ${response.user.name} (${response.user.role})`);
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Switch role error:', err);
+      toast.error('Failed to switch role account');
+      return false;
+    }
+  };
+
   const register = async (formData: any) => {
     try {
       const response = await authService.register(formData);
@@ -127,7 +157,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, register, createHRUser, getAllUsers, deleteUser, updateHRPassword }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, switchRoleAccount, register, createHRUser, getAllUsers, deleteUser, updateHRPassword }}>
       {children}
     </AuthContext.Provider>
   );

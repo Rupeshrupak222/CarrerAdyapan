@@ -66,7 +66,7 @@ export const interviewService = {
     }
   },
 
-  updateInterviewFeedback: async (id: string, data: { feedback?: string; rating?: number; status?: string }) => {
+  updateInterviewFeedback: async (id: string, data: { feedback?: string; rating?: number; status?: string; result?: string }) => {
     try {
       const response = await api.patch(`/interviews/${id}/feedback`, data);
       cacheService.invalidate('all_interviews');

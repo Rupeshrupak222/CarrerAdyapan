@@ -14,8 +14,18 @@ export const createJob = async (req, res) => {
       salaryMin, 
       salaryMax, 
       location,
-      status
+      status,
+      interviewRounds,
+      totalRounds,
     } = req.body;
+
+    const parsedRounds = Array.isArray(interviewRounds) && interviewRounds.length > 0
+      ? interviewRounds
+      : [
+          { roundNumber: 1, name: 'Round 1: Screening / HR Round', type: 'PHONE' },
+          { roundNumber: 2, name: 'Round 2: Technical / Sales Pitch Round', type: 'VIDEO' }
+        ];
+    const finalTotalRounds = totalRounds ? parseInt(String(totalRounds), 10) : parsedRounds.length;
 
     // Validation
     if (!title || !department || !description || !location) {
@@ -88,6 +98,8 @@ export const createJob = async (req, res) => {
           salaryMin: salaryMin ? parseFloat(salaryMin) : null,
           salaryMax: salaryMax ? parseFloat(salaryMax) : null,
           location,
+          interviewRounds: parsedRounds,
+          totalRounds: finalTotalRounds,
           status: status || 'PUBLISHED',
           publishedAt: status === 'PUBLISHED' ? new Date() : null,
         }
@@ -107,6 +119,8 @@ export const createJob = async (req, res) => {
           salaryMin: salaryMin ? parseFloat(salaryMin) : null,
           salaryMax: salaryMax ? parseFloat(salaryMax) : null,
           location,
+          interviewRounds: parsedRounds,
+          totalRounds: finalTotalRounds,
           userId: targetUserId,
           status: status || 'PUBLISHED',
           publishedAt: status === 'PUBLISHED' ? new Date() : null,

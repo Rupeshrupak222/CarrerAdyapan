@@ -5,12 +5,18 @@ import {
   getAllApplications,
   getApplicationById,
   updateApplicationStatus,
-  deleteApplication
+  deleteApplication,
+  reassignCandidate,
+  approveSelectionForOffer,
+  triggerAutoScreening,
 } from '../controllers/applicationController.js';
 
 const router = express.Router();
 
 router.use(authMiddleware);
+router.post('/trigger-screening', triggerAutoScreening);
+router.post('/:id/reassign', reassignCandidate);
+router.post('/:id/approve-offer', approveSelectionForOffer);
 router.post('/', createApplication);
 router.get('/', getAllApplications);
 router.get('/:id', getApplicationById);

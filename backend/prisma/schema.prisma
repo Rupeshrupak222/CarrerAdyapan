@@ -12,165 +12,409 @@ model User {
   name         String
   email        String   @unique
   password     String
-  role         String   @default("HR")
-  company      String
+  role         String   @default("HR") // ADMIN, HR_MANAGER, HR, INTERVIEWER
+  company      String   @default("Adyapan Edutech Pvt. Ltd.")
   phone        String?
-  designation  String?  @default("Head of Talent Acquisition")
-  department   String?  @default("Executive HR & Placement")
+  designation  String?  @default("Talent Acquisition Specialist")
+  department   String?  @default("HR & Recruitment")
   location     String?  @default("Hyderabad / Remote")
   bio          String?
   avatar       String?
+  meetLink     String?  // Individual Google Meet Link for interview calls
+  isActive     Boolean  @default(true) // Dynamic active status for round-robin allocation
+  status       String   @default("ACTIVE") // ACTIVE, INACTIVE, ON_LEAVE
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   
-  jobs         Job[]
-  activities   Activity[]
-  conversations AIConversation[]
-  offers       Offer[]
+  jobs               Job[]
+  activities         Activity[]
+  conversations      AIConversation[]
+  offers             Offer[]
+  assignedInterviews Interview[]     @relation("HRInterviews")
+  conductedInterviews Interview[]    @relation("InterviewerInterviews")
+  assignedCandidates Application[]   @relation("AssignedHRCandidates")
+  hrAssignments      HRAssignment[]  @relation("HRAssignments")
+  feedbacksSubmitted InterviewFeedback[]
+  auditLogs          AuditLog[]
 }
 
 model Job {
-  id              String      @id @default(cuid())
-  title           String
-  slug            String      @unique
-  department      String
-  description     String
-  requirements    String
+  id               String      @id @default(cuid())
+  title            String
+  slug             String      @unique
+  department       String
+  description      String
+  requirements     String
   responsibilities String
-  type            String      @default("FULL_TIME")
-  experienceLevel String
-  salaryMin       Float?
-  salaryMax       Float?
-  location        String
-  status          String      @default("DRAFT")
-  publishedAt     DateTime?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  type             String      @default("FULL_TIME")
+  experienceLevel  String
+  salaryMin        Float?
+  salaryMax        Float?
+  location         String
+  status           String      @default("PUBLISHED")
+  interviewRounds  Json?       // Dynamic list of configurable interview rounds
+  totalRounds      Int         @default(3)
+  publishedAt      DateTime?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
   
-  userId          String
-  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String
+  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  applications    Application[]
-  activities      Activity[]
+  applications     Application[]
+  activities       Activity[]
+  screeningRules   ScreeningRule[]
 
   @@index([userId])
   @@index([status])
 }
 
 model Candidate {
-  id              String        @id @default(cuid())
-  firstName       String
-  lastName        String
-  email           String        @unique
-  password        String?
-  phone           String?
-  resumeUrl       String        @default("")
-  parsedResume    Json?         
-  totalExperience Float?        
-  education       Json?         
-  skills          String[]      
-  currentCompany  String?
-  currentPosition String?
-  employmentStatus String?      @default("EMPLOYED")
-  location        String?
-  linkedin        String?
-  portfolio       String?
-  aiScore         Float?        @default(75)
-  matchReason     String?
-  atsBreakdown    Json?
-  isRegistered    Boolean       @default(false)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id               String        @id @default(cuid())
+  candidateCode    String?       @unique // E.g. CAND-000001
+  firstName        String
+  lastName         String
+  email            String        @unique
+  password         String?
+  phone            String?
+  resumeUrl        String        @default("")
+  parsedResume     Json?         
+  totalExperience  Float?        
+  education        Json?         
+  skills           String[]      
+  currentCompany   String?
+  currentPosition  String?
+  employmentStatus String?       @default("EMPLOYED")
+  location         String?
+  linkedin         String?
+  portfolio        String?
+  aiScore          Float?        @default(75)
+  matchReason      String?
+  atsBreakdown     Json?
+  isRegistered     Boolean       @default(false)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
   
-  applications    Application[]
-  activities      Activity[]
+  applications     Application[]
+  activities       Activity[]
+  secureTokens     CandidateSecureToken[]
+  onboardings      Onboarding[]
+  joinings         Joining[]
+
+  @@index([email])
+  @@index([candidateCode])
 }
 
 model Application {
-  id              String          @id @default(cuid())
-  status          String          @default("PENDING")
-  aiScore         Float?          
-  scoreBreakdown  Json?           
-  matchReason     String?         
-  missingSkills   String[]        
-  strengths       String[]        
-  recommendations String[]        
-  notes           String?
-  appliedAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  id                     String          @id @default(cuid())
+  candidateCode          String?         // E.g. CAND-000001
+  status                 String          @default("APPLIED") // APPLIED, SCREENING, SHORTLISTED, HR_ASSIGNED, INTERVIEWING, SELECTED, REJECTED, OFFER_PENDING, OFFER_RELEASED, OFFER_ACCEPTED, OFFER_REJECTED, ONBOARDING, DOCUMENT_VERIFICATION, JOINING_SCHEDULED, JOINED, WITHDRAWN
+  overallStatus          String          @default("APPLIED")
+  currentRound           Int             @default(0) // 0 = Applied/Shortlisted, 1 = Round 1, 2 = Round 2, 3 = Round 3
+  maxRounds              Int             @default(3)
+  isEligibleForNextRound Boolean         @default(false)
+  finalSelected          Boolean         @default(false)
+  managerApproved        Boolean         @default(false)
   
-  jobId           String
-  job             Job             @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  // 24-Hour Automated Screening
+  screeningStatus        String?         @default("PENDING") // PENDING, SHORTLISTED, REJECTED
+  screeningScore         Float?          
+  screenedAt             DateTime?
+  screeningNotes         String?
   
-  candidateId     String
-  candidate       Candidate       @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  aiScore                Float?          
+  scoreBreakdown         Json?           
+  matchReason            String?         
+  missingSkills          String[]        
+  strengths              String[]        
+  recommendations        String[]        
+  notes                  String?
   
-  interviews      Interview[]
-  offer           Offer?
-  activities      Activity[]
+  // Assigned HR
+  assignedHrId           String?
+  assignedHr             User?           @relation("AssignedHRCandidates", fields: [assignedHrId], references: [id], onDelete: SetNull)
+  assignedAt             DateTime?
+  
+  appliedAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+  
+  jobId                  String
+  job                    Job             @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  
+  candidateId            String
+  candidate              Candidate       @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  
+  interviews             Interview[]
+  hrAssignments          HRAssignment[]
+  offer                  Offer?
+  onboarding             Onboarding?
+  joining                Joining?
+  activities             Activity[]
+  secureTokens           CandidateSecureToken[]
 
   @@index([jobId])
+  @@index([candidateId])
+  @@index([assignedHrId])
+  @@index([status])
+  @@index([overallStatus])
+  @@index([currentRound])
+  @@index([finalSelected])
+}
+
+model HRAssignment {
+  id            String      @id @default(cuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  candidateId   String
+  hrId          String
+  hr            User        @relation("HRAssignments", fields: [hrId], references: [id])
+  assignedAt    DateTime    @default(now())
+  status        String      @default("ACTIVE") // ACTIVE, INACTIVE, REASSIGNED
+  assignedBy    String?     // SYSTEM or HR_MANAGER User ID
+  reason        String?     // WORKLOAD_BALANCED, MANUAL_REASSIGN, SPECIALIZATION
+  createdAt     DateTime    @default(now())
+  
+  @@index([applicationId])
+  @@index([candidateId])
+  @@index([hrId])
+  @@index([status])
+}
+
+model CandidateSecureToken {
+  id            String       @id @default(cuid())
+  candidateId   String
+  candidate     Candidate    @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  applicationId String?
+  application   Application? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  token         String       @unique
+  tokenType     String       // INTERVIEW, OFFER, ONBOARDING, DOCUMENT_UPLOAD
+  data          Json?        // Contextual payload e.g. { interviewId, roundNumber, offerId }
+  expiresAt     DateTime
+  usedAt        DateTime?
+  revokedAt     DateTime?
+  createdAt     DateTime     @default(now())
+  
+  @@index([token])
+  @@index([candidateId])
+  @@index([tokenType])
+}
+
+model Interview {
+  id                 String              @id @default(cuid())
+  type               String              @default("VIDEO") // PHONE, VIDEO, ON_SITE, SALES_PITCH_ROUND, TECHNICAL, MANAGERIAL
+  scheduledAt        DateTime
+  duration           Int                 @default(30)
+  location           String?             @default("Google Meet")
+  meetingLink        String?
+  roundNumber        Int                 @default(1) // 1, 2, 3
+  roundName          String?             // Round 1: Screening, Round 2: Technical, Round 3: Final HR
+  result             String              @default("PENDING") // PENDING, SELECTED, REJECTED, HOLD
+  status             String              @default("SCHEDULED") // NOT_SCHEDULED, SCHEDULED, COMPLETED, CANCELLED, RESCHEDULED
+  feedback           String?
+  rating             Int?                // Overall 1-5 or 1-10
+  generatedQuestions Json?        
+  notes              String?
+  candidateName      String?
+  candidateEmail     String?
+  jobTitle           String?
+  candidateId        String?
+  jobId              String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  
+  hrId               String?
+  hr                 User?               @relation("HRInterviews", fields: [hrId], references: [id], onDelete: SetNull)
+
+  interviewerId      String?
+  interviewer        User?               @relation("InterviewerInterviews", fields: [interviewerId], references: [id], onDelete: SetNull)
+
+  applicationId      String?
+  application        Application?        @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  
+  feedbackDetails    InterviewFeedback?
+  offer              Offer?
+
+  @@index([hrId])
+  @@index([interviewerId])
+  @@index([roundNumber])
+  @@index([result])
+  @@index([status])
+}
+
+model InterviewFeedback {
+  id                 String      @id @default(cuid())
+  interviewId        String      @unique
+  interview          Interview   @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  interviewerId      String
+  interviewer        User        @relation(fields: [interviewerId], references: [id])
+  technicalScore     Int?
+  communicationScore Int?
+  problemSolving     Int?
+  cultureFit         Int?
+  confidence         Int?
+  overallScore       Int?
+  strengths          String?
+  weaknesses         String?
+  notes              String?
+  recommendation     String      @default("YES") // STRONG_YES, YES, HOLD, NO, STRONG_NO
+  decision           String      @default("SELECTED") // SELECTED, REJECTED, HOLD
+  isLocked           Boolean     @default(true)
+  lockedAt           DateTime    @default(now())
+  reopenedBy         String?
+  reopenedAt         DateTime?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  @@index([interviewerId])
+}
+
+model Offer {
+  id                 String          @id @default(cuid())
+  candidateId        String?
+  candidateName      String?
+  candidateEmail     String?
+  jobTitle           String?
+  salary             Float           @default(0)
+  bonus              Float?
+  equity             Float?
+  benefits           String[]
+  joiningDate        DateTime        @default(now())
+  expirationDate     DateTime        @default(now())
+  status             String          @default("PENDING") // PENDING, OFFER_PENDING_APPROVAL, APPROVED, SENT, ACCEPTED, REJECTED
+  managerApproved    Boolean         @default(false)
+  approvedBy         String?         // HR Manager ID
+  approvedAt         DateTime?
+  acceptanceToken    String?         @unique // Cryptographic token for candidate offer acceptance
+  acceptedAt         DateTime?
+  rejectedAt         DateTime?
+  rejectionReason    String?
+  acceptanceIp       String?
+  acceptanceMetadata Json?
+  offerLetterUrl     String?         
+  customTerms        String?         @db.Text
+  offerDetails       Json?
+  notes              String?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  
+  applicationId      String?         @unique
+  application        Application?    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  
+  interviewId        String?         @unique
+  interview          Interview?      @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  
+  userId             String?
+  user               User?           @relation(fields: [userId], references: [id])
+
+  @@index([candidateId])
+  @@index([candidateEmail])
+  @@index([acceptanceToken])
+  @@index([status])
+}
+
+model Onboarding {
+  id                String               @id @default(cuid())
+  applicationId     String               @unique
+  application       Application          @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  candidateId       String
+  candidate         Candidate            @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  status            String               @default("PENDING") // PENDING, IN_PROGRESS, DOCUMENTS_SUBMITTED, VERIFIED, REJECTED
+  personalDetails   Json?
+  addressDetails    Json?
+  educationDetails  Json?
+  bankDetails       Json?
+  emergencyContact  Json?
+  documents         OnboardingDocument[]
+  submittedAt       DateTime?
+  verifiedAt        DateTime?
+  verifiedBy        String?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
   @@index([candidateId])
   @@index([status])
 }
 
-model Interview {
-  id              String          @id @default(cuid())
-  type            String          @default("PHONE")
-  scheduledAt     DateTime
-  duration        Int             @default(30)
-  location        String?         
-  meetingLink     String?
-  status          String          @default("SCHEDULED")
-  feedback        String?
-  rating          Int?            
-  generatedQuestions Json?        
-  notes           String?
-  candidateName   String?
-  candidateEmail  String?
-  jobTitle        String?
-  candidateId     String?
-  jobId           String?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+model OnboardingDocument {
+  id              String     @id @default(cuid())
+  onboardingId    String
+  onboarding      Onboarding @relation(fields: [onboardingId], references: [id], onDelete: Cascade)
+  documentType    String     // IDENTITY_PROOF, ADDRESS_PROOF, EDUCATION_CERT, RESUME, PHOTO, BANK_DOC, OTHER
+  title           String
+  fileUrl         String
+  fileName        String?
+  fileSize        Int?
+  status          String     @default("PENDING") // PENDING, VERIFIED, REJECTED, RESUBMISSION_REQUIRED
+  rejectionReason String?
+  verifiedAt      DateTime?
+  verifiedBy      String?
+  uploadedAt      DateTime   @default(now())
   
-  applicationId   String?
-  application     Application?    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  
-  offer           Offer?
+  @@index([onboardingId])
+  @@index([documentType])
+  @@index([status])
 }
 
-model Offer {
-  id              String          @id @default(cuid())
-  candidateId     String?
-  candidateName   String?
-  candidateEmail  String?
-  jobTitle        String?
-  salary          Float           @default(0)
-  bonus           Float?
-  equity          Float?
-  benefits        String[]
-  joiningDate     DateTime        @default(now())
-  expirationDate  DateTime        @default(now())
-  status          String          @default("PENDING")
-  offerLetterUrl  String?         
-  customTerms     String?         @db.Text
-  offerDetails    Json?
-  notes           String?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  
-  applicationId   String?         @unique
-  application     Application?    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  
-  interviewId     String?         @unique
-  interview       Interview?      @relation(fields: [interviewId], references: [id], onDelete: Cascade)
-  
-  userId          String?
-  user            User?           @relation(fields: [userId], references: [id])
+model Joining {
+  id               String      @id @default(cuid())
+  applicationId    String      @unique
+  application      Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  candidateId      String
+  candidate        Candidate   @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  employeeId       String      @unique // E.g. EMP-2026-001
+  confirmedDate    DateTime
+  actualJoinedDate DateTime?
+  designation      String
+  department       String
+  managerName      String?
+  location         String
+  status           String      @default("SCHEDULED") // SCHEDULED, JOINED, NO_SHOW, CANCELLED
+  notes            String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 
   @@index([candidateId])
-  @@index([candidateEmail])
+  @@index([employeeId])
+  @@index([status])
+}
+
+model ScreeningRule {
+  id             String   @id @default(cuid())
+  jobId          String?
+  job            Job?     @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  name           String   @default("Default 24-Hour Screening Policy")
+  minAiScore     Float    @default(70)
+  requiredSkills String[]
+  minExperience  Float    @default(0)
+  allowedDegrees String[]
+  isActive       Boolean  @default(true)
+  autoReject     Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([jobId])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?  // null for SYSTEM or candidate public actions
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userRole   String?
+  userName   String?
+  action     String   // CANDIDATE_APPLIED, SCREENING_COMPLETED, HR_ASSIGNED, HR_REASSIGNED, INTERVIEW_SCHEDULED, FEEDBACK_SUBMITTED, ROUND_SELECTED, ROUND_REJECTED, OFFER_APPROVED, OFFER_RELEASED, OFFER_ACCEPTED, ONBOARDING_COMPLETED, DOCUMENT_VERIFIED, JOINING_CONFIRMED, CANDIDATE_JOINED
+  entity     String   // Candidate, Application, Interview, Offer, Onboarding, Document, Joining, User
+  entityId   String
+  oldValue   Json?
+  newValue   Json?
+  ipAddress  String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  
+  @@index([entity])
+  @@index([entityId])
+  @@index([action])
+  @@index([userId])
+  @@index([createdAt])
 }
 
 model SystemSetting {

@@ -1,14 +1,350 @@
 import prisma from '../config/db.js';
 import { logger } from '../utils/logger.js';
-import { sendInterviewScheduledEmail } from '../services/emailService.js';
+import { sendInterviewScheduledEmail, sendRejectionEmail } from '../services/emailService.js';
 import { notificationService } from '../services/notificationService.js';
+import { secureTokenService } from '../services/secureTokenService.js';
 
-// Create Interview
+/**
+ * Get Eligible Candidates for a specific Interview Round (Strict Backend Enforcement)
+ * Round 1: Shortlisted candidates who haven't been rejected.
+ * Round R (> 1): Candidates who were marked "SELECTED" in Round R-1 and haven't been rejected.
+ */
+export const getEligibleCandidatesForRound = async (req, res) => {
+  try {
+    const roundNumber = parseInt(req.query.roundNumber || '1', 10);
+    const jobId = req.query.jobId ? String(req.query.jobId) : undefined;
+
+    let applications = [];
+
+    if (roundNumber === 1) {
+      // Eligible for Round 1: Status is SHORTLISTED or AI_SCREENED / PENDING, not REJECTED
+      applications = await prisma.application.findMany({
+        where: {
+          ...(jobId && { jobId }),
+          status: { in: ['SHORTLISTED', 'AI_SCREENED', 'PENDING', 'APPLIED'] },
+          NOT: {
+            status: 'REJECTED',
+          },
+        },
+        include: {
+          candidate: true,
+          job: true,
+          interviews: {
+            orderBy: { roundNumber: 'asc' },
+          },
+        },
+      });
+    } else {
+      // Eligible for Round R: Must have passed Round R-1 with result "SELECTED"
+      const prevRoundNumber = roundNumber - 1;
+
+      // Find applications that have passed previous round
+      applications = await prisma.application.findMany({
+        where: {
+          ...(jobId && { jobId }),
+          NOT: {
+            status: 'REJECTED',
+          },
+          interviews: {
+            some: {
+              roundNumber: prevRoundNumber,
+              result: 'SELECTED',
+            },
+            none: {
+              result: 'REJECTED',
+            },
+          },
+        },
+        include: {
+          candidate: true,
+          job: true,
+          interviews: {
+            orderBy: { roundNumber: 'asc' },
+          },
+        },
+      });
+    }
+
+    // Filter out candidates already scheduled for this exact round (optional flag)
+    const candidates = applications.map((app) => {
+      const existingInterviewForThisRound = app.interviews.find((i) => i.roundNumber === roundNumber);
+      return {
+        ...app.candidate,
+        applicationId: app.id,
+        jobId: app.jobId,
+        jobTitle: app.job?.title || 'Applicant',
+        currentRound: app.currentRound,
+        maxRounds: app.maxRounds,
+        finalSelected: app.finalSelected,
+        applicationStatus: app.status,
+        alreadyScheduledInThisRound: !!existingInterviewForThisRound,
+        existingInterviewId: existingInterviewForThisRound?.id,
+        interviews: app.interviews,
+      };
+    });
+
+    res.json({
+      success: true,
+      roundNumber,
+      count: candidates.length,
+      candidates,
+    });
+  } catch (error: any) {
+    logger.error('Get Eligible Candidates Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch eligible candidates: ' + error.message });
+  }
+};
+
+/**
+ * Dynamic Round-Robin HR Allocation & Multi-Round Scheduling
+ * 1. Validates candidates eligible for the given round.
+ * 2. Fetches all currently active HR team members (dynamic count: 1, 2, 5, 10, 20+).
+ * 3. Evenly distributes candidates across active HRs (Round-Robin).
+ * 4. Assigns each interview the HR's database-stored Google Meet link.
+ * 5. Dispatches interview invitation emails in parallel.
+ */
+export const allocateAndScheduleRound = async (req, res) => {
+  try {
+    const {
+      roundNumber = 1,
+      roundName,
+      candidateIds = [],
+      applicationIds = [],
+      type = 'VIDEO',
+      scheduledAt,
+      duration = 30,
+      notes,
+      specificHrId, // Optional manual override, otherwise automatic balanced round-robin
+    } = req.body;
+
+    const roundNum = parseInt(String(roundNumber), 10) || 1;
+    const scheduledDate = scheduledAt ? new Date(scheduledAt) : new Date();
+    const durationNum = parseInt(String(duration), 10) || 30;
+    const targetRoundName = roundName || `Round ${roundNum}`;
+
+    // 1. Fetch Candidates/Applications
+    let targetApplications = [];
+    if (applicationIds && applicationIds.length > 0) {
+      targetApplications = await prisma.application.findMany({
+        where: { id: { in: applicationIds } },
+        include: { candidate: true, job: true, interviews: true },
+      });
+    } else if (candidateIds && candidateIds.length > 0) {
+      targetApplications = await prisma.application.findMany({
+        where: { candidateId: { in: candidateIds } },
+        include: { candidate: true, job: true, interviews: true },
+      });
+    }
+
+    if (targetApplications.length === 0) {
+      return res.status(400).json({ success: false, message: 'No valid candidate applications found to schedule.' });
+    }
+
+    // 2. Strict Backend Eligibility Check
+    if (roundNum > 1) {
+      const prevRoundNum = roundNum - 1;
+      const disqualified = targetApplications.filter((app) => {
+        const prevInterview = app.interviews.find((i) => i.roundNumber === prevRoundNum);
+        return !prevInterview || prevInterview.result !== 'SELECTED' || app.status === 'REJECTED';
+      });
+
+      if (disqualified.length > 0) {
+        const names = disqualified.map((a) => `${a.candidate?.firstName} ${a.candidate?.lastName}`).join(', ');
+        return res.status(400).json({
+          success: false,
+          message: `The following candidates are NOT eligible for Round ${roundNum} because they were not selected in Round ${prevRoundNum}: ${names}`,
+        });
+      }
+    }
+
+    // 3. Fetch Currently Active HRs from PostgreSQL DB
+    let activeHRs = [];
+    if (specificHrId) {
+      const singleHr = await prisma.user.findUnique({ where: { id: specificHrId } });
+      if (singleHr) activeHRs = [singleHr];
+    }
+
+    if (activeHRs.length === 0) {
+      activeHRs = await prisma.user.findMany({
+        where: {
+          isActive: true,
+          role: { in: ['HR', 'ADMIN', 'RECRUITER'] },
+        },
+        orderBy: { name: 'asc' },
+      });
+    }
+
+    // Fallback if no active HR is marked in DB
+    if (activeHRs.length === 0) {
+      const adminFallback = await prisma.user.findFirst({
+        where: { role: 'ADMIN' },
+      });
+      if (adminFallback) {
+        activeHRs = [adminFallback];
+      } else {
+        activeHRs = [{
+          id: 'hr-default-1',
+          name: 'Talent Acquisition Team',
+          email: 'hr@adyapan.com',
+          meetLink: 'https://meet.google.com/adyapan-interview',
+        }];
+      }
+    }
+
+    logger.info(`Distributing ${targetApplications.length} candidates across ${activeHRs.length} active HRs for ${targetRoundName}...`);
+
+    // 4. Balanced Round-Robin Allocation
+    const createdInterviews = [];
+
+    for (let i = 0; i < targetApplications.length; i++) {
+      const app = targetApplications[i];
+      const assignedHr = activeHRs[i % activeHRs.length]; // Balanced round-robin modulo
+      const hrMeetLink = assignedHr.meetLink || 'https://meet.google.com/adyapan-interview';
+      const candName = `${app.candidate?.firstName || ''} ${app.candidate?.lastName || ''}`.trim() || 'Candidate';
+      const candEmail = app.candidate?.email || '';
+      const jobTitle = app.job?.title || 'Business Development Associate (BDA)';
+      const interviewId = `int-${app.id}-r${roundNum}-${Date.now()}`;
+
+      // Create or update interview record in DB
+      const interview = await prisma.interview.create({
+        data: {
+          id: interviewId,
+          applicationId: app.id,
+          candidateId: app.candidateId,
+          jobId: app.jobId,
+          candidateName: candName,
+          candidateEmail: candEmail,
+          jobTitle: jobTitle,
+          roundNumber: roundNum,
+          roundName: targetRoundName,
+          type: type || 'VIDEO',
+          scheduledAt: scheduledDate,
+          duration: durationNum,
+          location: 'Google Meet',
+          meetingLink: hrMeetLink,
+          hrId: assignedHr.id !== 'hr-default-1' ? assignedHr.id : null,
+          status: 'SCHEDULED',
+          result: 'PENDING',
+          notes: notes || `${targetRoundName} scheduled with HR ${assignedHr.name}`,
+        },
+        include: {
+          hr: {
+            select: { id: true, name: true, email: true, designation: true, meetLink: true },
+          },
+          application: {
+            include: { candidate: true, job: true },
+          },
+        },
+      });
+
+      // Update application currentRound & status in DB
+      await prisma.application.update({
+        where: { id: app.id },
+        data: {
+          currentRound: roundNum,
+          status: 'INTERVIEW_SCHEDULED',
+        },
+      });
+
+      createdInterviews.push(interview);
+
+      // 5. Send Interview Scheduled Email with Assigned HR Details & Meet Link
+      if (candEmail && !candEmail.includes('example.com')) {
+        let secureInterviewToken = interview.id;
+        try {
+          secureInterviewToken = await secureTokenService.createSecureToken({
+            candidateId: app.candidateId,
+            applicationId: app.id,
+            tokenType: 'INTERVIEW',
+            data: { interviewId: interview.id, roundNumber: roundNum },
+          });
+        } catch (tokErr) {
+          logger.warn('Token creation notice:', tokErr);
+        }
+
+        sendInterviewScheduledEmail({
+          candidateName: candName,
+          candidateEmail: candEmail,
+          jobTitle: jobTitle,
+          roundNumber: roundNum,
+          roundName: targetRoundName,
+          assignedHrName: assignedHr.name,
+          scheduledAt: scheduledDate.toISOString(),
+          meetingLink: hrMeetLink,
+          secureToken: secureInterviewToken,
+        }).catch((err) => logger.error(`Email dispatch error for ${candEmail}:`, err));
+      }
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: `Successfully allocated & scheduled ${targetRoundName} for ${createdInterviews.length} candidates across ${activeHRs.length} active HRs!`,
+      roundNumber: roundNum,
+      activeHrCount: activeHRs.length,
+      interviews: createdInterviews,
+    });
+  } catch (error: any) {
+    logger.error('Allocate & Schedule Round Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to allocate and schedule round: ' + error.message });
+  }
+};
+
+// Create or Upsert Single Interview
 export const createInterview = async (req, res) => {
   try {
-    const { id, candidateName, candidateEmail, jobTitle, candidateId, jobId, applicationId, type, scheduledAt, duration, location, meetingLink, notes, status } = req.body;
+    const {
+      id,
+      candidateName,
+      candidateEmail,
+      jobTitle,
+      candidateId,
+      jobId,
+      applicationId,
+      type,
+      scheduledAt,
+      duration,
+      location,
+      meetingLink,
+      notes,
+      status,
+      roundNumber = 1,
+      roundName,
+      result = 'PENDING',
+      hrId,
+    } = req.body;
 
     const targetId = id || `int-${Date.now()}`;
+    const roundNum = parseInt(String(roundNumber), 10) || 1;
+    const targetRoundName = roundName || `Round ${roundNum}`;
+
+    // Auto-fetch assigned HR's meet link if not explicitly provided
+    let finalMeetingLink = meetingLink;
+    let assignedHrId = hrId || null;
+
+    if (hrId) {
+      const hrUser = await prisma.user.findUnique({ where: { id: hrId } }).catch(() => null);
+      if (hrUser && !meetingLink) {
+        finalMeetingLink = hrUser.meetLink;
+      }
+    }
+
+    if (!finalMeetingLink) {
+      finalMeetingLink = 'https://meet.google.com/adyapan-interview';
+    }
+
+    // Strict Rejection Check: Prevent scheduling rejected candidates
+    if (applicationId) {
+      const app = await prisma.application.findUnique({
+        where: { id: applicationId },
+        include: { interviews: true },
+      });
+      if (app && (app.status === 'REJECTED' || app.overallStatus === 'REJECTED' || app.interviews.some((i) => i.result === 'REJECTED'))) {
+        return res.status(400).json({
+          success: false,
+          message: 'Cannot schedule interview: Candidate has been REJECTED in a previous round.',
+        });
+      }
+    }
 
     const interview = await prisma.interview.upsert({
       where: { id: targetId },
@@ -18,11 +354,15 @@ export const createInterview = async (req, res) => {
         jobTitle,
         candidateId: candidateId || undefined,
         jobId: jobId || undefined,
+        roundNumber: roundNum,
+        roundName: targetRoundName,
+        result: result || undefined,
         type: type || 'VIDEO',
         scheduledAt: scheduledAt ? new Date(scheduledAt) : new Date(),
-        duration: duration ? parseInt(duration) : 30,
-        location,
-        meetingLink,
+        duration: duration ? parseInt(String(duration)) : 30,
+        location: location || 'Google Meet',
+        meetingLink: finalMeetingLink,
+        hrId: assignedHrId,
         notes,
         status: status || 'SCHEDULED',
       },
@@ -34,15 +374,22 @@ export const createInterview = async (req, res) => {
         candidateId: candidateId || null,
         jobId: jobId || null,
         applicationId: applicationId || null,
+        roundNumber: roundNum,
+        roundName: targetRoundName,
+        result: result || 'PENDING',
         type: type || 'VIDEO',
         scheduledAt: scheduledAt ? new Date(scheduledAt) : new Date(),
-        duration: duration ? parseInt(duration) : 30,
-        location,
-        meetingLink,
+        duration: duration ? parseInt(String(duration)) : 30,
+        location: location || 'Google Meet',
+        meetingLink: finalMeetingLink,
+        hrId: assignedHrId,
         notes,
         status: status || 'SCHEDULED',
       },
       include: {
+        hr: {
+          select: { id: true, name: true, email: true, designation: true, meetLink: true },
+        },
         application: {
           include: {
             candidate: true,
@@ -52,155 +399,61 @@ export const createInterview = async (req, res) => {
       },
     });
 
-    const isGenericJob = (t: any) => !t || ['student / fresher', 'student', 'fresher', 'applicant', 'entry level', 'student applicant'].includes(String(t).toLowerCase().trim());
-
-    let targetJob = !isGenericJob(jobTitle) ? jobTitle : null;
-
-    if (!targetJob && interview?.application?.job?.title) {
-      targetJob = interview.application.job.title;
-    }
-
-    if (!targetJob && (candidateId || applicationId)) {
-      const candidateApp = await prisma.application.findFirst({
-        where: candidateId ? { candidateId } : { id: applicationId },
-        include: { job: true },
-        orderBy: { createdAt: 'desc' },
-      }).catch(() => null);
-      if (candidateApp?.job?.title && !isGenericJob(candidateApp.job.title)) {
-        targetJob = candidateApp.job.title;
-      }
-    }
-
-    if (!targetJob) {
-      targetJob = 'Business Development Associate';
+    const targetCandId = candidateId || interview?.candidateId || interview?.application?.candidateId;
+    if (targetCandId) {
+      const updatedCandStatus = status === 'COMPLETED' ? 'INTERVIEWED' : 'INTERVIEW_SCHEDULED';
+      await prisma.application.updateMany({
+        where: { candidateId: targetCandId },
+        data: { status: updatedCandStatus, currentRound: roundNum },
+      }).catch(() => { });
     }
 
     const targetEmail = candidateEmail || interview?.application?.candidate?.email;
     const targetName = candidateName || (interview?.application?.candidate ? `${interview.application.candidate.firstName} ${interview.application.candidate.lastName}` : 'Candidate');
-    const targetCandId = candidateId || interview?.candidateId || interview?.application?.candidateId;
-
-    if (targetCandId) {
-      const updatedCandStatus = status === 'COMPLETED' ? 'INTERVIEWED' : 'SCHEDULED';
-      await prisma.application.updateMany({
-        where: { candidateId: targetCandId },
-        data: { status: updatedCandStatus },
-      }).catch(() => { });
-    }
+    const targetJob = jobTitle || interview?.application?.job?.title || 'Business Development Associate (BDA)';
 
     if (targetEmail && (interview.status === 'SCHEDULED' || status === 'SCHEDULED')) {
-      try {
-        await sendInterviewScheduledEmail({
-          candidateName: targetName,
-          candidateEmail: targetEmail,
-          jobTitle: targetJob,
-          scheduledAt: scheduledAt || new Date().toISOString(),
-          meetingLink: meetingLink || 'https://meet.google.com/adyapan-interview',
-        });
-      } catch (emailErr: any) {
+      sendInterviewScheduledEmail({
+        candidateName: targetName,
+        candidateEmail: targetEmail,
+        jobTitle: targetJob,
+        roundNumber: roundNum,
+        roundName: targetRoundName,
+        assignedHrName: interview.hr?.name || 'HR Team',
+        scheduledAt: scheduledAt || new Date().toISOString(),
+        meetingLink: finalMeetingLink,
+      }).catch((emailErr: any) => {
         logger.error('Interview Schedule Email Error:', emailErr?.message || emailErr);
-      }
-
-      try {
-        await notificationService.createNotification({
-          type: 'INTERVIEW_SCHEDULED',
-          title: 'Interview Scheduled',
-          message: `Interview scheduled with ${targetName} for ${targetJob}`,
-          link: '/interviews',
-          relatedInterviewId: interview.id,
-        });
-      } catch (notifErr: any) {
-        logger.warn('Failed to record interview notification:', notifErr?.message || notifErr);
-      }
+      });
     }
 
     res.status(201).json({ success: true, interview });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Create Interview Error:', error);
     res.status(500).json({ success: false, message: 'Failed to create interview: ' + error.message });
   }
 };
 
-// High-Performance Bulk Interview Scheduling (< 1 sec for 100+ candidates)
+// Bulk Schedule Interviews
 export const bulkScheduleInterviews = async (req, res) => {
-  try {
-    const { interviews: payloadList, candidates: candidateList, type, scheduledAt, duration, meetingLink, notes } = req.body;
-    const rawList = Array.isArray(payloadList) && payloadList.length > 0 ? payloadList : (Array.isArray(candidateList) ? candidateList : []);
-
-    if (rawList.length === 0) {
-      return res.status(400).json({ success: false, message: 'No candidates provided for bulk interview scheduling.' });
-    }
-
-    const scheduledDate = scheduledAt ? new Date(scheduledAt) : new Date();
-    const durationNum = duration ? parseInt(duration) : 30;
-    const defaultMeeting = meetingLink || 'https://meet.google.com/adyapan-hiring-call';
-
-    const interviewRecords = rawList.map((c, index) => {
-      const fullCandName = `${c.firstName || ''} ${c.lastName || ''}`.trim() || c.candidateName || c.name || 'Candidate';
-      const candEmail = c.email || c.candidateEmail || 'candidate@example.com';
-      const jobTitle = c.currentPosition || c.jobTitle || 'Business Development Associate (BDA)';
-      const targetId = c.id ? `int-bulk-${c.id}` : `int-bulk-${Date.now()}-${index}`;
-
-      return {
-        id: targetId,
-        candidateName: fullCandName,
-        candidateEmail: candEmail,
-        jobTitle: jobTitle,
-        candidateId: c.id || c.candidateId || null,
-        applicationId: c.applicationId || c.applications?.[0]?.id || null,
-        type: type || 'SALES_PITCH_ROUND',
-        scheduledAt: scheduledDate,
-        duration: durationNum,
-        meetingLink: defaultMeeting,
-        notes: notes || `Bulk scheduled interview for ${fullCandName}`,
-        status: 'SCHEDULED',
-      };
-    });
-
-    // 1. Batch Insert into PostgreSQL DB via createMany in 1 fast transaction (< 50ms)
-    await prisma.interview.createMany({
-      data: interviewRecords,
-      skipDuplicates: true,
-    });
-
-    // 2. Batch update Candidate Application Status in DB
-    const candidateIds = rawList.map((c) => c.id || c.candidateId).filter(Boolean);
-    if (candidateIds.length > 0) {
-      await prisma.application.updateMany({
-        where: { candidateId: { in: candidateIds } },
-        data: { status: 'SCHEDULED' },
-      }).catch(() => {});
-    }
-
-    // 3. Parallel Async Background Email Dispatch (non-blocking!)
-    Promise.allSettled(
-      interviewRecords.map((item) =>
-        sendInterviewScheduledEmail({
-          candidateName: item.candidateName,
-          candidateEmail: item.candidateEmail,
-          jobTitle: item.jobTitle,
-          scheduledAt: item.scheduledAt.toISOString(),
-          meetingLink: item.meetingLink,
-        })
-      )
-    ).catch((err) => logger.error('Bulk Email Dispatch Error:', err));
-
-    return res.status(201).json({
-      success: true,
-      message: `Successfully bulk scheduled interviews for ${interviewRecords.length} candidates in parallel!`,
-      count: interviewRecords.length,
-      interviews: interviewRecords,
-    });
-  } catch (error) {
-    logger.error('Bulk Schedule Error:', error);
-    return res.status(500).json({ success: false, message: 'Failed to bulk schedule: ' + error.message });
-  }
+  return allocateAndScheduleRound(req, res);
 };
 
 // Get All Interviews
 export const getAllInterviews = async (req, res) => {
   try {
+    const { roundNumber, result, status } = req.query;
+    const where: any = {};
+    if (roundNumber) where.roundNumber = parseInt(String(roundNumber), 10);
+    if (result && result !== 'ALL') where.result = String(result);
+    if (status && status !== 'ALL') where.status = String(status);
+
     const interviews = await prisma.interview.findMany({
+      where,
       include: {
+        hr: {
+          select: { id: true, name: true, email: true, designation: true, meetLink: true, phone: true },
+        },
         application: {
           include: {
             candidate: true,
@@ -209,13 +462,10 @@ export const getAllInterviews = async (req, res) => {
         },
       },
       orderBy: { scheduledAt: 'desc' },
-    }).catch((e) => {
-      logger.warn('Interviews findMany pooler warning: ' + (e?.message || String(e)));
-      return [];
     });
 
     res.json({ success: true, interviews });
-  } catch (error) {
+  } catch (error: any) {
     logger.warn('Get Interviews Error: ' + (error?.message || String(error)));
     res.json({ success: true, interviews: [] });
   }
@@ -227,6 +477,9 @@ export const getInterviewById = async (req, res) => {
     const interview = await prisma.interview.findUnique({
       where: { id: req.params.id },
       include: {
+        hr: {
+          select: { id: true, name: true, email: true, designation: true, meetLink: true, phone: true },
+        },
         application: {
           include: {
             candidate: true,
@@ -241,16 +494,71 @@ export const getInterviewById = async (req, res) => {
     }
 
     res.json({ success: true, interview });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Get Interview Error:', error.message);
     res.status(500).json({ success: false, message: 'Failed to fetch interview: ' + error.message });
+  }
+};
+
+/**
+ * Public: Get Interview Details by Secure Candidate Token (NO LOGIN REQUIRED)
+ */
+export const getInterviewByToken = async (req, res) => {
+  try {
+    const { token } = req.params;
+    if (!token || typeof token !== 'string') {
+      return res.status(400).json({ success: false, message: 'Invalid or missing token' });
+    }
+
+    // 1. Check secure token service
+    const verification = await secureTokenService.verifyToken(token, 'INTERVIEW');
+    if (verification.valid && verification.data?.interviewId) {
+      const interview = await prisma.interview.findUnique({
+        where: { id: verification.data.interviewId },
+        include: {
+          hr: { select: { id: true, name: true, email: true, designation: true, meetLink: true } },
+          application: { include: { candidate: true, job: true } },
+        },
+      });
+      if (interview) {
+        return res.json({
+          success: true,
+          interview,
+          candidate: verification.candidate || interview.application?.candidate,
+          job: interview.application?.job || { title: interview.jobTitle },
+        });
+      }
+    }
+
+    // 2. Direct fallback lookup by interview ID or candidate ID
+    const interview = await prisma.interview.findFirst({
+      where: { OR: [{ id: token }, { applicationId: token }, { candidateId: token }] },
+      include: {
+        hr: { select: { id: true, name: true, email: true, designation: true, meetLink: true } },
+        application: { include: { candidate: true, job: true } },
+      },
+    });
+
+    if (!interview) {
+      return res.status(404).json({ success: false, message: 'Interview session not found or link has expired.' });
+    }
+
+    return res.json({
+      success: true,
+      interview,
+      candidate: interview.application?.candidate || { firstName: interview.candidateName, email: interview.candidateEmail },
+      job: interview.application?.job || { title: interview.jobTitle },
+    });
+  } catch (error: any) {
+    logger.error('Get Interview by Token Error:', error);
+    return res.status(500).json({ success: false, message: 'Failed to verify interview link: ' + error.message });
   }
 };
 
 // Update Interview
 export const updateInterview = async (req, res) => {
   try {
-    const { status, feedback, rating, notes, scheduledAt, type, meetingLink, candidateName, candidateEmail, jobTitle, candidateId, jobId } = req.body;
+    const { status, feedback, rating, notes, scheduledAt, type, meetingLink, candidateName, candidateEmail, jobTitle, candidateId, jobId, roundNumber, roundName, result, hrId } = req.body;
 
     const updateData: any = {};
     if (status !== undefined) updateData.status = status;
@@ -265,65 +573,176 @@ export const updateInterview = async (req, res) => {
     if (jobTitle !== undefined) updateData.jobTitle = jobTitle;
     if (candidateId !== undefined) updateData.candidateId = candidateId;
     if (jobId !== undefined) updateData.jobId = jobId;
+    if (roundNumber !== undefined) updateData.roundNumber = parseInt(String(roundNumber), 10);
+    if (roundName !== undefined) updateData.roundName = roundName;
+    if (result !== undefined) updateData.result = result;
+    if (hrId !== undefined) updateData.hrId = hrId;
 
-    let interview = await prisma.interview.findUnique({ where: { id: req.params.id } }).catch(() => null);
-
-    if (interview) {
-      interview = await prisma.interview.update({
-        where: { id: req.params.id },
-        data: updateData,
-      });
-    } else {
-      interview = await prisma.interview.create({
-        data: {
-          id: req.params.id,
-          candidateName: candidateName || 'Candidate',
-          candidateEmail: candidateEmail || '',
-          jobTitle: jobTitle || 'Business Development Associate (BDA)',
-          candidateId: candidateId || null,
-          jobId: jobId || null,
-          type: type || 'VIDEO',
-          scheduledAt: scheduledAt ? new Date(scheduledAt) : new Date(),
-          status: status || 'COMPLETED',
-          feedback,
-          rating,
-          notes,
+    const interview = await prisma.interview.update({
+      where: { id: req.params.id },
+      data: updateData,
+      include: {
+        hr: {
+          select: { id: true, name: true, email: true, designation: true, meetLink: true },
         },
-      });
-    }
+        application: {
+          include: { candidate: true, job: true },
+        },
+      },
+    });
 
-    logger.info(`Interview ${req.params.id} updated in PostgreSQL DB! Status: ${interview.status}`);
     res.json({ success: true, interview });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Update Interview Error:', error.message);
     res.status(500).json({ success: false, message: 'Failed to update interview: ' + error.message });
   }
 };
 
-// Update Interview Feedback / Complete Interview
+/**
+ * Record Interview Scorecard / Result (SELECTED, REJECTED, PENDING)
+ * Upgrades candidate progression:
+ * - If SELECTED in Final Round: marks Application `finalSelected = true`, status = `FINAL_SELECTED` (eligible for Offer).
+ * - If SELECTED in Middle Round: marks Application `isEligibleForNextRound = true`, status = `ROUND_CLEARED`.
+ * - If REJECTED: marks Application status = `REJECTED`, stops progression.
+ */
 export const updateInterviewFeedback = async (req, res) => {
   try {
-    const { feedback, rating, status } = req.body;
+    const { feedback, rating, status = 'COMPLETED', result = 'SELECTED' } = req.body;
 
     const interview = await prisma.interview.update({
       where: { id: req.params.id },
       data: {
         feedback,
-        rating,
+        rating: rating !== undefined ? parseInt(String(rating), 10) : undefined,
         status: status || 'COMPLETED',
+        result: result || 'SELECTED',
+      },
+      include: {
+        application: {
+          include: { job: true, candidate: true },
+        },
       },
     });
 
-    if (interview.candidateId) {
-      await prisma.application.updateMany({
+    // Locate Target Application Robustly
+    let targetApp: any = interview.application;
+    if (!targetApp && interview.candidateId) {
+      targetApp = await prisma.application.findFirst({
         where: { candidateId: interview.candidateId },
-        data: { status: 'INTERVIEWED' },
-      }).catch(() => { });
+        include: { job: true, candidate: true },
+      });
+    }
+    if (!targetApp && interview.candidateEmail) {
+      const cand = await prisma.candidate.findFirst({ where: { email: interview.candidateEmail } });
+      if (cand) {
+        targetApp = await prisma.application.findFirst({
+          where: { candidateId: cand.id },
+          include: { job: true, candidate: true },
+        });
+      }
     }
 
-    logger.info(`Interview ${req.params.id} marked as COMPLETED in PostgreSQL DB!`);
+    if (targetApp) {
+      const currentRoundNum = interview.roundNumber || targetApp.currentRound || 1;
+      const totalRounds = targetApp.job?.totalRounds || 3;
+
+      if (result === 'SELECTED') {
+        const nextRoundNum = currentRoundNum + 1;
+        const isFinalRound = currentRoundNum >= totalRounds || currentRoundNum >= 3;
+
+        await prisma.application.update({
+          where: { id: targetApp.id },
+          data: {
+            status: isFinalRound ? 'FINAL_SELECTED' : 'ROUND_CLEARED',
+            currentRound: isFinalRound ? 3 : nextRoundNum,
+            isEligibleForNextRound: !isFinalRound,
+            finalSelected: isFinalRound,
+            managerApproved: isFinalRound,
+          },
+        });
+
+        // If candidate cleared final round, automatically generate / prepare an official Offer record
+        if (isFinalRound) {
+          const cand = targetApp.candidate || await prisma.candidate.findUnique({ where: { id: targetApp.candidateId } });
+          const candName = cand ? `${cand.firstName} ${cand.lastName}` : (interview.candidateName || 'Candidate');
+          const candEmail = cand?.email || interview.candidateEmail;
+
+          const existingOffer = await prisma.offer.findFirst({
+            where: {
+              OR: [
+                { applicationId: targetApp.id },
+                { candidateId: targetApp.candidateId },
+                ...(candEmail ? [{ candidateEmail: candEmail }] : []),
+              ],
+            },
+          });
+
+          if (!existingOffer) {
+            await prisma.offer.create({
+              data: {
+                id: `off-${Date.now()}`,
+                applicationId: targetApp.id,
+                candidateId: targetApp.candidateId,
+                candidateName: candName,
+                candidateEmail: candEmail || '',
+                jobTitle: targetApp.job?.title || interview.jobTitle || 'Business Development Associate (BDA)',
+                salary: 20000,
+                status: 'PENDING',
+                joiningDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                customTerms: JSON.stringify({
+                  stipend: 'INR 20,000/- Per Month (During 6-Month Training)',
+                  location: 'Hyderabad / Hybrid',
+                  trainingStartDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                }),
+                offerDetails: {
+                  stipend: 'INR 20,000/- Per Month (During 6-Month Training)',
+                  location: 'Hyderabad / Hybrid',
+                  trainingStartDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                },
+              },
+            }).catch((err) => logger.warn('Auto Offer Creation Warning:', err));
+          }
+        }
+      } else if (result === 'REJECTED') {
+        await prisma.application.update({
+          where: { id: targetApp.id },
+          data: {
+            status: 'REJECTED',
+            overallStatus: 'REJECTED',
+            isEligibleForNextRound: false,
+            finalSelected: false,
+            managerApproved: false,
+          },
+        });
+
+        // Delete any pending draft offer for this rejected candidate
+        await prisma.offer.deleteMany({
+          where: {
+            OR: [
+              { applicationId: targetApp.id },
+              { candidateId: targetApp.candidateId },
+              ...(targetApp.candidate?.email ? [{ candidateEmail: targetApp.candidate.email }] : []),
+            ],
+            status: { in: ['PENDING', 'DRAFT'] },
+          },
+        }).catch(() => {});
+
+        // Send formal polite rejection notification email
+        const cand = targetApp.candidate || await prisma.candidate.findUnique({ where: { id: targetApp.candidateId } });
+        if (cand?.email && !cand.email.includes('example.com')) {
+          sendRejectionEmail({
+            candidateName: `${cand.firstName} ${cand.lastName}`,
+            candidateEmail: cand.email,
+            jobTitle: targetApp.job?.title || 'Applied Position',
+            reason: feedback || 'Did not meet evaluation criteria for the subsequent round.',
+          }).catch((err) => logger.warn('Async Rejection Email Warning:', err));
+        }
+      }
+    }
+
+    logger.info(`Interview ${req.params.id} completed with result "${result}" in PostgreSQL DB!`);
     res.json({ success: true, interview });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Update Feedback Error:', error.message);
     res.status(500).json({ success: false, message: 'Failed to update interview feedback: ' + error.message });
   }
@@ -336,7 +755,7 @@ export const deleteInterview = async (req, res) => {
       await prisma.interview.deleteMany({ where: { id } });
     });
     res.json({ success: true, message: 'Interview deleted successfully' });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Delete Interview Error:', error.message);
     res.json({ success: true, message: 'Interview deleted successfully' });
   }
