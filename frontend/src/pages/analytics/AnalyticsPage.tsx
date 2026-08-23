@@ -31,22 +31,6 @@ const AnalyticsPage = () => {
     };
   }, []);
 
-  const getLocalDataCounts = () => {
-    let localCands = [];
-    let localInterviews = [];
-    try {
-      localCands = JSON.parse(localStorage.getItem('adyapan_candidates') || '[]');
-      localInterviews = JSON.parse(localStorage.getItem('adyapan_interviews') || '[]');
-    } catch (e) {}
-
-    const totalCands = localCands.length;
-    const shortlisted = localCands.filter((c) => c.status === 'SHORTLISTED' || c.status === 'INTERVIEWED').length;
-    const hired = localCands.filter((c) => c.status === 'HIRED' || c.status === 'OFFERED').length;
-    const interviewed = localInterviews.length;
-
-    return { totalCands, shortlisted, hired, interviewed };
-  };
-
   const fetchAnalyticsData = async () => {
     try {
       const [statsRes, funnelRes, velocityRes] = await Promise.allSettled([
@@ -55,28 +39,21 @@ const AnalyticsPage = () => {
         analyticsService.getMonthlyVelocity(true),
       ]);
 
-      const local = getLocalDataCounts();
-
       // 1. Process Stats Cards Data
       if (statsRes.status === 'fulfilled' && statsRes.value) {
         const raw = statsRes.value;
-        const totalApps = Math.max(raw.totalApplications || 0, local.totalCands);
-        const screened = Math.max(raw.aiScreened || 0, local.totalCands);
-        const interviewedCount = Math.max(raw.interviewed ?? raw.interviewsScheduled ?? 0, local.interviewed);
-        const hireCount = Math.max(raw.hired || 0, local.hired);
-
         setStats({
-          totalApplications: totalApps,
-          aiScreened: screened,
-          interviewed: interviewedCount,
-          hired: hireCount,
+          totalApplications: raw.totalApplications || 0,
+          aiScreened: raw.aiScreened || 0,
+          interviewed: raw.interviewed ?? raw.interviewsScheduled ?? 0,
+          hired: raw.hired || 0,
         });
       } else {
         setStats({
-          totalApplications: local.totalCands || 0,
-          aiScreened: local.totalCands || 0,
-          interviewed: local.interviewed || 0,
-          hired: local.hired || 0,
+          totalApplications: 0,
+          aiScreened: 0,
+          interviewed: 0,
+          hired: 0,
         });
       }
 
@@ -85,12 +62,11 @@ const AnalyticsPage = () => {
         const backendFunnel = funnelRes.value.data.filter((f: any) => f.stage !== 'Shortlisted');
         setFunnelData(backendFunnel);
       } else {
-        const totalApps = local.totalCands || 0;
         setFunnelData([
-          { stage: 'Applied', count: totalApps },
-          { stage: 'AI Screened', count: totalApps },
-          { stage: 'Interviewed', count: local.interviewed || 0 },
-          { stage: 'Hired', count: local.hired || 0 },
+          { stage: 'Applied', count: 0 },
+          { stage: 'AI Screened', count: 0 },
+          { stage: 'Interviewed', count: 0 },
+          { stage: 'Hired', count: 0 },
         ]);
       }
 
@@ -104,7 +80,7 @@ const AnalyticsPage = () => {
 
         const calculatedVelocity = activeMonths.map((m) => ({
           month: m,
-          applications: local.totalCands || 0,
+          applications: 0,
         }));
         setVelocityData(calculatedVelocity);
       }

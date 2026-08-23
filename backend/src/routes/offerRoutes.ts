@@ -4,6 +4,7 @@ import {
   createOffer,
   getAllOffers,
   getOfferById,
+  updateOffer,
   updateOfferStatus,
   deleteOffer,
   sendOfferEmail,
@@ -23,6 +24,7 @@ router.post('/:id/send-email', sendOfferEmail);
 router.post('/send-welcome-email', sendWelcomeEmail);
 router.get('/', getAllOffers);
 router.get('/:id', getOfferById);
+router.put('/:id', updateOffer);
 router.patch('/:id/status', updateOfferStatus);
 router.delete('/:id', deleteOffer);
 

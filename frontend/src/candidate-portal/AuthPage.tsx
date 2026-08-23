@@ -33,9 +33,14 @@ const AuthPage: React.FC = () => {
   });
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setReveal(true), 2850);
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+    const timer = window.setTimeout(() => setReveal(true), isMobile ? 350 : 1500);
     return () => window.clearTimeout(timer);
   }, []);
+
+  const handleSceneClick = () => {
+    if (!reveal) setReveal(true);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -163,7 +168,10 @@ const AuthPage: React.FC = () => {
   };
 
   return (
-    <div className={`auth-scene ${isSignup ? 'auth-signup' : 'auth-signin'} ${reveal ? 'auth-revealed' : ''}`}>
+    <div
+      className={`auth-scene ${isSignup ? 'auth-signup' : 'auth-signin'} ${reveal ? 'auth-revealed' : ''}`}
+      onClick={handleSceneClick}
+    >
       <div className="auth-stars" aria-hidden="true" />
       <div className="auth-haze" aria-hidden="true" />
 

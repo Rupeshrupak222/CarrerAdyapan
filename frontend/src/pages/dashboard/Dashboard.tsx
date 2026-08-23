@@ -6,7 +6,6 @@ import { analyticsService } from '../../services/analyticsService';
 import { jobService } from '../../services/jobService';
 import { offerService } from '../../services/offerService';
 import { candidateService } from '../../services/candidateService';
-import { getStoredCandidates, getStoredOffers } from '../../utils/applicationStore';
 import toast from 'react-hot-toast';
 import { StatCardSkeleton, ChartSkeleton, JobListSkeleton } from '../../components/common/SkeletonLoaders';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Cell } from 'recharts';
@@ -20,10 +19,6 @@ const DEFAULT_FUNNEL = [
   { stage: 'Offer Extended', count: 0 },
   { stage: 'Hired', count: 0 }
 ];
-
-const FALLBACK_JOBS = [];
-
-const FALLBACK_SELECTED_CANDIDATES = [];
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -56,11 +51,9 @@ const Dashboard = () => {
     };
 
     window.addEventListener('adyapan_data_updated', handleDataUpdate);
-    window.addEventListener('storage', handleDataUpdate);
 
     return () => {
       window.removeEventListener('adyapan_data_updated', handleDataUpdate);
-      window.removeEventListener('storage', handleDataUpdate);
     };
   }, []);
 
@@ -68,18 +61,8 @@ const Dashboard = () => {
     try {
       const res = await offerService.getAllOffers().catch(() => null);
       const dbOffers = res?.offers || [];
-      const localOffers = getStoredOffers();
 
-      const combinedMap = new Map();
-      [...localOffers, ...dbOffers].forEach((o) => {
-        if (o && (o.id || o.candidateName)) {
-          const key = o.candidateName ? o.candidateName.toLowerCase().trim().replace(/\s+/g, ' ') : o.id;
-          combinedMap.set(key, o);
-        }
-      });
-
-      const uniqueOffers = Array.from(combinedMap.values());
-      const hiredList = uniqueOffers.filter(
+      const hiredList = dbOffers.filter(
         (o) => !o.status || o.status === 'ACCEPTED' || o.status === 'READY_TO_SEND' || o.status === 'SENT' || o.status === 'APPROVED'
       );
 
@@ -119,7 +102,7 @@ const Dashboard = () => {
         jobTitle: cand.jobTitle,
         joiningDate: cand.joiningDate,
       });
-      toast.success(`Welcome Onboarding Package Email dispatched via Resend to ${cand.email}! `);
+      toast.success(`Welcome Onboarding Package Email dispatched via Resend to ${cand.email}!`);
     } catch (e) {
       toast.error('Failed to send welcome email');
     } finally {
@@ -137,20 +120,9 @@ const Dashboard = () => {
         candidateService.getAllCandidates(true),
       ]);
 
-      const localOffers = getStoredOffers();
-      const localCandidates = getStoredCandidates();
-
       const dbOffers = offersRes.status === 'fulfilled' ? (offersRes.value?.offers || []) : [];
-      const allOffersMap = new Map();
-      [...localOffers, ...dbOffers].forEach((o) => {
-        if (o && (o.id || o.candidateName)) {
-          const key = o.candidateName ? o.candidateName.toLowerCase().trim().replace(/\s+/g, ' ') : o.id;
-          allOffersMap.set(key, o);
-        }
-      });
-      const uniqueOffers = Array.from(allOffersMap.values());
-      const activeOffersCount = uniqueOffers.filter((o) => o.status !== 'REJECTED').length;
-      const hiredCount = uniqueOffers.filter((o) => !o.status || o.status === 'ACCEPTED' || o.status === 'READY_TO_SEND' || o.status === 'SENT' || o.status === 'APPROVED').length;
+      const activeOffersCount = dbOffers.filter((o) => o.status !== 'REJECTED').length;
+      const hiredCount = dbOffers.filter((o) => !o.status || o.status === 'ACCEPTED' || o.status === 'READY_TO_SEND' || o.status === 'SENT' || o.status === 'APPROVED').length;
 
       let fetchedStats = statsRes.status === 'fulfilled' && statsRes.value ? statsRes.value : {};
       let dbJobs = jobsRes.status === 'fulfilled' && Array.isArray(jobsRes.value?.jobs) ? jobsRes.value.jobs : [];
@@ -158,11 +130,11 @@ const Dashboard = () => {
 
       const totalCandCount = fetchedStats.totalApplications !== undefined && fetchedStats.totalApplications !== null
         ? fetchedStats.totalApplications
-        : Math.max(dbCandidates.length, localCandidates.length);
+        : dbCandidates.length;
 
       const aiScreenedCount = fetchedStats.aiScreened !== undefined && fetchedStats.aiScreened !== null
         ? fetchedStats.aiScreened
-        : Math.max(dbCandidates.length, localCandidates.length);
+        : dbCandidates.length;
 
       const computedStats = {
         totalApplications: totalCandCount,
@@ -173,7 +145,7 @@ const Dashboard = () => {
         hired: fetchedStats.hired ?? hiredCount,
         jobs: fetchedStats.jobs ?? dbJobs.length,
         averageScore: fetchedStats.averageScore || 88,
-        timeSaved: fetchedStats.timeSaved || 0,
+        timeSaved: fetchedStats.timeSaved || Math.round(totalCandCount * 1.5),
       };
 
       setStats(computedStats);

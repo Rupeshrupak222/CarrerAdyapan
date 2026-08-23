@@ -375,65 +375,65 @@ const Careers: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             SECTION 02 — TRUST / STATS STRIP (FAST HIRING & FAST REPLY)
            ══════════════════════════════════════════════════════════ */}
-        <section className="relative z-20 -mt-6 sm:-mt-8 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto">
-          <div className="bg-white dark:bg-[#181715] rounded-3xl p-6 sm:p-8 border border-stone-200/80 dark:border-stone-800 shadow-2xl">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-0 lg:divide-x divide-stone-200/80 dark:divide-stone-800">
+        <section className="relative z-20 -mt-6 sm:-mt-8 px-3 sm:px-6 lg:px-8 max-w-[1380px] mx-auto">
+          <div className="bg-white dark:bg-[#181715] rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 lg:p-8 border border-stone-200/80 dark:border-stone-800 shadow-2xl">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-0 lg:divide-x divide-stone-200/80 dark:divide-stone-800">
 
               {/* Stat 1: 24h Fast Recruiter Reply */}
-              <div className="flex items-center gap-4 px-2 sm:px-6">
-                <div className="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
-                  <Zap size={22} />
+              <div className="flex items-center gap-2.5 sm:gap-4 px-1.5 sm:px-4 lg:px-6 min-w-0">
+                <div className="w-9 h-9 sm:w-11 sm:h-11 lg:w-12 lg:h-12 rounded-xl sm:rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 shadow-xs">
+                  <Zap className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
                 </div>
-                <div>
-                  <b className="text-2xl sm:text-4xl font-bold text-stone-900 dark:text-white block tracking-tight">
+                <div className="min-w-0 flex-1">
+                  <b className="text-base sm:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-stone-900 dark:text-white block tracking-tight leading-none sm:leading-tight">
                     <AnimatedCounter end={24} suffix="h" />
                   </b>
-                  <span className="text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider">
+                  <span className="text-[10px] sm:text-[11px] lg:text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider block leading-tight mt-1 break-words">
                     Fast Recruiter Reply
                   </span>
                 </div>
               </div>
 
               {/* Stat 2: 48-72h Direct Interview */}
-              <div className="flex items-center gap-4 px-2 sm:px-6">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
-                  <Flame size={22} />
+              <div className="flex items-center gap-2.5 sm:gap-4 px-1.5 sm:px-4 lg:px-6 min-w-0">
+                <div className="w-9 h-9 sm:w-11 sm:h-11 lg:w-12 lg:h-12 rounded-xl sm:rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-xs">
+                  <Flame className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
                 </div>
-                <div>
-                  <b className="text-2xl sm:text-4xl font-bold text-stone-900 dark:text-white block tracking-tight">
+                <div className="min-w-0 flex-1">
+                  <b className="text-base sm:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-stone-900 dark:text-white block tracking-tight leading-none sm:leading-tight">
                     <AnimatedCounter end={48} suffix="-72h" />
                   </b>
-                  <span className="text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider">
+                  <span className="text-[10px] sm:text-[11px] lg:text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider block leading-tight mt-1 break-words">
                     Direct Interview Call
                   </span>
                 </div>
               </div>
 
               {/* Stat 3: 100% Transparent CTC */}
-              <div className="flex items-center gap-4 px-2 sm:px-6">
-                <div className="w-12 h-12 rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center flex-shrink-0">
-                  <ShieldCheck size={22} />
+              <div className="flex items-center gap-2.5 sm:gap-4 px-1.5 sm:px-4 lg:px-6 min-w-0">
+                <div className="w-9 h-9 sm:w-11 sm:h-11 lg:w-12 lg:h-12 rounded-xl sm:rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 shadow-xs">
+                  <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
                 </div>
-                <div>
-                  <b className="text-2xl sm:text-4xl font-bold text-stone-900 dark:text-white block tracking-tight">
+                <div className="min-w-0 flex-1">
+                  <b className="text-base sm:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-stone-900 dark:text-white block tracking-tight leading-none sm:leading-tight">
                     <AnimatedCounter end={100} suffix="%" />
                   </b>
-                  <span className="text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider">
+                  <span className="text-[10px] sm:text-[11px] lg:text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider block leading-tight mt-1 break-words">
                     Transparent CTC
                   </span>
                 </div>
               </div>
 
               {/* Stat 4: Zero Application Fee */}
-              <div className="flex items-center gap-4 px-2 sm:px-6">
-                <div className="w-12 h-12 rounded-2xl bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center flex-shrink-0">
-                  <IndianRupee size={22} />
+              <div className="flex items-center gap-2.5 sm:gap-4 px-1.5 sm:px-4 lg:px-6 min-w-0">
+                <div className="w-9 h-9 sm:w-11 sm:h-11 lg:w-12 lg:h-12 rounded-xl sm:rounded-2xl bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 shadow-xs">
+                  <IndianRupee className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
                 </div>
-                <div>
-                  <b className="text-2xl sm:text-4xl font-bold text-stone-900 dark:text-white block tracking-tight">
+                <div className="min-w-0 flex-1">
+                  <b className="text-base sm:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-stone-900 dark:text-white block tracking-tight leading-none sm:leading-tight">
                     ₹0 Fee
                   </b>
-                  <span className="text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider">
+                  <span className="text-[10px] sm:text-[11px] lg:text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider block leading-tight mt-1 break-words">
                     Zero Application Fee
                   </span>
                 </div>

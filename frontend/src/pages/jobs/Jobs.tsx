@@ -35,18 +35,17 @@ const Jobs = () => {
     const title = typeof jobOrId === 'object' ? jobOrId.title : (jobTitle || 'Job Opening');
     const slug = typeof jobOrId === 'object' ? jobOrId.slug : undefined;
 
-    if (!window.confirm(`Are you sure you want to delete the job opening "${title}"? This will permanently remove it from database and frontend.`)) {
+    if (!window.confirm(`Are you sure you want to delete the job opening "${title}"? This will permanently remove it from database.`)) {
       return;
     }
     try {
       await jobService.deleteJob(id, slug, title);
       setJobs((prev) => prev.filter((j) => j.id !== id && j._id !== id && j.slug !== slug));
-      toast.success(`Job "${title}" deleted from database & frontend!`);
+      toast.success(`Job "${title}" deleted from database!`);
       fetchJobs(true);
-    } catch (err) {
-      setJobs((prev) => prev.filter((j) => j.id !== id && j._id !== id && j.slug !== slug));
-      toast.success(`Job "${title}" removed!`);
-      fetchJobs(true);
+    } catch (err: any) {
+      console.error('Failed to delete job:', err);
+      toast.error(err.response?.data?.message || `Failed to delete job "${title}". Please try again.`);
     }
   };
 
@@ -87,16 +86,9 @@ const Jobs = () => {
       setJobs((prev) => prev.map((j) => (j.id === id || j._id === id ? updatedJob : j)));
       toast.success(`Job opening "${editFormData.title}" updated successfully!`);
       setEditingJob(null);
-    } catch (err) {
-      // Fallback local state update
-      const payload = {
-        ...editFormData,
-        salaryMin: editFormData.salaryMin ? parseFloat(editFormData.salaryMin) : null,
-        salaryMax: editFormData.salaryMax ? parseFloat(editFormData.salaryMax) : null,
-      };
-      setJobs((prev) => prev.map((j) => (j.id === id || j._id === id ? { ...j, ...payload } : j)));
-      toast.success(`Job opening "${editFormData.title}" updated!`);
-      setEditingJob(null);
+    } catch (err: any) {
+      console.error('Failed to update job:', err);
+      toast.error(err.response?.data?.message || 'Failed to update job opening. Please try again.');
     } finally {
       setSavingEdit(false);
     }

@@ -247,6 +247,56 @@ export const getOfferById = async (req, res) => {
   }
 };
 
+// Update Offer Details
+export const updateOffer = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      candidateName,
+      candidateEmail,
+      jobTitle,
+      salary,
+      bonus,
+      equity,
+      benefits,
+      joiningDate,
+      expirationDate,
+      customTerms,
+      notes,
+      status,
+    } = req.body;
+
+    let numericSalary = typeof salary === 'number' ? salary : 0;
+    if (typeof salary === 'string') {
+      const parsed = parseFloat(salary.replace(/[^0-9.]/g, ''));
+      if (!isNaN(parsed) && parsed > 0) numericSalary = parsed;
+    }
+
+    const offer = await prisma.offer.update({
+      where: { id },
+      data: {
+        ...(candidateName && { candidateName }),
+        ...(candidateEmail && { candidateEmail }),
+        ...(jobTitle && { jobTitle }),
+        ...(numericSalary > 0 && { salary: numericSalary }),
+        ...(bonus !== undefined && { bonus: parseFloat(bonus) || null }),
+        ...(equity !== undefined && { equity: parseFloat(equity) || null }),
+        ...(benefits && { benefits }),
+        ...(joiningDate && { joiningDate: new Date(joiningDate) }),
+        ...(expirationDate && { expirationDate: new Date(expirationDate) }),
+        ...(customTerms && { customTerms: typeof customTerms === 'object' ? JSON.stringify(customTerms) : customTerms }),
+        ...(notes !== undefined && { notes }),
+        ...(status && { status }),
+      },
+    });
+
+    res.json({ success: true, offer });
+  } catch (error) {
+    logger.error('Update Offer Error:', error.message);
+    res.status(500).json({ success: false, message: 'Failed to update offer: ' + error.message });
+  }
+};
+
 // Update Offer Status
 export const updateOfferStatus = async (req, res) => {
   try {

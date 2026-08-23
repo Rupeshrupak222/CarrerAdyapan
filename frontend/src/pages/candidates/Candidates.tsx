@@ -64,75 +64,33 @@ const Candidates = () => {
   }, []);
 
   const fetchCandidates = async () => {
-    let list = [];
     try {
-      const res = await candidateService.getAllCandidates();
-      if (res?.candidates && Array.isArray(res.candidates) && res.candidates.length > 0) {
-        list = res.candidates;
+      const res = await candidateService.getAllCandidates(true);
+      if (res?.candidates && Array.isArray(res.candidates)) {
+        setCandidates(res.candidates);
+      } else {
+        setCandidates([]);
       }
     } catch (error) {
       console.warn('Backend candidates fetch error:', error);
+      setCandidates([]);
+    } finally {
+      setLoading(false);
     }
-
-    try {
-      const localCandidates = getStoredCandidates();
-      if (localCandidates && Array.isArray(localCandidates) && localCandidates.length > 0) {
-        const map = new Map();
-        const getCandKey = (c: any) => (c.email ? String(c.email).trim().toLowerCase() : String(c.id));
-
-        list.forEach((c) => {
-          if (c && (c.email || c.id)) {
-            map.set(getCandKey(c), c);
-          }
-        });
-
-        localCandidates.forEach((c) => {
-          if (c && (c.email || c.id)) {
-            const key = getCandKey(c);
-            if (!map.has(key)) {
-              map.set(key, c);
-            } else {
-              map.set(key, { ...map.get(key), ...c });
-            }
-          }
-        });
-
-        list = Array.from(map.values());
-      }
-    } catch (e) { }
-
-    setCandidates(list);
-    setLoading(false);
   };
 
   const fetchInterviewsData = async () => {
-    let list = [];
     try {
       const res = await interviewService.getAllInterviews(true);
       if (res?.interviews && Array.isArray(res.interviews)) {
-        list = res.interviews;
+        setInterviews(res.interviews);
+      } else {
+        setInterviews([]);
       }
     } catch (e) {
       console.warn('Error fetching interviews for candidates:', e);
+      setInterviews([]);
     }
-    try {
-      const localStr = localStorage.getItem('adyapan_interviews');
-      if (localStr) {
-        const localList = JSON.parse(localStr);
-        if (Array.isArray(localList)) {
-          const map = new Map();
-          list.forEach((i) => i && i.id && map.set(String(i.id), i));
-          localList.forEach((i) => {
-            if (i && i.id) {
-              if (!map.has(String(i.id))) map.set(String(i.id), i);
-              else map.set(String(i.id), { ...map.get(String(i.id)), ...i });
-            }
-          });
-          list = Array.from(map.values());
-        }
-      }
-    } catch (e) { }
-    setInterviews(Array.isArray(list) ? list : []);
   };
 
   // Excel / CSV File Import Handler
@@ -328,20 +286,15 @@ const Candidates = () => {
   };
 
   const handleDeleteCandidate = async (id, name) => {
-    if (!window.confirm(`Delete candidate "${name}" permanently from DB, backend & frontend?`)) return;
+    if (!window.confirm(`Delete candidate "${name}" permanently from database?`)) return;
     try {
       await candidateService.deleteCandidate(id);
-    } catch (err) {
-      // ignore errors — still remove from UI
+      setCandidates((prev) => prev.filter((c) => c.id !== id));
+      toast.success(`Candidate "${name}" deleted from database!`);
+    } catch (err: any) {
+      console.error('Failed to delete candidate:', err);
+      toast.error(err.response?.data?.message || 'Failed to delete candidate from database');
     }
-    setCandidates((prev) => prev.filter((c) => c.id !== id));
-    // Also remove from localStorage
-    try {
-      const key = 'adyapan_candidates';
-      const stored = JSON.parse(localStorage.getItem(key) || '[]');
-      localStorage.setItem(key, JSON.stringify(stored.filter((c) => c.id !== id)));
-    } catch (e) { }
-    toast.success(`Candidate "${name}" deleted! `);
   };
 
   const handleDownloadCandidateResume = (cand) => {
@@ -444,34 +397,13 @@ const Candidates = () => {
     try {
       await interviewService.createInterview(newInterviewData);
       await candidateService.updateCandidate(schedulingCandidate.id, { status: 'SCHEDULED' }).catch(() => { });
-    } catch (err) {
-      console.warn('DB interview create fallback:', err.message);
+      toast.success(`Interview scheduled for ${fullCandName} and saved to database!`);
+      setSchedulingCandidate(null);
+      navigate('/interviews');
+    } catch (err: any) {
+      console.error('DB interview create error:', err);
+      toast.error(err.response?.data?.message || 'Failed to schedule interview. Please try again.');
     }
-
-    try {
-      const key = 'adyapan_interviews';
-      const existing = JSON.parse(localStorage.getItem(key) || '[]');
-      const updated = [newInterviewData, ...existing.filter((i) => i.id !== newInterviewData.id)];
-      localStorage.setItem(key, JSON.stringify(updated));
-
-      const candKey = 'adyapan_candidates';
-      const existingCands = JSON.parse(localStorage.getItem(candKey) || '[]');
-      const updatedCands = existingCands.map((c) => {
-        if (c.id === schedulingCandidate.id || (c.email && schedulingCandidate.email && c.email.toLowerCase() === schedulingCandidate.email.toLowerCase())) {
-          return { ...c, status: 'SCHEDULED' };
-        }
-        return c;
-      });
-      localStorage.setItem(candKey, JSON.stringify(updatedCands));
-    } catch (e) { }
-
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new Event('adyapan_data_sync'));
-    }
-
-    toast.success(`Interview scheduled for ${fullCandName} & saved to Interviews directory!`);
-    setSchedulingCandidate(null);
-    navigate('/interviews');
   };
 
   const handleOpenBulkScheduleModal = () => {
@@ -505,7 +437,6 @@ const Candidates = () => {
     setIsBulkScheduling(true);
 
     try {
-      // High-performance batch API call (< 1 second response for 100+ candidates)
       const res = await interviewService.bulkScheduleInterviews({
         interviews: filteredCandidates,
         type: bulkScheduleFormData.type || 'SALES_PITCH_ROUND',
@@ -515,39 +446,16 @@ const Candidates = () => {
         notes: `Bulk scheduled interview round`,
       });
 
-      const newInterviewsList = res?.interviews || [];
-      const scheduledCount = newInterviewsList.length || filteredCandidates.length;
+      const scheduledCount = res?.count || filteredCandidates.length;
 
-      // Update LocalStorage sync layer instantly
-      const key = 'adyapan_interviews';
-      const existingInterviews = JSON.parse(localStorage.getItem(key) || '[]');
-      const candKey = 'adyapan_candidates';
-      let existingCands = JSON.parse(localStorage.getItem(candKey) || '[]');
-
-      const updatedInterviews = [...newInterviewsList, ...existingInterviews];
-      localStorage.setItem(key, JSON.stringify(updatedInterviews));
-
-      const updatedCands = existingCands.map((c) => {
-        const isMatch = filteredCandidates.some(
-          (fc) => fc.id === c.id || (fc.email && c.email && fc.email.toLowerCase() === c.email.toLowerCase())
-        );
-        return isMatch ? { ...c, status: 'SCHEDULED' } : c;
-      });
-      localStorage.setItem(candKey, JSON.stringify(updatedCands));
-
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new Event('adyapan_data_sync'));
-        window.dispatchEvent(new Event('adyapan_data_updated'));
-      }
-
-      toast.success(`⚡ Successfully bulk scheduled interviews & dispatched invitation emails to all ${scheduledCount} candidates instantly!`);
+      toast.success(`Successfully bulk scheduled interviews for all ${scheduledCount} candidates in database!`);
       setShowBulkScheduleModal(false);
       fetchCandidates();
       fetchInterviewsData();
       navigate('/interviews');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error bulk scheduling interviews:', err);
-      toast.error('Failed to complete bulk interview scheduling: ' + err.message);
+      toast.error(err.response?.data?.message || 'Failed to complete bulk interview scheduling: ' + err.message);
     } finally {
       setIsBulkScheduling(false);
     }

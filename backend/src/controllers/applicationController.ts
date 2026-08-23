@@ -50,8 +50,14 @@ export const createApplication = async (req, res) => {
 // Get All Applications
 export const getAllApplications = async (req, res) => {
   try {
+    const { jobId, candidateId, status } = req.query;
+    const where: any = {};
+    if (jobId) where.jobId = String(jobId);
+    if (candidateId) where.candidateId = String(candidateId);
+    if (status && status !== 'ALL') where.status = String(status);
+
     const applications = await prisma.application.findMany({
-      where: { job: { userId: req.user.id } },
+      where,
       include: {
         candidate: true,
         job: true,
@@ -64,7 +70,7 @@ export const getAllApplications = async (req, res) => {
     res.json({ success: true, applications });
   } catch (error) {
     logger.error('Get Applications Error:', error);
-    res.status(500).json({ success: false, message: 'Failed to fetch applications' });
+    res.status(500).json({ success: false, message: 'Failed to fetch applications: ' + error.message });
   }
 };
 

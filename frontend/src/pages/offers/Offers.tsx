@@ -8,10 +8,6 @@ import { useTheme } from '../../context/ThemeContext';
 import {
   getGlobalOfferTemplate,
   saveGlobalOfferTemplate,
-  getStoredOffers,
-  saveOffersList,
-  syncUpdateOffer,
-  getStoredCandidates
 } from '../../utils/applicationStore';
 import toast from 'react-hot-toast';
 
@@ -56,55 +52,6 @@ const Offers = () => {
     try {
       const dbResponse = await offerService.getAllOffers().catch(() => null);
       const dbList = dbResponse?.offers || [];
-      const localList = getStoredOffers();
-
-      const combinedMap = new Map();
-      const allOffers = [...localList, ...dbList];
-
-      allOffers.forEach((o) => {
-        if (!o || (!o.candidateName && !o.id)) return;
-
-        // Primary key by normalized candidate name
-        const key = o.candidateName ? o.candidateName.toLowerCase().trim().replace(/\s+/g, ' ') : o.id;
-
-        if (!combinedMap.has(key)) {
-          combinedMap.set(key, o);
-        } else {
-          const existing = combinedMap.get(key);
-
-          const validEmail = (existing.email && !existing.email.includes('example.com'))
-            ? existing.email
-            : ((o.email && !o.email.includes('example.com')) ? o.email : (existing.email || o.email));
-
-          const validSalary = (existing.stipend || existing.salary) && existing.salary !== 0 && existing.salary !== '0' && existing.salary !== '₹0'
-            ? (existing.stipend || existing.salary)
-            : (o.stipend || o.salary);
-
-          combinedMap.set(key, {
-            ...o,
-            ...existing,
-            id: existing.id || o.id,
-            email: validEmail,
-            candidateEmail: validEmail,
-            salary: validSalary,
-            stipend: existing.stipend || o.stipend || validSalary,
-            postProbationCtc: existing.postProbationCtc || o.postProbationCtc,
-            location: existing.location || o.location,
-            trainingStartDate: existing.trainingStartDate || o.trainingStartDate || existing.joiningDate || o.joiningDate,
-            joiningDate: existing.joiningDate || o.joiningDate || existing.trainingStartDate || o.trainingStartDate,
-            trainingEndDate: existing.trainingEndDate || o.trainingEndDate,
-            ojtStartDate: existing.ojtStartDate || o.ojtStartDate,
-            ojtEndDate: existing.ojtEndDate || o.ojtEndDate,
-            workTiming: existing.workTiming || o.workTiming,
-            workingHours: existing.workingHours || o.workingHours,
-            jobType: existing.jobType || o.jobType,
-            hrEmail: existing.hrEmail || o.hrEmail,
-            hrPhone: existing.hrPhone || o.hrPhone,
-            companyWebsite: existing.companyWebsite || o.companyWebsite,
-            hrManagerName: existing.hrManagerName || o.hrManagerName,
-          });
-        }
-      });
 
       const sanitizeOfferTerms = (off: any) => {
         let terms = off.customTerms;
@@ -119,42 +66,20 @@ const Offers = () => {
         return { ...off, customTerms: terms };
       };
 
-      const merged = Array.from(combinedMap.values()).map(sanitizeOfferTerms);
-      setOffers(merged);
+      const sanitized = dbList.map(sanitizeOfferTerms);
+      setOffers(sanitized);
 
-      // Check if candidateId search param is passed (e.g. /offers?candidateId=cand-bda-1)
       const queryParams = new URLSearchParams(location.search);
       const targetCandidateId = queryParams.get('candidateId');
       if (targetCandidateId) {
-        const found = merged.find((o) => o.candidateId === targetCandidateId || o.id === targetCandidateId);
+        const found = sanitized.find((o: any) => o.candidateId === targetCandidateId || o.id === targetCandidateId);
         if (found) {
           handleOpenEditModal(found);
-        } else {
-          // Find in candidates store if not in offers list yet
-          const candidateStore = getStoredCandidates();
-          const cand = candidateStore.find((c) => c.id === targetCandidateId);
-          if (cand) {
-            const newOfferEntry = syncUpdateOffer({
-              candidateId: cand.id,
-              candidateName: `${cand.firstName} ${cand.lastName}`,
-              email: cand.email,
-              phone: cand.phone,
-              jobTitle: cand.jobTitle || cand.appliedRole || cand.applications?.[0]?.job?.title || (!['student / fresher', 'student', 'fresher', 'applicant'].includes(String(cand.currentPosition || '').toLowerCase().trim()) ? cand.currentPosition : '') || 'Business Development Associate (BDA)',
-              salary: cand.offerDetails?.salary || 550000,
-              bonus: cand.offerDetails?.bonus || 100000,
-              joiningDate: cand.offerDetails?.joiningDate || '2026-09-01',
-              expirationDate: cand.offerDetails?.expirationDate || '2026-08-30',
-              customTerms: cand.offerDetails?.customTerms || 'Standard Adyapan Edutech employment terms apply.',
-              benefits: cand.offerDetails?.benefits || ['Health Insurance', 'Performance Incentives'],
-              status: cand.status === 'SHORTLISTED' ? 'READY_TO_SEND' : 'SENT',
-            });
-            setOffers(getStoredOffers());
-            handleOpenEditModal(newOfferEntry);
-          }
         }
       }
     } catch (error) {
-      setOffers(getStoredOffers());
+      console.warn('Failed to load offers:', error);
+      setOffers([]);
     } finally {
       setLoading(false);
     }
@@ -187,9 +112,11 @@ const Offers = () => {
         hrManagerName: offer.hrManagerName || 'HR MANAGER',
         ...offer,
       });
-      syncUpdateOffer({ ...offer, status: 'SENT', email: candidateEmail });
-      setOffers(getStoredOffers());
-      toast.success(`Official 4-Page Adyapan Offer Letter dispatched via Resend to ${candidateEmail}! `);
+      if (offer.id) {
+        await offerService.updateOfferStatus(offer.id, 'SENT').catch(() => null);
+      }
+      fetchOffers();
+      toast.success(`Official 4-Page Adyapan Offer Letter dispatched via Resend to ${candidateEmail}!`);
     } catch (e) {
       toast.error('Failed to send offer email');
     }
@@ -197,18 +124,17 @@ const Offers = () => {
 
   const handleDeleteOffer = async (offer) => {
     const name = offer.candidateName || 'this candidate';
-    if (!window.confirm(`Delete offer for "${name}" permanently from DB, backend & frontend?`)) return;
-    // Remove from DB
+    if (!window.confirm(`Delete offer for "${name}" permanently from database?`)) return;
     if (offer.id) {
-      try { await offerService.deleteOffer(offer.id); } catch (e) { }
+      try {
+        await offerService.deleteOffer(offer.id);
+        setOffers((prev) => prev.filter((o) => o.id !== offer.id));
+        toast.success(`Offer for "${name}" deleted from database!`);
+      } catch (e) {
+        console.error('Delete offer error:', e);
+        toast.error('Failed to delete offer');
+      }
     }
-    // Remove from localStorage
-    try {
-      const stored = getStoredOffers().filter((o) => o.id !== offer.id && o.candidateName !== offer.candidateName);
-      saveOffersList(stored);
-    } catch (e) { }
-    setOffers((prev) => prev.filter((o) => o.id !== offer.id && o.candidateName !== offer.candidateName));
-    toast.success(`Offer for "${name}" deleted! `);
   };
 
   const [viewingPdfOffer, setViewingPdfOffer] = useState<any | null>(null);
@@ -238,7 +164,6 @@ const Offers = () => {
       toast.loading(`Generating Candidate PDF Offer Letter for ${offer.candidateName}...`, { id: 'pdf-toast' });
       const globalTpl = getGlobalOfferTemplate();
 
-      // Generate dynamic personalized PDF blob overlaying candidate name onto uploaded company template
       const blob = await offerService.generatePDF({
         olNo: offer.olNo || `ADP04${Math.floor(10 + Math.random() * 90)}`,
         offerDate: offer.offerDate || '14-May-2026',
@@ -271,7 +196,7 @@ const Offers = () => {
       setViewingPdfUrl(targetPdfUrl);
       setViewingPdfOffer(offer);
 
-      toast.success(`Opening Candidate PDF Offer Letter for ${offer.candidateName}! `, { id: 'pdf-toast' });
+      toast.success(`Opening Candidate PDF Offer Letter for ${offer.candidateName}!`, { id: 'pdf-toast' });
     } catch (e) {
       toast.error('Failed to generate PDF offer letter preview', { id: 'pdf-toast' });
     }
@@ -279,18 +204,20 @@ const Offers = () => {
 
   const handleRejectCandidate = async (offer) => {
     const candidateEmail = offer.email || offer.candidateEmail || (offer.candidateName ? `${offer.candidateName.toLowerCase().replace(/\s+/g, '.')}@example.com` : 'dks241655@gmail.com');
-    const updated = syncUpdateOffer({ ...offer, status: 'REJECTED', email: candidateEmail });
-    setOffers(getStoredOffers());
 
     try {
+      if (offer.id) {
+        await offerService.updateOfferStatus(offer.id, 'REJECTED');
+      }
       await candidateService.sendRejectionEmail({
         candidateName: offer.candidateName,
         candidateEmail,
         jobTitle: offer.jobTitle || 'Business Development Associate (BDA)',
       });
-      toast.error(`Offer for ${offer.candidateName} marked as Rejected. Rejection email dispatched via Resend to ${candidateEmail}! `);
+      toast.success(`Offer for ${offer.candidateName} marked as Rejected and rejection email sent!`);
+      fetchOffers();
     } catch (e) {
-      toast.error(`Offer for ${offer.candidateName} marked as Rejected.`);
+      toast.error(`Failed to reject offer`);
     }
   };
 
@@ -359,9 +286,8 @@ const Offers = () => {
     const globalTpl = getGlobalOfferTemplate();
 
     const newOffer = {
-      id: `off-${Date.now()}`,
       candidateName: formData.candidateName,
-      email: candidateEmail,
+      candidateEmail: candidateEmail,
       phone: formData.phone || '+91 98765-43210',
       jobTitle: formData.jobTitle,
       salary: parseFloat(formData.salary) || 500000,
@@ -375,23 +301,27 @@ const Offers = () => {
     };
 
     try {
-      await offerService.sendEmail({
-        candidateName: newOffer.candidateName,
-        candidateEmail: newOffer.email,
-        jobTitle: newOffer.jobTitle,
-        salary: newOffer.salary,
-        joiningDate: newOffer.joiningDate,
-        companyTemplateName: globalTpl.templateName,
-        templateDataUrl: globalTpl.templateDataUrl,
-      });
-    } catch (err) {
-      toast.error('Offer saved locally but failed to send email.');
+      await offerService.createOffer(newOffer);
+      try {
+        await offerService.sendEmail({
+          candidateName: newOffer.candidateName,
+          candidateEmail: newOffer.candidateEmail,
+          jobTitle: newOffer.jobTitle,
+          salary: newOffer.salary,
+          joiningDate: newOffer.joiningDate,
+          companyTemplateName: globalTpl.templateName,
+          templateDataUrl: globalTpl.templateDataUrl,
+        });
+      } catch (err) {
+        console.warn('Email dispatch warning:', err);
+      }
+      toast.success('Offer Letter created and saved to database!');
+      setShowAddModal(false);
+      fetchOffers();
+    } catch (err: any) {
+      console.error('Error creating offer:', err);
+      toast.error(err.response?.data?.message || 'Failed to create offer letter');
     }
-
-    syncUpdateOffer(newOffer);
-    setOffers(getStoredOffers());
-    toast.success('Offer Letter created and approved! ');
-    setShowAddModal(false);
   };
 
   const getCleanTermsDisplay = (terms) => {
@@ -427,7 +357,7 @@ const Offers = () => {
     return 'INR 20000/-PerMonth';
   };
 
-  const handleSaveEditedOffer = (e) => {
+  const handleSaveEditedOffer = async (e) => {
     e.preventDefault();
     if (!editingOffer) return;
 
@@ -438,14 +368,19 @@ const Offers = () => {
       benefits: editingOffer.benefitsText ? editingOffer.benefitsText.split(',').map((b) => b.trim()) : editingOffer.benefits,
     };
 
-    const savedOffer = syncUpdateOffer(offerToSave);
-    const updatedList = getStoredOffers();
-    setOffers(updatedList);
-
-    toast.success(`Offer Letter for ${editingOffer.candidateName} updated successfully! `);
+    try {
+      if (editingOffer.id) {
+        await offerService.updateOffer(editingOffer.id, offerToSave);
+      }
+      toast.success(`Offer Letter for ${editingOffer.candidateName} updated in database!`);
+      fetchOffers();
+    } catch (err: any) {
+      console.error('Error updating offer:', err);
+      toast.error('Failed to update offer');
+    }
 
     if (viewingPdfOffer && (viewingPdfOffer.id === editingOffer.id || viewingPdfOffer.email === editingOffer.email)) {
-      handleViewOfferPdf(savedOffer);
+      handleViewOfferPdf(offerToSave);
     }
 
     setEditingOffer(null);

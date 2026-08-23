@@ -82,42 +82,14 @@ const Interviews = () => {
   const fetchInterviews = async () => {
     try {
       const res = await interviewService.getAllInterviews(true);
-      const dbList = res?.interviews || [];
-      const localList = getSavedLocalInterviews();
-
-      const combinedMap = new Map();
-      INITIAL_MOCK_INTERVIEWS.forEach((i) => combinedMap.set(i.id, i));
-
-      // 1. Load DB items first
-      dbList.forEach((i) => {
-        if (i && i.id) combinedMap.set(i.id, i);
-      });
-
-      // 2. Merge local items ensuring COMPLETED status is never overwritten by stale SCHEDULED status
-      localList.forEach((i) => {
-        if (i && i.id) {
-          const existing = combinedMap.get(i.id);
-          if (!existing) {
-            combinedMap.set(i.id, i);
-          } else {
-            combinedMap.set(i.id, {
-              ...existing,
-              ...i,
-              status: (existing.status === 'COMPLETED' || i.status === 'COMPLETED') ? 'COMPLETED' : (i.status || existing.status || 'SCHEDULED'),
-            });
-          }
-        }
-      });
-
-      const merged = Array.from(combinedMap.values());
-      setInterviews(merged);
-
-      try {
-        localStorage.setItem('adyapan_interviews', JSON.stringify(merged));
-      } catch (e) { }
+      if (res?.interviews && Array.isArray(res.interviews)) {
+        setInterviews(res.interviews);
+      } else {
+        setInterviews([]);
+      }
     } catch (e) {
-      const localList = getSavedLocalInterviews();
-      setInterviews(localList.length > 0 ? localList : INITIAL_MOCK_INTERVIEWS);
+      console.warn('Failed to load interviews from DB:', e);
+      setInterviews([]);
     } finally {
       setLoading(false);
     }
@@ -150,113 +122,44 @@ const Interviews = () => {
       status: 'SCHEDULED',
     };
 
-    let created = null;
     try {
-      const response = await interviewService.createInterview(newInterviewData);
-      created = response?.interview;
-    } catch (error) {
-      console.warn('DB create interview fallback:', error.message);
+      await interviewService.createInterview(newInterviewData);
+      toast.success(`Interview scheduled for ${fullCandName} and saved to database!`);
+      setShowAddModal(false);
+      fetchInterviews();
+    } catch (error: any) {
+      console.error('DB create interview error:', error);
+      toast.error(error.response?.data?.message || 'Failed to schedule interview');
     }
-
-    if (!created) {
-      created = {
-        ...newInterviewData,
-        application: {
-          candidate: selectedCandidate || { firstName: 'Applicant', lastName: '' },
-          job: { title: appliedRole },
-        },
-      };
-    }
-
-    const updated = [created, ...interviews];
-    saveInterviewsToStore(updated);
-    toast.success(`Interview scheduled for ${fullCandName} & saved to Database! `);
-    setShowAddModal(false);
   };
 
   const handleCompleteInterview = async (id) => {
     const targetInt = interviews.find((i) => i.id === id);
     if (!targetInt) return;
 
-    const updatedPayload = {
-      ...targetInt,
-      status: 'COMPLETED',
-      completedAt: new Date().toISOString(),
-    };
-
-    // 1. Immediately update React state & localStorage
-    const updatedList = interviews.map((i) => (i.id === id ? updatedPayload : i));
-    saveInterviewsToStore(updatedList);
-
-    // 2. Persist to PostgreSQL Database via API call
     try {
-      await interviewService.updateInterview(id, updatedPayload);
-    } catch (e) {
-      console.warn('DB update interview error:', e);
+      await interviewService.updateInterviewFeedback(id, { status: 'COMPLETED' });
+      toast.success('Interview marked as Completed in database!');
+      fetchInterviews();
+    } catch (e: any) {
+      console.error('DB update interview error:', e);
+      toast.error('Failed to complete interview');
     }
-
-    // 3. Sync Candidate to Offers page
-    const candName = targetInt.candidateName || (targetInt.application?.candidate
-      ? `${targetInt.application.candidate.firstName} ${targetInt.application.candidate.lastName}`
-      : 'Candidate');
-    const candEmail = targetInt.candidateEmail || targetInt.application?.candidate?.email || targetInt.email || `${candName.toLowerCase().replace(/\s+/g, '.')}@example.com`;
-    const jobTitle = targetInt.jobTitle || targetInt.application?.job?.title || 'Business Development Associate (BDA)';
-
-    const offerEntry = {
-      id: `off-${Date.now()}`,
-      candidateId: targetInt.candidateId || targetInt.application?.candidate?.id,
-      candidateName: candName,
-      email: candEmail,
-      jobTitle: jobTitle,
-      salary: 550000,
-      bonus: 100000,
-      joiningDate: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
-      expirationDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
-      status: 'READY_TO_SEND',
-      templateName: getGlobalOfferTemplate().templateName,
-      benefits: ['Health Insurance', 'Performance Incentives', 'Learning Allowance'],
-      customTerms: 'Probation period of 3 months. Interview cleared successfully.',
-    };
-
-    syncUpdateOffer(offerEntry);
-
-    // Update candidate status to INTERVIEWED in local storage candidates list
-    try {
-      const targetCandId = targetInt.candidateId || targetInt.application?.candidate?.id;
-      if (targetCandId) {
-        await candidateService.updateCandidate(targetCandId, { status: 'INTERVIEWED' }).catch(() => { });
-      }
-      const candKey = 'adyapan_candidates';
-      const existingCands = JSON.parse(localStorage.getItem(candKey) || '[]');
-      const updatedCands = existingCands.map((c) => {
-        if (
-          (targetCandId && String(c.id) === String(targetCandId)) ||
-          (c.email && candEmail && c.email.toLowerCase() === candEmail.toLowerCase())
-        ) {
-          return { ...c, status: 'INTERVIEWED' };
-        }
-        return c;
-      });
-      localStorage.setItem(candKey, JSON.stringify(updatedCands));
-    } catch (e) { }
-
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('adyapan_data_updated'));
-      window.dispatchEvent(new Event('adyapan_data_sync'));
-    }
-
-    toast.success('Interview marked as Completed & persisted to Database! Candidate added to Offers section! ');
   };
 
   const handleDeleteInterview = async (id) => {
     const interview = interviews.find((i) => i.id === id);
     const name = interview?.candidateName
       || (interview?.application?.candidate ? `${interview.application.candidate.firstName} ${interview.application.candidate.lastName}` : 'this interview');
-    if (!window.confirm(`Delete interview for "${name}" permanently from DB, backend & frontend?`)) return;
-    try { await interviewService.deleteInterview(id); } catch (e) { }
-    const updated = interviews.filter((i) => i.id !== id);
-    saveInterviewsToStore(updated);
-    toast.success(`Interview for "${name}" deleted! `);
+    if (!window.confirm(`Delete interview for "${name}" permanently from database?`)) return;
+    try {
+      await interviewService.deleteInterview(id);
+      setInterviews((prev) => prev.filter((i) => i.id !== id));
+      toast.success(`Interview for "${name}" deleted from database!`);
+    } catch (e: any) {
+      console.error('Failed to delete interview:', e);
+      toast.error('Failed to delete interview');
+    }
   };
 
   const filteredInterviews = interviews.filter((i) => {

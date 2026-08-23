@@ -58,172 +58,30 @@ const CandidateDetails = () => {
   }, [id]);
 
   const fetchInterviewsData = async () => {
-    let list = [];
     try {
       const res = await interviewService.getAllInterviews(true);
-      list = res?.interviews || [];
-    } catch (e) { }
-    try {
-      const localStr = localStorage.getItem('adyapan_interviews');
-      if (localStr) {
-        const localList = JSON.parse(localStr);
-        const map = new Map();
-        list.forEach((i) => map.set(i.id, i));
-        localList.forEach((i) => {
-          if (!map.has(i.id)) map.set(i.id, i);
-          else map.set(i.id, { ...map.get(i.id), ...i });
-        });
-        list = Array.from(map.values());
-      }
-    } catch (e) { }
-    setInterviews(list);
+      setInterviews(res?.interviews || []);
+    } catch (e) {
+      setInterviews([]);
+    }
   };
 
   const fetchCandidate = async () => {
     setLoading(true);
     let loadedCandidate = null;
 
-    // 1. Try DB backend by ID
     try {
       const res = await candidateService.getCandidateById(id);
       if (res?.candidate) {
         loadedCandidate = res.candidate;
       }
     } catch (error) {
-      console.warn('Backend candidate fetch error, trying local:', error);
-    }
-
-    // 2. Search local stored candidates & offers
-    const localCandidates = getStoredCandidates();
-    const offersList = getStoredOffers();
-
-    const matchingOffer = offersList.find(
-      (o) => o.id === id || o.candidateId === id || (o.email && o.email === id)
-    );
-
-    if (!loadedCandidate) {
-      const foundCandidate = localCandidates.find((c) => {
-        if (!c) return false;
-        if (c.id === id) return true;
-        if (c.email && (c.email === id || (matchingOffer && c.email.toLowerCase() === matchingOffer.email?.toLowerCase()))) return true;
-        if (matchingOffer && (c.id === matchingOffer.candidateId || (c.firstName && matchingOffer.candidateName?.toLowerCase().includes(c.firstName.toLowerCase())))) return true;
-        return false;
-      });
-
-      if (foundCandidate) {
-        loadedCandidate = foundCandidate;
-      }
-    }
-
-    // 3. Construct candidate from matchingOffer if not found in candidate store
-    if (!loadedCandidate && matchingOffer) {
-      const nameParts = (matchingOffer.candidateName || 'Valued Candidate').split(' ');
-      const fName = nameParts[0] || 'Candidate';
-      const lName = nameParts.slice(1).join(' ') || '';
-
-      loadedCandidate = {
-        id: matchingOffer.candidateId || matchingOffer.id,
-        firstName: fName,
-        lastName: lName,
-        email: matchingOffer.email || matchingOffer.candidateEmail || 'N/A',
-        phone: matchingOffer.phone || 'N/A',
-        employmentStatus: 'EMPLOYED',
-        currentPosition: matchingOffer.jobTitle || 'Business Development Associate (BDA)',
-        currentCompany: 'Adyapan Selected Candidate',
-        currentCompanyTenure: '1-3 Years',
-        totalExperience: 2,
-        noticePeriod: 'Immediate',
-        currentCtc: '₹4,50,000 LPA',
-        expectedCtc: '₹6,50,000 LPA',
-        location: matchingOffer.location || 'India',
-        education: 'Graduate',
-        skills: ['EdTech Sales', 'Student Counselling', 'Communication', 'Target Handling'],
-        score: 88,
-        reason: 'Selected candidate for Adyapan Edutech.',
-        status: matchingOffer.status || 'SHORTLISTED',
-        appliedAt: new Date().toISOString(),
-      };
-    }
-
-    // 4. Check DB candidates list fallback
-    if (!loadedCandidate) {
-      try {
-        const allDbRes = await candidateService.getAllCandidates().catch(() => null);
-        const allDb = allDbRes?.candidates || [];
-        const dbMatch = allDb.find((c) => c.id === id || c.email === id || (matchingOffer && c.email === matchingOffer.email));
-        if (dbMatch) {
-          loadedCandidate = dbMatch;
-        }
-      } catch (e) { }
-    }
-
-    // 5. Final fallback
-    if (!loadedCandidate) {
-      loadedCandidate = getFallbackCandidate(id);
-    }
-
-    // Attach offer details & override placeholder name
-    const activeOffer = matchingOffer || offersList.find(
-      (o) => o.candidateId === loadedCandidate.id || (o.email && loadedCandidate.email && o.email.toLowerCase() === loadedCandidate.email.toLowerCase())
-    );
-
-    if (activeOffer) {
-      const fullCandidateName = `${loadedCandidate.firstName || ''} ${loadedCandidate.lastName || ''}`.trim();
-      const resolvedName = (fullCandidateName && fullCandidateName !== 'Applicant') ? fullCandidateName : (activeOffer.candidateName || 'Candidate');
-      const nameSplit = resolvedName.split(' ');
-
-      loadedCandidate = {
-        ...loadedCandidate,
-        firstName: nameSplit[0] || loadedCandidate.firstName || 'Candidate',
-        lastName: nameSplit.slice(1).join(' ') || loadedCandidate.lastName || '',
-        email: (loadedCandidate.email && loadedCandidate.email !== 'N/A') ? loadedCandidate.email : (activeOffer.email || activeOffer.candidateEmail || ''),
-        offerDetails: {
-          salary: activeOffer.salary,
-          bonus: activeOffer.bonus,
-          joiningDate: activeOffer.trainingStartDate || activeOffer.joiningDate,
-          expirationDate: activeOffer.expirationDate,
-          customTerms: activeOffer.customTerms,
-          benefits: activeOffer.benefits,
-          status: activeOffer.status,
-        },
-      };
+      console.warn('Backend candidate fetch error:', error);
     }
 
     setCandidate(loadedCandidate);
     setLoading(false);
   };
-
-  const getFallbackCandidate = (candId) => ({
-    id: candId || `cand-${Date.now()}`,
-    firstName: 'Applicant',
-    lastName: '',
-    email: 'N/A',
-    phone: 'N/A',
-    employmentStatus: 'STUDENT',
-    currentPosition: 'Student / Fresher',
-    currentCompany: 'University Student',
-    currentCompanyTenure: 'N/A',
-    currentRoleDescription: '',
-    totalExperience: 0,
-    noticePeriod: 'Immediate',
-    currentCtc: 'N/A',
-    expectedCtc: 'N/A',
-    location: 'India',
-    education: 'Graduate',
-    collegeName: 'University',
-    graduationYear: '2024',
-    specialization: 'General',
-    cgpa: 'Passing',
-    preferredLocationType: 'Hybrid',
-    motivationPitch: '',
-    skills: [],
-    score: 85,
-    reason: 'Application profile under evaluation.',
-    status: 'AI_SCREENED',
-    appliedAt: new Date().toISOString(),
-    resumeFileName: '',
-    resumeDataUrl: null,
-  });
 
   const handleDownloadResume = () => {
     if (!candidate) return;
@@ -378,11 +236,6 @@ const CandidateDetails = () => {
       };
 
       setCandidate(updated);
-      try {
-        const stored = JSON.parse(localStorage.getItem('adyapan_candidates') || '[]');
-        const updatedList = stored.map((c) => (c.id === candidate.id ? updated : c));
-        localStorage.setItem('adyapan_candidates', JSON.stringify(updatedList));
-      } catch (e) { }
 
       // Persist score & reason directly to PostgreSQL Database
       await candidateService.updateCandidate(candidate.id, {
@@ -391,7 +244,7 @@ const CandidateDetails = () => {
         atsBreakdown: res?.atsResult?.breakdown || updated.aiBreakdown
       }).catch(() => null);
 
-      toast.success(`Automated AI ATS Audit Complete! Score updated & saved to Database: ${newScore}% `);
+      toast.success(`Automated AI ATS Audit Complete! Score updated & saved to Database: ${newScore}%`);
     } catch (e) {
       toast.error('Failed to calculate automatic ATS score');
     } finally {
@@ -399,42 +252,32 @@ const CandidateDetails = () => {
     }
   };
 
-  const handleStatusChange = (newStatus) => {
+  const handleStatusChange = async (newStatus) => {
     if (!candidate) return;
-    const updated = { ...candidate, status: newStatus };
-    setCandidate(updated);
-    toast.success(`Candidate pipeline updated to ${newStatus}! `);
+    try {
+      await candidateService.updateCandidate(candidate.id, { status: newStatus });
+      setCandidate((prev) => ({ ...prev, status: newStatus }));
+      toast.success(`Candidate status updated to ${newStatus} in database!`);
+    } catch (e) {
+      toast.error('Failed to update candidate status');
+    }
   };
 
   const handleDeleteCandidate = async () => {
     if (!candidate) return;
     const candName = `${candidate.firstName || ''} ${candidate.lastName || ''}`.trim() || 'Candidate';
-    if (!window.confirm(`Are you sure you want to PERMANENTLY delete candidate "${candName}" and all associated applications, offers, and interviews from PostgreSQL Database?`)) {
+    if (!window.confirm(`Are you sure you want to PERMANENTLY delete candidate "${candName}" and all associated applications, offers, and interviews from Database?`)) {
       return;
     }
 
     try {
       await candidateService.deleteCandidate(candidate.id);
-    } catch (e) {
-      console.warn('DB candidate delete notice:', e);
+      toast.success(`Candidate "${candName}" permanently deleted from database!`);
+      navigate('/candidates');
+    } catch (e: any) {
+      console.error('DB candidate delete error:', e);
+      toast.error(e.response?.data?.message || 'Failed to delete candidate');
     }
-
-    try {
-      const storedCands = JSON.parse(localStorage.getItem('adyapan_candidates') || '[]');
-      const updatedCands = storedCands.filter((c) => c.id !== candidate.id && c.email !== candidate.email);
-      localStorage.setItem('adyapan_candidates', JSON.stringify(updatedCands));
-
-      const storedOffers = JSON.parse(localStorage.getItem('adyapan_offers') || '[]');
-      const updatedOffers = storedOffers.filter((o) => o.candidateId !== candidate.id && o.email !== candidate.email);
-      localStorage.setItem('adyapan_offers', JSON.stringify(updatedOffers));
-
-      const storedInterviews = JSON.parse(localStorage.getItem('adyapan_interviews') || '[]');
-      const updatedInterviews = storedInterviews.filter((i) => i.candidateId !== candidate.id && i.candidateEmail !== candidate.email);
-      localStorage.setItem('adyapan_interviews', JSON.stringify(updatedInterviews));
-    } catch (e) { }
-
-    toast.success(`Candidate "${candName}" & all linked data permanently deleted from DB! `);
-    navigate('/candidates');
   };
 
   // --- OFFER LETTER EDIT & PREVIEW HANDLERS FOR CANDIDATE PAGE ---
