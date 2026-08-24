@@ -178,13 +178,7 @@ const CandidateLogin = () => {
             </button>
           </form>
 
-          <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-            <Link
-              to={`/register${redirectUrl ? `?redirect=${encodeURIComponent(redirectUrl)}` : ''}`}
-              className="font-bold text-amber-600 dark:text-amber-400 hover:underline"
-            >
-              Create Account Free ↗
-            </Link>
+          <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end text-[11px] text-slate-500 dark:text-slate-400">
             <Link
               to="/careers"
               className="hover:text-amber-500 transition-colors"

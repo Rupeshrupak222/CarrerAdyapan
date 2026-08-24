@@ -163,10 +163,7 @@ const Login = () => {
           </form>
 
           {/* Footer Links */}
-          <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] font-semibold">
-            <Link to="/register" className="text-amber-600 dark:text-amber-400 hover:underline">
-              Create Account ↗
-            </Link>
+          <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end text-[11px] font-semibold">
             <Link to="/careers" className="text-slate-500 dark:text-slate-400 hover:text-amber-500 transition-colors">
               ← Back to Careers
             </Link>

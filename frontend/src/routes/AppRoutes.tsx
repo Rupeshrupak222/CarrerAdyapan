@@ -130,7 +130,7 @@ const AppRoutes = () => {
       {/* ===== AUTH ===== */}
       <Route path="/auth" element={<AuthPage />} />
       <Route path="/login" element={<AuthPage />} />
-      <Route path="/register" element={<AuthPage />} />
+      <Route path="/register" element={<Navigate to="/login" replace />} />
       <Route path="/admin/login" element={<Login />} />
       <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
 
