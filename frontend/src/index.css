@@ -5288,3 +5288,301 @@ html[data-theme="dark"] .about-value-cards>div {
     border-radius: 25px
   }
 }
+
+/* ====================================================
+   LIFE AT ADYAPAN & ABOUT US - EXTENDED DESIGN SYSTEM
+   ==================================================== */
+
+@keyframes timelinePulse {
+  0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.5); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 12px rgba(234, 88, 12, 0); }
+  100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(234, 88, 12, 0); }
+}
+
+@keyframes pulseBorder {
+  0%, 100% { border-color: rgba(234, 88, 12, 0.3); box-shadow: 0 0 20px rgba(234, 88, 12, 0.1); }
+  50% { border-color: rgba(249, 115, 22, 0.8); box-shadow: 0 0 35px rgba(249, 115, 22, 0.25); }
+}
+
+.ady-glass-card {
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html.dark .ady-glass-card {
+  background: #1c1b18;
+  border-color: #292524;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.ady-glass-card:hover {
+  transform: translateY(-6px);
+  border-color: #ea580c;
+  box-shadow: 0 20px 45px rgba(234, 88, 12, 0.12);
+}
+
+.ady-tab-btn {
+  padding: 0.75rem 1.4rem;
+  border-radius: 12px;
+  border: none;
+  font-weight: 800;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  color: #78716c;
+  background: transparent;
+}
+
+html.dark .ady-tab-btn {
+  color: #a8a29e;
+}
+
+.ady-tab-btn.active {
+  background: #ea580c !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 20px -4px rgba(234, 88, 12, 0.4);
+  transform: scale(1.02);
+}
+
+.ady-tab-btn:not(.active):hover {
+  color: #1c1917;
+  background: #f5f5f4;
+}
+
+html.dark .ady-tab-btn:not(.active):hover {
+  color: #fafaf9;
+  background: #292524;
+}
+
+.ady-timeline-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 850px;
+  margin: 0 auto;
+  border-left: 2px dashed #ea580c;
+  padding-left: 2.5rem;
+}
+
+.ady-timeline-item {
+  position: relative;
+  margin-bottom: 2.5rem;
+  transition: transform 0.3s ease;
+}
+
+.ady-timeline-item:hover {
+  transform: translateX(8px);
+}
+
+.ady-timeline-marker {
+  position: absolute;
+  left: -3.05rem;
+  top: 1.5rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  background: #ea580c;
+  border: 3px solid #ffffff;
+  animation: timelinePulse 2.5s infinite;
+}
+
+html.dark .ady-timeline-marker {
+  border-color: #0d0d0b;
+}
+
+.ady-perk-box {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.ady-perk-box:hover {
+  border-color: #ea580c;
+  transform: translateY(-4px);
+  background: #0f172a;
+  box-shadow: 0 10px 25px rgba(234, 88, 12, 0.2);
+}
+
+.perks-benefit-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 4.5rem;
+  align-items: center;
+}
+
+.perks-heading {
+  font-size: 2.7rem;
+  font-weight: 900;
+  margin: 1.4rem 0 1rem;
+  color: #ffffff;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.perks-lead {
+  color: #94a3b8;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  margin-bottom: 2.5rem;
+}
+
+.perks-image-pane {
+  border-radius: 24px;
+  overflow: hidden;
+  height: 440px;
+  border: 1px solid #334155;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+}
+
+.perks-image-pane img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.life-culture-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3.5rem;
+}
+
+.life-culture-icon {
+  font-size: 1.8rem;
+  color: #ea580c;
+  display: inline-block;
+  margin-bottom: 0.5rem;
+}
+
+.life-added-feature {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-radius: 28px;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+  margin-top: 3.5rem;
+  width: 100%;
+}
+
+html.dark .life-added-feature {
+  background: #1c1b18;
+  border-color: #292524;
+}
+
+.life-added-feature-copy {
+  padding: 4rem 3.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: linear-gradient(135deg, #ea580c 0%, #f97316 60%, #fb923c 100%);
+  color: #ffffff;
+}
+
+.life-added-feature-copy h3 {
+  font-size: 2.2rem;
+  line-height: 1.25;
+  margin: 1rem 0 2rem;
+  color: #ffffff;
+  font-weight: 900;
+}
+
+.life-added-feature-copy a {
+  background: #ffffff;
+  color: #ea580c;
+  width: fit-content;
+  padding: 0.85rem 2rem;
+  border-radius: 9999px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
+}
+
+.life-added-feature-copy a:hover {
+  transform: translateY(-3px);
+}
+
+.life-added-feature-image {
+  min-height: 380px;
+}
+
+.life-added-feature-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.life-added-closing-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.life-added-closing-art {
+  border-radius: 28px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.06);
+  height: 400px;
+}
+
+html.dark .life-added-closing-art {
+  border-color: #292524;
+}
+
+.life-added-closing-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.life-closing-values {
+  display: flex;
+  gap: 2rem;
+  margin-top: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.life-closing-values div {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.life-closing-values strong {
+  color: #ea580c;
+  font-size: 1.3rem;
+}
+
+.life-closing-values span b {
+  display: block;
+  font-size: 0.95rem;
+  color: inherit;
+}
+
+@media (max-width: 960px) {
+  .life-added-feature,
+  .life-added-closing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .perks-benefit-grid {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .perks-image-pane {
+    height: 320px;
+  }
+}
