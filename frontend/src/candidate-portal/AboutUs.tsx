@@ -292,6 +292,51 @@ const AboutUs: React.FC = () => {
         </section>
 
         {/* ══════════════════════════════════════════════════════════
+            OUR CULTURE SECTION (HARSHITHA DESIGN COMPOSITION)
+           ══════════════════════════════════════════════════════════ */}
+        <section className="py-16 sm:py-24 border-b border-stone-200/70 dark:border-stone-800 bg-[#fbf9f4] dark:bg-[#11100e]">
+          <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-2xl mx-auto mb-14" data-reveal="up">
+              <span className="inline-block px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-extrabold text-xs uppercase tracking-wider mb-2">
+                OUR CULTURE
+              </span>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-stone-950 dark:text-white tracking-tight">
+                Strong teams build <span className="text-amber-500">stronger futures.</span>
+              </h2>
+              <p className="text-stone-600 dark:text-stone-300 text-sm sm:text-base mt-3 leading-relaxed">
+                Our culture is designed around ownership, learning and respect. Every team plays a different role, but the standard stays the same: build thoughtfully, communicate openly and keep candidate experience at the center.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+              {[
+                { num: '01', img: adyapanTeam, label: 'Continuous Learning & Growth' },
+                { num: '02', img: 'https://adyapan-website-storage.s3.ap-south-1.amazonaws.com/images/room-teaching.jpg', label: 'Mentorship in Action' },
+                { num: '03', img: teamCultureImage, label: 'Energy & Shared Ambition' }
+              ].map((item, i) => (
+                <div 
+                  key={item.num} 
+                  data-reveal="up" 
+                  data-delay={i * 120} 
+                  className="group relative rounded-3xl overflow-hidden shadow-lg h-[280px] sm:h-[340px] border border-stone-200 dark:border-stone-800"
+                >
+                  <img 
+                    src={item.img} 
+                    alt={`Adyapan culture ${item.num}`} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                    loading="lazy" 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6 text-white">
+                    <span className="text-xs font-black text-amber-400 uppercase tracking-widest">{item.num}</span>
+                    <span className="text-base sm:text-lg font-bold mt-1">{item.label}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════════════════
             PEOPLE CULTURE BANNER
            ══════════════════════════════════════════════════════════ */}
         <section className="pt-6 pb-14 sm:pt-8 sm:pb-18">
