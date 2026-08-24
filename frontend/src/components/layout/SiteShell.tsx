@@ -1,22 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
-  ArrowRight,
   Briefcase,
   Home,
   Info,
-  LogOut,
   Menu,
   Moon,
   Phone,
   Sparkles,
   Sun,
-  User,
   X,
 } from 'lucide-react';
 import logo from '../../assets/adyapan-logo.png';
 import { useTheme } from '../../context/ThemeContext';
-import { useCandidateAuth } from '../../context/CandidateAuthContext';
 import Footer from './Footer';
 
 interface SiteShellProps {
@@ -35,12 +31,11 @@ export const SiteShell: React.FC<SiteShellProps> = ({ children }) => {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { theme, toggleTheme } = useTheme();
-  const { candidate, logout } = useCandidateAuth();
   const location = useLocation();
 
   const isDark = theme === 'dark';
 
-  // Handle scroll detection for sticky navbar background & subtle shadow
+  // Handle scroll detection for sticky navbar background & shadow elevation
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 15) {
@@ -60,12 +55,12 @@ export const SiteShell: React.FC<SiteShellProps> = ({ children }) => {
 
   return (
     <div className={`h-app ${isDark ? 'theme-dark' : ''}`}>
-      {/* ── CLEAN EXECUTIVE FIXED NAVBAR (SLIGHTLY BLACK / OBSIDIAN) ── */}
+      {/* ── CLEAN EXECUTIVE STICKY NAVBAR (ALWAYS PINNED TO TOP ON SCROLL) ── */}
       <header
-        className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+        className={`sticky top-0 z-[100] w-full transition-all duration-300 ${
           scrolled
-            ? 'bg-[#181716]/95 dark:bg-[#121110]/95 backdrop-blur-md shadow-md border-b border-stone-800/90 py-3.5'
-            : 'bg-[#181716]/90 dark:bg-[#121110]/90 backdrop-blur-sm border-b border-stone-800/70 py-4'
+            ? 'bg-[#181716]/98 dark:bg-[#121110]/98 backdrop-blur-md shadow-lg border-b border-stone-800 py-3'
+            : 'bg-[#181716]/95 dark:bg-[#121110]/95 backdrop-blur-md border-b border-stone-800/80 py-3.5'
         }`}
       >
         <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
@@ -112,59 +107,20 @@ export const SiteShell: React.FC<SiteShellProps> = ({ children }) => {
 
           {/* Right Action Buttons */}
           <div className="flex items-center gap-3">
-            {/* Theme Switcher Button */}
+            {/* Theme Toggle Button with "Apply Theme" Label */}
             <button
               onClick={toggleTheme}
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-stone-300 hover:text-amber-400 hover:bg-stone-800 transition-colors"
+              className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold text-stone-200 bg-stone-800/90 hover:bg-stone-700/90 hover:text-amber-400 border border-stone-700/70 hover:border-amber-500/40 transition-all cursor-pointer shadow-xs active:scale-95"
               aria-label={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
               title={isDark ? 'Light Mode' : 'Dark Mode'}
             >
-              {isDark ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} />}
+              {isDark ? <Sun size={15} className="text-amber-400" /> : <Moon size={15} className="text-amber-400" />}
+              <span>Apply Theme</span>
             </button>
-
-            {/* Candidate Auth Buttons */}
-            {candidate ? (
-              <div className="hidden sm:flex items-center gap-2">
-                <Link
-                  to="/my-applications"
-                  className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25 transition-all flex items-center gap-1.5"
-                  title="View My Applications"
-                >
-                  <User size={14} className="text-amber-400" />
-                  <span className="truncate max-w-[120px] text-stone-200">
-                    {candidate.firstName || 'Candidate'}
-                  </span>
-                </Link>
-                <button
-                  onClick={logout}
-                  className="p-2 text-stone-400 hover:text-rose-400 transition-colors"
-                  title="Logout"
-                  aria-label="Logout"
-                >
-                  <LogOut size={16} />
-                </button>
-              </div>
-            ) : (
-              <div className="hidden sm:flex items-center gap-2.5">
-                <Link
-                  to="/auth?mode=signin"
-                  className="px-3.5 py-1.5 text-xs font-bold text-stone-200 hover:text-white transition-colors"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  to="/auth?mode=signup"
-                  className="px-4 py-2 text-xs font-extrabold rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 shadow-md shadow-amber-500/20 transition-all flex items-center gap-1.5 hover:scale-105 active:scale-95"
-                >
-                  <span>Sign Up</span>
-                  <ArrowRight size={13} />
-                </Link>
-              </div>
-            )}
 
             {/* Mobile Menu Button */}
             <button
-              className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center text-stone-200 hover:bg-stone-800"
+              className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center text-stone-200 hover:bg-stone-800 border border-stone-700/60"
               onClick={() => setOpen((v) => !v)}
               aria-label="Toggle Navigation"
             >
@@ -202,47 +158,15 @@ export const SiteShell: React.FC<SiteShellProps> = ({ children }) => {
               })}
             </div>
 
-            {/* Mobile Auth Actions */}
-            <div className="mt-4 pt-4 border-t border-stone-800">
-              {candidate ? (
-                <div className="space-y-2">
-                  <Link
-                    to="/my-applications"
-                    onClick={() => setOpen(false)}
-                    className="w-full py-2.5 px-4 rounded-xl text-xs font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center justify-center gap-2"
-                  >
-                    <User size={15} />
-                    <span>My Applications ({candidate.firstName})</span>
-                  </Link>
-                  <button
-                    onClick={() => {
-                      logout();
-                      setOpen(false);
-                    }}
-                    className="w-full py-2 text-xs font-bold text-rose-400 hover:bg-rose-500/10 rounded-xl"
-                  >
-                    Log Out
-                  </button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-2">
-                  <Link
-                    to="/auth?mode=signin"
-                    onClick={() => setOpen(false)}
-                    className="w-full py-2.5 text-center text-xs font-bold rounded-xl bg-stone-800 text-white flex items-center justify-center gap-1.5"
-                  >
-                    <span>Sign In</span>
-                  </Link>
-                  <Link
-                    to="/auth?mode=signup"
-                    onClick={() => setOpen(false)}
-                    className="w-full py-2.5 text-center text-xs font-extrabold rounded-xl bg-amber-500 text-stone-950 shadow-md flex items-center justify-center gap-1.5"
-                  >
-                    <span>Sign Up</span>
-                    <ArrowRight size={13} />
-                  </Link>
-                </div>
-              )}
+            {/* Mobile Theme Toggle */}
+            <div className="mt-4 pt-4 border-t border-stone-800 flex items-center justify-between">
+              <button
+                onClick={toggleTheme}
+                className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold text-stone-200 bg-stone-800 border border-stone-700/60 hover:text-amber-400"
+              >
+                {isDark ? <Sun size={16} className="text-amber-400" /> : <Moon size={16} className="text-amber-400" />}
+                <span>Apply Theme</span>
+              </button>
             </div>
           </div>
         )}
@@ -251,7 +175,7 @@ export const SiteShell: React.FC<SiteShellProps> = ({ children }) => {
       {/* ── MAIN CONTENT ── */}
       {children}
 
-      {/* ── FOOTER (EXACT HARSHITHA DESIGN) ── */}
+      {/* ── FOOTER ── */}
       <Footer />
     </div>
   );
