@@ -40,18 +40,20 @@ export const ResumeViewerModal: React.FC<ResumeViewerModalProps> = ({
     if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
       return trimmed;
     }
-    const backendBase = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/api\/?$/, '');
-    return `${backendBase}${trimmed.startsWith('/') ? '' : '/'}${trimmed}`;
+    const rawApi = (import.meta.env.VITE_API_URL || '').replace(/\/api\/?$/, '');
+    if (rawApi && rawApi.startsWith('http')) {
+      return `${rawApi}${trimmed.startsWith('/') ? '' : '/'}${trimmed}`;
+    }
+    return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
   };
 
   const resolvedUrl = getCleanResumeUrl(resumeUrl);
   const isCloudinary = resolvedUrl.includes('cloudinary.com') || resolvedUrl.includes('res.cloudinary.com');
-  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/api\/?$/, '');
+  const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/api\/?$/, '');
+  const proxyEndpoint = apiBase ? `${apiBase}/api/candidates/resume-proxy` : '/api/candidates/resume-proxy';
   
-  // Use proxy for Cloudinary or external CORS-restricted links to guarantee 100% load & download
-  const streamUrl = isCloudinary 
-    ? `${apiBase}/api/candidates/resume-proxy?url=${encodeURIComponent(resolvedUrl)}`
-    : resolvedUrl;
+  // Use proxy for all resumes to guarantee 100% CORS-free preview and prevent Vercel 404 static routing
+  const streamUrl = resolvedUrl ? `${proxyEndpoint}?url=${encodeURIComponent(resolvedUrl)}` : '';
 
   const handleDownload = async () => {
     if (!resolvedUrl) {
@@ -225,7 +227,7 @@ export const ResumeViewerModal: React.FC<ResumeViewerModalProps> = ({
 
           {resolvedUrl && (
             <a 
-              href={resolvedUrl} 
+              href={streamUrl || resolvedUrl} 
               target="_blank" 
               rel="noopener noreferrer" 
               className="hover:text-orange-400 text-slate-300 font-semibold flex items-center gap-1 text-[11px] transition-colors"

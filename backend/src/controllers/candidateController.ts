@@ -137,10 +137,13 @@ export const publicApplyCandidate = async (req, res) => {
     const isDummyUrl = (url: any) => typeof url === 'string' && url.includes('example.com');
     const localFilename = req.file ? req.file.filename : (req.body.resumeFileName ? path.basename(req.body.resumeFileName) : null);
     
-    // Always prioritize server static URL to prevent Cloudinary 401 blocking
-    const safeResumeUrl = localFilename 
-      ? `/uploads/resumes/${localFilename}`
-      : (savedFileUrl || ((resumeUrl && !isDataUrl(resumeUrl) && !isDummyUrl(resumeUrl)) ? resumeUrl : `${baseUrl}/uploads/resumes/default_resume.pdf`));
+    // Prioritize Cloudinary / CDN permanent URL if available, fallback to full backend static URL
+    const isPermanentUrl = (url: any) => typeof url === 'string' && url.startsWith('http') && !url.includes('/uploads/resumes/');
+    const safeResumeUrl = (savedFileUrl && isPermanentUrl(savedFileUrl))
+      ? savedFileUrl
+      : (localFilename 
+          ? `/uploads/resumes/${localFilename}`
+          : ((resumeUrl && !isDataUrl(resumeUrl) && !isDummyUrl(resumeUrl)) ? resumeUrl : `${baseUrl}/uploads/resumes/default_resume.pdf`));
 
     // Check if the user is logged in as a candidate (optional auth)
     const authenticatedCandidateId = getAuthenticatedCandidateId(req);
@@ -977,6 +980,13 @@ export const proxyResumeUrl = async (req: any, res: any) => {
 
     const axios = (await import('axios')).default;
     let streamFetchUrl = targetUrl;
+
+    // If local file wasn't found on disk (e.g. serverless instance), check Cloudinary CDN fallback
+    if (targetUrl.startsWith('/uploads') || targetUrl.startsWith('uploads/') || !targetUrl.startsWith('http')) {
+      const sanitizedPublicId = filenameOnly.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'tdxhecfr';
+      streamFetchUrl = `https://res.cloudinary.com/${cloudName}/image/upload/adyapan_resumes/${sanitizedPublicId}.pdf`;
+    }
 
     // If Cloudinary URL, generate authenticated signed private download URL
     if (targetUrl.includes('cloudinary.com') || targetUrl.includes('res.cloudinary.com')) {
