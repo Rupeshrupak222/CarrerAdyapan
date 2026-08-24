@@ -191,48 +191,47 @@ export const generateOfferLetterPdfBuffer = async (rawOfferData: any = {}) => {
     const drawPageHeader = (page: any) => {
       const { height } = page.getSize();
       
-      // Top Left Official Adyapan Logo Image
+      // Top Left Official Adyapan Logo Image (Proportional 28x28 height aligned with 2-row text)
       if (embeddedLogoImage) {
         page.drawImage(embeddedLogoImage, {
-          x: 42,
-          y: height - 70,
-          width: 48,
-          height: 48,
+          x: 44,
+          y: height - 68,
+          width: 28,
+          height: 28,
         });
       } else {
         page.drawCircle({
-          x: 65,
-          y: height - 50,
-          size: 26,
+          x: 58,
+          y: height - 54,
+          size: 14,
           color: rgb(0.94, 0.65, 0.20),
           borderColor: rgb(0.88, 0.55, 0.10),
-          borderWidth: 1.5,
+          borderWidth: 1,
         });
-        page.drawText('ady.', { x: 49, y: height - 52, size: 16, font: fontBold, color: textDark });
-        page.drawText('ADYAPAN', { x: 50, y: height - 63, size: 5.5, font: fontBold, color: textDark });
+        page.drawText('ady.', { x: 49, y: height - 55, size: 9, font: fontBold, color: textDark });
       }
 
       // Header Text
       page.drawText("SR'S ADYAPAN EDUTECH PRIVATE LIMITED", {
-        x: 102,
-        y: height - 48,
-        size: 15.5,
+        x: 82,
+        y: height - 49,
+        size: 14.5,
         font: fontBold,
         color: orangeHeaderColor,
       });
 
       page.drawText("A D Y A P A N   S C H O O L .", {
-        x: 195,
-        y: height - 65,
-        size: 10.5,
+        x: 160,
+        y: height - 64,
+        size: 10,
         font: fontBold,
         color: crimsonSchoolColor,
       });
 
       // Header Underline
       page.drawLine({
-        start: { x: 40, y: height - 76 },
-        end: { x: 555, y: height - 76 },
+        start: { x: 40, y: height - 74 },
+        end: { x: 555, y: height - 74 },
         thickness: 1.2,
         color: rgb(0.75, 0.75, 0.75),
       });

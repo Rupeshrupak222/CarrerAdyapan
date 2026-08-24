@@ -136,18 +136,18 @@ export const SendOfferModal: React.FC<SendOfferModalProps> = ({
   };
 
   const renderPreviewHeader = () => (
-    <div className="border-b border-slate-300 pb-3 mb-5">
-      <div className="flex items-center gap-3.5">
+    <div className="border-b border-slate-300 pb-2.5 mb-5">
+      <div className="flex items-center gap-2.5">
         <img
           src="/adyapan-logo.jpeg"
           alt="Adyapan Logo"
-          className="w-13 h-13 rounded-full object-cover shadow-sm shrink-0 border border-amber-500/40"
+          className="w-8 h-8 rounded-full object-cover shadow-xs shrink-0 border border-amber-500/40"
         />
         <div>
-          <h2 className="text-[#ED9415] font-black text-base sm:text-lg tracking-wide uppercase">
+          <h2 className="text-[#ED9415] font-black text-sm sm:text-base tracking-wide uppercase leading-tight">
             SR'S ADYAPAN EDUTECH PRIVATE LIMITED
           </h2>
-          <h4 className="text-[#B81E1E] font-black text-xs tracking-[0.25em] uppercase mt-0.5">
+          <h4 className="text-[#B81E1E] font-black text-[10px] sm:text-xs tracking-[0.25em] uppercase leading-tight mt-0.5">
             A D Y A P A N &nbsp; S C H O O L .
           </h4>
         </div>
