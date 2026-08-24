@@ -113,8 +113,54 @@ const createTransporter = (method: 'gmail_service' | 'port_465' | 'port_587' = '
   } as any);
 };
 
+// HTTPS Port 443 REST API Dispatcher (Immune to Render Cloud SMTP Port Blocks)
+const sendViaHttpsPort443 = async ({ to, subject, html, attachments = [] }: { to: string; subject: string; html: string; attachments?: any[] }) => {
+  const apiKey = (process.env.BREVO_API_KEY || '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').trim();
+  if (!apiKey) return null;
+
+  const senderEmail = process.env.BREVO_SENDER_EMAIL || 'dks241655@gmail.com';
+  const senderName = process.env.BREVO_SENDER_NAME || 'Adyapan Academy';
+
+  const apiAttachments = attachments.map((att: any) => ({
+    name: att.filename,
+    content: Buffer.isBuffer(att.content)
+      ? att.content.toString('base64')
+      : (typeof att.content === 'string' ? att.content : Buffer.from(att.content).toString('base64')),
+  }));
+
+  try {
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'api-key': apiKey,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        sender: { name: senderName, email: senderEmail },
+        to: [{ email: to }],
+        replyTo: { name: senderName, email: 'eclipse@adyapan.com' },
+        subject,
+        htmlContent: html,
+        attachment: apiAttachments.length > 0 ? apiAttachments : undefined,
+      }),
+    });
+
+    const data: any = await response.json();
+    if (response.status >= 200 && response.status < 300) {
+      logger.info(`REAL HTTPS PORT 443 EMAIL DELIVERED to candidate ${to}! MessageID: ${data?.messageId || data?.id}`);
+      return { success: true, method: 'HTTPS_Port_443_Live', messageId: data?.messageId || data?.id };
+    }
+    logger.warn(`HTTPS Port 443 Notice for ${to}:`, data?.message || data);
+    return null;
+  } catch (err: any) {
+    logger.warn(`HTTPS Port 443 Error for ${to}:`, err?.message || err);
+    return null;
+  }
+};
+
 /**
- * Dispatch Real Email to Candidate Email Address via Gmail SMTP
+ * Dispatch Real Email to Candidate Email Address via HTTPS Port 443 + Gmail SMTP Fallback
  */
 const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }: { to: string; subject: string; html: string; attachments?: any[] }) => {
   if (!to || typeof to !== 'string' || !to.includes('@')) {
@@ -123,6 +169,15 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
   }
 
   const allAttachments = [...attachments];
+
+  // 1. PRIMARY: Try Port 443 HTTPS REST API (Delivers in <1s without Render SMTP Port Blocks)
+  try {
+    const httpsRes = await sendViaHttpsPort443({ to, subject, html, attachments: allAttachments });
+    if (httpsRes && httpsRes.success) return httpsRes;
+  } catch (httpsErr: any) {
+    logger.warn(`HTTPS Port 443 notice for ${to}:`, httpsErr?.message || httpsErr);
+  }
+
   const { user, from } = getSmtpCredentials();
 
   // Format attachments for Nodemailer
