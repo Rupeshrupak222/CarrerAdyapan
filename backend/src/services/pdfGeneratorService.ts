@@ -1,9 +1,15 @@
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import mammoth from 'mammoth';
 import prisma from '../config/db.js';
 import { logger } from '../utils/logger.js';
 
-const cleanText = (str) => {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const cleanText = (str: any) => {
   if (typeof str !== 'string') return String(str || '');
   return str
     .replace(/₹/g, 'Rs. ')
@@ -152,6 +158,27 @@ export const generateOfferLetterPdfBuffer = async (rawOfferData: any = {}) => {
     const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontOblique = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
 
+    // Embed real adyapan-logo.jpeg image
+    let embeddedLogoImage: any = null;
+    try {
+      const logoPaths = [
+        path.join(__dirname, '../assets/adyapan-logo.jpeg'),
+        path.join(process.cwd(), 'src/assets/adyapan-logo.jpeg'),
+        path.join(process.cwd(), 'backend/src/assets/adyapan-logo.jpeg'),
+        path.join(process.cwd(), '../frontend/public/adyapan-logo.jpeg'),
+        path.join(process.cwd(), 'frontend/public/adyapan-logo.jpeg'),
+      ];
+      for (const lp of logoPaths) {
+        if (fs.existsSync(lp)) {
+          const imgBytes = fs.readFileSync(lp);
+          embeddedLogoImage = await pdfDoc.embedJpg(imgBytes);
+          break;
+        }
+      }
+    } catch (imgErr: any) {
+      logger.warn('Failed to embed adyapan-logo.jpeg:', imgErr?.message || imgErr);
+    }
+
     // Color definitions matching exact Adyapan branding
     const orangeHeaderColor = rgb(0.93, 0.58, 0.08); // Golden Orange #ED9415
     const crimsonSchoolColor = rgb(0.72, 0.12, 0.12); // Deep Crimson #B81E1E
@@ -164,35 +191,30 @@ export const generateOfferLetterPdfBuffer = async (rawOfferData: any = {}) => {
     const drawPageHeader = (page: any) => {
       const { height } = page.getSize();
       
-      // Top Left Logo Circle
-      page.drawCircle({
-        x: 65,
-        y: height - 50,
-        size: 26,
-        color: rgb(0.94, 0.65, 0.20), // Golden orange circle
-        borderColor: rgb(0.88, 0.55, 0.10),
-        borderWidth: 1.5,
-      });
-
-      page.drawText('ady.', {
-        x: 49,
-        y: height - 52,
-        size: 16,
-        font: fontBold,
-        color: textDark,
-      });
-
-      page.drawText('ADYAPAN', {
-        x: 50,
-        y: height - 63,
-        size: 5.5,
-        font: fontBold,
-        color: textDark,
-      });
+      // Top Left Official Adyapan Logo Image
+      if (embeddedLogoImage) {
+        page.drawImage(embeddedLogoImage, {
+          x: 42,
+          y: height - 70,
+          width: 48,
+          height: 48,
+        });
+      } else {
+        page.drawCircle({
+          x: 65,
+          y: height - 50,
+          size: 26,
+          color: rgb(0.94, 0.65, 0.20),
+          borderColor: rgb(0.88, 0.55, 0.10),
+          borderWidth: 1.5,
+        });
+        page.drawText('ady.', { x: 49, y: height - 52, size: 16, font: fontBold, color: textDark });
+        page.drawText('ADYAPAN', { x: 50, y: height - 63, size: 5.5, font: fontBold, color: textDark });
+      }
 
       // Header Text
       page.drawText("SR'S ADYAPAN EDUTECH PRIVATE LIMITED", {
-        x: 105,
+        x: 102,
         y: height - 48,
         size: 15.5,
         font: fontBold,
@@ -200,7 +222,7 @@ export const generateOfferLetterPdfBuffer = async (rawOfferData: any = {}) => {
       });
 
       page.drawText("A D Y A P A N   S C H O O L .", {
-        x: 205,
+        x: 195,
         y: height - 65,
         size: 10.5,
         font: fontBold,
