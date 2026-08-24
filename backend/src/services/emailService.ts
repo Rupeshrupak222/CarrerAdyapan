@@ -70,12 +70,12 @@ const getSmtpCredentials = () => {
   return { user, pass, from };
 };
 
-// Create Nodemailer SMTP Transporter
+// Create Bulletproof Nodemailer SMTP Transporter
 const createTransporter = (customPort?: number) => {
   const { user, pass } = getSmtpCredentials();
   const host = (process.env.SMTP_HOST || 'smtp.gmail.com').trim();
-  const port = customPort || parseInt(process.env.SMTP_PORT || '587');
-  const isSecure = process.env.SMTP_SECURE === 'true' || port === 465;
+  const port = customPort || parseInt(process.env.SMTP_PORT || '465');
+  const isSecure = port === 465 || process.env.SMTP_SECURE === 'true';
 
   return nodemailer.createTransport({
     host,
@@ -83,10 +83,10 @@ const createTransporter = (customPort?: number) => {
     secure: isSecure,
     requireTLS: port === 587 || port === 2525,
     auth: { user, pass },
-    family: 4, // FORCE IPV4 CONNECTION
-    connectionTimeout: 2000,
-    greetingTimeout: 2000,
-    socketTimeout: 3000,
+    family: 4, // FORCE IPV4 CONNECTION (Prevents Render IPv6 DNS timeout)
+    connectionTimeout: 5000,
+    greetingTimeout: 5000,
+    socketTimeout: 8000,
     tls: {
       rejectUnauthorized: false,
       servername: host,
