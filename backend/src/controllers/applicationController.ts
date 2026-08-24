@@ -156,7 +156,7 @@ export const getManagerStats = async (req, res) => {
     const shortlisted = await prisma.application.count({
       where: {
         status: {
-          in: ['SHORTLISTED', 'ASSIGNED', 'ROUND_1_PENDING', 'ROUND_1_SELECTED', 'ROUND_2_PENDING', 'ROUND_2_SELECTED', 'FINAL_ROUND', 'OFFER_SENT', 'JOINED'],
+          in: ['SHORTLISTED', 'ASSIGNED', 'ROUND_1_PENDING', 'ROUND_1_SELECTED', 'ROUND_2_PENDING', 'ROUND_2_SELECTED', 'FINAL_ROUND', 'OFFER_SENT', 'OFFER_ACCEPTED', 'JOINED'],
         },
       },
     });
@@ -165,46 +165,73 @@ export const getManagerStats = async (req, res) => {
     });
     const unassigned = await prisma.application.count({
       where: {
-        status: 'SHORTLISTED',
         assignedHrId: null,
+        status: { in: ['APPLIED', 'SUBMITTED', 'PENDING', 'SHORTLISTED'] },
       },
     });
     const assigned = await prisma.application.count({
       where: {
         assignedHrId: { not: null },
-        status: { notIn: ['REJECTED', 'ROUND_1_REJECTED', 'ROUND_2_REJECTED'] },
+        status: { in: ['ASSIGNED', 'ROUND_1_PENDING', 'ROUND_2_PENDING'] },
       },
     });
-    const round1 = await prisma.application.count({
+    
+    // Round 1 Selected (Candidates who passed Round 1 evaluation)
+    const round1Selected = await prisma.application.count({
       where: {
         OR: [
-          { status: 'ROUND_1_PENDING' },
-          { status: 'ASSIGNED', currentRound: 1 },
-          { currentRound: 1, status: { notIn: ['REJECTED', 'ROUND_1_REJECTED', 'ROUND_2_REJECTED'] } },
+          { status: { in: ['ROUND_1_SELECTED', 'ROUND_2_PENDING', 'ROUND_2_SELECTED', 'FINAL_ROUND', 'OFFER_SENT', 'OFFER_ACCEPTED', 'JOINED'] } },
+          { interviews: { some: { roundNumber: 1, outcome: 'PASSED' } } },
+        ],
+        NOT: { status: 'ROUND_1_REJECTED' },
+      },
+    });
+
+    // Round 1 Rejected
+    const round1Rejected = await prisma.application.count({
+      where: {
+        OR: [
+          { status: 'ROUND_1_REJECTED' },
+          { interviews: { some: { roundNumber: 1, outcome: 'REJECTED' } } },
         ],
       },
     });
-    const round2 = await prisma.application.count({
+
+    // Round 2 Selected (Candidates who passed Round 2 evaluation)
+    const round2Selected = await prisma.application.count({
       where: {
         OR: [
-          { status: 'ROUND_2_PENDING' },
-          { status: 'ROUND_1_SELECTED' },
-          { currentRound: 2, status: { notIn: ['REJECTED', 'ROUND_1_REJECTED', 'ROUND_2_REJECTED'] } },
+          { status: { in: ['ROUND_2_SELECTED', 'FINAL_ROUND', 'OFFER_SENT', 'OFFER_ACCEPTED', 'JOINED'] } },
+          { interviews: { some: { roundNumber: 2, outcome: 'PASSED' } } },
+        ],
+        NOT: { status: { in: ['REJECTED', 'ROUND_1_REJECTED', 'ROUND_2_REJECTED'] } },
+      },
+    });
+
+    // Round 2 Rejected
+    const round2Rejected = await prisma.application.count({
+      where: {
+        OR: [
+          { status: 'ROUND_2_REJECTED' },
+          { interviews: { some: { roundNumber: 2, outcome: 'REJECTED' } } },
         ],
       },
     });
+
+    // Final Round Selected (Cleared Round 2 & ready for offer release, offer not dispatched yet)
     const finalRound = await prisma.application.count({
       where: {
         OR: [
-          { status: 'FINAL_ROUND' },
-          { status: 'ROUND_2_SELECTED' },
+          { status: { in: ['ROUND_2_SELECTED', 'FINAL_ROUND'] } },
           { finalSelected: true },
         ],
         NOT: {
-          status: { in: ['REJECTED', 'ROUND_1_REJECTED', 'ROUND_2_REJECTED', 'OFFER_SENT', 'JOINED'] },
+          status: { in: ['REJECTED', 'ROUND_1_REJECTED', 'ROUND_2_REJECTED', 'OFFER_SENT', 'OFFER_ACCEPTED', 'JOINED'] },
         },
       },
     });
+
+    // Offers Sent
     const offersSent = await prisma.application.count({
       where: {
         status: { in: ['OFFER_SENT', 'OFFER_ACCEPTED', 'JOINED'] },
@@ -230,8 +257,12 @@ export const getManagerStats = async (req, res) => {
         rejected,
         unassigned,
         assigned,
-        round1,
-        round2,
+        round1: round1Selected,
+        round1Selected,
+        round1Rejected,
+        round2: round2Selected,
+        round2Selected,
+        round2Rejected,
         finalRound,
         offersSent,
       },

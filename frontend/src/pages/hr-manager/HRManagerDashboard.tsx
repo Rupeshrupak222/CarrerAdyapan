@@ -28,8 +28,10 @@ export const HRManagerDashboard: React.FC = () => {
     rejected: 0,
     unassigned: 0,
     assigned: 0,
-    round1: 0,
-    round2: 0,
+    round1Selected: 0,
+    round1Rejected: 0,
+    round2Selected: 0,
+    round2Rejected: 0,
     finalRound: 0,
     offersSent: 0,
   });
@@ -87,8 +89,8 @@ export const HRManagerDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* 10-Card Metric Overview Matrix */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+        {/* 12-Card Pipeline Overview Matrix */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
           {/* 1. Total Applications */}
           <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-1">
             <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Total Applications</span>
@@ -110,49 +112,63 @@ export const HRManagerDashboard: React.FC = () => {
             <div className="text-[10px] text-slate-500 font-semibold">Screened Positive</div>
           </div>
 
-          {/* 4. Rejected */}
-          <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-1">
-            <span className="text-[10px] font-extrabold text-red-600 uppercase tracking-wider block">Rejected</span>
-            <div className="text-2xl font-black text-red-600">{metrics.rejected}</div>
-            <div className="text-[10px] text-slate-500 font-semibold">Archived / Closed</div>
-          </div>
-
-          {/* 5. Unassigned Shortlisted */}
+          {/* 4. Unassigned Shortlisted */}
           <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-300 shadow-xs space-y-1">
             <span className="text-[10px] font-extrabold text-amber-800 uppercase tracking-wider block">Unassigned</span>
             <div className="text-2xl font-black text-amber-950">{metrics.unassigned}</div>
             <div className="text-[10px] text-amber-800 font-bold">Needs Specialist Assignment</div>
           </div>
 
-          {/* 6. Assigned Candidates */}
+          {/* 5. Assigned Total */}
           <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-1">
             <span className="text-[10px] font-extrabold text-blue-600 uppercase tracking-wider block">Assigned Total</span>
             <div className="text-2xl font-black text-blue-600">{metrics.assigned}</div>
-            <div className="text-[10px] text-slate-500 font-semibold">In HR Queues</div>
+            <div className="text-[10px] text-slate-500 font-semibold">In Active HR Queues</div>
           </div>
 
-          {/* 7. Round 1 */}
+          {/* 6. Total Rejected */}
           <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-1">
-            <span className="text-[10px] font-extrabold text-amber-600 uppercase tracking-wider block">Round 1</span>
-            <div className="text-2xl font-black text-amber-600">{metrics.round1}</div>
-            <div className="text-[10px] text-slate-500 font-semibold">Screening Calls</div>
+            <span className="text-[10px] font-extrabold text-red-600 uppercase tracking-wider block">Total Rejected</span>
+            <div className="text-2xl font-black text-red-600">{metrics.rejected}</div>
+            <div className="text-[10px] text-slate-500 font-semibold">Archived / Closed</div>
           </div>
 
-          {/* 8. Round 2 */}
-          <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-1">
-            <span className="text-[10px] font-extrabold text-indigo-600 uppercase tracking-wider block">Round 2</span>
-            <div className="text-2xl font-black text-indigo-600">{metrics.round2}</div>
-            <div className="text-[10px] text-slate-500 font-semibold">Technical / Domain</div>
-          </div>
-
-          {/* 9. Final Round Selected */}
+          {/* 7. Round 1 Selected */}
           <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-300 shadow-xs space-y-1">
-            <span className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider block">Final Round</span>
-            <div className="text-2xl font-black text-emerald-950">{metrics.finalRound}</div>
-            <div className="text-[10px] text-emerald-800 font-bold">Ready for Offer Release</div>
+            <span className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider block">Round 1 Selected</span>
+            <div className="text-2xl font-black text-emerald-950">{metrics.round1Selected}</div>
+            <div className="text-[10px] text-emerald-800 font-semibold">Passed Screening Call</div>
           </div>
 
-          {/* 10. Offers Sent */}
+          {/* 8. Round 1 Rejected */}
+          <div className="p-4 rounded-2xl bg-red-500/10 border border-red-200 shadow-xs space-y-1">
+            <span className="text-[10px] font-extrabold text-red-800 uppercase tracking-wider block">Round 1 Rejected</span>
+            <div className="text-2xl font-black text-red-950">{metrics.round1Rejected}</div>
+            <div className="text-[10px] text-red-800 font-semibold">Screening Call Disqualified</div>
+          </div>
+
+          {/* 9. Round 2 Selected */}
+          <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-300 shadow-xs space-y-1">
+            <span className="text-[10px] font-extrabold text-indigo-800 uppercase tracking-wider block">Round 2 Selected</span>
+            <div className="text-2xl font-black text-indigo-950">{metrics.round2Selected}</div>
+            <div className="text-[10px] text-indigo-800 font-semibold">Passed Technical / Domain</div>
+          </div>
+
+          {/* 10. Round 2 Rejected */}
+          <div className="p-4 rounded-2xl bg-red-500/10 border border-red-200 shadow-xs space-y-1">
+            <span className="text-[10px] font-extrabold text-red-800 uppercase tracking-wider block">Round 2 Rejected</span>
+            <div className="text-2xl font-black text-red-950">{metrics.round2Rejected}</div>
+            <div className="text-[10px] text-red-800 font-semibold">Technical Round Disqualified</div>
+          </div>
+
+          {/* 11. Final Round Selected (Ready for Offer) */}
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-300 shadow-xs space-y-1">
+            <span className="text-[10px] font-extrabold text-amber-800 uppercase tracking-wider block">Final Round</span>
+            <div className="text-2xl font-black text-amber-950">{metrics.finalRound}</div>
+            <div className="text-[10px] text-amber-800 font-bold">R2 Cleared & Offer Pending</div>
+          </div>
+
+          {/* 12. Offers Sent */}
           <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-300 shadow-xs space-y-1">
             <span className="text-[10px] font-extrabold text-purple-800 uppercase tracking-wider block">Offers Sent</span>
             <div className="text-2xl font-black text-purple-950">{metrics.offersSent}</div>
@@ -185,25 +201,25 @@ export const HRManagerDashboard: React.FC = () => {
             <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 space-y-1">
               <span className="text-[10px] font-bold text-amber-800 block">3. ASSIGNED</span>
               <div className="font-extrabold text-amber-950 text-sm">{metrics.assigned}</div>
-              <span className="text-[10px] text-amber-700">In Queue</span>
-            </div>
-
-            <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 space-y-1">
-              <span className="text-[10px] font-bold text-blue-800 block">4. ROUND 1</span>
-              <div className="font-extrabold text-blue-950 text-sm">{metrics.round1}</div>
-              <span className="text-[10px] text-blue-700">Screening</span>
-            </div>
-
-            <div className="p-3 rounded-xl bg-indigo-50 border border-indigo-200 space-y-1">
-              <span className="text-[10px] font-bold text-indigo-800 block">5. ROUND 2</span>
-              <div className="font-extrabold text-indigo-950 text-sm">{metrics.round2}</div>
-              <span className="text-[10px] text-indigo-700">Domain</span>
+              <span className="text-[10px] text-amber-700">In Active Queue</span>
             </div>
 
             <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 space-y-1">
-              <span className="text-[10px] font-bold text-emerald-800 block">6. FINAL ROUND</span>
-              <div className="font-extrabold text-emerald-950 text-sm">{metrics.finalRound}</div>
-              <span className="text-[10px] text-emerald-700">Approved</span>
+              <span className="text-[10px] font-bold text-emerald-800 block">4. R1 SELECTED</span>
+              <div className="font-extrabold text-emerald-950 text-sm">{metrics.round1Selected}</div>
+              <span className="text-[10px] text-emerald-700">Screened Cleared</span>
+            </div>
+
+            <div className="p-3 rounded-xl bg-indigo-50 border border-indigo-200 space-y-1">
+              <span className="text-[10px] font-bold text-indigo-800 block">5. R2 SELECTED</span>
+              <div className="font-extrabold text-indigo-950 text-sm">{metrics.round2Selected}</div>
+              <span className="text-[10px] text-indigo-700">Domain Cleared</span>
+            </div>
+
+            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 space-y-1">
+              <span className="text-[10px] font-bold text-amber-800 block">6. FINAL ROUND</span>
+              <div className="font-extrabold text-amber-950 text-sm">{metrics.finalRound}</div>
+              <span className="text-[10px] text-amber-700">Offer Pending</span>
             </div>
 
             <div className="p-3 rounded-xl bg-purple-50 border border-purple-200 space-y-1">
