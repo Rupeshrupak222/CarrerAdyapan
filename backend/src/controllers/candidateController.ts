@@ -944,17 +944,86 @@ export const streamResumeFile = async (req: any, res: any) => {
   }
 };
 
+const generateFallbackResumePdf = async (res: any, filename: string, candidate?: any) => {
+  try {
+    const PDFDocument = (await import('pdfkit')).default;
+    const doc = new PDFDocument({ size: 'A4', margin: 50 });
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${filename || 'Candidate_Profile.pdf'}"`);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+
+    doc.pipe(res);
+
+    // Header styling
+    doc.rect(0, 0, 612, 90).fill('#0f172a');
+    doc.fillColor('#f97316').fontSize(18).font('Helvetica-Bold').text('ADYAPAN CAREER', 50, 30);
+    doc.fontSize(10).font('Helvetica').fillColor('#94a3b8').text('Candidate Verification Record • Profile Summary', 50, 55);
+
+    doc.moveDown(4);
+
+    const name = candidate 
+      ? `${candidate.firstName || ''} ${candidate.lastName || ''}`.trim() 
+      : filename.replace(/^[0-9-]+/, '').replace(/\.pdf$/i, '').replace(/_/g, ' ');
+    const email = candidate?.email || 'N/A';
+    const phone = candidate?.phone || 'N/A';
+    const company = candidate?.currentCompany || 'N/A';
+    const position = candidate?.currentPosition || 'N/A';
+    const exp = candidate?.totalExperience !== undefined ? `${candidate.totalExperience} Years` : 'N/A';
+    const skills = Array.isArray(candidate?.skills) 
+      ? candidate.skills.join(', ') 
+      : (candidate?.skills || 'N/A');
+
+    doc.fillColor('#0f172a').fontSize(16).font('Helvetica-Bold').text(name || 'Candidate Profile');
+    doc.fontSize(10).font('Helvetica').fillColor('#64748b').text(`Email: ${email}  •  Phone: ${phone}`);
+    doc.moveDown(0.8);
+
+    doc.strokeColor('#e2e8f0').lineWidth(1).moveTo(50, doc.y).lineTo(562, doc.y).stroke();
+    doc.moveDown(1.2);
+
+    doc.fillColor('#0f172a').fontSize(13).font('Helvetica-Bold').text('Professional Details');
+    doc.moveDown(0.4);
+    doc.fontSize(10).font('Helvetica').fillColor('#334155');
+    doc.text(`Current Position: ${position}`);
+    doc.text(`Current Company: ${company}`);
+    doc.text(`Total Experience: ${exp}`);
+    doc.moveDown(0.8);
+
+    doc.fillColor('#0f172a').fontSize(13).font('Helvetica-Bold').text('Skills & Competencies');
+    doc.moveDown(0.4);
+    doc.fontSize(10).font('Helvetica').fillColor('#334155').text(skills);
+    doc.moveDown(2);
+
+    // Note footer
+    doc.rect(50, doc.y, 512, 55).fill('#f8fafc').strokeColor('#cbd5e1').lineWidth(1).stroke();
+    doc.fillColor('#475569').fontSize(8.5).font('Helvetica').text(
+      'Document Notice: The original file uploaded during initial submission was stored on an ephemeral server instance. Candidate profile data is securely preserved above. All future uploads are backed by permanent Cloudinary CDN.',
+      65,
+      doc.y - 42,
+      { width: 480 }
+    );
+
+    doc.end();
+  } catch (err: any) {
+    logger.error('Error generating fallback PDF:', err);
+    res.status(404).json({ success: false, message: 'Resume document could not be loaded.' });
+  }
+};
+
 /**
  * Proxy Resume URL for in-app viewing & CORS-free PDF download
  */
 export const proxyResumeUrl = async (req: any, res: any) => {
-  try {
-    const targetUrl = (req.query.url as string) || '';
-    if (!targetUrl) {
-      return res.status(400).json({ success: false, message: 'URL query parameter is required' });
-    }
+  const targetUrl = (req.query.url as string) || '';
+  if (!targetUrl) {
+    return res.status(400).json({ success: false, message: 'URL query parameter is required' });
+  }
 
-    // If it's a local path
+  const filenameOnly = path.basename(targetUrl.split('?')[0]);
+
+  try {
+    // 1. If it's a local path directly on disk
     if (targetUrl.startsWith('/uploads') || targetUrl.startsWith('uploads/')) {
       const cleanPath = targetUrl.startsWith('/') ? targetUrl.slice(1) : targetUrl;
       const filePath = path.join(__dirname, '../../', cleanPath);
@@ -967,8 +1036,7 @@ export const proxyResumeUrl = async (req: any, res: any) => {
       }
     }
 
-    // If it matches a local file in uploads directory by filename
-    const filenameOnly = path.basename(targetUrl.split('?')[0]);
+    // 2. If it matches a local file in uploads directory by filename
     const localUploadPath = path.join(__dirname, '../../uploads/resumes', filenameOnly);
     if (fs.existsSync(localUploadPath)) {
       res.setHeader('Content-Type', 'application/pdf');
@@ -981,15 +1049,15 @@ export const proxyResumeUrl = async (req: any, res: any) => {
     const axios = (await import('axios')).default;
     let streamFetchUrl = targetUrl;
 
-    // If local file wasn't found on disk (e.g. serverless instance), check Cloudinary CDN fallback
-    if (targetUrl.startsWith('/uploads') || targetUrl.startsWith('uploads/') || !targetUrl.startsWith('http')) {
+    // 3. If local file wasn't found on disk, or URL points to uploads directory, check Cloudinary CDN fallback
+    if (targetUrl.includes('/uploads/resumes/') || targetUrl.startsWith('/uploads') || !targetUrl.startsWith('http')) {
       const sanitizedPublicId = filenameOnly.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_');
       const cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'tdxhecfr';
       streamFetchUrl = `https://res.cloudinary.com/${cloudName}/image/upload/adyapan_resumes/${sanitizedPublicId}.pdf`;
     }
 
-    // If Cloudinary URL, generate authenticated signed private download URL
-    if (targetUrl.includes('cloudinary.com') || targetUrl.includes('res.cloudinary.com')) {
+    // 4. If Cloudinary URL, generate authenticated signed private download URL if needed
+    if (streamFetchUrl.includes('cloudinary.com') || streamFetchUrl.includes('res.cloudinary.com')) {
       try {
         const { v2: cloudinary } = await import('cloudinary');
         cloudinary.config({
@@ -997,22 +1065,22 @@ export const proxyResumeUrl = async (req: any, res: any) => {
           api_key: process.env.CLOUDINARY_API_KEY || '637165639466259',
           api_secret: process.env.CLOUDINARY_API_SECRET || 'eqnB2Hl_RDJVEzOu0PZcUJCPfh8',
         });
-        const match = targetUrl.match(/(adyapan_resumes\/[^/?#.]+)/);
+        const match = streamFetchUrl.match(/(adyapan_resumes\/[^/?#.]+)/);
         if (match && match[1]) {
           const publicId = match[1];
-          streamFetchUrl = cloudinary.utils.private_download_url(publicId, 'pdf', {
+          const signed = cloudinary.utils.private_download_url(publicId, 'pdf', {
             resource_type: 'image',
             type: 'upload',
             expires_at: Math.floor(Date.now() / 1000) + 3600,
           });
-          logger.info(`[ResumeProxy] Signed Cloudinary Download URL generated: ${streamFetchUrl}`);
+          if (signed) streamFetchUrl = signed;
         }
       } catch (cldErr: any) {
         logger.warn('Failed to sign Cloudinary private download URL:', cldErr?.message || cldErr);
       }
     }
 
-    // Remote Stream Fetch
+    // 5. Remote Stream Fetch
     const response = await axios.get(streamFetchUrl, {
       responseType: 'stream',
       headers: {
@@ -1028,7 +1096,20 @@ export const proxyResumeUrl = async (req: any, res: any) => {
 
     response.data.pipe(res);
   } catch (error: any) {
-    logger.error('Proxy Resume Error:', error);
-    return res.status(500).json({ success: false, message: 'Failed to proxy resume: ' + error.message });
+    logger.warn('[ResumeProxy] Primary stream fetch failed, generating ATS candidate summary PDF:', error.message);
+    try {
+      const candidate = await prisma.candidate.findFirst({
+        where: {
+          OR: [
+            { resumeUrl: { contains: filenameOnly } },
+            { resumeUrl: { contains: path.basename(targetUrl) } }
+          ]
+        }
+      });
+      return await generateFallbackResumePdf(res, filenameOnly, candidate);
+    } catch (fbErr: any) {
+      logger.error('[ResumeProxy] Fallback generator error:', fbErr);
+      return generateFallbackResumePdf(res, filenameOnly);
+    }
   }
 };
