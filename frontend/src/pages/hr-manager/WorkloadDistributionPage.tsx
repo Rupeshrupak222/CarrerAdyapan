@@ -1,18 +1,20 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  Users, 
-  UserCheck, 
-  Search, 
-  Filter, 
-  RotateCw, 
-  Sparkles, 
-  FileText, 
-  ArrowRight, 
-  CheckCircle2, 
-  Clock, 
-  ShieldCheck, 
-  Briefcase, 
-  RefreshCw 
+import { createPortal } from 'react-dom';
+import {
+  Users,
+  UserCheck,
+  Search,
+  Filter,
+  RotateCw,
+  Sparkles,
+  FileText,
+  ArrowRight,
+  CheckCircle2,
+  Clock,
+  ShieldCheck,
+  Briefcase,
+  RefreshCw,
+  X
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DashboardLayout from '../../components/layout/DashboardLayout';
@@ -36,7 +38,7 @@ export const WorkloadDistributionPage: React.FC = () => {
 
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterMode, setFilterMode] = useState<'UNASSIGNED' | 'ASSIGNED' | 'ALL'>('UNASSIGNED');
+  const [filterMode, setFilterMode] = useState<'UNASSIGNED' | 'ASSIGNED'>('UNASSIGNED');
   const [selectedHrMap, setSelectedHrMap] = useState<Record<string, string>>({});
   const [assigningId, setAssigningId] = useState<string | null>(null);
 
@@ -63,9 +65,11 @@ export const WorkloadDistributionPage: React.FC = () => {
       ]);
 
       const allApps = appsRes.applications || appsRes.data || (Array.isArray(appsRes) ? appsRes : []);
-      // Candidates relevant to workload: SHORTLISTED or ASSIGNED
+      // Candidates relevant to workload: Active Unassigned or Active Assigned
       const workloadApps = allApps.filter((a: any) =>
-        ['SHORTLISTED', 'ASSIGNED', 'ROUND_1_PENDING', 'ROUND_2_PENDING'].includes(a.status)
+        (['SHORTLISTED', 'ASSIGNED', 'ROUND_1_PENDING', 'ROUND_1_SELECTED', 'ROUND_2_PENDING'].includes(a.status) || (a.status === 'INTERVIEW_SCHEDULED' && a.currentRound <= 2)) &&
+        !a.finalSelected &&
+        !['FINAL_SELECTED', 'ROUND_2_SELECTED', 'FINAL_ROUND', 'REJECTED', 'ROUND_1_REJECTED', 'ROUND_2_REJECTED', 'OFFER_SENT', 'JOINED'].includes(a.status)
       );
       setApplications(workloadApps);
 
@@ -90,7 +94,7 @@ export const WorkloadDistributionPage: React.FC = () => {
       if (filterMode === 'UNASSIGNED') {
         if (app.assignedHrId || app.status !== 'SHORTLISTED') return false;
       } else if (filterMode === 'ASSIGNED') {
-        if (!app.assignedHrId && app.status === 'SHORTLISTED') return false;
+        if (!app.assignedHrId) return false;
       }
 
       // Search
@@ -149,14 +153,14 @@ export const WorkloadDistributionPage: React.FC = () => {
         {/* Header Title */}
         <div className="p-6 rounded-2xl bg-white border border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-xs">
           <div>
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <span className="text-xs font-extrabold text-orange-600 uppercase tracking-wider block">
                 Workload Management
               </span>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-100 text-orange-800">
                 👥 1 Candidate = 1 HR Specialist
               </span>
-            </div>
+            </div> */}
             <h1 className="text-2xl font-black text-slate-900 mt-1">Workload Distribution</h1>
             <p className="text-slate-500 text-xs sm:text-sm mt-0.5">
               Shortlisted candidates automatically enter this queue. Manually allocate each candidate to an active HR Specialist.
@@ -236,33 +240,21 @@ export const WorkloadDistributionPage: React.FC = () => {
           <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 border border-slate-200/60 self-start">
             <button
               onClick={() => setFilterMode('UNASSIGNED')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all ${
-                filterMode === 'UNASSIGNED'
-                  ? 'bg-white text-orange-700 shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all ${filterMode === 'UNASSIGNED'
+                ? 'bg-white text-orange-700 shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900'
+                }`}
             >
               Unassigned ({workloadStats.unassignedCount})
             </button>
             <button
               onClick={() => setFilterMode('ASSIGNED')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all ${
-                filterMode === 'ASSIGNED'
-                  ? 'bg-white text-orange-700 shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all ${filterMode === 'ASSIGNED'
+                ? 'bg-white text-orange-700 shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900'
+                }`}
             >
               Assigned Queue ({workloadStats.assignedCount})
-            </button>
-            <button
-              onClick={() => setFilterMode('ALL')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all ${
-                filterMode === 'ALL'
-                  ? 'bg-white text-orange-700 shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              All Shortlisted
             </button>
           </div>
 
@@ -348,11 +340,10 @@ export const WorkloadDistributionPage: React.FC = () => {
                         {/* Status */}
                         <td className="py-3.5 px-3 whitespace-nowrap">
                           <span
-                            className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
-                              isAssigned
-                                ? 'bg-blue-100 text-blue-800'
-                                : 'bg-amber-100 text-amber-800'
-                            }`}
+                            className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${isAssigned
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-amber-100 text-amber-800'
+                              }`}
                           >
                             {isAssigned ? 'ASSIGNED' : 'SHORTLISTED'}
                           </span>
@@ -431,40 +422,58 @@ export const WorkloadDistributionPage: React.FC = () => {
           isOpen={previewModalOpen}
           onClose={() => setPreviewModalOpen(false)}
           application={selectedAppForPreview}
-          onRunAts={() => {}}
+          onRunAts={() => { }}
           onViewResume={(url, name) => {
             setActiveResumeUrl(url);
             setActiveCandidateName(name);
             setResumeModalOpen(true);
           }}
-          onShortlist={() => {}}
-          onReject={() => {}}
+          onShortlist={() => { }}
+          onReject={() => { }}
         />
 
-        {/* Controlled Reassign Modal */}
-        {reassignModalOpen && (
-          <div 
-            className="fixed inset-0 z-[9999] bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn"
+        {/* Controlled Reassign Modal rendered via Portal */}
+        {reassignModalOpen && typeof document !== 'undefined' && createPortal(
+          <div
+            className="fixed inset-0 z-[99999] bg-slate-950/75 backdrop-blur-sm overflow-y-auto flex items-center justify-center p-4 min-h-screen animate-fadeIn"
             onClick={() => setReassignModalOpen(false)}
           >
-            <div 
-              className="max-w-md w-full bg-white border border-slate-200 rounded-2xl p-6 shadow-2xl space-y-4 animate-scaleUp my-auto"
+            <div
+              className="max-w-md w-full bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-2xl space-y-4 my-auto relative animate-scaleUp"
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="text-base font-extrabold text-slate-900">Reassign HR Specialist</h3>
-              <p className="text-xs text-slate-500">
-                Candidate: <strong>{selectedAppForReassign?.candidate?.firstName} {selectedAppForReassign?.candidate?.lastName}</strong>
-              </p>
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                <div>
+                  <span className="text-[10px] font-extrabold text-orange-600 uppercase tracking-wider block">Workload Reallocation</span>
+                  <h3 className="text-base font-extrabold text-slate-900 mt-0.5">Reassign HR Specialist</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setReassignModalOpen(false)}
+                  className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                  title="Close"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-orange-50/80 border border-orange-100 text-xs">
+                <span className="text-slate-600">Candidate: </span>
+                <strong className="text-slate-900">{selectedAppForReassign?.candidate?.firstName} {selectedAppForReassign?.candidate?.lastName}</strong>
+                <span className="text-slate-400 mx-1.5">•</span>
+                <span className="text-orange-700 font-mono">{selectedAppForReassign?.candidateCode || selectedAppForReassign?.id}</span>
+              </div>
 
               <form onSubmit={handleExecuteReassign} className="space-y-3.5 text-xs">
                 <div>
-                  <label className="text-slate-600 font-semibold uppercase">Select New HR Specialist</label>
+                  <label className="text-slate-700 font-bold block mb-1">Select New HR Specialist *</label>
                   <select
+                    required
                     value={reassignTargetHr}
                     onChange={(e) => setReassignTargetHr(e.target.value)}
-                    className="mt-1 w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 font-medium outline-none focus:border-orange-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 font-semibold outline-none focus:border-orange-500"
                   >
-                    <option value="">Select Specialist</option>
+                    <option value="">Select Specialist ▼</option>
                     {workloadStats.specialists.map((hr) => (
                       <option key={hr.id} value={hr.id}>
                         {hr.name} ({hr.email})
@@ -474,11 +483,11 @@ export const WorkloadDistributionPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-slate-600 font-semibold uppercase">Reassignment Reason</label>
+                  <label className="text-slate-700 font-bold block mb-1">Reassignment Reason *</label>
                   <select
                     value={reassignReason}
                     onChange={(e) => setReassignReason(e.target.value)}
-                    className="mt-1 w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 font-medium outline-none focus:border-orange-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 font-semibold outline-none focus:border-orange-500"
                   >
                     <option value="WORKLOAD_BALANCING">Workload Balancing</option>
                     <option value="SPECIALIZATION_MATCH">Domain Specialization Match</option>
@@ -491,20 +500,21 @@ export const WorkloadDistributionPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setReassignModalOpen(false)}
-                    className="px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold"
+                    className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold"
+                    className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs shadow-xs"
                   >
                     Confirm Reassign
                   </button>
                 </div>
               </form>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     </DashboardLayout>

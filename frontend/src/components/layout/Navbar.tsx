@@ -152,21 +152,6 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
           <span className="hidden sm:inline">AI Copilot</span>
         </Link>
 
-        {/* Google Meet Room Shortcut */}
-        {user?.meetLink ? (
-          <a
-            href={user.meetLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-800 text-xs font-bold transition-all shadow-2xs"
-            title="Open Google Meet Room"
-          >
-            <Video className="w-3.5 h-3.5 text-orange-600" />
-            <span>Meet Room</span>
-            <ExternalLink className="w-3 h-3 text-orange-500 ml-0.5" />
-          </a>
-        ) : null}
-
         {/* Notification Bell Dropdown */}
         <div className="relative" ref={notifRef}>
           <button

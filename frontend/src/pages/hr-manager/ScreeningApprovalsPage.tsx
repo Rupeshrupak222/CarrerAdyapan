@@ -1,20 +1,24 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  Search, 
-  Filter, 
-  RotateCw, 
-  Sparkles, 
-  FileText, 
-  Eye, 
-  UserCheck, 
-  UserX, 
-  CheckSquare, 
-  Square, 
+import {
+  Search,
+  Filter,
+  RotateCw,
+  Sparkles,
+  FileText,
+  Eye,
+  UserCheck,
+  UserX,
+  CheckSquare,
+  Square,
   Download,
   Award,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Layers,
-  Clock
+  Clock,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DashboardLayout from '../../components/layout/DashboardLayout';
@@ -33,7 +37,16 @@ export const ScreeningApprovalsPage: React.FC = () => {
   const [selectedAtsFilter, setSelectedAtsFilter] = useState('ALL');
   const [selectedAppIds, setSelectedAppIds] = useState<string[]>([]);
 
-  // Modals state (All viewport-centered popups via createPortal)
+  // Server-side Pagination State (20 candidates per page)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(20);
+  const [totalCandidates, setTotalCandidates] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
+  // Bulk ATS Loading
+  const [bulkAtsLoading, setBulkAtsLoading] = useState(false);
+
+  // Modals state
   const [atsModalOpen, setAtsModalOpen] = useState(false);
   const [selectedAppForAts, setSelectedAppForAts] = useState<any>(null);
   const [atsResultData, setAtsResultData] = useState<any>(null);
@@ -52,13 +65,25 @@ export const ScreeningApprovalsPage: React.FC = () => {
     app: any;
   }>({ open: false, type: 'SHORTLIST', app: null });
 
-  // Load Applications
-  const loadData = async () => {
+  // Load Applications with Server-side Pagination (20 per page)
+  const loadData = async (pageToLoad: number = currentPage) => {
     setLoading(true);
     try {
-      const res = await applicationService.getAllApplications();
+      const queryParams: any = {
+        page: pageToLoad,
+        limit: pageSize,
+      };
+
+      if (searchQuery.trim()) queryParams.search = searchQuery.trim();
+      if (selectedJobFilter !== 'ALL') queryParams.jobId = selectedJobFilter;
+      if (selectedStatusFilter !== 'ALL') queryParams.status = selectedStatusFilter;
+
+      const res = await applicationService.getAllApplications(queryParams);
       const apps = res.applications || res.data || (Array.isArray(res) ? res : []);
       setApplications(apps);
+      setTotalCandidates(res.total !== undefined ? res.total : apps.length);
+      setTotalPages(res.totalPages !== undefined ? res.totalPages : Math.ceil((res.total || apps.length) / pageSize) || 1);
+      setCurrentPage(pageToLoad);
     } catch (err: any) {
       toast.error('Failed to load applications: ' + (err.message || 'Error'));
     } finally {
@@ -67,58 +92,40 @@ export const ScreeningApprovalsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadData();
-  }, []);
+    loadData(1);
+  }, [selectedJobFilter, selectedStatusFilter]);
 
-  // Filtered Applications
+  // Debounced Search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadData(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Filtered Applications for in-memory ATS matching
   const filteredApps = useMemo(() => {
+    if (selectedAtsFilter === 'ALL') return applications;
     return applications.filter((app) => {
-      // Search
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase().trim();
-        const candName = `${app.candidate?.firstName || ''} ${app.candidate?.lastName || ''}`.toLowerCase();
-        const email = (app.candidate?.email || '').toLowerCase();
-        const code = (app.candidateCode || app.id || '').toLowerCase();
-        const jobTitle = (app.job?.title || '').toLowerCase();
-        if (!candName.includes(q) && !email.includes(q) && !code.includes(q) && !jobTitle.includes(q)) {
-          return false;
-        }
-      }
-
-      // Job Filter
-      if (selectedJobFilter !== 'ALL' && app.job?.title !== selectedJobFilter) {
-        return false;
-      }
-
-      // Status Filter
-      if (selectedStatusFilter !== 'ALL') {
-        if (selectedStatusFilter === 'NEW' && app.status !== 'APPLIED' && app.status !== 'SUBMITTED') return false;
-        if (selectedStatusFilter === 'SHORTLISTED' && app.status !== 'SHORTLISTED') return false;
-        if (selectedStatusFilter === 'REJECTED' && app.status !== 'REJECTED') return false;
-        if (selectedStatusFilter === 'ASSIGNED' && app.status !== 'ASSIGNED') return false;
-      }
-
-      // ATS Filter
-      if (selectedAtsFilter !== 'ALL') {
-        if (selectedAtsFilter === 'CHECKED' && (!app.atsScore || app.atsStatus === 'ATS_NOT_CHECKED')) return false;
-        if (selectedAtsFilter === 'NOT_CHECKED' && app.atsScore && app.atsStatus !== 'ATS_NOT_CHECKED') return false;
-        if (selectedAtsFilter === 'HIGH_MATCH' && (app.atsScore || 0) < 80) return false;
-      }
-
+      if (selectedAtsFilter === 'CHECKED' && (!app.atsScore || app.atsStatus === 'ATS_NOT_CHECKED')) return false;
+      if (selectedAtsFilter === 'NOT_CHECKED' && app.atsScore && app.atsStatus !== 'ATS_NOT_CHECKED') return false;
+      if (selectedAtsFilter === 'HIGH_MATCH' && (app.atsScore || 0) < 80) return false;
       return true;
     });
-  }, [applications, searchQuery, selectedJobFilter, selectedStatusFilter, selectedAtsFilter]);
+  }, [applications, selectedAtsFilter]);
 
-  // Unique Job List
+  // Unique Job List from applications for filter
   const uniqueJobs = useMemo(() => {
-    const set = new Set<string>();
+    const set = new Map<string, string>();
     applications.forEach((a) => {
-      if (a.job?.title) set.add(a.job.title);
+      if (a.job?.id && a.job?.title) {
+        set.set(a.job.id, a.job.title);
+      }
     });
-    return Array.from(set);
+    return Array.from(set.entries()).map(([id, title]) => ({ id, title }));
   }, [applications]);
 
-  // ATS Check Handler
+  // Individual ATS Check Handler
   const handleOpenAtsCheck = async (app: any) => {
     setSelectedAppForAts(app);
     setAtsModalOpen(true);
@@ -126,21 +133,19 @@ export const ScreeningApprovalsPage: React.FC = () => {
     try {
       const res = await applicationService.runAtsCheck(app.id);
       if (res.success) {
-        setAtsResultData(res.atsData);
+        setAtsResultData(res.atsResult || res.application?.atsResult);
         setApplications((prev) =>
           prev.map((item) =>
             item.id === app.id
               ? {
-                  ...item,
-                  atsScore: res.atsData.score,
-                  atsStatus: 'ATS_COMPLETED',
-                  atsMatchedSkills: res.atsData.matchedSkills,
-                  atsPartialSkills: res.atsData.partialSkills,
-                  atsMissingSkills: res.atsData.missingSkills,
-                }
+                ...item,
+                atsScore: res.application?.atsScore || res.atsScore,
+                atsStatus: 'ATS_COMPLETED',
+              }
               : item
           )
         );
+        toast.success(`ATS Score: ${res.application?.atsScore || res.atsScore}/100`);
       }
     } catch (err: any) {
       toast.error('ATS Check Error: ' + err.message);
@@ -149,11 +154,65 @@ export const ScreeningApprovalsPage: React.FC = () => {
     }
   };
 
-  // Resume Handler
+  // Bulk ATS Evaluation Handler (Gemini Batch Engine)
+  const handleBulkRunAts = async () => {
+    if (selectedAppIds.length === 0) {
+      toast.error('Please select candidate(s) to evaluate ATS.');
+      return;
+    }
+
+    setBulkAtsLoading(true);
+    const toastId = toast.loading(`Running Gemini ATS Analysis for ${selectedAppIds.length} candidate(s)...`);
+    try {
+      const res = await applicationService.bulkRunAtsCheck(selectedAppIds);
+      if (res.success) {
+        toast.success(res.message || `ATS evaluation complete for ${selectedAppIds.length} candidate(s)!`, { id: toastId });
+        loadData(currentPage);
+      } else {
+        toast.error('Batch ATS finished with notices', { id: toastId });
+      }
+    } catch (err: any) {
+      toast.error('Batch ATS failed: ' + err.message, { id: toastId });
+    } finally {
+      setBulkAtsLoading(false);
+    }
+  };
+
+  // Resume Handlers
   const handleViewResume = (resumeUrl: string, candidateName: string) => {
     setActiveResumeUrl(resumeUrl);
     setActiveCandidateName(candidateName);
     setResumeModalOpen(true);
+  };
+
+  const handleDownloadResume = async (url: string, name: string) => {
+    if (!url) {
+      toast.error('No resume document available to download.');
+      return;
+    }
+    const filename = `${name.replace(/\s+/g, '_')}_Resume.pdf`;
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Network error');
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+      toast.success('Resume downloaded successfully.');
+    } catch {
+      const link = document.createElement('a');
+      link.href = url;
+      link.target = '_blank';
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   // Preview Handler
@@ -173,7 +232,7 @@ export const ScreeningApprovalsPage: React.FC = () => {
         );
       } else {
         await applicationService.rejectApplication(appId, reason);
-        toast.success('Candidate rejected successfully.');
+        toast.success('Candidate rejected and notification email sent.');
         setApplications((prev) =>
           prev.map((a) => (a.id === appId ? { ...a, status: 'REJECTED', overallStatus: 'REJECTED' } : a))
         );
@@ -186,33 +245,39 @@ export const ScreeningApprovalsPage: React.FC = () => {
   // Bulk Actions
   const handleBulkShortlist = async () => {
     if (selectedAppIds.length === 0) return;
+    const toastId = toast.loading(`Shortlisting ${selectedAppIds.length} candidate(s)...`);
     try {
       const res = await applicationService.bulkShortlist(selectedAppIds);
-      toast.success(res.message || 'Bulk shortlist completed.');
+      toast.success(res.message || `${selectedAppIds.length} candidate(s) shortlisted to Workload Distribution.`, { id: toastId });
       setSelectedAppIds([]);
-      loadData();
+      loadData(currentPage);
     } catch (err: any) {
-      toast.error('Bulk shortlist failed: ' + err.message);
+      toast.error('Bulk shortlist failed: ' + err.message, { id: toastId });
     }
   };
 
   const handleBulkReject = async () => {
     if (selectedAppIds.length === 0) return;
+    const toastId = toast.loading(`Rejecting ${selectedAppIds.length} candidate(s)...`);
     try {
       const res = await applicationService.bulkReject(selectedAppIds);
-      toast.success(res.message || 'Bulk reject completed.');
+      toast.success(res.message || `${selectedAppIds.length} candidate(s) rejected with email notifications.`, { id: toastId });
       setSelectedAppIds([]);
-      loadData();
+      loadData(currentPage);
     } catch (err: any) {
-      toast.error('Bulk reject failed: ' + err.message);
+      toast.error('Bulk reject failed: ' + err.message, { id: toastId });
     }
   };
 
-  const toggleSelectAll = () => {
-    if (selectedAppIds.length === filteredApps.length) {
-      setSelectedAppIds([]);
+  // Select All 20 Visible on Current Page
+  const toggleSelectAllVisible = () => {
+    const visibleIds = filteredApps.map((a) => a.id);
+    const allVisibleSelected = visibleIds.every((id) => selectedAppIds.includes(id));
+
+    if (allVisibleSelected) {
+      setSelectedAppIds((prev) => prev.filter((id) => !visibleIds.includes(id)));
     } else {
-      setSelectedAppIds(filteredApps.map((a) => a.id));
+      setSelectedAppIds((prev) => Array.from(new Set([...prev, ...visibleIds])));
     }
   };
 
@@ -222,29 +287,31 @@ export const ScreeningApprovalsPage: React.FC = () => {
     );
   };
 
+  const isAllVisibleSelected = filteredApps.length > 0 && filteredApps.every((a) => selectedAppIds.includes(a.id));
+
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fadeIn pb-12">
         {/* Header Title */}
         <div className="p-6 rounded-2xl bg-white border border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-xs">
           <div>
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <span className="text-xs font-extrabold text-orange-600 uppercase tracking-wider block">
                 Screening Console
               </span>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-100 text-orange-800">
-                🎯 On-Demand Review
+                🎯 20 Candidates / Page
               </span>
-            </div>
+            </div> */}
             <h1 className="text-2xl font-black text-slate-900 mt-1">Screening & Approvals</h1>
             <p className="text-slate-500 text-xs sm:text-sm mt-0.5">
-              Review incoming applications, run on-demand ATS evaluations, inspect resumes, and manually shortlist or reject candidates.
+              Review incoming applications, run on-demand or batch Gemini ATS evaluations, inspect resumes, and shortlist to Workload Distribution or reject with email notice.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             <button
-              onClick={loadData}
+              onClick={() => loadData(currentPage)}
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold border border-slate-300 shadow-2xs transition-all"
             >
               <RotateCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Refresh Table
@@ -263,7 +330,7 @@ export const ScreeningApprovalsPage: React.FC = () => {
                 placeholder="Search Candidate / ID / Email..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 outline-none focus:border-orange-500 focus:bg-white transition-all"
+                className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 outline-none focus:border-orange-500 focus:bg-white transition-all font-medium"
               />
             </div>
 
@@ -276,7 +343,7 @@ export const ScreeningApprovalsPage: React.FC = () => {
               >
                 <option value="ALL">All Job Roles</option>
                 {uniqueJobs.map((j) => (
-                  <option key={j} value={j}>{j}</option>
+                  <option key={j.id} value={j.id}>{j.title}</option>
                 ))}
               </select>
             </div>
@@ -311,29 +378,58 @@ export const ScreeningApprovalsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Bulk Action Controls */}
-          {selectedAppIds.length > 0 && (
-            <div className="flex items-center justify-between p-3 rounded-xl bg-orange-50 border border-orange-200 animate-fadeIn">
-              <span className="text-xs font-bold text-orange-950">
-                {selectedAppIds.length} candidate(s) selected
-              </span>
+          {/* Bulk Action Controls Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={toggleSelectAllVisible}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-all"
+              >
+                {isAllVisibleSelected ? (
+                  <CheckSquare className="w-4 h-4 text-orange-600" />
+                ) : (
+                  <Square className="w-4 h-4 text-slate-400" />
+                )}
+                <span>Select All {filteredApps.length} Visible</span>
+              </button>
 
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleBulkReject}
-                  className="px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs border border-red-200 transition-all"
-                >
-                  Reject Selected
-                </button>
-                <button
-                  onClick={handleBulkShortlist}
-                  className="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-xs transition-all"
-                >
-                  Shortlist Selected
-                </button>
-              </div>
+              {selectedAppIds.length > 0 && (
+                <span className="text-xs font-bold text-orange-700 bg-orange-50 px-2.5 py-1 rounded-lg border border-orange-200">
+                  {selectedAppIds.length} candidate(s) selected
+                </span>
+              )}
             </div>
-          )}
+
+            <div className="flex items-center gap-2">
+              {/* Batch Gemini ATS Run */}
+              <button
+                onClick={handleBulkRunAts}
+                disabled={selectedAppIds.length === 0 || bulkAtsLoading}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold text-xs shadow-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <Sparkles className={`w-3.5 h-3.5 ${bulkAtsLoading ? 'animate-spin' : ''}`} />
+                <span>{bulkAtsLoading ? 'Evaluating ATS...' : 'Run ATS for Selected'}</span>
+              </button>
+
+              {/* Bulk Shortlist */}
+              <button
+                onClick={handleBulkShortlist}
+                disabled={selectedAppIds.length === 0}
+                className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Shortlist Selected
+              </button>
+
+              {/* Bulk Reject */}
+              <button
+                onClick={handleBulkReject}
+                disabled={selectedAppIds.length === 0}
+                className="px-3 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs border border-red-200 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Reject Selected
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Screening Table */}
@@ -343,8 +439,8 @@ export const ScreeningApprovalsPage: React.FC = () => {
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50/80 text-slate-500 font-extrabold uppercase tracking-wider">
                   <th className="py-3 px-4 w-10 text-center">
-                    <button onClick={toggleSelectAll} className="text-slate-400 hover:text-slate-700">
-                      {selectedAppIds.length === filteredApps.length && filteredApps.length > 0 ? (
+                    <button onClick={toggleSelectAllVisible} className="text-slate-400 hover:text-slate-700">
+                      {isAllVisibleSelected ? (
                         <CheckSquare className="w-4 h-4 text-orange-600" />
                       ) : (
                         <Square className="w-4 h-4" />
@@ -367,7 +463,7 @@ export const ScreeningApprovalsPage: React.FC = () => {
                     <td colSpan={9} className="py-12 text-center text-slate-400">
                       <div className="flex flex-col items-center gap-2">
                         <div className="w-7 h-7 border-3 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-                        <p className="font-semibold text-xs text-slate-500">Loading screening queue...</p>
+                        <p className="font-semibold text-xs text-slate-500">Loading screening candidates...</p>
                       </div>
                     </td>
                   </tr>
@@ -388,9 +484,8 @@ export const ScreeningApprovalsPage: React.FC = () => {
                     return (
                       <tr
                         key={app.id}
-                        className={`hover:bg-orange-50/20 transition-colors ${
-                          isSelected ? 'bg-orange-50/40' : ''
-                        }`}
+                        className={`hover:bg-orange-50/20 transition-colors ${isSelected ? 'bg-orange-50/40' : ''
+                          }`}
                       >
                         {/* Checkbox */}
                         <td className="py-3 px-4 text-center">
@@ -428,15 +523,14 @@ export const ScreeningApprovalsPage: React.FC = () => {
                         {/* Hiring Status */}
                         <td className="py-3 px-3 whitespace-nowrap">
                           <span
-                            className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
-                              app.status === 'SHORTLISTED'
+                            className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${app.status === 'SHORTLISTED'
                                 ? 'bg-emerald-100 text-emerald-800'
                                 : app.status === 'REJECTED'
-                                ? 'bg-red-100 text-red-800'
-                                : app.status === 'ASSIGNED'
-                                ? 'bg-blue-100 text-blue-800'
-                                : 'bg-slate-100 text-slate-700'
-                            }`}
+                                  ? 'bg-red-100 text-red-800'
+                                  : app.status === 'ASSIGNED'
+                                    ? 'bg-blue-100 text-blue-800'
+                                    : 'bg-slate-100 text-slate-700'
+                              }`}
                           >
                             {app.status || 'SUBMITTED'}
                           </span>
@@ -473,46 +567,62 @@ export const ScreeningApprovalsPage: React.FC = () => {
                               <FileText className="w-3.5 h-3.5 text-orange-600" /> View
                             </button>
                             {candidate.resumeUrl && (
-                              <a
-                                href={candidate.resumeUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                download
-                                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                              <button
+                                onClick={() => handleDownloadResume(candidate.resumeUrl, candName)}
+                                className="p-1 rounded-lg text-slate-400 hover:text-orange-600 hover:bg-orange-50 transition-colors"
                                 title="Download Resume"
                               >
                                 <Download className="w-3.5 h-3.5" />
-                              </a>
+                              </button>
                             )}
                           </div>
                         </td>
 
-                        {/* Row Actions: Preview, ATS, Shortlist, Reject */}
+                        {/* Row Actions: Preview, Shortlist, Reject */}
                         <td className="py-3 px-4 text-right whitespace-nowrap">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <button
-                              onClick={() => handlePreviewCandidate(app)}
-                              className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-all"
-                            >
-                              Preview
-                            </button>
+                          {(() => {
+                            const isProcessed = [
+                              'SHORTLISTED', 'ASSIGNED', 'ROUND_1_PENDING', 'ROUND_1_SELECTED',
+                              'ROUND_1_REJECTED', 'ROUND_2_PENDING', 'ROUND_2_SELECTED',
+                              'ROUND_2_REJECTED', 'FINAL_SELECTED', 'FINAL_ROUND', 'OFFER_SENT',
+                              'OFFER_ACCEPTED', 'JOINED', 'REJECTED'
+                            ].includes(app.status) || app.finalSelected || app.status?.includes('REJECTED');
 
-                            <button
-                              onClick={() => setConfirmModalData({ open: true, type: 'SHORTLIST', app })}
-                              disabled={app.status === 'SHORTLISTED'}
-                              className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-2xs transition-all disabled:opacity-40"
-                            >
-                              Shortlist
-                            </button>
+                            return (
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  onClick={() => handlePreviewCandidate(app)}
+                                  className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-all"
+                                >
+                                  Preview
+                                </button>
 
-                            <button
-                              onClick={() => setConfirmModalData({ open: true, type: 'REJECT', app })}
-                              disabled={app.status === 'REJECTED'}
-                              className="px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs border border-red-200 transition-all disabled:opacity-40"
-                            >
-                              Reject
-                            </button>
-                          </div>
+                                <button
+                                  onClick={() => setConfirmModalData({ open: true, type: 'SHORTLIST', app })}
+                                  disabled={isProcessed}
+                                  className={`px-3 py-1 rounded-lg font-extrabold text-xs transition-all ${isProcessed
+                                      ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
+                                      : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs'
+                                    }`}
+                                  title={isProcessed ? 'Candidate has already advanced beyond screening' : 'Shortlist Candidate'}
+                                >
+                                  Shortlist
+                                </button>
+
+                                <button
+                                  onClick={() => setConfirmModalData({ open: true, type: 'REJECT', app })}
+                                  disabled={isProcessed}
+                                  className={`px-2.5 py-1 rounded-lg font-bold text-xs border transition-all ${isProcessed
+                                      ? 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'
+                                      : 'bg-red-50 hover:bg-red-100 text-red-700 border-red-200'
+                                    }`}
+                                  title={isProcessed ? 'Candidate has already advanced beyond screening' : 'Reject Candidate'}
+                                >
+                                  Reject
+                                </button>
+                              </div>
+                            );
+                          })()}
                         </td>
                       </tr>
                     );
@@ -520,6 +630,37 @@ export const ScreeningApprovalsPage: React.FC = () => {
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Server-Side Pagination Bar (20 candidates per page) */}
+          <div className="p-4 border-t border-slate-200 bg-slate-50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <div className="text-slate-500 font-medium">
+              Showing <span className="font-bold text-slate-900">{totalCandidates > 0 ? (currentPage - 1) * pageSize + 1 : 0}</span> to{' '}
+              <span className="font-bold text-slate-900">{Math.min(currentPage * pageSize, totalCandidates)}</span> of{' '}
+              <span className="font-bold text-slate-900">{totalCandidates}</span> total applications
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => loadData(currentPage - 1)}
+                disabled={currentPage <= 1 || loading}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-300 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs"
+              >
+                <ChevronLeft className="w-4 h-4" /> Previous
+              </button>
+
+              <div className="flex items-center gap-1 px-2 font-bold text-slate-700">
+                Page {currentPage} of {totalPages}
+              </div>
+
+              <button
+                onClick={() => loadData(currentPage + 1)}
+                disabled={currentPage >= totalPages || loading}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-300 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs"
+              >
+                Next <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
 

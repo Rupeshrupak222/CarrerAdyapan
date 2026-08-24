@@ -39,39 +39,13 @@ export const HRManagerDashboard: React.FC = () => {
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      const [appsRes, statsRes] = await Promise.all([
-        applicationService.getAllApplications(),
-        applicationService.getWorkloadStats(),
-      ]);
-
-      const allApps = appsRes.applications || appsRes.data || (Array.isArray(appsRes) ? appsRes : []);
-      setRecentApplications(allApps.slice(0, 6));
-
-      const total = allApps.length;
-      const newApps = allApps.filter((a: any) => a.status === 'APPLIED' || a.status === 'SUBMITTED').length;
-      const shortlisted = allApps.filter((a: any) =>
-        ['SHORTLISTED', 'ASSIGNED', 'ROUND_1_PENDING', 'ROUND_1_SELECTED', 'ROUND_2_PENDING', 'ROUND_2_SELECTED', 'FINAL_ROUND', 'OFFER_SENT'].includes(a.status)
-      ).length;
-      const rejected = allApps.filter((a: any) => a.status === 'REJECTED').length;
-      const unassigned = allApps.filter((a: any) => a.status === 'SHORTLISTED' && !a.assignedHrId).length;
-      const assigned = allApps.filter((a: any) => !!a.assignedHrId && a.status !== 'REJECTED').length;
-      const round1 = allApps.filter((a: any) => a.status === 'ROUND_1_PENDING' || (a.status === 'ASSIGNED' && a.currentRound === 1)).length;
-      const round2 = allApps.filter((a: any) => a.status === 'ROUND_2_PENDING' || a.status === 'ROUND_1_SELECTED').length;
-      const finalRound = allApps.filter((a: any) => a.status === 'FINAL_ROUND' || a.status === 'ROUND_2_SELECTED' || a.finalSelected).length;
-      const offersSent = allApps.filter((a: any) => a.status === 'OFFER_SENT').length;
-
-      setMetrics({
-        total,
-        newApps,
-        shortlisted,
-        rejected,
-        unassigned,
-        assigned,
-        round1,
-        round2,
-        finalRound,
-        offersSent,
-      });
+      const res = await applicationService.getManagerStats();
+      if (res?.metrics) {
+        setMetrics(res.metrics);
+      }
+      if (res?.recentApplications) {
+        setRecentApplications(res.recentApplications);
+      }
     } catch (err: any) {
       toast.error('Failed to load manager metrics: ' + err.message);
     } finally {

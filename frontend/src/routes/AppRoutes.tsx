@@ -146,6 +146,7 @@ const AppRoutes = () => {
 
       {/* ===== HR MANAGER DEDICATED ATS WORKFLOW ROUTES ===== */}
       <Route path="/hr-manager/dashboard" element={<ProtectedRoute><HRManagerDashboard /></ProtectedRoute>} />
+      <Route path="/hr-manager/candidates" element={<ProtectedRoute><Candidates /></ProtectedRoute>} />
       <Route path="/hr-manager/screening" element={<ProtectedRoute><ScreeningApprovalsPage /></ProtectedRoute>} />
       <Route path="/hr-manager/workload" element={<ProtectedRoute><WorkloadDistributionPage /></ProtectedRoute>} />
       <Route path="/hr-manager/final-selected" element={<ProtectedRoute><FinalRoundSelectedPage /></ProtectedRoute>} />
@@ -161,6 +162,7 @@ const AppRoutes = () => {
 
       {/* ===== ADMIN RECRUITER & MANAGEMENT ROUTES ===== */}
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/admin/candidates" element={<ProtectedRoute><Candidates /></ProtectedRoute>} />
       <Route path="/admin/screening" element={<ProtectedRoute><ScreeningApprovalsPage /></ProtectedRoute>} />
       <Route path="/admin/workload" element={<ProtectedRoute><WorkloadDistributionPage /></ProtectedRoute>} />
       <Route path="/admin/final-selected" element={<ProtectedRoute><FinalRoundSelectedPage /></ProtectedRoute>} />

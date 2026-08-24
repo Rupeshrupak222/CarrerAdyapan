@@ -41,6 +41,16 @@ export const applicationService = {
     return response.data;
   },
 
+  getManagerStats: async () => {
+    const response = await api.get('/applications/manager-stats');
+    return response.data;
+  },
+
+  bulkRunAtsCheck: async (applicationIds: string[]) => {
+    const response = await api.post('/applications/bulk-ats-check', { applicationIds });
+    return response.data;
+  },
+
   getFinalRoundSelected: async () => {
     const response = await api.get('/applications/final-selected/list');
     return response.data;

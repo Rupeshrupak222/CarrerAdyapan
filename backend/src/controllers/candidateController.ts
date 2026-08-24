@@ -559,60 +559,158 @@ export const updateCandidate = async (req, res) => {
   }
 };
 
-// Delete Candidate (cascades applications, interviews, offers from PostgreSQL DB)
+// Delete Candidate (cascades all applications, interviews, feedback, offers, onboardings, activities from PostgreSQL DB)
 export const deleteCandidate = async (req, res) => {
   try {
     const { id } = req.params;
-    const candidate = await prisma.candidate.findUnique({ where: { id } }).catch(() => null);
+    const user = req.user;
+
+    if (!user || (user.role !== 'ADMIN' && user.role !== 'HR_MANAGER')) {
+      return res.status(403).json({ success: false, message: 'Unauthorized. Only HR Manager or Admin can delete candidates.' });
+    }
+
+    // Find candidate by ID, code, or email
+    const candidate = await prisma.candidate.findFirst({
+      where: {
+        OR: [
+          { id },
+          { candidateCode: id },
+          { email: id },
+        ],
+      },
+      include: {
+        applications: {
+          select: { id: true },
+        },
+      },
+    }).catch(() => null);
+
+    const targetCandId = candidate?.id || id;
     const candEmail = candidate?.email;
+    const appIds = candidate?.applications?.map((a: any) => a.id) || [];
 
-    // 1. Delete linked Applications from DB
-    await prisma.application.deleteMany({
+    // 1. Delete linked Offer Verification Tokens & Offers
+    const offers = await prisma.offer.findMany({
       where: {
         OR: [
-          { candidateId: id },
-          ...(candEmail ? [{ candidate: { email: candEmail } }] : [])
-        ]
-      }
-    }).catch(() => null);
+          { candidateId: targetCandId },
+          ...(candEmail ? [{ candidateEmail: candEmail }] : []),
+          ...(appIds.length > 0 ? [{ applicationId: { in: appIds } }] : []),
+        ],
+      },
+      select: { id: true },
+    }).catch(() => []);
 
-    // 2. Delete linked Interviews from DB
-    await prisma.interview.deleteMany({
-      where: {
-        OR: [
-          { candidateId: id },
-          ...(candEmail ? [{ candidateEmail: candEmail }] : [])
-        ]
-      }
-    }).catch(() => null);
-
-    // 3. Delete linked Offers from DB
+    const offerIds = offers.map((o) => o.id);
+    if (offerIds.length > 0) {
+      await prisma.offerVerificationToken.deleteMany({ where: { offerId: { in: offerIds } } }).catch(() => {});
+    }
     await prisma.offer.deleteMany({
       where: {
         OR: [
-          { candidateId: id },
-          ...(candEmail ? [{ candidateEmail: candEmail }] : [])
-        ]
-      }
-    }).catch(() => null);
+          { candidateId: targetCandId },
+          ...(candEmail ? [{ candidateEmail: candEmail }] : []),
+          ...(appIds.length > 0 ? [{ applicationId: { in: appIds } }] : []),
+        ],
+      },
+    }).catch(() => {});
 
-    // 4. Delete Candidate record from DB
-    await prisma.candidate.delete({ where: { id } }).catch(async () => {
-      await prisma.candidate.deleteMany({
-        where: {
-          OR: [
-            { id },
-            ...(candEmail ? [{ email: candEmail }] : [])
-          ]
-        }
-      });
+    // 2. Delete Interview Feedback Details & Interviews
+    const interviews = await prisma.interview.findMany({
+      where: {
+        OR: [
+          { candidateId: targetCandId },
+          ...(candEmail ? [{ candidateEmail: candEmail }] : []),
+          ...(appIds.length > 0 ? [{ applicationId: { in: appIds } }] : []),
+        ],
+      },
+      select: { id: true },
+    }).catch(() => []);
+
+    const interviewIds = interviews.map((i) => i.id);
+    if (interviewIds.length > 0) {
+      await prisma.feedbackDetail.deleteMany({ where: { interviewId: { in: interviewIds } } }).catch(() => {});
+      await prisma.interview.deleteMany({ where: { id: { in: interviewIds } } }).catch(() => {});
+    }
+
+    // 3. Delete Onboardings, Documents & Joinings
+    const onboardings = await prisma.onboarding.findMany({
+      where: {
+        OR: [
+          { candidateId: targetCandId },
+          ...(candEmail ? [{ email: candEmail }] : []),
+          ...(appIds.length > 0 ? [{ applicationId: { in: appIds } }] : []),
+        ],
+      },
+      select: { id: true },
+    }).catch(() => []);
+
+    const onboardingIds = onboardings.map((o) => o.id);
+    if (onboardingIds.length > 0) {
+      await prisma.onboardingDocument.deleteMany({ where: { onboardingId: { in: onboardingIds } } }).catch(() => {});
+      await prisma.onboarding.deleteMany({ where: { id: { in: onboardingIds } } }).catch(() => {});
+    }
+
+    await prisma.joining.deleteMany({
+      where: {
+        OR: [
+          { candidateId: targetCandId },
+          ...(candEmail ? [{ email: candEmail }] : []),
+          ...(appIds.length > 0 ? [{ applicationId: { in: appIds } }] : []),
+        ],
+      },
+    }).catch(() => {});
+
+    // 4. Delete Test Results
+    await prisma.testResult.deleteMany({
+      where: {
+        OR: [
+          { candidateId: targetCandId },
+          ...(candEmail ? [{ candidateEmail: candEmail }] : []),
+          ...(appIds.length > 0 ? [{ applicationId: { in: appIds } }] : []),
+        ],
+      },
+    }).catch(() => {});
+
+    // 5. Delete Activities, Secure Tokens, HR Assignments, ATS Analyses, Communications
+    await prisma.activity.deleteMany({ where: { candidateId: targetCandId } }).catch(() => {});
+    await prisma.candidateSecureToken.deleteMany({ where: { candidateId: targetCandId } }).catch(() => {});
+    await prisma.hRAssignment.deleteMany({ where: { candidateId: targetCandId } }).catch(() => {});
+
+    if (appIds.length > 0) {
+      await prisma.aTSAnalysis.deleteMany({ where: { applicationId: { in: appIds } } }).catch(() => {});
+      await prisma.communicationRecord.deleteMany({ where: { applicationId: { in: appIds } } }).catch(() => {});
+    }
+
+    // 6. Delete Applications
+    await prisma.application.deleteMany({
+      where: {
+        OR: [
+          { candidateId: targetCandId },
+          ...(candEmail ? [{ candidate: { email: candEmail } }] : []),
+          ...(appIds.length > 0 ? [{ id: { in: appIds } }] : []),
+        ],
+      },
+    }).catch(() => {});
+
+    // 7. Delete Candidate Record
+    await prisma.candidate.deleteMany({
+      where: {
+        OR: [
+          { id: targetCandId },
+          ...(candEmail ? [{ email: candEmail }] : []),
+        ],
+      },
+    }).catch(() => {});
+
+    logger.info(`Candidate ${targetCandId} (${candEmail || ''}) and all associated records permanently DELETED from PostgreSQL DB by ${user.name}!`);
+    return res.json({
+      success: true,
+      message: 'Candidate and all associated hiring lifecycle data permanently deleted from database.',
     });
-
-    logger.info(`Candidate ${id} (${candEmail || ''}) and all associated records DELETED from PostgreSQL DB!`);
-    res.json({ success: true, message: 'Candidate and all associated data deleted successfully from database' });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Delete Candidate Error:', error.message);
-    res.json({ success: true, message: 'Candidate deleted successfully' });
+    return res.status(500).json({ success: false, message: 'Failed to delete candidate: ' + error.message });
   }
 };
 

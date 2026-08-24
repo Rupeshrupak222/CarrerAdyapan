@@ -399,12 +399,13 @@ export const createInterview = async (req, res) => {
       },
     });
 
-    const targetCandId = candidateId || interview?.candidateId || interview?.application?.candidateId;
-    if (targetCandId) {
-      const updatedCandStatus = status === 'COMPLETED' ? 'INTERVIEWED' : 'INTERVIEW_SCHEDULED';
-      await prisma.application.updateMany({
-        where: { candidateId: targetCandId },
-        data: { status: updatedCandStatus, currentRound: roundNum },
+    // Update the specific application status based on round number
+    const targetAppId = applicationId || interview?.applicationId;
+    if (targetAppId) {
+      const roundStatus = status === 'COMPLETED' ? 'INTERVIEWED' : (roundNum === 1 ? 'ROUND_1_PENDING' : roundNum === 2 ? 'ROUND_2_PENDING' : 'INTERVIEW_SCHEDULED');
+      await prisma.application.update({
+        where: { id: targetAppId },
+        data: { status: roundStatus, currentRound: roundNum },
       }).catch(() => { });
     }
 
@@ -644,70 +645,36 @@ export const updateInterviewFeedback = async (req, res) => {
 
     if (targetApp) {
       const currentRoundNum = interview.roundNumber || targetApp.currentRound || 1;
-      const totalRounds = targetApp.job?.totalRounds || 3;
+      const totalRounds = targetApp.job?.totalRounds || 2;
 
       if (result === 'SELECTED') {
-        const nextRoundNum = currentRoundNum + 1;
-        const isFinalRound = currentRoundNum >= totalRounds || currentRoundNum >= 3;
-
-        await prisma.application.update({
-          where: { id: targetApp.id },
-          data: {
-            status: isFinalRound ? 'FINAL_SELECTED' : 'ROUND_CLEARED',
-            currentRound: isFinalRound ? 3 : nextRoundNum,
-            isEligibleForNextRound: !isFinalRound,
-            finalSelected: isFinalRound,
-            managerApproved: isFinalRound,
-          },
-        });
-
-        // If candidate cleared final round, automatically generate / prepare an official Offer record
-        if (isFinalRound) {
-          const cand = targetApp.candidate || await prisma.candidate.findUnique({ where: { id: targetApp.candidateId } });
-          const candName = cand ? `${cand.firstName} ${cand.lastName}` : (interview.candidateName || 'Candidate');
-          const candEmail = cand?.email || interview.candidateEmail;
-
-          const existingOffer = await prisma.offer.findFirst({
-            where: {
-              OR: [
-                { applicationId: targetApp.id },
-                { candidateId: targetApp.candidateId },
-                ...(candEmail ? [{ candidateEmail: candEmail }] : []),
-              ],
+        if (currentRoundNum === 1) {
+          await prisma.application.update({
+            where: { id: targetApp.id },
+            data: {
+              status: 'ROUND_1_SELECTED',
+              currentRound: 2,
+              isEligibleForNextRound: true,
             },
           });
-
-          if (!existingOffer) {
-            await prisma.offer.create({
-              data: {
-                id: `off-${Date.now()}`,
-                applicationId: targetApp.id,
-                candidateId: targetApp.candidateId,
-                candidateName: candName,
-                candidateEmail: candEmail || '',
-                jobTitle: targetApp.job?.title || interview.jobTitle || 'Business Development Associate (BDA)',
-                salary: 20000,
-                status: 'PENDING',
-                joiningDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-                customTerms: JSON.stringify({
-                  stipend: 'INR 20,000/- Per Month (During 6-Month Training)',
-                  location: 'Hyderabad / Hybrid',
-                  trainingStartDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                }),
-                offerDetails: {
-                  stipend: 'INR 20,000/- Per Month (During 6-Month Training)',
-                  location: 'Hyderabad / Hybrid',
-                  trainingStartDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                },
-              },
-            }).catch((err) => logger.warn('Auto Offer Creation Warning:', err));
-          }
+        } else if (currentRoundNum >= 2) {
+          await prisma.application.update({
+            where: { id: targetApp.id },
+            data: {
+              status: 'FINAL_SELECTED',
+              currentRound: 2,
+              isEligibleForNextRound: false,
+              finalSelected: true,
+              managerApproved: false, // Explicit Manager Approval Required before Offer Release
+            },
+          });
         }
       } else if (result === 'REJECTED') {
+        const rejectionStatus = currentRoundNum === 1 ? 'ROUND_1_REJECTED' : 'ROUND_2_REJECTED';
         await prisma.application.update({
           where: { id: targetApp.id },
           data: {
-            status: 'REJECTED',
+            status: rejectionStatus,
             overallStatus: 'REJECTED',
             isEligibleForNextRound: false,
             finalSelected: false,
@@ -728,14 +695,13 @@ export const updateInterviewFeedback = async (req, res) => {
         }).catch(() => {});
 
         // Send formal polite rejection notification email
-        const cand = targetApp.candidate || await prisma.candidate.findUnique({ where: { id: targetApp.candidateId } });
-        if (cand?.email && !cand.email.includes('example.com')) {
+        if (targetApp.candidate?.email && !targetApp.candidate.email.includes('example.com')) {
           sendRejectionEmail({
-            candidateName: `${cand.firstName} ${cand.lastName}`,
-            candidateEmail: cand.email,
-            jobTitle: targetApp.job?.title || 'Applied Position',
-            reason: feedback || 'Did not meet evaluation criteria for the subsequent round.',
-          }).catch((err) => logger.warn('Async Rejection Email Warning:', err));
+            candidateName: targetApp.candidate ? `${targetApp.candidate.firstName} ${targetApp.candidate.lastName}` : (interview.candidateName || 'Candidate'),
+            candidateEmail: targetApp.candidate.email,
+            jobTitle: targetApp.job?.title || interview.jobTitle || 'Open Position',
+            reason: feedback || `Interview evaluation completed for Round ${currentRoundNum}.`,
+          }).catch((emailErr) => logger.warn('Rejection email error:', emailErr));
         }
       }
     }
