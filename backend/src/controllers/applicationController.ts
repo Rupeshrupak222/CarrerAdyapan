@@ -181,7 +181,7 @@ export const getManagerStats = async (req, res) => {
       where: {
         OR: [
           { status: { in: ['ROUND_1_SELECTED', 'ROUND_2_PENDING', 'ROUND_2_SELECTED', 'FINAL_ROUND', 'OFFER_SENT', 'OFFER_ACCEPTED', 'JOINED'] } },
-          { interviews: { some: { roundNumber: 1, outcome: 'PASSED' } } },
+          { interviews: { some: { roundNumber: 1, result: { in: ['SELECTED', 'PASSED'] } } } },
         ],
         NOT: { status: 'ROUND_1_REJECTED' },
       },
@@ -192,7 +192,7 @@ export const getManagerStats = async (req, res) => {
       where: {
         OR: [
           { status: 'ROUND_1_REJECTED' },
-          { interviews: { some: { roundNumber: 1, outcome: 'REJECTED' } } },
+          { interviews: { some: { roundNumber: 1, result: 'REJECTED' } } },
         ],
       },
     });
@@ -202,7 +202,7 @@ export const getManagerStats = async (req, res) => {
       where: {
         OR: [
           { status: { in: ['ROUND_2_SELECTED', 'FINAL_ROUND', 'OFFER_SENT', 'OFFER_ACCEPTED', 'JOINED'] } },
-          { interviews: { some: { roundNumber: 2, outcome: 'PASSED' } } },
+          { interviews: { some: { roundNumber: 2, result: { in: ['SELECTED', 'PASSED'] } } } },
         ],
         NOT: { status: { in: ['REJECTED', 'ROUND_1_REJECTED', 'ROUND_2_REJECTED'] } },
       },
@@ -213,7 +213,7 @@ export const getManagerStats = async (req, res) => {
       where: {
         OR: [
           { status: 'ROUND_2_REJECTED' },
-          { interviews: { some: { roundNumber: 2, outcome: 'REJECTED' } } },
+          { interviews: { some: { roundNumber: 2, result: 'REJECTED' } } },
         ],
       },
     });
