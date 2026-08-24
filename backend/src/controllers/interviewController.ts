@@ -610,6 +610,17 @@ export const updateInterviewFeedback = async (req, res) => {
   try {
     const { feedback, rating, status = 'COMPLETED', result = 'SELECTED' } = req.body;
 
+    const existingInterview = await prisma.interview.findUnique({
+      where: { id: req.params.id },
+    });
+
+    if (existingInterview && existingInterview.status === 'COMPLETED' && req.user?.role === 'HR') {
+      return res.status(400).json({
+        success: false,
+        message: 'Evaluation has already been recorded and locked for this interview round.',
+      });
+    }
+
     const interview = await prisma.interview.update({
       where: { id: req.params.id },
       data: {

@@ -46,11 +46,30 @@ export const InterviewScheduleModal: React.FC<InterviewScheduleModalProps> = ({
   const jobTitle = application?.job?.title || 'Business Development Associate';
   const candidateCode = application?.candidateCode || application?.id?.slice(0, 10) || 'APP-2026';
 
-  const initialRoundName = defaultRoundName || (defaultRoundNumber === 2 ? 'Round 2: Technical & Sales Pitch' : 'Round 1: Screening & Domain');
+  const getInitialRoundType = () => {
+    if (defaultRoundName && defaultRoundName.toLowerCase().includes('screen')) return 'SCREENING';
+    if (defaultRoundName && defaultRoundName.toLowerCase().includes('final')) return 'FINAL';
+    if (defaultRoundNumber === 2) return 'FINAL';
+    if (defaultRoundNumber === 1) return 'SCREENING';
+    return defaultRoundName ? 'OTHERS' : 'SCREENING';
+  };
+
+  const [roundType, setRoundType] = useState<'SCREENING' | 'FINAL' | 'OTHERS'>(getInitialRoundType());
+  const [customRoundName, setCustomRoundName] = useState(
+    defaultRoundName && !['Screening Round', 'Final Round'].includes(defaultRoundName) ? defaultRoundName : ''
+  );
+
+  const getComputedRoundDetails = (type: 'SCREENING' | 'FINAL' | 'OTHERS', customName: string) => {
+    if (type === 'SCREENING') return { roundNumber: 1, roundName: 'Screening Round' };
+    if (type === 'FINAL') return { roundNumber: 2, roundName: 'Final Round' };
+    return { roundNumber: 3, roundName: customName.trim() || 'Custom Round' };
+  };
+
+  const initialDetails = getComputedRoundDetails(getInitialRoundType(), customRoundName);
 
   const [formData, setFormData] = useState({
-    roundNumber: defaultRoundNumber,
-    roundName: initialRoundName,
+    roundNumber: initialDetails.roundNumber,
+    roundName: initialDetails.roundName,
     scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
     duration: 30,
     type: 'VIDEO',
@@ -61,11 +80,15 @@ export const InterviewScheduleModal: React.FC<InterviewScheduleModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      const rNum = defaultRoundNumber || 1;
-      const rName = defaultRoundName || (rNum === 2 ? 'Round 2: Technical & Sales Pitch' : 'Round 1: Screening & Domain');
+      const type = getInitialRoundType();
+      const custom = defaultRoundName && !['Screening Round', 'Final Round'].includes(defaultRoundName) ? defaultRoundName : '';
+      setRoundType(type);
+      setCustomRoundName(custom);
+      const details = getComputedRoundDetails(type, custom);
+
       setFormData({
-        roundNumber: rNum,
-        roundName: rName,
+        roundNumber: details.roundNumber,
+        roundName: details.roundName,
         scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
         duration: 30,
         type: 'VIDEO',
@@ -211,30 +234,48 @@ export const InterviewScheduleModal: React.FC<InterviewScheduleModalProps> = ({
                 <div>
                   <label className="text-slate-700 font-bold block mb-1">Interview Round *</label>
                   <select
-                    value={formData.roundNumber}
+                    value={roundType}
                     onChange={(e) => {
-                      const rNum = parseInt(e.target.value, 10);
+                      const newType = e.target.value as 'SCREENING' | 'FINAL' | 'OTHERS';
+                      setRoundType(newType);
+                      const details = getComputedRoundDetails(newType, customRoundName);
                       setFormData({
                         ...formData,
-                        roundNumber: rNum,
-                        roundName: rNum === 2 ? 'Round 2: Technical & Sales Pitch' : 'Round 1: Screening & Domain',
+                        roundNumber: details.roundNumber,
+                        roundName: details.roundName,
                       });
                     }}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 font-semibold outline-none focus:border-orange-500 focus:bg-white"
                   >
-                    <option value={1}>Round 1: Screening & Domain</option>
-                    <option value={2}>Round 2: Technical & Sales Pitch</option>
+                    <option value="SCREENING">Screening Round</option>
+                    <option value="FINAL">Final Round</option>
+                    <option value="OTHERS">Others (Custom Round)</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="text-slate-700 font-bold block mb-1">Round Display Name</label>
+                  <label className="text-slate-700 font-bold block mb-1">
+                    {roundType === 'OTHERS' ? 'Custom Round Name *' : 'Round Display Name'}
+                  </label>
                   <input
                     type="text"
                     required
-                    value={formData.roundName}
-                    onChange={(e) => setFormData({ ...formData, roundName: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 font-semibold outline-none focus:border-orange-500 focus:bg-white"
+                    placeholder={roundType === 'OTHERS' ? 'e.g. Managerial Discussion / Technical Assessment' : 'Round Title'}
+                    disabled={roundType !== 'OTHERS'}
+                    value={roundType === 'OTHERS' ? customRoundName : formData.roundName}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setCustomRoundName(val);
+                      setFormData({
+                        ...formData,
+                        roundName: val.trim() || 'Custom Round',
+                      });
+                    }}
+                    className={`w-full px-3.5 py-2.5 rounded-xl border text-slate-900 font-semibold outline-none transition-all ${
+                      roundType === 'OTHERS' 
+                        ? 'bg-white border-orange-500 ring-2 ring-orange-500/20' 
+                        : 'bg-slate-100 border-slate-300 text-slate-600 cursor-not-allowed'
+                    }`}
                   />
                 </div>
               </div>

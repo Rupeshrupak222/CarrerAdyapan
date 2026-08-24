@@ -49,6 +49,7 @@ export const HRSpecialistRound2Page: React.FC = () => {
   const [rating, setRating] = useState(9);
   const [feedback, setFeedback] = useState('Excellent problem solving, technical depth, pitch clarity, and cultural alignment.');
   const [decision, setDecision] = useState<'SELECTED' | 'REJECTED'>('SELECTED');
+  const [isLocked, setIsLocked] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   // Preview & Resume Modals
@@ -113,12 +114,16 @@ export const HRSpecialistRound2Page: React.FC = () => {
     setScheduleModalOpen(true);
   };
 
-  // Open Evaluation Modal
+  // Open Evaluation Modal (Locks if already completed)
   const handleOpenEvaluation = (app: any) => {
+    const round2Interview = app.interviews?.find((i: any) => i.roundNumber === 2);
+    const isAlreadyEvaluated = app.status === 'ROUND_2_SELECTED' || app.status === 'ROUND_2_REJECTED' || app.status === 'FINAL_SELECTED' || app.status === 'FINAL_ROUND' || app.status === 'OFFER_SENT' || app.status === 'JOINED' || round2Interview?.status === 'COMPLETED';
+
     setSelectedApp(app);
-    setRating(9);
-    setFeedback('Excellent problem solving, technical depth, pitch clarity, and cultural alignment.');
-    setDecision('SELECTED');
+    setRating(round2Interview?.rating || 9);
+    setFeedback(round2Interview?.feedback || 'Excellent problem solving, technical depth, pitch clarity, and cultural alignment.');
+    setDecision(round2Interview?.result === 'REJECTED' || app.status === 'ROUND_2_REJECTED' ? 'REJECTED' : 'SELECTED');
+    setIsLocked(Boolean(isAlreadyEvaluated));
     setEvaluationModalOpen(true);
   };
 
@@ -337,12 +342,23 @@ export const HRSpecialistRound2Page: React.FC = () => {
                               {round2Iv ? 'Reschedule' : 'Schedule R2'}
                             </button>
 
-                            <button
-                              onClick={() => handleOpenEvaluation(app)}
-                              className="px-3.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs shadow-xs"
-                            >
-                              Evaluate
-                            </button>
+                            {isPassed || isRejected || round2Iv?.status === 'COMPLETED' ? (
+                              <button
+                                onClick={() => handleOpenEvaluation(app)}
+                                className="px-3 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-extrabold text-xs border border-emerald-300 shadow-2xs inline-flex items-center gap-1"
+                                title="Evaluation completed - Click to view scorecard"
+                              >
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>Evaluated</span>
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleOpenEvaluation(app)}
+                                className="px-3.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs shadow-xs"
+                              >
+                                Evaluate
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -356,50 +372,26 @@ export const HRSpecialistRound2Page: React.FC = () => {
           {/* Pagination Controls */}
           {filteredApps.length > 0 && (
             <div className="px-6 py-4 border-t border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-              <div className="text-slate-500 font-medium">
-                Showing <strong className="text-slate-800">{(currentPage - 1) * itemsPerPage + 1}</strong> to{' '}
-                <strong className="text-slate-800">
-                  {Math.min(currentPage * itemsPerPage, filteredApps.length)}
-                </strong>{' '}
-                of <strong className="text-slate-800">{filteredApps.length}</strong> candidates
-              </div>
-
+              <span className="text-slate-500 font-medium">
+                Showing {Math.min((currentPage - 1) * itemsPerPage + 1, filteredApps.length)} to {Math.min(currentPage * itemsPerPage, filteredApps.length)} of {filteredApps.length} candidates
+              </span>
               <div className="flex items-center gap-1.5">
                 <button
-                  onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-300 bg-white font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                  className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold"
                 >
-                  <ChevronLeft className="w-4 h-4" /> Prev
+                  Previous
                 </button>
-
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: totalPages }, (_, idx) => idx + 1)
-                    .filter((page) => page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1)
-                    .map((page, idx, arr) => (
-                      <React.Fragment key={page}>
-                        {idx > 0 && arr[idx - 1] !== page - 1 && (
-                          <span className="px-1 text-slate-400">...</span>
-                        )}
-                        <button
-                          onClick={() => setCurrentPage(page)}
-                          className={`w-7 h-7 rounded-lg font-bold text-xs transition-all ${currentPage === page
-                            ? 'bg-blue-600 text-white shadow-xs'
-                            : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-100'
-                            }`}
-                        >
-                          {page}
-                        </button>
-                      </React.Fragment>
-                    ))}
-                </div>
-
+                <span className="px-3 py-1.5 text-slate-600 font-mono font-bold">
+                  Page {currentPage} of {totalPages}
+                </span>
                 <button
-                  onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-300 bg-white font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                  className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold"
                 >
-                  Next <ChevronRight className="w-4 h-4" />
+                  Next
                 </button>
               </div>
             </div>
@@ -412,7 +404,7 @@ export const HRSpecialistRound2Page: React.FC = () => {
           onClose={() => setScheduleModalOpen(false)}
           application={selectedAppForSchedule}
           defaultRoundNumber={2}
-          defaultRoundName="Round 2: Technical & Sales Pitch"
+          defaultRoundName="Final Round"
           hrUser={user}
           onSuccess={loadData}
         />
@@ -429,7 +421,9 @@ export const HRSpecialistRound2Page: React.FC = () => {
             >
               <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                 <div>
-                  <span className="text-[10px] font-extrabold text-blue-600 uppercase tracking-wider block">Round 2 Scorecard & Final Decision</span>
+                  <span className="text-[10px] font-extrabold text-blue-600 uppercase tracking-wider block">
+                    {isLocked ? 'Round 2 Scorecard (Completed)' : 'Round 2 Scorecard & Final Decision'}
+                  </span>
                   <h3 className="text-base font-extrabold text-slate-900 mt-0.5">
                     {selectedApp.candidate?.firstName} {selectedApp.candidate?.lastName}
                   </h3>
@@ -441,6 +435,13 @@ export const HRSpecialistRound2Page: React.FC = () => {
                   <X className="w-4 h-4" />
                 </button>
               </div>
+
+              {isLocked && (
+                <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Evaluation Completed & Locked (One-time submission recorded)</span>
+                </div>
+              )}
 
               <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
                 <div className="font-bold text-slate-900">{selectedApp.job?.title || 'Open Position'}</div>
@@ -455,9 +456,12 @@ export const HRSpecialistRound2Page: React.FC = () => {
                     min="1"
                     max="10"
                     required
+                    disabled={isLocked}
                     value={rating}
                     onChange={(e) => setRating(parseInt(e.target.value) || 1)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 font-black text-sm outline-none focus:border-blue-500"
+                    className={`w-full px-3.5 py-2.5 rounded-xl border font-black text-sm outline-none ${
+                      isLocked ? 'bg-slate-100 border-slate-200 text-slate-600 cursor-not-allowed' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-blue-500'
+                    }`}
                   />
                 </div>
 
@@ -466,21 +470,25 @@ export const HRSpecialistRound2Page: React.FC = () => {
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
+                      disabled={isLocked}
                       onClick={() => setDecision('SELECTED')}
-                      className={`py-2.5 px-3 rounded-xl font-extrabold text-xs border transition-all ${decision === 'SELECTED'
-                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs ring-2 ring-emerald-500/20'
-                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                        }`}
+                      className={`py-2.5 px-3 rounded-xl font-extrabold text-xs border transition-all ${
+                        decision === 'SELECTED'
+                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs ring-2 ring-emerald-500/20'
+                          : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                      } ${isLocked ? 'opacity-90 cursor-not-allowed' : ''}`}
                     >
                       ✓ Select (Offer Stage)
                     </button>
                     <button
                       type="button"
+                      disabled={isLocked}
                       onClick={() => setDecision('REJECTED')}
-                      className={`py-2.5 px-3 rounded-xl font-extrabold text-xs border transition-all ${decision === 'REJECTED'
-                        ? 'bg-red-600 text-white border-red-600 shadow-xs ring-2 ring-red-500/20'
-                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                        }`}
+                      className={`py-2.5 px-3 rounded-xl font-extrabold text-xs border transition-all ${
+                        decision === 'REJECTED'
+                          ? 'bg-red-600 text-white border-red-600 shadow-xs ring-2 ring-red-500/20'
+                          : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                      } ${isLocked ? 'opacity-90 cursor-not-allowed' : ''}`}
                     >
                       ✕ Reject in Round 2
                     </button>
@@ -492,9 +500,12 @@ export const HRSpecialistRound2Page: React.FC = () => {
                   <textarea
                     rows={3}
                     required
+                    disabled={isLocked}
                     value={feedback}
                     onChange={(e) => setFeedback(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 outline-none focus:border-blue-500 font-medium"
+                    className={`w-full px-3.5 py-2 rounded-xl border outline-none font-medium ${
+                      isLocked ? 'bg-slate-100 border-slate-200 text-slate-600 cursor-not-allowed' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-blue-500'
+                    }`}
                   />
                 </div>
 
@@ -505,15 +516,17 @@ export const HRSpecialistRound2Page: React.FC = () => {
                     disabled={submitting}
                     className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs"
                   >
-                    Cancel
+                    {isLocked ? 'Close' : 'Cancel'}
                   </button>
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs shadow-xs disabled:opacity-50"
-                  >
-                    {submitting ? 'Submitting...' : 'Save Evaluation'}
-                  </button>
+                  {!isLocked && (
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs shadow-xs disabled:opacity-50"
+                    >
+                      {submitting ? 'Submitting...' : 'Save Evaluation'}
+                    </button>
+                  )}
                 </div>
               </form>
             </div>
