@@ -135,7 +135,12 @@ export const publicApplyCandidate = async (req, res) => {
 
     const isDataUrl = (url: any) => typeof url === 'string' && url.startsWith('data:');
     const isDummyUrl = (url: any) => typeof url === 'string' && url.includes('example.com');
-    const safeResumeUrl = savedFileUrl || ((resumeUrl && !isDataUrl(resumeUrl) && !isDummyUrl(resumeUrl)) ? resumeUrl : `${baseUrl}/uploads/resumes/default_resume.pdf`);
+    const localFilename = req.file ? req.file.filename : (req.body.resumeFileName ? path.basename(req.body.resumeFileName) : null);
+    
+    // Always prioritize server static URL to prevent Cloudinary 401 blocking
+    const safeResumeUrl = localFilename 
+      ? `/uploads/resumes/${localFilename}`
+      : (savedFileUrl || ((resumeUrl && !isDataUrl(resumeUrl) && !isDummyUrl(resumeUrl)) ? resumeUrl : `${baseUrl}/uploads/resumes/default_resume.pdf`));
 
     // Check if the user is logged in as a candidate (optional auth)
     const authenticatedCandidateId = getAuthenticatedCandidateId(req);
@@ -970,13 +975,40 @@ export const proxyResumeUrl = async (req: any, res: any) => {
       return res.sendFile(localUploadPath);
     }
 
-    // Remote Fetch (Cloudinary or S3) with axios stream
     const axios = (await import('axios')).default;
-    const response = await axios.get(targetUrl, {
+    let streamFetchUrl = targetUrl;
+
+    // If Cloudinary URL, generate authenticated signed private download URL
+    if (targetUrl.includes('cloudinary.com') || targetUrl.includes('res.cloudinary.com')) {
+      try {
+        const { v2: cloudinary } = await import('cloudinary');
+        cloudinary.config({
+          cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'tdxhecfr',
+          api_key: process.env.CLOUDINARY_API_KEY || '637165639466259',
+          api_secret: process.env.CLOUDINARY_API_SECRET || 'eqnB2Hl_RDJVEzOu0PZcUJCPfh8',
+        });
+        const match = targetUrl.match(/(adyapan_resumes\/[^/?#.]+)/);
+        if (match && match[1]) {
+          const publicId = match[1];
+          streamFetchUrl = cloudinary.utils.private_download_url(publicId, 'pdf', {
+            resource_type: 'image',
+            type: 'upload',
+            expires_at: Math.floor(Date.now() / 1000) + 3600,
+          });
+          logger.info(`[ResumeProxy] Signed Cloudinary Download URL generated: ${streamFetchUrl}`);
+        }
+      } catch (cldErr: any) {
+        logger.warn('Failed to sign Cloudinary private download URL:', cldErr?.message || cldErr);
+      }
+    }
+
+    // Remote Stream Fetch
+    const response = await axios.get(streamFetchUrl, {
       responseType: 'stream',
       headers: {
         'Accept': 'application/pdf, application/octet-stream, */*',
-      }
+      },
+      timeout: 15000,
     });
 
     res.setHeader('Content-Type', response.headers['content-type'] || 'application/pdf');

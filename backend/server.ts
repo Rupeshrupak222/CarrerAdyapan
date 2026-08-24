@@ -80,7 +80,9 @@ const authLimiter = rateLimit({
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
   crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: false,
   frameguard: false, // Allow in-app document preview in iframe
+  contentSecurityPolicy: false, // Prevent frame-ancestors 'self' CSP blocking in-app PDF preview
   xContentTypeOptions: true,
   xXssProtection: true,
   hsts: process.env.NODE_ENV === 'production' ? {
