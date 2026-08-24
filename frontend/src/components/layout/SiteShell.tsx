@@ -55,13 +55,9 @@ export const SiteShell: React.FC<SiteShellProps> = ({ children }) => {
 
   return (
     <div className={`h-app ${isDark ? 'theme-dark' : ''}`}>
-      {/* ── CLEAN EXECUTIVE STICKY NAVBAR (ALWAYS PINNED TO TOP ON SCROLL) ── */}
+      {/* ── CLEAN EXECUTIVE SOLID STICKY NAVBAR (ALWAYS OPAQUE BLACK ON SCROLL) ── */}
       <header
-        className={`sticky top-0 z-[100] w-full transition-all duration-300 ${
-          scrolled
-            ? 'bg-[#181716]/98 dark:bg-[#121110]/98 backdrop-blur-md shadow-lg border-b border-stone-800 py-3'
-            : 'bg-[#181716]/95 dark:bg-[#121110]/95 backdrop-blur-md border-b border-stone-800/80 py-3.5'
-        }`}
+        className="sticky top-0 z-[100] w-full bg-[#181716] dark:bg-[#121110] border-b border-stone-800 shadow-md py-3.5 transition-all duration-300"
       >
         <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           {/* Brand Logo & Name */}
@@ -131,7 +127,7 @@ export const SiteShell: React.FC<SiteShellProps> = ({ children }) => {
 
         {/* ── MOBILE SLIDE-DOWN DRAWER ── */}
         {open && (
-          <div className="md:hidden border-t border-stone-800 bg-[#181716]/98 dark:bg-[#121110]/98 backdrop-blur-xl px-4 py-5 animate-fadeIn">
+          <div className="md:hidden border-t border-stone-800 bg-[#181716] dark:bg-[#121110] px-4 py-5 animate-fadeIn">
             <div className="flex flex-col space-y-1">
               {navItems.map(({ path, label, icon: Icon }) => {
                 const isActive =
