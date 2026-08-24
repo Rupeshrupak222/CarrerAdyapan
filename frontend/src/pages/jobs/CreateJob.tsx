@@ -30,9 +30,8 @@ const EDTECH_TEMPLATES = [
     requirements: '1-3 years sales experience; fluent communication; target orientation.',
     responsibilities: 'Connect with prospective students; counsel on career choices; achieve monthly admissions quota.',
     rounds: [
-      { roundNumber: 1, name: 'Round 1: Screening / HR Call', type: 'PHONE' },
-      { roundNumber: 2, name: 'Round 2: Technical & Sales Pitch Round', type: 'VIDEO' },
-      { roundNumber: 3, name: 'Round 3: Final Culture & Management HR', type: 'VIDEO' },
+      { roundNumber: 1, name: 'Round 1: Screening & Domain', type: 'VIDEO' },
+      { roundNumber: 2, name: 'Round 2: Technical & Sales Pitch', type: 'VIDEO' },
     ],
   },
   {
@@ -48,7 +47,7 @@ const EDTECH_TEMPLATES = [
     requirements: '2+ years academic counselling experience; empathetic communication.',
     responsibilities: 'Guide students on career choices; follow up on inbound leads; meet enrolment goals.',
     rounds: [
-      { roundNumber: 1, name: 'Round 1: HR Screening Call', type: 'PHONE' },
+      { roundNumber: 1, name: 'Round 1: Screening & Domain', type: 'VIDEO' },
       { roundNumber: 2, name: 'Round 2: Counselling Roleplay Round', type: 'VIDEO' },
     ],
   },
@@ -70,9 +69,8 @@ const CreateJob: React.FC = () => {
     requirements: '1-3 years sales or telesales experience in EdTech; excellent English & Hindi communication; strong target achievement mindset.',
     responsibilities: 'Connect with prospective student leads; conduct detailed course counselling sessions; meet monthly enrolment targets.',
     interviewRounds: [
-      { roundNumber: 1, name: 'Round 1: Screening / HR Call', type: 'PHONE' },
-      { roundNumber: 2, name: 'Round 2: Technical & Sales Pitch Round', type: 'VIDEO' },
-      { roundNumber: 3, name: 'Round 3: Final Culture & Management HR', type: 'VIDEO' },
+      { roundNumber: 1, name: 'Round 1: Screening & Domain', type: 'VIDEO' },
+      { roundNumber: 2, name: 'Round 2: Technical & Sales Pitch', type: 'VIDEO' },
     ],
   });
 

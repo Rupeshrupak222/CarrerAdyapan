@@ -138,6 +138,16 @@ const AuthPage: React.FC = () => {
           } else {
             window.location.href = '/my-applications';
           }
+        } else if (role === 'HR') {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          toast.success(`Welcome back, ${data.user?.name || 'HR Specialist'}!`);
+          window.location.href = '/hr/dashboard';
+        } else if (role === 'HR_MANAGER') {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          toast.success(`Welcome back, ${data.user?.name || 'HR Manager'}!`);
+          window.location.href = '/hr-manager/dashboard';
         } else {
           // Admin / Recruiter
           localStorage.setItem('token', data.token);

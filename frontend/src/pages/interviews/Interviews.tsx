@@ -261,24 +261,19 @@ const Interviews: React.FC = () => {
         </div>
 
         {/* Round KPI Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="p-5 rounded-2xl bg-white border border-orange-200 shadow-sm">
-            <span className="text-[11px] font-bold text-orange-600 uppercase tracking-wider block">Round 1 (Screening)</span>
+            <span className="text-[11px] font-bold text-orange-600 uppercase tracking-wider block">Round 1 (Screening & Domain)</span>
             <p className="text-2xl font-black text-slate-900 mt-1">{round1Count}</p>
           </div>
 
           <div className="p-5 rounded-2xl bg-white border border-orange-200 shadow-sm">
-            <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wider block">Round 2 (Technical)</span>
+            <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wider block">Round 2 (Technical & Sales Pitch)</span>
             <p className="text-2xl font-black text-slate-900 mt-1">{round2Count}</p>
           </div>
 
           <div className="p-5 rounded-2xl bg-white border border-orange-200 shadow-sm">
-            <span className="text-[11px] font-bold text-purple-600 uppercase tracking-wider block">Round 3 (Final HR)</span>
-            <p className="text-2xl font-black text-slate-900 mt-1">{round3Count}</p>
-          </div>
-
-          <div className="p-5 rounded-2xl bg-white border border-orange-200 shadow-sm">
-            <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider block">Selected</span>
+            <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider block">Final Selected</span>
             <p className="text-2xl font-black text-emerald-600 mt-1">{selectedCount}</p>
           </div>
         </div>
@@ -303,9 +298,8 @@ const Interviews: React.FC = () => {
               className="px-3.5 py-2 rounded-xl bg-white border border-orange-200 text-slate-700 text-xs font-semibold focus:border-orange-500 outline-none"
             >
               <option value="ALL">All Rounds</option>
-              <option value="1">Round 1 (Screening)</option>
-              <option value="2">Round 2 (Technical)</option>
-              <option value="3">Round 3 (Final HR)</option>
+              <option value="1">Round 1 (Screening & Domain)</option>
+              <option value="2">Round 2 (Technical & Sales Pitch)</option>
             </select>
 
             <select

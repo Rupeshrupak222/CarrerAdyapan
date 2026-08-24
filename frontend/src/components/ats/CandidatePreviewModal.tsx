@@ -20,10 +20,11 @@ interface CandidatePreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   application: any;
-  onRunAts: (app: any) => void;
+  onRunAts?: (app: any) => void;
   onViewResume: (url: string, name: string) => void;
-  onShortlist: (app: any) => void;
-  onReject: (app: any) => void;
+  onShortlist?: (app: any) => void;
+  onReject?: (app: any) => void;
+  showActions?: boolean;
 }
 
 export const CandidatePreviewModal: React.FC<CandidatePreviewModalProps> = ({
@@ -34,6 +35,7 @@ export const CandidatePreviewModal: React.FC<CandidatePreviewModalProps> = ({
   onViewResume,
   onShortlist,
   onReject,
+  showActions = false,
 }) => {
   if (!isOpen || !application) return null;
 
@@ -178,15 +180,17 @@ export const CandidatePreviewModal: React.FC<CandidatePreviewModalProps> = ({
               </div>
             </div>
 
-            <button
-              onClick={() => {
-                onClose();
-                onRunAts(application);
-              }}
-              className="px-3 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-xs transition-all"
-            >
-              {application.atsScore ? 'View ATS Result' : 'Run ATS Check'}
-            </button>
+            {onRunAts && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onRunAts(application);
+                }}
+                className="px-3 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-xs transition-all"
+              >
+                {application.atsScore ? 'View ATS Result' : 'Run ATS Check'}
+              </button>
+            )}
           </div>
         </div>
 
@@ -202,27 +206,29 @@ export const CandidatePreviewModal: React.FC<CandidatePreviewModalProps> = ({
             <FileText className="w-3.5 h-3.5 text-orange-600" /> View Resume
           </button>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                onClose();
-                onReject(application);
-              }}
-              className="px-3.5 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs border border-red-200 transition-all"
-            >
-              Reject
-            </button>
+          {showActions && onShortlist && onReject && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  onClose();
+                  onReject(application);
+                }}
+                className="px-3.5 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs border border-red-200 transition-all"
+              >
+                Reject
+              </button>
 
-            <button
-              onClick={() => {
-                onClose();
-                onShortlist(application);
-              }}
-              className="px-4 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-all"
-            >
-              Shortlist Candidate
-            </button>
-          </div>
+              <button
+                onClick={() => {
+                  onClose();
+                  onShortlist(application);
+                }}
+                className="px-4 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-all"
+              >
+                Shortlist Candidate
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

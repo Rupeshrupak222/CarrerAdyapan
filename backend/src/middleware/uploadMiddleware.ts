@@ -12,15 +12,23 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Configure Cloudinary SDK if credentials exist in .env
-const hasCloudinary = process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
-if (hasCloudinary) {
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-  });
-}
+// Ensure Cloudinary is properly configured
+const getCloudinaryClient = () => {
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'tdxhecfr';
+  const apiKey = process.env.CLOUDINARY_API_KEY || '637165639466259';
+  const apiSecret = process.env.CLOUDINARY_API_SECRET || 'eqnB2Hl_RDJVEzOu0PZcUJCPfh8';
+
+  if (cloudName && apiKey && apiSecret) {
+    cloudinary.config({
+      cloud_name: cloudName,
+      api_key: apiKey,
+      api_secret: apiSecret,
+      secure: true,
+    });
+    return cloudinary;
+  }
+  return null;
+};
 
 // Local Disk Storage
 const storage = multer.diskStorage({
@@ -34,7 +42,7 @@ const storage = multer.diskStorage({
   }
 });
 
-const fileFilter = (req, file, cb) => {
+const fileFilter = (req: any, file: any, cb: any) => {
   const isExtAllowed = !!file.originalname.match(/\.(pdf|doc|docx|png|jpg|jpeg)$/i);
   const isExecutableExt = !!file.originalname.match(/\.(exe|bat|cmd|sh|php|js|jsx|ts|tsx|html|htm|py|pl|cgi|jar|vbs)$/i);
   const allowedMime = [
@@ -69,17 +77,29 @@ export const upload = multer({
  * Upload Buffer or File to Cloudinary CDN (with local URL fallback)
  */
 export const uploadToCloudinaryOrDisk = async (filePath: string, filename: string): Promise<string> => {
-  if (hasCloudinary && fs.existsSync(filePath)) {
+  const cld = getCloudinaryClient();
+  if (cld && fs.existsSync(filePath)) {
     try {
-      const result = await cloudinary.uploader.upload(filePath, {
+      const sanitizedPublicId = filename.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const isPdf = filename.toLowerCase().endsWith('.pdf');
+      
+      const result = await cld.uploader.upload(filePath, {
         folder: 'adyapan_resumes',
-        resource_type: 'auto',
-        public_id: filename.replace(/\.[^/.]+$/, ''),
+        resource_type: isPdf ? 'auto' : 'auto',
+        public_id: sanitizedPublicId,
+        overwrite: true,
+        use_filename: true,
       });
-      return result.secure_url;
-    } catch (err) {
-      console.warn('Cloudinary upload failed, using local disk URL fallback:', err);
+
+      if (result && result.secure_url) {
+        console.log(`[Cloudinary] Successfully uploaded ${filename} -> ${result.secure_url}`);
+        return result.secure_url;
+      }
+    } catch (err: any) {
+      console.warn('[Cloudinary] Upload failed, falling back to local disk URL:', err?.message || err);
     }
   }
-  return `/uploads/resumes/${filename}`;
+
+  const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
+  return `${backendUrl}/uploads/resumes/${filename}`;
 };

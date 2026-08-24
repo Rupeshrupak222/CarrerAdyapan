@@ -147,7 +147,7 @@ export const FinalRoundSelectedPage: React.FC = () => {
                   <th className="py-3 px-3">HR Specialist</th>
                   <th className="py-3 px-3">Round 1</th>
                   <th className="py-3 px-3">Round 2</th>
-                  <th className="py-3 px-3">ATS Score</th>
+                  <th className="py-3 px-3">Offer Status</th>
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
@@ -173,6 +173,8 @@ export const FinalRoundSelectedPage: React.FC = () => {
                     const candName = `${candidate.firstName || ''} ${candidate.lastName || ''}`.trim() || 'Candidate';
                     const appId = app.candidateCode || app.id?.slice(0, 10) || 'APP-2026';
                     const assignedHr = app.assignedHr?.name || 'HR Specialist';
+                    const isOfferSent = app.status === 'OFFER_SENT' || app.offer?.status === 'SENT';
+                    const isOfferAccepted = app.status === 'OFFER_ACCEPTED' || app.offer?.status === 'ACCEPTED';
 
                     return (
                       <tr key={app.id} className="hover:bg-orange-50/20 transition-colors">
@@ -209,18 +211,24 @@ export const FinalRoundSelectedPage: React.FC = () => {
                           </span>
                         </td>
 
-                        {/* ATS Score */}
+                        {/* Offer Status Badge */}
                         <td className="py-3.5 px-3 whitespace-nowrap">
-                          {app.atsScore ? (
-                            <span className="font-extrabold text-orange-700 bg-orange-50 px-2 py-0.5 rounded-md border border-orange-200/60">
-                              {app.atsScore}/100
+                          {isOfferAccepted ? (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-indigo-800 bg-indigo-100 px-2.5 py-0.5 rounded-full border border-indigo-300 shadow-2xs">
+                              <CheckCircle2 className="w-3 h-3 text-indigo-700" /> ACCEPTED
+                            </span>
+                          ) : isOfferSent ? (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full border border-emerald-300 shadow-2xs">
+                              <Send className="w-3 h-3 text-emerald-700" /> OFFER SENT
                             </span>
                           ) : (
-                            <span className="text-slate-400 font-mono">--</span>
+                            <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-300">
+                              <Clock className="w-3 h-3 text-amber-700" /> READY FOR OFFER
+                            </span>
                           )}
                         </td>
 
-                        {/* Actions: Preview Full History, View Resume, Send Offer */}
+                        {/* Actions: Preview Full History, View Resume, Send / Resend Offer */}
                         <td className="py-3.5 px-4 text-right whitespace-nowrap">
                           <div className="flex items-center justify-end gap-1.5">
                             <button
@@ -240,15 +248,28 @@ export const FinalRoundSelectedPage: React.FC = () => {
                               <FileText className="w-3.5 h-3.5 text-orange-600" /> Resume
                             </button>
 
-                            <button
-                              onClick={() => {
-                                setSelectedAppForOffer(app);
-                                setOfferModalOpen(true);
-                              }}
-                              className="inline-flex items-center gap-1.5 px-4 py-1 rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs shadow-xs transition-all"
-                            >
-                              <Send className="w-3.5 h-3.5" /> Send Offer
-                            </button>
+                            {isOfferSent ? (
+                              <button
+                                onClick={() => {
+                                  setSelectedAppForOffer(app);
+                                  setOfferModalOpen(true);
+                                }}
+                                className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-xs transition-all"
+                                title="Inspect or re-dispatch offer letter"
+                              >
+                                <RotateCw className="w-3 h-3" /> Resend Offer
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  setSelectedAppForOffer(app);
+                                  setOfferModalOpen(true);
+                                }}
+                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs shadow-xs transition-all"
+                              >
+                                <Send className="w-3.5 h-3.5" /> Send Offer
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>

@@ -337,11 +337,12 @@ export const sendInterviewScheduledEmail = async (payload: any) => {
   const targetEmail = payload?.candidateEmail || payload?.email || payload?.candidate?.email;
   const candidateName = payload?.candidateName || payload?.name || (payload?.candidate ? `${payload.candidate.firstName} ${payload.candidate.lastName}` : 'Candidate');
   const jobTitle = payload?.jobTitle || payload?.job?.title || 'Business Development Associate';
-  const roundNumber = payload?.roundNumber || 1;
-  const roundName = payload?.roundName || `Round ${roundNumber}`;
+  const roundNumber = parseInt(String(payload?.roundNumber || 1), 10);
+  const roundName = payload?.roundName || (roundNumber === 1 ? 'Round 1: Screening & Domain' : roundNumber === 2 ? 'Round 2: Technical & Sales Pitch' : `Round ${roundNumber}`);
   const assignedHrName = payload?.assignedHrName || payload?.hr?.name || 'Talent Acquisition Team';
   const scheduledAt = payload?.scheduledAt;
   const meetingLink = payload?.meetingLink;
+  const instructions = payload?.instructions || 'Please be ready in a quiet room with stable high-speed internet and your video camera enabled.';
   const companyName = 'Adyapan Edutech Pvt. Ltd.';
 
   const scheduledDateObj = scheduledAt ? new Date(scheduledAt) : new Date();
@@ -361,23 +362,39 @@ export const sendInterviewScheduledEmail = async (payload: any) => {
 
   const meetingLocation = meetingLink || payload?.location || 'https://meet.google.com/adyapan-interview';
 
+  const isRound1 = roundNumber === 1;
+  const isRound2 = roundNumber === 2;
+
+  const headerTitle = isRound1
+    ? 'APPLICATION SHORTLISTED & ROUND 1 SCHEDULE'
+    : isRound2
+    ? 'ROUND 1 CLEARED — ROUND 2 INVITATION'
+    : 'INTERVIEW INVITATION';
+
+  const introParagraph = isRound1
+    ? `We are pleased to inform you that your application for the <strong>${jobTitle}</strong> position has been <strong>SHORTLISTED</strong>. As the next step in our recruitment process, we invite you to attend your <strong>Round 1 (Screening & Domain)</strong> interview.`
+    : isRound2
+    ? `Congratulations on clearing Round 1! We were impressed with your profile and discussion. You have successfully advanced to <strong>Round 2 (${roundName})</strong> for the position of <strong>${jobTitle}</strong>.`
+    : `Congratulations! You have been scheduled for your <strong>${roundName}</strong> interview for the position of <strong>${jobTitle}</strong> at <strong>${companyName}</strong>.`;
+
   const emailHtml = `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #fed7aa; box-shadow: 0 4px 14px rgba(217,119,6,0.12);">
-      ${renderEmailHeader(companyName, 'INTERVIEW INVITATION')}
+      ${renderEmailHeader(companyName, headerTitle)}
       
       <div style="padding: 32px 32px 28px 32px; font-size: 15px; color: #334155; line-height: 1.7;">
         <p style="margin: 0 0 16px 0;">Dear <strong>${candidateName}</strong>,</p>
         
         <p style="margin: 0 0 16px 0;">
-          Congratulations! You have been shortlisted for the <strong>${roundName}</strong> interview for the position of <strong>${jobTitle}</strong> at <strong>${companyName}</strong>.
+          ${introParagraph}
         </p>
         
         <div style="background-color: #fffbeb; border: 1.5px solid #fde68a; border-radius: 14px; padding: 22px; margin: 24px 0; font-size: 14px; line-height: 1.8; box-shadow: 0 2px 8px rgba(245,158,11,0.06);">
           <p style="margin: 0 0 8px 0; color: #92400e;"><strong>🎯 Interview Stage:</strong> <span style="color: #0f172a; font-weight: 700; background: #fef3c7; padding: 3px 8px; border-radius: 6px;">${roundName}</span></p>
           <p style="margin: 0 0 8px 0; color: #92400e;"><strong>💼 Position:</strong> <span style="color: #1e293b;">${jobTitle}</span></p>
-          <p style="margin: 0 0 8px 0; color: #92400e;"><strong>👤 Assigned HR Interviewer:</strong> <span style="color: #1e293b; font-weight: 600;">${assignedHrName}</span></p>
-          <p style="margin: 0 0 8px 0; color: #92400e;"><strong>📅 Interview Date:</strong> <span style="color: #1e293b; font-weight: 600;">${interviewDate}</span></p>
-          <p style="margin: 0 0 10px 0; color: #92400e;"><strong>⏰ Interview Time:</strong> <span style="color: #1e293b; font-weight: 600;">${interviewTime}</span></p>
+          <p style="margin: 0 0 8px 0; color: #92400e;"><strong>👤 Assigned HR Specialist:</strong> <span style="color: #1e293b; font-weight: 600;">${assignedHrName}</span></p>
+          <p style="margin: 0 0 8px 0; color: #92400e;"><strong>📅 Date:</strong> <span style="color: #1e293b; font-weight: 600;">${interviewDate}</span></p>
+          <p style="margin: 0 0 8px 0; color: #92400e;"><strong>⏰ Time:</strong> <span style="color: #1e293b; font-weight: 600;">${interviewTime} (IST)</span></p>
+          ${instructions ? `<p style="margin: 0 0 10px 0; color: #92400e;"><strong>📝 Instructions:</strong> <span style="color: #1e293b;">${instructions}</span></p>` : ''}
           <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed #fcd34d;">
             <p style="margin: 0 0 6px 0; color: #92400e; font-weight: 700;">🔗 Join Google Meet Video Call:</p>
             <a href="${meetingLocation}" target="_blank" style="display: inline-block; background: #d97706; color: #ffffff; text-decoration: none; font-weight: 700; padding: 10px 20px; border-radius: 8px; font-size: 13px; letter-spacing: 0.2px; box-shadow: 0 2px 6px rgba(217,119,6,0.3);">
@@ -395,7 +412,7 @@ export const sendInterviewScheduledEmail = async (payload: any) => {
         </div>
 
         <p style="margin: 0 0 16px 0;">
-          Please make sure you are available 5 minutes prior to the scheduled time. Ensure that your internet connection, camera, and microphone are functioning smoothly.
+          Please ensure you join 5 minutes prior to the scheduled time with your microphone and camera tested and ready.
         </p>
 
         <p style="margin: 0 0 24px 0;">
@@ -404,16 +421,22 @@ export const sendInterviewScheduledEmail = async (payload: any) => {
         
         <div style="border-top: 1px solid #e2e8f0; margin-top: 28px; padding-top: 20px; font-size: 14px; color: #475569;">
           <p style="margin: 0 0 4px 0;">Best regards,</p>
-          <p style="margin: 0;"><strong style="color: #0f172a;">${assignedHrName}</strong> (Talent Acquisition)</p>
-          <p style="margin: 0; font-size: 12px; color: #94a3b8;">${companyName}</p>
+          <p style="margin: 0;"><strong style="color: #0f172a;">${assignedHrName}</strong></p>
+          <p style="margin: 0; font-size: 12px; color: #94a3b8;">Talent Acquisition Team • ${companyName}</p>
         </div>
       </div>
     </div>
   `;
 
+  const emailSubject = isRound1
+    ? `Shortlisted for Round 1: ${jobTitle} – ${companyName}`
+    : isRound2
+    ? `Round 2 Interview Invitation: ${jobTitle} – ${companyName}`
+    : `Interview Invitation (${roundName}): ${jobTitle} – ${companyName}`;
+
   return await dispatchEmailToCandidate({
     to: targetEmail,
-    subject: `Interview Invitation (${roundName}): ${jobTitle} at ${companyName}`,
+    subject: emailSubject,
     html: emailHtml,
   });
 };

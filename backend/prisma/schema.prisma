@@ -110,8 +110,8 @@ model Application {
   candidateCode          String?         // E.g. CAND-000001
   status                 String          @default("APPLIED") // APPLIED, SCREENING, SHORTLISTED, HR_ASSIGNED, INTERVIEWING, SELECTED, REJECTED, OFFER_PENDING, OFFER_RELEASED, OFFER_ACCEPTED, OFFER_REJECTED, ONBOARDING, DOCUMENT_VERIFICATION, JOINING_SCHEDULED, JOINED, WITHDRAWN
   overallStatus          String          @default("APPLIED")
-  currentRound           Int             @default(0) // 0 = Applied/Shortlisted, 1 = Round 1, 2 = Round 2, 3 = Round 3
-  maxRounds              Int             @default(3)
+  currentRound           Int             @default(0) // 0 = Applied/Shortlisted, 1 = Round 1, 2 = Round 2
+  maxRounds              Int             @default(2)
   isEligibleForNextRound Boolean         @default(false)
   finalSelected          Boolean         @default(false)
   managerApproved        Boolean         @default(false)

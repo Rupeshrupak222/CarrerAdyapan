@@ -11,12 +11,14 @@ import {
   triggerAutoScreening,
   runAtsCheck,
   getAtsResult,
+  bulkRunAtsCheck,
   manualShortlistCandidate,
   manualRejectCandidate,
   bulkShortlistCandidates,
   bulkRejectCandidates,
   assignHrSpecialist,
   getWorkloadStats,
+  getManagerStats,
   getFinalRoundSelected,
   sendOfficialOffer,
   getCommunicationHistory,
@@ -27,7 +29,11 @@ const router = express.Router();
 
 router.use(authMiddleware);
 
-// On-Demand Individual ATS Evaluation
+// Real Database Executive Manager Pipeline Metrics
+router.get('/manager-stats', getManagerStats);
+
+// On-Demand Individual & Bulk ATS Evaluation
+router.post('/bulk-ats-check', bulkRunAtsCheck);
 router.post('/:id/ats-check', runAtsCheck);
 router.get('/:id/ats-result', getAtsResult);
 router.post('/:id/ats-rerun', runAtsCheck);

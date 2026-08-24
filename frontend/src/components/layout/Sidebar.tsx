@@ -33,17 +33,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
   // Dynamic Navigation based on strict Role-Based Access Control
   const getNavigationLinks = () => {
-    // 1. ADMIN SIDEBAR (Same Base Structure + More Access)
+    // 1. ADMIN SIDEBAR (Full Control Panel)
     if (isAdmin) {
       return [
         { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
+        { path: '/admin/candidates', label: 'All Candidates', icon: <Users className="w-4 h-4 text-orange-600" /> },
         { path: '/admin/screening', label: 'Screening & Approvals', icon: <Target className="w-4 h-4" /> },
         { path: '/admin/workload', label: 'Workload Distribution', icon: <Users className="w-4 h-4" /> },
         { path: '/admin/final-selected', label: 'Final Round Selected', icon: <Award className="w-4 h-4" /> },
         { path: '/admin/jobs', label: 'Job Openings', icon: <Briefcase className="w-4 h-4" /> },
         { path: '/admin/communications', label: 'Communication History', icon: <Mail className="w-4 h-4" /> },
-        { path: '/admin/reports', label: 'Hiring Reports', icon: <TrendingUp className="w-4 h-4" /> },
-        { path: '/admin/audit-logs', label: 'Audit Trail', icon: <ShieldCheck className="w-4 h-4" /> },
         { path: '/profile', label: 'Settings', icon: <Settings className="w-4 h-4" /> },
       ];
     }
@@ -52,11 +51,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     if (isManager) {
       return [
         { path: '/hr-manager/dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
+        { path: '/hr-manager/candidates', label: 'All Candidates', icon: <Users className="w-4 h-4 text-orange-600" /> },
         { path: '/hr-manager/screening', label: 'Screening & Approvals', icon: <Target className="w-4 h-4" /> },
         { path: '/hr-manager/workload', label: 'Workload Distribution', icon: <Users className="w-4 h-4" /> },
         { path: '/hr-manager/final-selected', label: 'Final Round Selected', icon: <Award className="w-4 h-4" /> },
         { path: '/hr-manager/communications', label: 'Communication History', icon: <Mail className="w-4 h-4" /> },
-        { path: '/hr-manager/reports', label: 'Hiring Reports', icon: <TrendingUp className="w-4 h-4" /> },
         { path: '/profile', label: 'Profile & Settings', icon: <Settings className="w-4 h-4" /> },
       ];
     }
@@ -78,7 +77,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     if (path === '/dashboard') return location.pathname === '/dashboard';
     if (path === '/hr-manager/dashboard') return location.pathname === '/hr-manager/dashboard';
     if (path === '/hr/dashboard') return location.pathname === '/hr/dashboard';
-    return location.pathname.startsWith(path);
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
   const homeRoute = isAdmin ? '/dashboard' : isManager ? '/hr-manager/dashboard' : '/hr/dashboard';
@@ -145,22 +144,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             })}
           </nav>
 
-          {/* User Profile & Meet at Bottom */}
-          <div className="p-3.5 border-t border-orange-100 bg-white space-y-2.5">
-            {user?.meetLink && (
-              <a
-                href={user.meetLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-between px-3 py-2 rounded-xl bg-orange-50 hover:bg-orange-100 border border-orange-200 text-xs font-bold text-orange-800 transition-all shadow-2xs"
-              >
-                <span className="flex items-center gap-2">
-                  <Video className="w-3.5 h-3.5 text-orange-600" />
-                  Google Meet Room
-                </span>
-                <ExternalLink className="w-3 h-3 text-orange-600" />
-              </a>
-            )}
+          {/* User Profile at Bottom */}
+          <div className="p-3.5 border-t border-orange-100 bg-white">
 
             <div className="flex items-center justify-between pt-1">
               <div className="flex items-center gap-2.5 truncate">

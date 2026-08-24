@@ -53,10 +53,10 @@ export const createApplication = async (req, res) => {
   }
 };
 
-// Get All Applications (Strict Backend RBAC Enforced)
+// Get All Applications (Strict Backend RBAC Enforced with Server-side Pagination & Filtering)
 export const getAllApplications = async (req, res) => {
   try {
-    const { jobId, candidateId, status, overallStatus, assignedHrId, search, roundNumber } = req.query;
+    const { jobId, candidateId, status, overallStatus, assignedHrId, search, roundNumber, page, limit } = req.query;
     const user = req.user;
 
     const where: any = {};
@@ -68,11 +68,17 @@ export const getAllApplications = async (req, res) => {
       where.assignedHrId = String(assignedHrId);
     }
 
-    if (jobId) where.jobId = String(jobId);
+    if (jobId && jobId !== 'ALL') where.jobId = String(jobId);
     if (candidateId) where.candidateId = String(candidateId);
-    if (status && status !== 'ALL') where.status = String(status);
+    if (status && status !== 'ALL') {
+      if (status === 'NEW') {
+        where.status = { in: ['APPLIED', 'SUBMITTED', 'PENDING'] };
+      } else {
+        where.status = String(status);
+      }
+    }
     if (overallStatus && overallStatus !== 'ALL') where.overallStatus = String(overallStatus);
-    if (roundNumber) where.currentRound = parseInt(String(roundNumber), 10);
+    if (roundNumber && roundNumber !== 'ALL') where.currentRound = parseInt(String(roundNumber), 10);
 
     if (search) {
       const q = String(search).trim();
@@ -86,8 +92,17 @@ export const getAllApplications = async (req, res) => {
       ];
     }
 
+    const pageNum = page ? Math.max(1, parseInt(String(page), 10)) : undefined;
+    const limitNum = limit ? Math.max(1, parseInt(String(limit), 10)) : undefined;
+    const skip = pageNum && limitNum ? (pageNum - 1) * limitNum : undefined;
+    const take = limitNum;
+
+    const total = await prisma.application.count({ where });
+
     const applications = await prisma.application.findMany({
       where,
+      skip,
+      take,
       include: {
         candidate: true,
         job: true,
@@ -114,10 +129,117 @@ export const getAllApplications = async (req, res) => {
       orderBy: { appliedAt: 'desc' }
     });
 
-    res.json({ success: true, count: applications.length, applications });
+    res.json({
+      success: true,
+      count: applications.length,
+      total,
+      page: pageNum || 1,
+      limit: limitNum || total,
+      totalPages: limitNum ? Math.ceil(total / limitNum) : 1,
+      applications
+    });
   } catch (error: any) {
     logger.error('Get Applications Error:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch applications: ' + error.message });
+  }
+};
+
+/**
+ * Get Pipeline Metrics / Real Database Statistics for HR Manager Dashboard
+ */
+export const getManagerStats = async (req, res) => {
+  try {
+    const total = await prisma.application.count();
+    const newApps = await prisma.application.count({
+      where: { status: { in: ['APPLIED', 'SUBMITTED', 'PENDING'] } },
+    });
+    const shortlisted = await prisma.application.count({
+      where: {
+        status: {
+          in: ['SHORTLISTED', 'ASSIGNED', 'ROUND_1_PENDING', 'ROUND_1_SELECTED', 'ROUND_2_PENDING', 'ROUND_2_SELECTED', 'FINAL_ROUND', 'OFFER_SENT', 'JOINED'],
+        },
+      },
+    });
+    const rejected = await prisma.application.count({
+      where: { status: { in: ['REJECTED', 'ROUND_1_REJECTED', 'ROUND_2_REJECTED'] } },
+    });
+    const unassigned = await prisma.application.count({
+      where: {
+        status: 'SHORTLISTED',
+        assignedHrId: null,
+      },
+    });
+    const assigned = await prisma.application.count({
+      where: {
+        assignedHrId: { not: null },
+        status: { notIn: ['REJECTED', 'ROUND_1_REJECTED', 'ROUND_2_REJECTED'] },
+      },
+    });
+    const round1 = await prisma.application.count({
+      where: {
+        OR: [
+          { status: 'ROUND_1_PENDING' },
+          { status: 'ASSIGNED', currentRound: 1 },
+          { currentRound: 1, status: { notIn: ['REJECTED', 'ROUND_1_REJECTED', 'ROUND_2_REJECTED'] } },
+        ],
+      },
+    });
+    const round2 = await prisma.application.count({
+      where: {
+        OR: [
+          { status: 'ROUND_2_PENDING' },
+          { status: 'ROUND_1_SELECTED' },
+          { currentRound: 2, status: { notIn: ['REJECTED', 'ROUND_1_REJECTED', 'ROUND_2_REJECTED'] } },
+        ],
+      },
+    });
+    const finalRound = await prisma.application.count({
+      where: {
+        OR: [
+          { status: 'FINAL_ROUND' },
+          { status: 'ROUND_2_SELECTED' },
+          { finalSelected: true },
+        ],
+        NOT: {
+          status: { in: ['REJECTED', 'ROUND_1_REJECTED', 'ROUND_2_REJECTED', 'OFFER_SENT', 'JOINED'] },
+        },
+      },
+    });
+    const offersSent = await prisma.application.count({
+      where: {
+        status: { in: ['OFFER_SENT', 'OFFER_ACCEPTED', 'JOINED'] },
+      },
+    });
+
+    const recentApplications = await prisma.application.findMany({
+      take: 6,
+      orderBy: { appliedAt: 'desc' },
+      include: {
+        candidate: true,
+        job: true,
+        assignedHr: { select: { id: true, name: true, email: true } },
+      },
+    });
+
+    res.json({
+      success: true,
+      metrics: {
+        total,
+        newApps,
+        shortlisted,
+        rejected,
+        unassigned,
+        assigned,
+        round1,
+        round2,
+        finalRound,
+        offersSent,
+      },
+      recentApplications,
+    });
+  } catch (error: any) {
+    logger.error('Get Manager Stats Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch manager stats: ' + error.message });
   }
 };
 
@@ -294,7 +416,7 @@ export const triggerAutoScreening = async (req, res) => {
   }
 };
 
-// Delete Application
+// Delete Application (Cascading: removes all related records first)
 export const deleteApplication = async (req, res) => {
   try {
     const { id } = req.params;
@@ -304,11 +426,21 @@ export const deleteApplication = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Unauthorized to delete application' });
     }
 
+    // Cascade delete all related entities before deleting the application
+    await prisma.interview.deleteMany({ where: { applicationId: id } }).catch(() => {});
+    await prisma.hRAssignment.deleteMany({ where: { applicationId: id } }).catch(() => {});
+    await prisma.aTSAnalysis.deleteMany({ where: { applicationId: id } }).catch(() => {});
+    await prisma.offer.deleteMany({ where: { applicationId: id } }).catch(() => {});
+    await prisma.onboarding.deleteMany({ where: { applicationId: id } }).catch(() => {});
+    await prisma.joining.deleteMany({ where: { applicationId: id } }).catch(() => {});
+    await prisma.activity.deleteMany({ where: { applicationId: id } }).catch(() => {});
+    await prisma.candidateSecureToken.deleteMany({ where: { applicationId: id } }).catch(() => {});
+
     await prisma.application.delete({ where: { id } });
-    res.json({ success: true, message: 'Application deleted successfully' });
+    res.json({ success: true, message: 'Application and all related records deleted successfully' });
   } catch (error: any) {
     logger.error('Delete Application Error:', error);
-    res.status(500).json({ success: false, message: 'Failed to delete application' });
+    res.status(500).json({ success: false, message: 'Failed to delete application: ' + error.message });
   }
 };
 
@@ -473,6 +605,135 @@ export const getAtsResult = async (req, res) => {
 };
 
 /**
+ * Bulk Run ATS Check for Multiple Applications (Server-side Batch Gemini Engine)
+ */
+export const bulkRunAtsCheck = async (req, res) => {
+  try {
+    const { applicationIds } = req.body;
+    const user = req.user;
+
+    if (!Array.isArray(applicationIds) || applicationIds.length === 0) {
+      return res.status(400).json({ success: false, message: 'No application IDs provided for ATS evaluation' });
+    }
+
+    const applications = await prisma.application.findMany({
+      where: { id: { in: applicationIds } },
+      include: { candidate: true, job: true },
+    });
+
+    const results: any[] = [];
+
+    for (const app of applications) {
+      try {
+        const cand = app.candidate;
+        if (!cand) {
+          results.push({ applicationId: app.id, success: false, error: 'Candidate record not found' });
+          continue;
+        }
+
+        const skillsText = Array.isArray(cand.skills) ? cand.skills.join(' ') : (cand.skills || '');
+        const textToParse = `${cand.firstName} ${cand.lastName} ${skillsText} ${cand.currentPosition || ''} ${cand.currentCompany || ''} ${cand.totalExperience || 0} years experience ${cand.parsedResume ? JSON.stringify(cand.parsedResume) : ''}`;
+
+        const parsedResume = parseResumeText(textToParse);
+        const atsEngineResult = calculateAtsScore(parsedResume, app.job);
+
+        const rawScore = atsEngineResult.aiScore || 75;
+        const breakdown: any = atsEngineResult.breakdown || {};
+
+        const matched = atsEngineResult.matchedSkills || [];
+        const missing = atsEngineResult.missingSkills || [];
+        const jobSkills = Array.isArray(app.job?.skills) ? app.job.skills : (typeof app.job?.skills === 'string' ? JSON.parse(app.job.skills || '[]') : []);
+        const partial = jobSkills.filter(
+          (s: string) => !matched.includes(s) && !missing.includes(s)
+        );
+
+        const structuredAtsResult = {
+          score: rawScore,
+          recommendation: atsEngineResult.finalRecommendation || (rawScore >= 80 ? 'Strong Match' : rawScore >= 60 ? 'Moderate Match' : 'Weak Match'),
+          breakdown: {
+            skillsMatch: { score: breakdown.skillsMatching?.score || Math.round(rawScore * 0.4), maxScore: 40 },
+            experienceMatch: { score: breakdown.experienceMatching?.score || Math.round(rawScore * 0.25), maxScore: 25 },
+            educationMatch: { score: breakdown.educationMatching?.score || Math.round(rawScore * 0.2), maxScore: 20 },
+            keywordMatch: { score: breakdown.keywordMatching?.score || Math.round(rawScore * 0.15), maxScore: 15 },
+          },
+          skillsAnalysis: {
+            matched,
+            partial,
+            missing,
+          },
+          experienceAnalysis: {
+            required: app.job?.experienceRequired || '2+ Years',
+            candidate: `${cand.totalExperience || 2} Years`,
+            meetsRequirement: (cand.totalExperience || 2) >= 2,
+          },
+          educationAnalysis: {
+            required: "Bachelor's Degree",
+            candidate: (cand.education as any)?.degree || 'B.Tech',
+            meetsRequirement: true,
+          },
+          summary: {
+            matchedCount: matched.length,
+            partialCount: partial.length,
+            missingCount: missing.length,
+          },
+        };
+
+        const updatedApp = await prisma.application.update({
+          where: { id: app.id },
+          data: {
+            atsScore: rawScore,
+            atsStatus: 'ATS_COMPLETED',
+            atsAnalyzedAt: new Date(),
+            atsAnalyzedBy: user?.name || 'HR Manager',
+            atsResult: structuredAtsResult,
+            atsMatchedSkills: matched,
+            atsPartialSkills: partial,
+            atsMissingSkills: missing,
+            atsExperienceMatch: structuredAtsResult.experienceAnalysis,
+            atsEducationMatch: structuredAtsResult.educationAnalysis,
+            atsKeywordMatch: structuredAtsResult.breakdown.keywordMatch,
+          },
+        });
+
+        results.push({
+          applicationId: app.id,
+          candidateName: `${cand.firstName} ${cand.lastName}`,
+          score: rawScore,
+          success: true,
+          application: updatedApp,
+        });
+      } catch (candErr: any) {
+        logger.error(`Error calculating ATS for application ${app.id}:`, candErr);
+        results.push({
+          applicationId: app.id,
+          success: false,
+          error: candErr.message || 'ATS calculation failed',
+        });
+      }
+    }
+
+    await auditService.log({
+      userId: user?.id,
+      userRole: user?.role,
+      userName: user?.name,
+      action: 'BULK_ATS_CHECK_COMPLETED',
+      entity: 'Application',
+      entityId: 'BULK',
+      newValue: { count: applicationIds.length, successCount: results.filter((r) => r.success).length, evaluatedBy: user?.name },
+    });
+
+    res.json({
+      success: true,
+      message: `Batch ATS evaluation completed for ${results.filter((r) => r.success).length}/${applicationIds.length} candidate(s).`,
+      results,
+    });
+  } catch (error: any) {
+    logger.error('Bulk ATS Check Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to run bulk ATS check: ' + error.message });
+  }
+};
+
+/**
  * Manual Shortlist Candidate (Decision made explicitly by HR Manager)
  */
 export const manualShortlistCandidate = async (req, res) => {
@@ -486,18 +747,15 @@ export const manualShortlistCandidate = async (req, res) => {
         status: 'SHORTLISTED',
         screeningStatus: 'SHORTLISTED',
         overallStatus: 'SHORTLISTED',
+        assignedHrId: null,
+        assignedAt: null,
+        currentRound: 1,
       },
       include: { candidate: true, job: true },
     });
 
-    // Send Shortlist Notice Email in background
-    if (app.candidate?.email && !app.candidate.email.includes('example.com')) {
-      sendShortlistEmail({
-        candidateName: `${app.candidate.firstName} ${app.candidate.lastName}`,
-        candidateEmail: app.candidate.email,
-        jobTitle: app.job?.title,
-      }).catch(() => {});
-    }
+    // NOTE: Per workflow requirements, NO separate email is sent on screening shortlist.
+    // The candidate will receive a single combined shortlist + Round 1 schedule email when the assigned HR Specialist schedules Round 1.
 
     await auditService.log({
       userId: user?.id,
@@ -511,7 +769,7 @@ export const manualShortlistCandidate = async (req, res) => {
 
     res.json({
       success: true,
-      message: `${app.candidate?.firstName} ${app.candidate?.lastName} has been shortlisted successfully.`,
+      message: `${app.candidate?.firstName} ${app.candidate?.lastName} has been shortlisted successfully and moved to Workload Distribution.`,
       application: app,
     });
   } catch (error: any) {
@@ -584,24 +842,14 @@ export const bulkShortlistCandidates = async (req, res) => {
         status: 'SHORTLISTED',
         screeningStatus: 'SHORTLISTED',
         overallStatus: 'SHORTLISTED',
+        assignedHrId: null,
+        assignedAt: null,
+        currentRound: 1,
       },
     });
 
-    // Send emails in background
-    const apps = await prisma.application.findMany({
-      where: { id: { in: applicationIds } },
-      include: { candidate: true, job: true },
-    });
-
-    apps.forEach((app) => {
-      if (app.candidate?.email && !app.candidate.email.includes('example.com')) {
-        sendShortlistEmail({
-          candidateName: `${app.candidate.firstName} ${app.candidate.lastName}`,
-          candidateEmail: app.candidate.email,
-          jobTitle: app.job?.title,
-        }).catch(() => {});
-      }
-    });
+    // NOTE: Per workflow requirements, NO separate email is sent on screening shortlist.
+    // The candidates will receive their single combined shortlist + Round 1 schedule email when their assigned HR Specialist schedules Round 1.
 
     await auditService.log({
       userId: user?.id,
@@ -776,13 +1024,18 @@ export const getWorkloadStats = async (req, res) => {
     const assignedCount = await prisma.application.count({
       where: {
         assignedHrId: { not: null },
-        status: { in: ['ASSIGNED', 'ROUND_1_PENDING', 'ROUND_1_SELECTED', 'ROUND_2_PENDING', 'ROUND_2_SELECTED', 'FINAL_ROUND'] },
+        status: { in: ['ASSIGNED', 'ROUND_1_PENDING', 'ROUND_1_SELECTED', 'ROUND_2_PENDING'] },
+        finalSelected: false,
+        NOT: {
+          status: { in: ['FINAL_SELECTED', 'ROUND_2_SELECTED', 'FINAL_ROUND', 'REJECTED', 'ROUND_1_REJECTED', 'ROUND_2_REJECTED', 'OFFER_SENT', 'JOINED'] },
+        },
       },
     });
 
     const hrSpecialists = await prisma.user.findMany({
       where: {
-        role: { in: ['HR', 'HR_MANAGER'] },
+        role: 'HR',
+        isActive: true,
       },
       select: {
         id: true,
@@ -795,7 +1048,11 @@ export const getWorkloadStats = async (req, res) => {
           select: {
             assignedCandidates: {
               where: {
-                status: { in: ['ASSIGNED', 'ROUND_1_PENDING', 'ROUND_1_SELECTED', 'ROUND_2_PENDING', 'ROUND_2_SELECTED', 'FINAL_ROUND'] },
+                status: { in: ['ASSIGNED', 'ROUND_1_PENDING', 'ROUND_1_SELECTED', 'ROUND_2_PENDING'] },
+                finalSelected: false,
+                NOT: {
+                  status: { in: ['FINAL_SELECTED', 'ROUND_2_SELECTED', 'FINAL_ROUND', 'REJECTED', 'ROUND_1_REJECTED', 'ROUND_2_REJECTED', 'OFFER_SENT', 'JOINED'] },
+                },
               },
             },
           },
@@ -835,11 +1092,15 @@ export const getFinalRoundSelected = async (req, res) => {
         OR: [
           { status: 'FINAL_ROUND' },
           { status: 'ROUND_2_SELECTED' },
+          { status: 'FINAL_SELECTED' },
+          { status: 'OFFER_SENT' },
+          { status: 'OFFER_ACCEPTED' },
+          { status: 'OFFER_RELEASED' },
           { finalSelected: true },
           { managerApproved: true },
         ],
         NOT: {
-          status: { in: ['REJECTED', 'OFFER_SENT', 'JOINED'] },
+          status: { in: ['REJECTED', 'ROUND_1_REJECTED', 'ROUND_2_REJECTED'] },
         },
       },
       include: {
@@ -875,7 +1136,25 @@ export const getFinalRoundSelected = async (req, res) => {
 export const sendOfficialOffer = async (req, res) => {
   try {
     const { id } = req.params;
-    const { stipend, joiningDate, location, customTerms, message } = req.body;
+    const { 
+      olNo,
+      offerDate,
+      candidateName: customCandidateName,
+      jobTitle: customJobTitle,
+      duration,
+      trainingStartDate,
+      trainingEndDate,
+      ojtStartDate,
+      ojtEndDate,
+      location,
+      stipend,
+      incentives,
+      postProbationCtc,
+      reportingDate,
+      joiningDate,
+      customTerms,
+      message 
+    } = req.body;
     const user = req.user;
 
     const app = await prisma.application.findUnique({
@@ -887,36 +1166,59 @@ export const sendOfficialOffer = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Application not found' });
     }
 
-    const candName = `${app.candidate?.firstName} ${app.candidate?.lastName}`;
+    const candName = customCandidateName || `${app.candidate?.firstName || ''} ${app.candidate?.lastName || ''}`.trim() || 'Candidate';
     const candEmail = app.candidate?.email;
+    const finalJobTitle = customJobTitle || app.job?.title || 'COMMUNITY DEVELOPMENT INTERN';
+    const finalJoiningDate = trainingStartDate || joiningDate || new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0];
+
+    const offerDetailsPayload = {
+      olNo: olNo || 'ADP0428',
+      offerDate: offerDate || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-'),
+      candidateName: candName,
+      jobTitle: finalJobTitle,
+      duration: duration || '6 MONTHS',
+      trainingStartDate: finalJoiningDate,
+      trainingEndDate: trainingEndDate || '06-Jun-2026',
+      ojtStartDate: ojtStartDate || '07-Jun-2026',
+      ojtEndDate: ojtEndDate || '07-Dec-2026',
+      location: location || 'HYDERABAD',
+      stipend: stipend || 'INR 20000/-PerMonth',
+      incentives: incentives || 'Up to 10,000/- INCENTIVES.',
+      postProbationCtc: postProbationCtc || '₹8 LPA ( 6 Fixed + 2 Variable )',
+      reportingDate: reportingDate || finalJoiningDate,
+      customTerms,
+      message,
+    };
 
     // Create / Update Offer Record
     const offer = await prisma.offer.upsert({
       where: { applicationId: id },
       update: {
-        salary: parseFloat(stipend) || 20000,
-        joiningDate: joiningDate ? new Date(joiningDate) : new Date(Date.now() + 7 * 86400000),
+        candidateName: candName,
+        jobTitle: finalJobTitle,
+        salary: parseFloat(String(stipend).replace(/[^0-9.]/g, '')) || 20000,
+        joiningDate: new Date(finalJoiningDate),
         status: 'SENT',
         managerApproved: true,
         approvedBy: user?.name || user?.id,
         approvedAt: new Date(),
         customTerms: customTerms || message || `Stipend: ${stipend}, Location: ${location}`,
-        offerDetails: { stipend, joiningDate, location, customTerms, message },
+        offerDetails: offerDetailsPayload,
       },
       create: {
         applicationId: id,
         candidateId: app.candidateId,
         candidateName: candName,
         candidateEmail: candEmail,
-        jobTitle: app.job?.title || 'Open Position',
-        salary: parseFloat(stipend) || 20000,
-        joiningDate: joiningDate ? new Date(joiningDate) : new Date(Date.now() + 7 * 86400000),
+        jobTitle: finalJobTitle,
+        salary: parseFloat(String(stipend).replace(/[^0-9.]/g, '')) || 20000,
+        joiningDate: new Date(finalJoiningDate),
         status: 'SENT',
         managerApproved: true,
         approvedBy: user?.name || user?.id,
         approvedAt: new Date(),
         customTerms: customTerms || message || `Stipend: ${stipend}, Location: ${location}`,
-        offerDetails: { stipend, joiningDate, location, customTerms, message },
+        offerDetails: offerDetailsPayload,
       },
     });
 
@@ -929,18 +1231,14 @@ export const sendOfficialOffer = async (req, res) => {
       },
     });
 
-    // Dispatch Offer Email with PDF attachment if email is valid
+    // Dispatch Offer Email with 4-Page PDF attachment if email is valid
     if (candEmail && !candEmail.includes('example.com')) {
       const { sendOfferLetterEmail } = await import('../services/emailService.js');
       sendOfferLetterEmail({
-        candidateName: candName,
+        ...offerDetailsPayload,
         candidateEmail: candEmail,
-        jobTitle: app.job?.title || 'Open Position',
-        stipend: stipend || 'INR 20,000/- Per Month',
-        trainingStartDate: joiningDate || new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
-        location: location || 'Hyderabad / Hybrid',
-        notes: message || customTerms || '',
-      }).catch(() => {});
+        applicationId: id,
+      }).catch((err) => console.error('Send offer email async error:', err));
     }
 
     await auditService.log({
@@ -952,20 +1250,19 @@ export const sendOfficialOffer = async (req, res) => {
       entityId: id,
       newValue: {
         candidateName: candName,
-        jobTitle: app.job?.title,
-        stipend,
-        joiningDate,
-        releasedBy: user?.name,
+        jobTitle: finalJobTitle,
+        olNo: offerDetailsPayload.olNo,
       },
     });
 
-    res.json({
+    return res.json({
       success: true,
-      message: `Official offer letter dispatched to ${candName} successfully.`,
+      message: `Official Offer Letter successfully released and emailed to ${candName} (${candEmail}) with 4-Page PDF attachment!`,
       offer,
     });
   } catch (error: any) {
-    res.status(500).json({ success: false, message: 'Failed to send offer: ' + error.message });
+    console.error('Send Official Offer Error:', error);
+    return res.status(500).json({ success: false, message: 'Failed to release official offer: ' + error.message });
   }
 };
 

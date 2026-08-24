@@ -71,12 +71,12 @@ const CandidateDetails: React.FC = () => {
     const app = candidate?.applications?.[0];
     const nextRound = (app?.currentRound || 0) + 1;
     let roundTitle = `Round ${nextRound}: Assessment`;
-    if (nextRound === 1) roundTitle = 'Round 1: Screening / HR';
-    else if (nextRound === 2) roundTitle = 'Round 2: Technical / Sales Pitch';
-    else if (nextRound === 3) roundTitle = 'Round 3: Final Management HR';
+    if (nextRound === 1) roundTitle = 'Round 1: Screening & Domain';
+    else if (nextRound === 2) roundTitle = 'Round 2: Technical & Sales Pitch';
+    else roundTitle = 'Final Evaluation';
 
     setScheduleFormData({
-      roundNumber: nextRound,
+      roundNumber: Math.min(nextRound, 2),
       roundName: roundTitle,
       scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
       duration: 30,
@@ -151,9 +151,9 @@ const CandidateDetails: React.FC = () => {
     { label: 'Applied', status: 'done', desc: new Date(candidate.createdAt).toLocaleDateString() },
     { label: '24-Hr Screened', status: app?.screeningStatus === 'SHORTLISTED' ? 'done' : 'pending' },
     { label: 'HR Allocated', status: app?.assignedHrId ? 'done' : 'pending', desc: app?.assignedHr?.name },
-    { label: 'Round 1 (HR)', status: interviewsList.some((i: any) => i.roundNumber === 1 && i.result === 'SELECTED') ? 'done' : interviewsList.some((i: any) => i.roundNumber === 1) ? 'active' : 'pending' },
+    { label: 'Round 1 (Domain)', status: interviewsList.some((i: any) => i.roundNumber === 1 && i.result === 'SELECTED') ? 'done' : interviewsList.some((i: any) => i.roundNumber === 1) ? 'active' : 'pending' },
     { label: 'Round 2 (Pitch)', status: interviewsList.some((i: any) => i.roundNumber === 2 && i.result === 'SELECTED') ? 'done' : interviewsList.some((i: any) => i.roundNumber === 2) ? 'active' : 'pending' },
-    { label: 'Round 3 (Final)', status: interviewsList.some((i: any) => i.roundNumber === 3 && i.result === 'SELECTED') ? 'done' : interviewsList.some((i: any) => i.roundNumber === 3) ? 'active' : 'pending' },
+    { label: 'Final Selected', status: app?.finalSelected || app?.status === 'FINAL_ROUND' || app?.status === 'ROUND_2_SELECTED' ? 'done' : 'pending' },
     { label: 'Approved', status: app?.managerApproved ? 'done' : 'pending' },
     { label: 'Offer Released', status: app?.offer?.status ? 'done' : 'pending' },
     { label: 'Offer Accepted', status: app?.offer?.status === 'ACCEPTED' ? 'done' : 'pending' },
