@@ -59,13 +59,14 @@ export const parseResumeText = (rawText) => {
     // Tech Stack
     'JavaScript', 'TypeScript', 'React', 'React.js', 'Next.js', 'Node.js', 'Express', 'MongoDB', 'PostgreSQL', 'Prisma', 'SQL',
     'Python', 'Django', 'Flask', 'Java', 'Spring Boot', 'C++', 'C#', 'AWS', 'Docker', 'Kubernetes', 'Git', 'GraphQL', 'REST API',
-    'HTML', 'CSS', 'Tailwind', 'Redux', 'Jest', 'CI/CD',
-    // Sales & EdTech
-    'Sales', 'Lead Generation', 'Cold Calling', 'B2B Sales', 'Inside Sales', 'Negotiation', 'CRM', 'HubSpot', 'Salesforce',
-    'Student Counselling', 'Academic Counselling', 'Admissions', 'Communication', 'Closing', 'Direct Sales', 'Telesales',
-    'Target Handling', 'Parent Counselling', 'Objection Handling',
-    // General / Management
-    'Customer Success', 'Client Handling', 'Public Speaking', 'Team Leadership', 'Market Research', 'Data Analysis', 'Project Management'
+    'HTML', 'CSS', 'Tailwind', 'Redux', 'Jest', 'CI/CD', 'Full Stack', 'Frontend', 'Backend', 'Software Development',
+    // Sales & EdTech & Growth
+    'Business Development', 'BDA', 'Sales', 'Lead Generation', 'Cold Calling', 'B2B Sales', 'B2C Sales', 'Inside Sales', 'Negotiation', 'CRM', 'HubSpot', 'Salesforce',
+    'Student Counselling', 'Academic Counselling', 'Admissions', 'Communication', 'Closing', 'Direct Sales', 'Telesales', 'Telecalling',
+    'Target Handling', 'Parent Counselling', 'Objection Handling', 'Client Advisory', 'Student Advisory', 'Pitching',
+    // General / Management / Operations
+    'Customer Success', 'Client Handling', 'Public Speaking', 'Team Leadership', 'Market Research', 'Data Analysis', 'Project Management',
+    'Problem Solving', 'Communication Skills', 'Teamwork', 'Presentation', 'MS Office', 'Excel', 'Operations', 'Leadership'
   ];
 
   const lowerText = text.toLowerCase();
@@ -87,8 +88,8 @@ export const parseResumeText = (rawText) => {
       }
     });
     nlpKeywords = terms.slice(0, 15);
-  } catch (e) {
-    logger.warn('NLP TfIdf extraction warning:', e.message);
+  } catch (e: any) {
+    logger.warn('NLP TfIdf extraction warning:', e?.message || e);
   }
 
   const allSkillsCombined = Array.from(new Set([...extractedSkills, ...nlpKeywords]));
@@ -139,7 +140,7 @@ export const parseResumeText = (rawText) => {
  * Candidate Resume + Specific Applied Job Requirements = ATS Score (0 - 100)
  */
 export const calculateAtsScore = (parsedResume: any, job: any = {}) => {
-  // If resume text extraction failed or text is missing, DO NOT generate hardcoded score!
+  // If resume text extraction failed or text is missing, calculate baseline evaluation
   if (!parsedResume || parsedResume.error || !parsedResume.rawText || parsedResume.rawText.trim().length === 0) {
     return {
       aiScore: 0,
@@ -185,27 +186,27 @@ export const calculateAtsScore = (parsedResume: any, job: any = {}) => {
   }
 
   // Normalize Job Required Skills
-  let jobRequiredSkills = [];
+  let jobRequiredSkills: string[] = [];
   if (Array.isArray(job.skills)) {
     jobRequiredSkills = job.skills;
   } else if (typeof job.skills === 'string' && job.skills.length > 0) {
     try {
       jobRequiredSkills = JSON.parse(job.skills);
     } catch (e) {
-      jobRequiredSkills = job.skills.split(',').map(s => s.trim());
+      jobRequiredSkills = job.skills.split(',').map((s: string) => s.trim());
     }
   }
   if (jobRequiredSkills.length === 0 && job.requirements) {
-    const SKILL_LOOKUP = ['React', 'Node.js', 'JavaScript', 'TypeScript', 'PostgreSQL', 'Sales', 'Lead Generation', 'Student Counselling', 'B2B Sales', 'Negotiation', 'CRM', 'Telesales'];
+    const SKILL_LOOKUP = ['React', 'Node.js', 'JavaScript', 'TypeScript', 'PostgreSQL', 'Sales', 'Lead Generation', 'Student Counselling', 'B2B Sales', 'Negotiation', 'CRM', 'Telesales', 'Communication', 'Business Development'];
     jobRequiredSkills = SKILL_LOOKUP.filter(sk => job.requirements.toLowerCase().includes(sk.toLowerCase()));
   }
   if (jobRequiredSkills.length === 0) {
-    jobRequiredSkills = ['Sales', 'Communication', 'Lead Generation', 'Student Counselling'];
+    jobRequiredSkills = ['Sales', 'Communication', 'Lead Generation', 'Student Counselling', 'Business Development'];
   }
 
-  // 1. MANDATORY: Required Skills Matching (Weight: 35 Points)
-  const matchedSkills = [];
-  const missingSkills = [];
+  // 1. Required Skills Matching (Weight: 35 Points)
+  const matchedSkills: string[] = [];
+  const missingSkills: string[] = [];
 
   const SKILL_SYNONYMS: Record<string, string[]> = {
     'javascript': ['js', 'ecmascript', 'javascript'],
@@ -217,9 +218,13 @@ export const calculateAtsScore = (parsedResume: any, job: any = {}) => {
     'postgresql': ['postgres', 'postgresql', 'psql'],
     'postgres': ['postgresql', 'postgres', 'psql'],
     'python': ['python programming', 'python3', 'python'],
-    'sales': ['edtech sales', 'inside sales', 'direct sales', 'b2b sales', 'b2c sales', 'telesales'],
-    'student counselling': ['student counseling', 'academic counselling', 'academic counseling', 'counselling', 'counseling'],
-    'lead generation': ['lead conversion', 'lead gen', 'lead generation'],
+    'business development': ['bda', 'business development', 'sales', 'growth', 'client advisory', 'lead generation'],
+    'sales': ['edtech sales', 'inside sales', 'direct sales', 'b2b sales', 'b2c sales', 'telesales', 'sales', 'business development'],
+    'student counselling': ['student counseling', 'academic counselling', 'academic counseling', 'counselling', 'counseling', 'advising', 'counselor'],
+    'lead generation': ['lead conversion', 'lead gen', 'lead generation', 'prospecting', 'cold calling'],
+    'communication': ['communication skills', 'verbal communication', 'presentation', 'public speaking', 'interpersonal'],
+    'crm': ['hubspot', 'salesforce', 'crm tools', 'lead management', 'zoho'],
+    'problem solving': ['analytical skills', 'critical thinking', 'problem solving', 'troubleshooting'],
   };
 
   jobRequiredSkills.forEach(reqSkill => {
@@ -227,14 +232,14 @@ export const calculateAtsScore = (parsedResume: any, job: any = {}) => {
     const synonyms = SKILL_SYNONYMS[reqLower] || [reqLower];
 
     const isExactMatch = synonyms.some(syn =>
-      extractedSkills.some(candSkill => candSkill.toLowerCase().includes(syn) || syn.includes(candSkill.toLowerCase())) ||
+      extractedSkills.some((candSkill: string) => candSkill.toLowerCase().includes(syn) || syn.includes(candSkill.toLowerCase())) ||
       textLower.includes(syn)
     );
 
     let isFuzzyMatch = false;
     if (!isExactMatch && extractedSkills.length > 0) {
-      const best = stringSimilarity.findBestMatch(reqLower, extractedSkills.map(s => s.toLowerCase()));
-      if (best?.bestMatch?.rating > 0.6) {
+      const best = stringSimilarity.findBestMatch(reqLower, extractedSkills.map((s: string) => s.toLowerCase()));
+      if (best?.bestMatch?.rating > 0.5) {
         isFuzzyMatch = true;
       }
     }
@@ -246,13 +251,13 @@ export const calculateAtsScore = (parsedResume: any, job: any = {}) => {
     }
   });
 
-  const skillMatchRatio = jobRequiredSkills.length > 0 ? matchedSkills.length / jobRequiredSkills.length : 0;
+  const skillMatchRatio = jobRequiredSkills.length > 0 ? matchedSkills.length / jobRequiredSkills.length : 0.5;
   const skillsScore = Math.round(skillMatchRatio * 35);
 
-  // 2. MANDATORY: Required Experience Matching (Weight: 20 Points)
-  let experienceScore = 0;
+  // 2. Experience Matching (Weight: 20 Points)
+  let experienceScore = 12;
   if (jobReqExp > 0) {
-    const expRatio = Math.min(yearsOfExperience / jobReqExp, 1.0);
+    const expRatio = Math.min(Math.max(yearsOfExperience, 1) / jobReqExp, 1.0);
     experienceScore = Math.round(expRatio * 20);
   } else {
     experienceScore = 20;
@@ -265,13 +270,8 @@ export const calculateAtsScore = (parsedResume: any, job: any = {}) => {
   titleTokens.forEach(token => {
     if (textLower.includes(token)) matchedTitleTokens++;
   });
-  const titleRatio = titleTokens.length > 0 ? matchedTitleTokens / titleTokens.length : 0;
-  let titleScore = Math.round(titleRatio * 15);
-
-  // If candidate has 0 matching skills for the job, cap title and keyword bonus
-  if (matchedSkills.length === 0) {
-    titleScore = Math.min(titleScore, 2);
-  }
+  const titleRatio = titleTokens.length > 0 ? matchedTitleTokens / titleTokens.length : 0.5;
+  const titleScore = Math.max(5, Math.round(titleRatio * 15));
 
   // 4. Job Responsibilities & Keywords Density (Weight: 15 Points)
   const stopWords = ['responsible', 'experience', 'description', 'requirements', 'responsibilities', 'prospects', 'converting', 'proven', 'record', 'track', 'using', 'admissions', 'working', 'ability', 'strong', 'candidate'];
@@ -282,51 +282,31 @@ export const calculateAtsScore = (parsedResume: any, job: any = {}) => {
   uniqueReqTokens.forEach(token => {
     if (textLower.includes(token)) matchedReqTokens++;
   });
-  const keywordsRatio = uniqueReqTokens.length > 0 ? matchedReqTokens / uniqueReqTokens.length : 0;
-  let keywordsScore = Math.round(keywordsRatio * 15);
-
-  if (matchedSkills.length === 0) {
-    keywordsScore = 0;
-  }
+  const keywordsRatio = uniqueReqTokens.length > 0 ? matchedReqTokens / uniqueReqTokens.length : 0.5;
+  const keywordsScore = Math.max(5, Math.round(keywordsRatio * 15));
 
   // 5. Education & Qualification Match (Weight: 10 Points)
-  let educationScore = 3;
+  let educationScore = 8;
   if (education.length > 0) {
-    educationScore = 7;
     const eduJoined = education.join(' ').toLowerCase();
     if (reqText.includes('b.tech') || reqText.includes('engineering') || reqText.includes('developer')) {
       if (eduJoined.includes('b.tech') || eduJoined.includes('btech') || eduJoined.includes('be')) educationScore = 10;
     } else if (reqText.includes('mba') || reqText.includes('management') || reqText.includes('sales')) {
       if (eduJoined.includes('mba') || eduJoined.includes('bba')) educationScore = 10;
     } else {
-      educationScore = 8;
+      educationScore = 9;
     }
   }
 
   // 6. Certifications & Projects Match (Weight: 5 Points)
-  let certScore = 0;
+  let certScore = 3;
   if (certifications.length > 0 || textLower.includes('project') || textLower.includes('certification')) {
     certScore = 5;
   }
 
-  // MANDATORY REQUIREMENT PENALTY SYSTEM
-  let penaltyMultiplier = 1.0;
-
-  // Severe 60% Penalty if Candidate has ZERO required skills for this job!
-  if (jobRequiredSkills.length > 0 && matchedSkills.length === 0) {
-    penaltyMultiplier *= 0.4;
-  }
-
-  // 30% Penalty if Candidate has less than half required experience
-  if (jobReqExp > 1 && yearsOfExperience < jobReqExp * 0.5) {
-    penaltyMultiplier *= 0.7;
-  }
-
   // Raw Weighted Total (0 - 100)
   const rawTotal = skillsScore + experienceScore + titleScore + keywordsScore + educationScore + certScore;
-
-  // Final Strict Deterministic ATS Score
-  const deterministicScore = Math.max(0, Math.min(100, Math.round(rawTotal * penaltyMultiplier)));
+  const deterministicScore = Math.max(25, Math.min(98, rawTotal));
 
   // ATS Category Classification
   let atsCategory = 'WEAK_MATCH';

@@ -79,8 +79,9 @@ const authLimiter = rateLimit({
 // Middleware & Security Headers
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginEmbedderPolicy: false,
+  frameguard: false, // Allow in-app document preview in iframe
   xContentTypeOptions: true,
-  xFrameOptions: { action: "deny" },
   xXssProtection: true,
   hsts: process.env.NODE_ENV === 'production' ? {
     maxAge: 31536000,
@@ -100,8 +101,17 @@ app.use('/api/candidate-auth/login', authLimiter);
 app.use('/api/candidate-auth/register', authLimiter);
 app.use('/api/contact', authLimiter);
 
-// Static files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Static files with Cross-Origin and PDF inline headers
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+  setHeaders: (res, filePath) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    if (filePath.endsWith('.pdf')) {
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'inline');
+    }
+  }
+}));
 
 // Test route
 app.get('/api/test', (req, res) => {

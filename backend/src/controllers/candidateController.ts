@@ -86,11 +86,20 @@ export const publicApplyCandidate = async (req, res) => {
 
     // 1. Upload resume to Cloudinary (with local fallback)
     let savedFileUrl = null;
+    let extractedResumeText = '';
     const host = req.get('host') || 'localhost:5000';
     const baseUrl = `http://${host}`;
 
     if (req.file) {
-      // File uploaded via Multer - upload to Cloudinary
+      // File uploaded via Multer - extract text and upload to Cloudinary/disk
+      try {
+        const { extractTextFromBuffer } = await import('../services/atsScoringEngine.js');
+        const fileBuffer = fs.readFileSync(req.file.path);
+        extractedResumeText = await extractTextFromBuffer(fileBuffer, req.file.mimetype, req.file.originalname);
+      } catch (err: any) {
+        logger.warn('Text extraction from uploaded file warning:', err?.message || err);
+      }
+
       const { uploadToCloudinaryOrDisk } = await import('../middleware/uploadMiddleware.js');
       savedFileUrl = await uploadToCloudinaryOrDisk(req.file.path, req.file.filename);
     } else if (resumeDataUrl && typeof resumeDataUrl === 'string' && resumeDataUrl.startsWith('data:')) {
@@ -107,7 +116,16 @@ export const publicApplyCandidate = async (req, res) => {
         const filename = `${unique}-${originalName}`;
         const filePath = path.join(uploadDir, filename);
 
-        fs.writeFileSync(filePath, Buffer.from(base64Data, 'base64'));
+        const fileBuffer = Buffer.from(base64Data, 'base64');
+        fs.writeFileSync(filePath, fileBuffer);
+
+        try {
+          const { extractTextFromBuffer } = await import('../services/atsScoringEngine.js');
+          extractedResumeText = await extractTextFromBuffer(fileBuffer, 'application/pdf', originalName);
+        } catch (err: any) {
+          logger.warn('Text extraction from base64 resume warning:', err?.message || err);
+        }
+
         const { uploadToCloudinaryOrDisk } = await import('../middleware/uploadMiddleware.js');
         savedFileUrl = await uploadToCloudinaryOrDisk(filePath, filename);
       } catch (e) {
@@ -115,8 +133,8 @@ export const publicApplyCandidate = async (req, res) => {
       }
     }
 
-    const isDataUrl = (url) => typeof url === 'string' && url.startsWith('data:');
-    const isDummyUrl = (url) => typeof url === 'string' && url.includes('example.com');
+    const isDataUrl = (url: any) => typeof url === 'string' && url.startsWith('data:');
+    const isDummyUrl = (url: any) => typeof url === 'string' && url.includes('example.com');
     const safeResumeUrl = savedFileUrl || ((resumeUrl && !isDataUrl(resumeUrl) && !isDummyUrl(resumeUrl)) ? resumeUrl : `${baseUrl}/uploads/resumes/default_resume.pdf`);
 
     // Check if the user is logged in as a candidate (optional auth)
@@ -217,7 +235,6 @@ export const publicApplyCandidate = async (req, res) => {
     }
 
     if (!targetJob) {
-      // Use transient in-memory job object for ATS scoring without persisting deleted jobs into DB
       targetJob = {
         id: 'transient-job',
         title: jobTitle || 'Business Development Associate (BDA)',
@@ -229,17 +246,26 @@ export const publicApplyCandidate = async (req, res) => {
       } as any;
     }
 
-    // Step 4 & 5: Run Real ATS Scoring Engine against Job Requirements
-    let calculatedAiScore = parseFloat(providedScore) || 85;
-    let calculatedMatchReason = providedReason || 'Application submitted via portal.';
-
-    if (targetJob) {
-      const textToParse = resumeText || `${firstName} ${lastName} ${skillsArray.join(' ')} ${currentPosition} ${currentCompany} ${experience} years experience`;
-      const parsedResume = parseResumeText(textToParse);
-      const atsResult = calculateAtsScore(parsedResume, targetJob);
-      calculatedAiScore = atsResult.aiScore;
-      calculatedMatchReason = atsResult.matchReason;
+    // Step 4 & 5: Run Identical Deterministic ATS Scoring Engine against Job Requirements
+    let textToParse = extractedResumeText || resumeText || '';
+    if (!textToParse || textToParse.trim().length < 10) {
+      textToParse = `${firstName} ${lastName || ''} ${skillsArray.join(' ')} ${finalPosition} ${finalCompany} ${finalExp} years experience ${eduData.degree || ''} ${eduData.college || ''} ${req.body.motivationPitch || ''} ${req.body.currentRoleDescription || ''}`;
     }
+
+    const parsedResume = parseResumeText(textToParse);
+    const atsResult = calculateAtsScore(parsedResume, targetJob);
+    const calculatedAiScore = atsResult.aiScore;
+    const calculatedMatchReason = atsResult.matchReason;
+
+    // Update candidate with calculated ATS score and breakdown
+    await prisma.candidate.update({
+      where: { id: candidate.id },
+      data: {
+        aiScore: calculatedAiScore,
+        matchReason: calculatedMatchReason,
+        atsBreakdown: atsResult.breakdown,
+      }
+    }).catch(() => null);
 
     let application = null;
     if (targetJob) {
@@ -860,3 +886,107 @@ export const parseAndScoreResume = async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to process resume ATS scoring: ' + error.message });
   }
 };
+
+/**
+ * Direct Stream Resume File by Filename or Candidate ID
+ */
+export const streamResumeFile = async (req: any, res: any) => {
+  try {
+    const { filename } = req.params;
+    const uploadDir = path.join(__dirname, '../../uploads/resumes');
+    const filePath = path.join(uploadDir, filename);
+
+    if (fs.existsSync(filePath)) {
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+      return res.sendFile(filePath);
+    }
+
+    // Try finding by candidate ID
+    const candidate = await prisma.candidate.findFirst({
+      where: {
+        OR: [
+          { id: filename },
+          { candidateCode: filename },
+          { resumeUrl: { contains: filename } }
+        ]
+      }
+    });
+
+    if (candidate && candidate.resumeUrl) {
+      if (candidate.resumeUrl.startsWith('http')) {
+        return res.redirect(candidate.resumeUrl);
+      }
+      const localCandidatePath = path.join(__dirname, '../../', candidate.resumeUrl.replace(/^\//, ''));
+      if (fs.existsSync(localCandidatePath)) {
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+        return res.sendFile(localCandidatePath);
+      }
+    }
+
+    return res.status(404).json({ success: false, message: 'Resume file not found on server' });
+  } catch (error: any) {
+    logger.error('Stream Resume Error:', error);
+    return res.status(500).json({ success: false, message: 'Failed to stream resume: ' + error.message });
+  }
+};
+
+/**
+ * Proxy Resume URL for in-app viewing & CORS-free PDF download
+ */
+export const proxyResumeUrl = async (req: any, res: any) => {
+  try {
+    const targetUrl = (req.query.url as string) || '';
+    if (!targetUrl) {
+      return res.status(400).json({ success: false, message: 'URL query parameter is required' });
+    }
+
+    // If it's a local path
+    if (targetUrl.startsWith('/uploads') || targetUrl.startsWith('uploads/')) {
+      const cleanPath = targetUrl.startsWith('/') ? targetUrl.slice(1) : targetUrl;
+      const filePath = path.join(__dirname, '../../', cleanPath);
+      if (fs.existsSync(filePath)) {
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `inline; filename="${path.basename(filePath)}"`);
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+        return res.sendFile(filePath);
+      }
+    }
+
+    // If it matches a local file in uploads directory by filename
+    const filenameOnly = path.basename(targetUrl.split('?')[0]);
+    const localUploadPath = path.join(__dirname, '../../uploads/resumes', filenameOnly);
+    if (fs.existsSync(localUploadPath)) {
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="${filenameOnly}"`);
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+      return res.sendFile(localUploadPath);
+    }
+
+    // Remote Fetch (Cloudinary or S3) with axios stream
+    const axios = (await import('axios')).default;
+    const response = await axios.get(targetUrl, {
+      responseType: 'stream',
+      headers: {
+        'Accept': 'application/pdf, application/octet-stream, */*',
+      }
+    });
+
+    res.setHeader('Content-Type', response.headers['content-type'] || 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${filenameOnly || 'Resume.pdf'}"`);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+
+    response.data.pipe(res);
+  } catch (error: any) {
+    logger.error('Proxy Resume Error:', error);
+    return res.status(500).json({ success: false, message: 'Failed to proxy resume: ' + error.message });
+  }
+};

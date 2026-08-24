@@ -46,6 +46,12 @@ export const ResumeViewerModal: React.FC<ResumeViewerModalProps> = ({
 
   const resolvedUrl = getCleanResumeUrl(resumeUrl);
   const isCloudinary = resolvedUrl.includes('cloudinary.com') || resolvedUrl.includes('res.cloudinary.com');
+  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/api\/?$/, '');
+  
+  // Use proxy for Cloudinary or external CORS-restricted links to guarantee 100% load & download
+  const streamUrl = isCloudinary 
+    ? `${apiBase}/api/candidates/resume-proxy?url=${encodeURIComponent(resolvedUrl)}`
+    : resolvedUrl;
 
   const handleDownload = async () => {
     if (!resolvedUrl) {
@@ -57,8 +63,8 @@ export const ResumeViewerModal: React.FC<ResumeViewerModalProps> = ({
     const filename = `${(candidateName || 'Candidate').replace(/\s+/g, '_')}_Resume.pdf`;
 
     try {
-      const response = await fetch(resolvedUrl, { mode: 'cors' });
-      if (!response.ok) throw new Error('CORS / Network fetch failed');
+      const response = await fetch(streamUrl);
+      if (!response.ok) throw new Error('Fetch failed with status ' + response.status);
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -70,16 +76,16 @@ export const ResumeViewerModal: React.FC<ResumeViewerModalProps> = ({
       window.URL.revokeObjectURL(blobUrl);
       toast.success('Resume downloaded successfully!', { id: toastId });
     } catch {
-      // Direct browser download / open fallback
+      // Direct browser download / open fallback via stream URL
       const link = document.createElement('a');
-      link.href = resolvedUrl;
+      link.href = streamUrl;
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
       link.download = filename;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      toast.success('Opened resume for direct download.', { id: toastId });
+      toast.success('Resume downloaded via direct link.', { id: toastId });
     } finally {
       setDownloading(false);
     }
@@ -87,7 +93,7 @@ export const ResumeViewerModal: React.FC<ResumeViewerModalProps> = ({
 
   const iframeSrc = useGoogleViewer
     ? `https://docs.google.com/viewer?url=${encodeURIComponent(resolvedUrl)}&embedded=true`
-    : `${resolvedUrl}#toolbar=0&navpanes=0`;
+    : `${streamUrl}#toolbar=0&navpanes=0`;
 
   const modalContent = (
     <div 
