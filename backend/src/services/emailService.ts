@@ -70,74 +70,48 @@ const getSmtpCredentials = () => {
   return { user, pass, from };
 };
 
-// Create Bulletproof Nodemailer SMTP Transporter
-const createTransporter = (customPort?: number) => {
+// Create Bulletproof Nodemailer Gmail Transporter
+const createTransporter = (method: 'gmail_service' | 'port_465' | 'port_587' = 'gmail_service') => {
   const { user, pass } = getSmtpCredentials();
   const host = (process.env.SMTP_HOST || 'smtp.gmail.com').trim();
-  const port = customPort || parseInt(process.env.SMTP_PORT || '465');
-  const isSecure = port === 465 || process.env.SMTP_SECURE === 'true';
+
+  if (method === 'gmail_service') {
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user, pass },
+      connectionTimeout: 30000,
+      greetingTimeout: 30000,
+      socketTimeout: 45000,
+    } as any);
+  }
+
+  if (method === 'port_465') {
+    return nodemailer.createTransport({
+      host,
+      port: 465,
+      secure: true,
+      auth: { user, pass },
+      family: 4,
+      connectionTimeout: 30000,
+      greetingTimeout: 30000,
+      socketTimeout: 45000,
+      tls: { rejectUnauthorized: false },
+    } as any);
+  }
 
   return nodemailer.createTransport({
     host,
-    port,
-    secure: isSecure,
-    requireTLS: port === 587 || port === 2525,
+    port: 587,
+    secure: false,
+    requireTLS: true,
     auth: { user, pass },
-    family: 4, // FORCE IPV4 CONNECTION (Prevents Render IPv6 DNS timeout)
-    connectionTimeout: 5000,
-    greetingTimeout: 5000,
-    socketTimeout: 8000,
-    tls: {
-      rejectUnauthorized: false,
-      servername: host,
-    },
+    family: 4,
+    connectionTimeout: 30000,
+    greetingTimeout: 30000,
+    socketTimeout: 45000,
+    tls: { rejectUnauthorized: false },
   } as any);
 };
-
-/*
-// Brevo Port 443 HTTPS REST API Dispatcher (Commented out - using SMTP directly)
-const sendViaBrevoApi = async ({ to, subject, html, attachments = [] }: any) => {
-  const apiKey = (process.env.BREVO_API_KEY || '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').trim();
-  if (!apiKey) return null;
-
-  const senderEmail = process.env.BREVO_SENDER_EMAIL || 'dks241655@gmail.com';
-  const senderName = process.env.BREVO_SENDER_NAME || 'Adyapan Edutech';
-
-  const brevoAttachments = attachments.map((att: any) => ({
-    name: att.filename,
-    content: Buffer.isBuffer(att.content)
-      ? att.content.toString('base64')
-      : (typeof att.content === 'string' ? att.content : Buffer.from(att.content).toString('base64')),
-  }));
-
-  try {
-    const response = await axios.post(
-      'https://api.brevo.com/v3/smtp/email',
-      {
-        sender: { name: senderName, email: senderEmail },
-        to: [{ email: to }],
-        subject,
-        htmlContent: html,
-        attachment: brevoAttachments.length > 0 ? brevoAttachments : undefined,
-      },
-      {
-        headers: {
-          'api-key': apiKey,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        timeout: 10000,
-      }
-    );
-
-    logger.info(`REAL BREVO HTTPS EMAIL DELIVERED to candidate ${to}! MessageID: ${response.data?.messageId || response.data?.id}`);
-    return { success: true, method: 'Brevo_HTTPS', messageId: response.data?.messageId || response.data?.id };
-  } catch (err: any) {
-    logger.warn(`Brevo HTTPS API Notice for ${to}:`, err?.response?.data?.message || err?.response?.data || err.message);
-    return null;
-  }
-};
-*/
 
 /**
  * Dispatch Real Email to Candidate Email Address via Gmail SMTP
@@ -148,18 +122,8 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
     return { success: false, message: 'Invalid recipient email address' };
   }
 
-  // Only pass explicit user attachments (e.g. PDF Offer Letter) - do NOT attach logo file to prevent bottom download box
   const allAttachments = [...attachments];
-
-  /*
-  // 1. Try Brevo Port 443 HTTPS REST API first (Disabled per user request)
-  const brevoRes = await sendViaBrevoApi({ to, subject, html, attachments: allAttachments });
-  if (brevoRes && brevoRes.success) return brevoRes;
-  */
-
   const { user, from } = getSmtpCredentials();
-  const configuredPort = parseInt(process.env.SMTP_PORT || '587');
-  const host = (process.env.SMTP_HOST || 'smtp.gmail.com').trim();
 
   // Format attachments for Nodemailer
   const nodemailerAttachments = allAttachments.map((att) => ({
@@ -170,41 +134,12 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
     cid: att.cid,
   }));
 
-  // Try Nodemailer Gmail OAuth2 HTTPS Transport
-  if (process.env.GMAIL_CLIENT_ID && process.env.GMAIL_REFRESH_TOKEN) {
-    try {
-      const oauth2Transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          type: 'OAuth2',
-          user,
-          clientId: process.env.GMAIL_CLIENT_ID,
-          clientSecret: process.env.GMAIL_CLIENT_SECRET,
-          refreshToken: process.env.GMAIL_REFRESH_TOKEN,
-        },
-      } as any);
+  logger.info(`Dispatching real email with ${allAttachments.length} attachment(s) to candidate ${to} via Gmail (${user})...`);
 
-      const info = await oauth2Transporter.sendMail({
-        from,
-        to,
-        subject,
-        html,
-        attachments: nodemailerAttachments,
-      });
-
-      logger.info(`REAL GMAIL OAUTH2 EMAIL DELIVERED to candidate ${to}! MessageID: ${info.messageId}`);
-      return { success: true, method: 'Nodemailer_Gmail_OAuth2', messageId: info.messageId };
-    } catch (oauthErr: any) {
-      logger.warn(`Nodemailer Gmail OAuth2 notice for ${to}:`, oauthErr?.message || oauthErr);
-    }
-  }
-
-  logger.info(`Dispatching real email with ${allAttachments.length} attachment(s) to candidate ${to} via Nodemailer Gmail SMTP (${user})...`);
-
-  // Try Port 465 SSL FIRST
+  // 1. PRIMARY: Try Official Nodemailer Gmail Service Connection
   try {
-    const transporter465 = createTransporter(465);
-    const info465 = await transporter465.sendMail({
+    const transporter = createTransporter('gmail_service');
+    const info = await transporter.sendMail({
       from,
       to,
       subject,
@@ -212,15 +147,15 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
       attachments: nodemailerAttachments,
     });
 
-    logger.info(`REAL NODEMAILER GMAIL EMAIL DELIVERED via Port 465 SSL to candidate ${to}! MessageID: ${info465.messageId}`);
-    return { success: true, method: 'Nodemailer_SMTP_465', messageId: info465.messageId };
-  } catch (sslErr: any) {
-    logger.warn(`Port 465 SSL notice for ${to}: ${sslErr?.message || sslErr}. Retrying Port 587 STARTTLS...`);
+    logger.info(`REAL GMAIL EMAIL DELIVERED to candidate ${to}! MessageID: ${info.messageId} - ${info.response}`);
+    return { success: true, method: 'Gmail_Service', messageId: info.messageId };
+  } catch (gmailServiceErr: any) {
+    logger.warn(`Gmail Service notice for ${to}: ${gmailServiceErr?.message || gmailServiceErr}. Retrying Direct Port 465 SSL...`);
 
-    // Try Port 587 STARTTLS Fallback
+    // 2. FALLBACK: Try Direct Port 465 SSL
     try {
-      const transporter587 = createTransporter(587);
-      const info587 = await transporter587.sendMail({
+      const transporter465 = createTransporter('port_465');
+      const info465 = await transporter465.sendMail({
         from,
         to,
         subject,
@@ -228,11 +163,28 @@ const dispatchEmailToCandidate = async ({ to, subject, html, attachments = [] }:
         attachments: nodemailerAttachments,
       });
 
-      logger.info(`REAL NODEMAILER GMAIL EMAIL DELIVERED via Port 587 to candidate ${to}! MessageID: ${info587.messageId}`);
-      return { success: true, method: 'Nodemailer_SMTP_587', messageId: info587.messageId };
-    } catch (smtpErr: any) {
-      logger.info(`Render Cloud Host active: Candidate email "${to}" processed & saved to PostgreSQL DB successfully!`);
-      return { success: true, method: 'Nodemailer_Cloud_Handled', candidateEmail: to };
+      logger.info(`REAL GMAIL EMAIL DELIVERED via Port 465 to candidate ${to}! MessageID: ${info465.messageId}`);
+      return { success: true, method: 'Gmail_Port_465', messageId: info465.messageId };
+    } catch (sslErr: any) {
+      logger.warn(`Port 465 SSL notice for ${to}: ${sslErr?.message || sslErr}. Retrying Port 587 STARTTLS...`);
+
+      // 3. FALLBACK: Try Port 587 STARTTLS
+      try {
+        const transporter587 = createTransporter('port_587');
+        const info587 = await transporter587.sendMail({
+          from,
+          to,
+          subject,
+          html,
+          attachments: nodemailerAttachments,
+        });
+
+        logger.info(`REAL GMAIL EMAIL DELIVERED via Port 587 to candidate ${to}! MessageID: ${info587.messageId}`);
+        return { success: true, method: 'Gmail_Port_587', messageId: info587.messageId };
+      } catch (smtpErr: any) {
+        logger.error(`Failed to send email to ${to}:`, smtpErr?.message || smtpErr);
+        return { success: false, message: 'SMTP Send failed: ' + (smtpErr?.message || smtpErr) };
+      }
     }
   }
 };
