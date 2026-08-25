@@ -97,15 +97,15 @@ export const ApplyJob: React.FC = () => {
     currentRoleDescription: '',
 
     // Education
-    highestQualification: "Bachelor's Degree",
+    highestQualification: '',
     collegeName: '',
-    degree: 'B.Tech / B.E.',
-    fieldOfStudy: 'Computer Science / Engineering',
-    graduationYear: '2024',
+    degree: '',
+    fieldOfStudy: '',
+    graduationYear: '',
     cgpa: '',
 
     // Skills
-    skills: ['Communication Skills', 'Problem Solving'] as string[],
+    skills: [] as string[],
 
     // Resume
     resumeFileName: '',
@@ -233,6 +233,11 @@ export const ApplyJob: React.FC = () => {
       : `${Math.round(file.size / 1024)} KB`;
 
     setSelectedFile(file);
+    setErrors((prev) => {
+      const copy = { ...prev };
+      delete copy.resume;
+      return copy;
+    });
 
     const reader = new FileReader();
     reader.onload = (event: any) => {
@@ -248,15 +253,68 @@ export const ApplyJob: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
+  // Remove Resume
+  const handleRemoveResume = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedFile(null);
+    setFormData((prev) => ({
+      ...prev,
+      resumeFileName: '',
+      resumeFileSize: '',
+      resumeDataUrl: null,
+      resumeText: '',
+    }));
+    const input = document.getElementById('resume-upload') as HTMLInputElement;
+    if (input) input.value = '';
+    toast.success('Resume removed');
+  };
+
   // Validation per step
   const validateCurrentStep = () => {
     const newErrors: { [key: string]: string } = {};
 
     if (currentStep === 1) {
       if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
-      if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
       if (!formData.email.trim() || !formData.email.includes('@')) newErrors.email = 'Valid email address is required';
-      if (!formData.phone.trim() || formData.phone.length < 10) newErrors.phone = 'Valid phone number is required';
+      if (!formData.phone.trim() || formData.phone.length !== 10) newErrors.phone = 'Please enter a valid 10-digit mobile number';
+    }
+
+    if (currentStep === 2) {
+      if (formData.employmentStatus !== 'FRESHER') {
+        if (!formData.experience || !formData.experience.trim()) {
+          newErrors.experience = 'Total experience is required';
+        }
+        if (!formData.currentCompany || !formData.currentCompany.trim()) {
+          newErrors.currentCompany = 'Current company name is required';
+        }
+        if (!formData.currentPosition || !formData.currentPosition.trim()) {
+          newErrors.currentPosition = 'Current designation is required';
+        }
+      }
+    }
+
+    if (currentStep === 3) {
+      if (!formData.highestQualification) {
+        newErrors.highestQualification = 'Please select your qualification';
+      }
+      if (!formData.collegeName.trim()) {
+        newErrors.collegeName = 'College / University name is required';
+      }
+      if (!formData.fieldOfStudy.trim()) {
+        newErrors.fieldOfStudy = 'Specialization / Branch is required';
+      }
+      if (!formData.graduationYear.trim()) {
+        newErrors.graduationYear = 'Graduation / Passout year is required';
+      } else if (formData.graduationYear.trim().length !== 4) {
+        newErrors.graduationYear = 'Please enter a valid 4-digit year (e.g. 2025)';
+      }
+    }
+
+    if (currentStep === 4) {
+      if (!formData.skills || formData.skills.length < 2) {
+        newErrors.skills = 'Please select or add at least 2 skills to continue';
+      }
     }
 
     if (currentStep === 5) {
@@ -576,17 +634,15 @@ export const ApplyJob: React.FC = () => {
 
                     <div className="space-y-1.5">
                       <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
-                        Last Name <span className="text-rose-500">*</span>
+                        Last Name <span className="text-stone-400 font-normal">(Optional)</span>
                       </label>
                       <input
                         type="text"
                         value={formData.lastName}
                         onChange={(e) => handleChange('lastName', e.target.value)}
                         placeholder="e.g. Sharma"
-                        className={`w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border ${errors.lastName ? 'border-rose-500' : 'border-stone-200 dark:border-stone-700'
-                          } text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all`}
+                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all"
                       />
-                      {errors.lastName && <span className="text-[11px] text-rose-500 font-bold">{errors.lastName}</span>}
                     </div>
 
                     <div className="space-y-1.5">
@@ -608,14 +664,31 @@ export const ApplyJob: React.FC = () => {
                       <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
                         Phone Number <span className="text-rose-500">*</span>
                       </label>
-                      <input
-                        type="tel"
-                        value={formData.phone}
-                        onChange={(e) => handleChange('phone', e.target.value)}
-                        placeholder="+91 98765 43210"
-                        className={`w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border ${errors.phone ? 'border-rose-500' : 'border-stone-200 dark:border-stone-700'
-                          } text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all`}
-                      />
+                      <div className={`flex items-center rounded-2xl bg-stone-50 dark:bg-stone-800 border ${errors.phone ? 'border-rose-500' : 'border-stone-200 dark:border-stone-700'} focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 transition-all overflow-hidden`}>
+                        <span className="px-3.5 py-3.5 bg-stone-100 dark:bg-stone-700/60 text-stone-600 dark:text-stone-300 font-bold text-xs sm:text-sm border-r border-stone-200 dark:border-stone-700 select-none">
+                          +91
+                        </span>
+                        <input
+                          type="tel"
+                          inputMode="numeric"
+                          maxLength={10}
+                          value={formData.phone}
+                          onKeyDown={(e) => {
+                            const isControlKey = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'].includes(e.key) || e.ctrlKey || e.metaKey;
+                            const input = e.currentTarget;
+                            const hasSelection = input.selectionStart !== input.selectionEnd;
+                            if (!isControlKey && !hasSelection && input.value.length >= 10) {
+                              e.preventDefault();
+                            }
+                          }}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                            handleChange('phone', val);
+                          }}
+                          placeholder="9876543210"
+                          className="w-full px-4 py-3.5 bg-transparent text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none"
+                        />
+                      </div>
                       {errors.phone && <span className="text-[11px] text-rose-500 font-bold">{errors.phone}</span>}
                     </div>
 
@@ -699,44 +772,47 @@ export const ApplyJob: React.FC = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-3 border-t border-stone-100 dark:border-stone-800">
                       <div className="space-y-1.5">
                         <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
-                          Total Relevant Experience
+                          Total Relevant Experience <span className="text-rose-500">*</span>
                         </label>
                         <select
                           value={formData.experience}
                           onChange={(e) => handleChange('experience', e.target.value)}
-                          className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                          className={`w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border ${errors.experience ? 'border-rose-500' : 'border-stone-200 dark:border-stone-700'} text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500`}
                         >
                           <option value="0-1 Years" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">0–1 Years</option>
                           <option value="1-3 Years" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">1–3 Years</option>
                           <option value="3-5 Years" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">3–5 Years</option>
                           <option value="5+ Years" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">5+ Years</option>
                         </select>
+                        {errors.experience && <span className="text-[11px] text-rose-500 font-bold">{errors.experience}</span>}
                       </div>
 
                       <div className="space-y-1.5">
                         <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
-                          Current Company
+                          Current Company <span className="text-rose-500">*</span>
                         </label>
                         <input
                           type="text"
                           value={formData.currentCompany}
                           onChange={(e) => handleChange('currentCompany', e.target.value)}
                           placeholder="e.g. Cognizant / TCS / Startup"
-                          className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                          className={`w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border ${errors.currentCompany ? 'border-rose-500' : 'border-stone-200 dark:border-stone-700'} text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none focus:border-amber-500`}
                         />
+                        {errors.currentCompany && <span className="text-[11px] text-rose-500 font-bold">{errors.currentCompany}</span>}
                       </div>
 
                       <div className="space-y-1.5">
                         <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
-                          Current Designation
+                          Current Designation <span className="text-rose-500">*</span>
                         </label>
                         <input
                           type="text"
                           value={formData.currentPosition}
                           onChange={(e) => handleChange('currentPosition', e.target.value)}
                           placeholder="e.g. Associate Analyst / Developer"
-                          className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                          className={`w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border ${errors.currentPosition ? 'border-rose-500' : 'border-stone-200 dark:border-stone-700'} text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none focus:border-amber-500`}
                         />
+                        {errors.currentPosition && <span className="text-[11px] text-rose-500 font-bold">{errors.currentPosition}</span>}
                       </div>
 
                       <div className="space-y-1.5">
@@ -784,59 +860,77 @@ export const ApplyJob: React.FC = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
                     <div className="space-y-1.5">
                       <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
-                        Highest Qualification
+                        Highest Qualification <span className="text-rose-500">*</span>
                       </label>
                       <select
                         value={formData.highestQualification}
                         onChange={(e) => handleChange('highestQualification', e.target.value)}
-                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                        className={`w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border ${errors.highestQualification ? 'border-rose-500' : 'border-stone-200 dark:border-stone-700'} text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500`}
                       >
-                        <option value="Bachelor's Degree" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Bachelor's Degree (B.Tech / B.E / B.Sc / B.Com)</option>
-                        <option value="Master's Degree" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Master's Degree (M.Tech / MBA / MCA)</option>
+                        <option value="" disabled className="bg-white dark:bg-stone-900 text-stone-400">Select Highest Qualification</option>
+                        <option value="Bachelor's Degree" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Bachelor's Degree (B.Tech / B.E / B.Sc / B.Com / BCA / BBA)</option>
+                        <option value="Master's Degree" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Master's Degree (M.Tech / MBA / MCA / M.Sc / M.Com)</option>
                         <option value="Diploma / Polytechnic" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Diploma / Polytechnic</option>
+                        <option value="Higher Secondary (12th)" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Higher Secondary (12th / Intermediate)</option>
                         <option value="Doctorate / PhD" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Doctorate / PhD</option>
+                        <option value="Other" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Other</option>
                       </select>
+                      {errors.highestQualification && <span className="text-[11px] text-rose-500 font-bold">{errors.highestQualification}</span>}
                     </div>
 
                     <div className="space-y-1.5">
                       <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
-                        College / University Name
+                        College / University Name <span className="text-rose-500">*</span>
                       </label>
                       <input
                         type="text"
                         value={formData.collegeName}
                         onChange={(e) => handleChange('collegeName', e.target.value)}
-                        placeholder="e.g. Lovely Professional University / JNTU"
-                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                        placeholder="e.g. Lovely Professional University / JNTU / Delhi University"
+                        className={`w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border ${errors.collegeName ? 'border-rose-500' : 'border-stone-200 dark:border-stone-700'} text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none focus:border-amber-500`}
                       />
+                      {errors.collegeName && <span className="text-[11px] text-rose-500 font-bold">{errors.collegeName}</span>}
                     </div>
 
                     <div className="space-y-1.5">
                       <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
-                        Specialization / Branch
+                        Specialization / Branch <span className="text-rose-500">*</span>
                       </label>
                       <input
                         type="text"
                         value={formData.fieldOfStudy}
                         onChange={(e) => handleChange('fieldOfStudy', e.target.value)}
-                        placeholder="e.g. Computer Science / Electronics / Business"
-                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
+                        placeholder="e.g. Computer Science, Mechanical, Commerce, Marketing, AI/ML..."
+                        className={`w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border ${errors.fieldOfStudy ? 'border-rose-500' : 'border-stone-200 dark:border-stone-700'} text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none focus:border-amber-500`}
                       />
+                      {errors.fieldOfStudy && <span className="text-[11px] text-rose-500 font-bold">{errors.fieldOfStudy}</span>}
                     </div>
 
                     <div className="space-y-1.5">
                       <label className="text-xs font-extrabold text-stone-700 dark:text-stone-300">
-                        Year of Graduation
+                        Year of Graduation / Passout <span className="text-rose-500">*</span>
                       </label>
-                      <select
+                      <input
+                        type="tel"
+                        inputMode="numeric"
+                        maxLength={4}
                         value={formData.graduationYear}
-                        onChange={(e) => handleChange('graduationYear', e.target.value)}
-                        className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white font-semibold text-xs sm:text-sm outline-none focus:border-amber-500"
-                      >
-                        {['2027', '2026', '2025', '2024', '2023', '2022', '2021', '2020', 'Prior'].map((yr) => (
-                          <option key={yr} value={yr} className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">{yr}</option>
-                        ))}
-                      </select>
+                        onKeyDown={(e) => {
+                          const isControlKey = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'].includes(e.key) || e.ctrlKey || e.metaKey;
+                          const input = e.currentTarget;
+                          const hasSelection = input.selectionStart !== input.selectionEnd;
+                          if (!isControlKey && !hasSelection && input.value.length >= 4) {
+                            e.preventDefault();
+                          }
+                        }}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+                          handleChange('graduationYear', val);
+                        }}
+                        placeholder="e.g. 2025"
+                        className={`w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border ${errors.graduationYear ? 'border-rose-500' : 'border-stone-200 dark:border-stone-700'} text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 font-semibold text-xs sm:text-sm outline-none focus:border-amber-500`}
+                      />
+                      {errors.graduationYear && <span className="text-[11px] text-rose-500 font-bold">{errors.graduationYear}</span>}
                     </div>
                   </div>
                 </div>
@@ -850,13 +944,22 @@ export const ApplyJob: React.FC = () => {
                       Step 04 of 07
                     </span>
                     <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-white">
-                      What are you great at?
+                      What are you great at? <span className="text-rose-500 text-xl">*</span>
                     </h2>
                     <p className="text-xs sm:text-sm text-stone-500 font-medium">
-                      Select your key strengths. You currently have{' '}
-                      <b className="text-amber-500">{formData.skills.length} skills</b> selected.
+                      Select or type your key strengths (at least 2 skills mandatory). You currently have{' '}
+                      <b className={formData.skills.length >= 2 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}>
+                        {formData.skills.length} of 2 required skills
+                      </b> selected.
                     </p>
                   </div>
+
+                  {errors.skills && (
+                    <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/25 text-rose-600 dark:text-rose-400 text-xs font-bold flex items-center gap-2 animate-fadeIn">
+                      <span className="text-base">⚠️</span>
+                      <span>{errors.skills}</span>
+                    </div>
+                  )}
 
                   {/* Add Custom Skill Form */}
                   <form onSubmit={addCustomSkill} className="flex gap-2">
@@ -939,15 +1042,16 @@ export const ApplyJob: React.FC = () => {
                       Step 05 of 07
                     </span>
                     <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-white">
-                      Let's add your resume.
+                      Let's add your resume. <span className="text-rose-500 text-xl">*</span>
                     </h2>
                     <p className="text-xs sm:text-sm text-stone-500 font-medium">
-                      Your resume helps our talent acquisition team review your background quickly.
+                      Your resume helps our talent acquisition team review your background quickly.{' '}
+                      <span className="text-amber-600 dark:text-amber-400 font-bold">(Attachment is mandatory)</span>
                     </p>
                   </div>
 
                   {/* Upload Card */}
-                  <div className="border-2 border-dashed border-stone-200 dark:border-stone-700 rounded-3xl p-8 sm:p-12 text-center bg-stone-50/50 dark:bg-stone-800/50 hover:border-amber-500 transition-all group">
+                  <div className={`border-2 border-dashed ${errors.resume ? 'border-rose-500 bg-rose-500/5' : 'border-stone-200 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-800/50'} rounded-3xl p-8 sm:p-12 text-center hover:border-amber-500 transition-all group`}>
                     <input
                       type="file"
                       id="resume-upload"
@@ -965,17 +1069,31 @@ export const ApplyJob: React.FC = () => {
                           <b className="text-sm font-bold text-stone-900 dark:text-white block truncate">
                             {formData.resumeFileName}
                           </b>
-                          <small className="text-xs text-stone-500 font-bold block">
-                            {formData.resumeFileSize || 'Ready for submission'} · Verified
+                          <small className="text-xs text-emerald-600 dark:text-emerald-400 font-bold block">
+                            {formData.resumeFileSize || 'Ready for submission'} · Attached Successfully
                           </small>
                         </div>
-                        <label
-                          htmlFor="resume-upload"
-                          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-stone-200 dark:bg-stone-800 hover:bg-amber-500 hover:text-white text-xs font-bold text-stone-700 dark:text-stone-300 transition-all cursor-pointer"
-                        >
-                          <Upload size={14} />
-                          <span>Replace File</span>
-                        </label>
+                        <div className="flex items-center justify-center gap-3 pt-2">
+                          <label
+                            htmlFor="resume-upload"
+                            onClick={() => {
+                              const input = document.getElementById('resume-upload') as HTMLInputElement;
+                              if (input) input.value = '';
+                            }}
+                            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-md shadow-amber-500/20 transition-all cursor-pointer"
+                          >
+                            <Upload size={14} />
+                            <span>Change / Replace Resume</span>
+                          </label>
+                          <button
+                            type="button"
+                            onClick={handleRemoveResume}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-600 dark:text-rose-400 text-xs font-bold border border-rose-500/20 transition-all cursor-pointer"
+                          >
+                            <Trash2 size={14} />
+                            <span>Remove</span>
+                          </button>
+                        </div>
                       </div>
                     ) : (
                       <label htmlFor="resume-upload" className="cursor-pointer space-y-4 block">
@@ -984,7 +1102,7 @@ export const ApplyJob: React.FC = () => {
                         </div>
                         <div className="space-y-1">
                           <b className="text-base font-bold text-stone-900 dark:text-white block">
-                            Upload your resume
+                            Upload your resume <span className="text-rose-500">*</span>
                           </b>
                           <p className="text-xs text-stone-500 font-medium">
                             Drag & drop your file here, or{' '}
@@ -999,7 +1117,10 @@ export const ApplyJob: React.FC = () => {
                   </div>
 
                   {errors.resume && (
-                    <p className="text-xs text-rose-500 font-bold text-center">{errors.resume}</p>
+                    <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/25 text-rose-600 dark:text-rose-400 text-xs font-bold flex items-center justify-center gap-2 animate-fadeIn">
+                      <span className="text-base">⚠️</span>
+                      <span>{errors.resume}</span>
+                    </div>
                   )}
                 </div>
               )}

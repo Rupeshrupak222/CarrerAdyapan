@@ -163,16 +163,12 @@ const Footer: React.FC<FooterProps> = ({ variant = 'dark' }) => {
                 href="https://maps.google.com/?q=ADYAPAN+EDUTECH+PRIVATE+LIMITED+Shaikpet+Hyderabad+Telangana"
                 target="_blank"
                 rel="noreferrer"
-                className={`group text-xs transition-all duration-300 block hover:translate-x-1 ${
-                  isWhite
-                    ? 'text-slate-600 hover:text-orange-600'
-                    : 'text-[#a9a198] hover:text-amber-500'
-                }`}
+                className={`group text-xs transition-all duration-300 block hover:translate-x-1 cursor-pointer`}
               >
-                <b className={`font-bold block transition-colors duration-300 ${isWhite ? 'text-slate-800' : 'text-stone-200'}`}>
+                <b className={`font-bold block transition-colors duration-300 ${isWhite ? 'text-slate-800 group-hover:text-orange-500' : 'text-stone-200 group-hover:text-orange-400'}`}>
                   Adyapan Edutech Pvt Ltd
                 </b>
-                <span className={`text-[11px] block mt-0.5 leading-relaxed transition-colors duration-300 ${isWhite ? 'text-slate-500' : 'text-stone-400'}`}>
+                <span className={`text-[11px] block mt-0.5 leading-relaxed transition-colors duration-300 ${isWhite ? 'text-slate-500 group-hover:text-orange-500' : 'text-stone-400 group-hover:text-orange-400'}`}>
                   Sattva Magnus, Sabza Colony, Toli Chowki, Hyderabad, Telangana 500008
                 </span>
               </a>
@@ -190,16 +186,12 @@ const Footer: React.FC<FooterProps> = ({ variant = 'dark' }) => {
                 href="https://maps.google.com/?q=ADYAPAN+EDUTECH+PRIVATE+LIMITED+Khajaguda+Rai+Durg+Hyderabad+500104"
                 target="_blank"
                 rel="noreferrer"
-                className={`group text-xs transition-all duration-300 block hover:translate-x-1 ${
-                  isWhite
-                    ? 'text-slate-600 hover:text-orange-600'
-                    : 'text-[#a9a198] hover:text-amber-500'
-                }`}
+                className={`group text-xs transition-all duration-300 block hover:translate-x-1 cursor-pointer`}
               >
-                <b className={`font-bold block transition-colors duration-300 ${isWhite ? 'text-slate-800' : 'text-stone-200'}`}>
+                <b className={`font-bold block transition-colors duration-300 ${isWhite ? 'text-slate-800 group-hover:text-orange-500' : 'text-stone-200 group-hover:text-orange-400'}`}>
                   Adyapan Edutech Pvt Ltd
                 </b>
-                <span className={`text-[11px] block mt-0.5 leading-relaxed transition-colors duration-300 ${isWhite ? 'text-slate-500' : 'text-stone-400'}`}>
+                <span className={`text-[11px] block mt-0.5 leading-relaxed transition-colors duration-300 ${isWhite ? 'text-slate-500 group-hover:text-orange-500' : 'text-stone-400 group-hover:text-orange-400'}`}>
                   Cluster_malkajgiri 82, X Road, Khajaguda - Nanakramguda Rd, Radhe Nagar, Rai Durg, Telangana 500104
                 </span>
               </a>
@@ -219,16 +211,12 @@ const Footer: React.FC<FooterProps> = ({ variant = 'dark' }) => {
               href="https://www.google.com/maps/search/?api=1&query=ADYAPAN+EDUTECH+PRIVATE+LIMITED+Gachibowli+Hyderabad"
               target="_blank"
               rel="noreferrer"
-              className={`group text-xs transition-all duration-300 block hover:translate-x-1 ${
-                isWhite
-                  ? 'text-slate-600 hover:text-orange-600'
-                  : 'text-[#a9a198] hover:text-amber-500'
-              }`}
+              className={`group text-xs transition-all duration-300 block hover:translate-x-1 cursor-pointer`}
             >
-              <b className={`font-bold block transition-colors duration-300 ${isWhite ? 'text-slate-800' : 'text-stone-200'}`}>
+              <b className={`font-bold block transition-colors duration-300 ${isWhite ? 'text-slate-800 group-hover:text-orange-500' : 'text-stone-200 group-hover:text-orange-400'}`}>
                 Adyapan Edutech Pvt Ltd
               </b>
-              <span className={`text-[11px] block mt-0.5 leading-relaxed transition-colors duration-300 ${isWhite ? 'text-slate-500' : 'text-stone-400'}`}>
+              <span className={`text-[11px] block mt-0.5 leading-relaxed transition-colors duration-300 ${isWhite ? 'text-slate-500 group-hover:text-orange-500' : 'text-stone-400 group-hover:text-orange-400'}`}>
                 IndiQube Pearl, Mindspace Rd, Gachibowli, Hyderabad, Telangana 500032
               </span>
             </a>

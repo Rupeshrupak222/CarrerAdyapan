@@ -686,7 +686,7 @@ const LifeAtAdyapan: React.FC = () => {
                   <br />
                   grow and make a difference.
                 </h3>
-                <Link to="/jobs">
+                <Link to="/open-positions">
                   Explore Jobs <ArrowRight size={18} />
                 </Link>
               </div>
@@ -746,7 +746,7 @@ const LifeAtAdyapan: React.FC = () => {
                 We're continuously looking for talented minds across engineering, product, outreach, and talent development.
               </p>
               <Link
-                to="/jobs"
+                to="/open-positions"
                 className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-white text-orange-600 font-extrabold text-sm sm:text-base shadow-xl hover:bg-orange-50 hover:scale-105 transition-all duration-300"
               >
                 <Briefcase size={20} /> View Open Positions

@@ -3,6 +3,7 @@ import {
   CheckCircle2,
   ChevronDown,
   Clock3,
+  ExternalLink,
   Mail,
   MapPin,
   Phone,
@@ -38,22 +39,46 @@ function ContactItem({
   icon,
   title,
   text,
+  href,
 }: {
   icon: ReactNode;
   title: string;
   text: string;
+  href?: string;
 }) {
-  return (
-    <div className="flex items-start gap-3.5 p-4 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 shadow-sm hover:border-amber-500/30 transition-all">
-      <span className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0 shadow-xs">
+  const content = (
+    <>
+      <span className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0 shadow-xs group-hover:scale-105 group-hover:bg-amber-500/25 transition-all">
         {icon}
       </span>
-      <div>
-        <b className="text-sm font-extrabold text-stone-900 dark:text-white block">{title}</b>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between gap-1">
+          <b className="text-sm font-extrabold text-stone-900 dark:text-white block group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">{title}</b>
+          {href && <ExternalLink size={13} className="text-stone-400 group-hover:text-amber-500 opacity-60 group-hover:opacity-100 transition-all flex-shrink-0" />}
+        </div>
         <small className="text-xs text-stone-500 dark:text-stone-400 font-medium block mt-0.5 leading-relaxed">
           {text}
         </small>
       </div>
+    </>
+  );
+
+  if (href) {
+    return (
+      <a
+        href={href}
+        target={href.startsWith('http') ? '_blank' : undefined}
+        rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
+        className="flex items-start gap-3.5 p-4 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 shadow-sm hover:border-amber-500/40 hover:shadow-md transition-all group cursor-pointer block"
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <div className="flex items-start gap-3.5 p-4 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 shadow-sm hover:border-amber-500/30 transition-all">
+      {content}
     </div>
   );
 }
@@ -73,13 +98,20 @@ const ContactUs: React.FC = () => {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    const cleanPhone = formData.phone.replace(/\D/g, '');
+    if (cleanPhone.length !== 10) {
+      toast.error('Please enter a valid 10-digit mobile number');
+      return;
+    }
+
     setLoading(true);
 
     try {
       await api.post('/contact', {
         fullName: formData.name,
         email: formData.email,
-        phone: formData.phone,
+        phone: cleanPhone,
         subject: formData.subject,
         message: formData.message,
       });
@@ -158,11 +190,13 @@ const ContactUs: React.FC = () => {
                     icon={<Phone size={18} />}
                     title="Phone"
                     text="+91 81791 24566"
+                    href="tel:+918179124566"
                   />
                   <ContactItem
                     icon={<Mail size={18} />}
                     title="Email"
                     text="support@adyapan.com"
+                    href="mailto:support@adyapan.com"
                   />
                   <ContactItem
                     icon={<Clock3 size={18} />}
@@ -173,6 +207,7 @@ const ContactUs: React.FC = () => {
                     icon={<MapPin size={18} />}
                     title="Head Office"
                     text="Sattva Magnus, Toli Chowki, Hyderabad, Telangana 500008"
+                    href="https://maps.google.com/?q=ADYAPAN+EDUTECH+PRIVATE+LIMITED+Sattva+Magnus+Toli+Chowki+Hyderabad+500008"
                   />
                 </div>
 
@@ -268,14 +303,33 @@ const ContactUs: React.FC = () => {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 space-y-1.5">
                           <span>Phone Number *</span>
-                          <input
-                            required
-                            type="tel"
-                            placeholder="+91 98765 43210"
-                            value={formData.phone}
-                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                            className="w-full px-4 py-3 rounded-xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-750 text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 text-xs font-semibold focus:outline-none focus:border-amber-500 transition-colors"
-                          />
+                          <div className="flex items-center rounded-xl bg-stone-50 dark:bg-stone-850 border border-stone-200 dark:border-stone-750 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/20 transition-all overflow-hidden">
+                            <span className="px-3 py-3 bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold text-xs border-r border-stone-200 dark:border-stone-750 select-none">
+                              +91
+                            </span>
+                            <input
+                              required
+                              type="tel"
+                              inputMode="numeric"
+                              maxLength={10}
+                              pattern="[0-9]{10}"
+                              placeholder="9876543210"
+                              value={formData.phone}
+                              onKeyDown={(e) => {
+                                const isControlKey = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'].includes(e.key) || e.ctrlKey || e.metaKey;
+                                const input = e.currentTarget;
+                                const hasSelection = input.selectionStart !== input.selectionEnd;
+                                if (!isControlKey && !hasSelection && input.value.length >= 10) {
+                                  e.preventDefault();
+                                }
+                              }}
+                              onChange={(e) => {
+                                const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                                setFormData({ ...formData, phone: val });
+                              }}
+                              className="w-full px-3.5 py-3 bg-transparent text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-500 text-xs font-semibold focus:outline-none"
+                            />
+                          </div>
                         </label>
 
                         <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 space-y-1.5">
@@ -420,49 +474,76 @@ const ContactUs: React.FC = () => {
               </div>
             </div>
 
-            {/* 3 Office Cards */}
+            {/* 3 Interactive Office Cards (Redirects to Google Maps) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <article
+              <a
+                href="https://maps.google.com/?q=ADYAPAN+EDUTECH+PRIVATE+LIMITED+Sattva+Magnus+Toli+Chowki+Hyderabad+500008"
+                target="_blank"
+                rel="noopener noreferrer"
                 data-reveal="up"
                 data-delay={100}
-                className="interactive-card p-6 sm:p-8 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 shadow-sm space-y-2 hover:border-amber-500/40 transition-all"
+                className="interactive-card group p-6 sm:p-8 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 block cursor-pointer"
               >
-                <div className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-3">
-                  <MapPin size={18} />
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center group-hover:scale-105 transition-all duration-300">
+                    <MapPin size={18} />
+                  </div>
+                  <span className="text-[11px] font-bold text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-800 px-2.5 py-1 rounded-full flex items-center gap-1 group-hover:bg-amber-500/15 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-all duration-300">
+                    <span>Open Map</span>
+                    <ExternalLink size={12} />
+                  </span>
                 </div>
-                <b className="text-lg font-bold text-stone-900 dark:text-white block">Head Office</b>
-                <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed font-medium">
+                <b className="text-lg font-bold text-stone-900 dark:text-white block group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors duration-300">Head Office</b>
+                <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed font-medium group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors duration-300">
                   Sattva Magnus, Sabza Colony, Toli Chowki, Hyderabad, Telangana 500008
                 </p>
-              </article>
+              </a>
 
-              <article
+              <a
+                href="https://maps.google.com/?q=ADYAPAN+EDUTECH+PRIVATE+LIMITED+Khajaguda+Rai+Durg+Hyderabad+500104"
+                target="_blank"
+                rel="noopener noreferrer"
                 data-reveal="up"
                 data-delay={200}
-                className="interactive-card p-6 sm:p-8 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 shadow-sm space-y-2 hover:border-amber-500/40 transition-all"
+                className="interactive-card group p-6 sm:p-8 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 block cursor-pointer"
               >
-                <div className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-3">
-                  <MapPin size={18} />
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center group-hover:scale-105 transition-all duration-300">
+                    <MapPin size={18} />
+                  </div>
+                  <span className="text-[11px] font-bold text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-800 px-2.5 py-1 rounded-full flex items-center gap-1 group-hover:bg-amber-500/15 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-all duration-300">
+                    <span>Open Map</span>
+                    <ExternalLink size={12} />
+                  </span>
                 </div>
-                <b className="text-lg font-bold text-stone-900 dark:text-white block">Second Office</b>
-                <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed font-medium">
+                <b className="text-lg font-bold text-stone-900 dark:text-white block group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors duration-300">Second Office</b>
+                <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed font-medium group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors duration-300">
                   Khajaguda – Nanakramguda Road, Rai Durg, Telangana 500104
                 </p>
-              </article>
+              </a>
 
-              <article
+              <a
+                href="https://maps.google.com/?q=IndiQube+Pearl+Mindspace+Road+Gachibowli+Hyderabad+Telangana+500032"
+                target="_blank"
+                rel="noopener noreferrer"
                 data-reveal="up"
                 data-delay={300}
-                className="interactive-card p-6 sm:p-8 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 shadow-sm space-y-2 hover:border-amber-500/40 transition-all"
+                className="interactive-card group p-6 sm:p-8 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 block cursor-pointer"
               >
-                <div className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-3">
-                  <MapPin size={18} />
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center group-hover:scale-105 transition-all duration-300">
+                    <MapPin size={18} />
+                  </div>
+                  <span className="text-[11px] font-bold text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-800 px-2.5 py-1 rounded-full flex items-center gap-1 group-hover:bg-amber-500/15 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-all duration-300">
+                    <span>Open Map</span>
+                    <ExternalLink size={12} />
+                  </span>
                 </div>
-                <b className="text-lg font-bold text-stone-900 dark:text-white block">Third Office</b>
-                <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed font-medium">
+                <b className="text-lg font-bold text-stone-900 dark:text-white block group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors duration-300">Third Office</b>
+                <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed font-medium group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors duration-300">
                   IndiQube Pearl, Mindspace Road, Gachibowli, Hyderabad, Telangana 500032
                 </p>
-              </article>
+              </a>
             </div>
 
           </div>

@@ -147,12 +147,13 @@ const AuthPage: React.FC = () => {
 
       {/* Animated Lighthouse Area */}
       <div className="auth-lighthouse-area" aria-hidden="true">
-        <div className="auth-beam auth-beam-1" />
-        <div className="auth-beam auth-beam-2" />
-        <div className="auth-beam auth-beam-3" />
-        <div className="auth-lamp-glow" />
-
         <div className="auth-lighthouse">
+          {/* Light Beams & Glow emitting directly from lantern */}
+          <div className="auth-lamp-glow" />
+          <div className="auth-beam auth-beam-1" />
+          <div className="auth-beam auth-beam-2" />
+          <div className="auth-beam auth-beam-3" />
+
           <div className="auth-spire" />
           <div className="auth-dome" />
           <div className="auth-lantern">

@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Users, 
-  UserCheck, 
-  Award, 
-  Star, 
-  ArrowRight, 
-  RotateCw, 
-  CheckCircle2, 
-  Clock, 
-  Sparkles, 
-  Briefcase, 
-  ShieldCheck, 
-  FileText, 
-  Send 
+import {
+  Users,
+  UserCheck,
+  Award,
+  Star,
+  ArrowRight,
+  RotateCw,
+  CheckCircle2,
+  Clock,
+  Sparkles,
+  Briefcase,
+  ShieldCheck,
+  FileText,
+  Send
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DashboardLayout from '../../components/layout/DashboardLayout';
@@ -151,14 +151,14 @@ export const HRManagerDashboard: React.FC = () => {
           <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-300 shadow-xs space-y-1">
             <span className="text-[10px] font-extrabold text-indigo-800 uppercase tracking-wider block">Round 2 Selected</span>
             <div className="text-2xl font-black text-indigo-950">{metrics.round2Selected}</div>
-            <div className="text-[10px] text-indigo-800 font-semibold">Passed Technical / Domain</div>
+            <div className="text-[10px] text-indigo-800 font-semibold">Second Round / Domain</div>
           </div>
 
           {/* 10. Round 2 Rejected */}
           <div className="p-4 rounded-2xl bg-red-500/10 border border-red-200 shadow-xs space-y-1">
             <span className="text-[10px] font-extrabold text-red-800 uppercase tracking-wider block">Round 2 Rejected</span>
             <div className="text-2xl font-black text-red-950">{metrics.round2Rejected}</div>
-            <div className="text-[10px] text-red-800 font-semibold">Technical Round Disqualified</div>
+            <div className="text-[10px] text-red-800 font-semibold">Second Round Disqualified</div>
           </div>
 
           {/* 11. Final Round Selected (Ready for Offer) */}
