@@ -123,7 +123,7 @@ const testimonials = [
     featured: false,
     quote:
       'The work environment at the Hyderabad office is super supportive and energetic. Management genuinely values freshers, providing 1-on-1 counseling training with zero toxic pressure and high uncapped weekly incentives.',
-    name: 'Ritesh',
+    name: 'Gaurav Kumar',
     role: 'Senior Academic Counselor',
     growth: '₹45K+ Monthly Incentives',
   },
@@ -131,7 +131,7 @@ const testimonials = [
     featured: false,
     quote:
       'Hands-on learning with direct access to founders. Every target achieved is celebrated with Friday team games, cricket matches, and instant rewards. Best culture for anyone wanting fast corporate sales and leadership exposure.',
-    name: 'Rishu',
+    name: 'Harry',
     role: 'Business Development Specialist',
     growth: 'Top Performer Award',
   },
