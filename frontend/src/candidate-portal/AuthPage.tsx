@@ -5,6 +5,8 @@ import logo from '../assets/adyapan-logo.png';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 
+import SiteShell from '../components/layout/SiteShell';
+
 const AuthPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -125,34 +127,23 @@ const AuthPage: React.FC = () => {
   };
 
   return (
-    <div
-      className={`auth-scene auth-signin ${reveal ? 'auth-revealed' : ''}`}
-      onClick={handleSceneClick}
-    >
-      <div className="auth-stars" aria-hidden="true" />
-      <div className="auth-haze" aria-hidden="true" />
-
-      {/* Brand Top Left */}
-      <Link to="/" className="auth-scene-brand" aria-label="Adyapan Hiring home">
-        <img src={logo} alt="Adyapan" />
-        <span>
-          Adyapan <b>Hiring</b>
-        </span>
-      </Link>
-
-      {/* Back Button Top Right */}
-      <button type="button" className="auth-back" onClick={goBack} aria-label="Go back to previous page">
-        <span aria-hidden="true">←</span> Go back
-      </button>
+    <SiteShell>
+      <div
+        className={`auth-scene auth-signin ${reveal ? 'auth-revealed' : ''}`}
+        onClick={handleSceneClick}
+      >
+        <div className="auth-stars" aria-hidden="true" />
+        <div className="auth-haze" aria-hidden="true" />
 
       {/* Animated Lighthouse Area */}
       <div className="auth-lighthouse-area" aria-hidden="true">
-        <div className="auth-beam auth-beam-1" />
-        <div className="auth-beam auth-beam-2" />
-        <div className="auth-beam auth-beam-3" />
-        <div className="auth-lamp-glow" />
-
         <div className="auth-lighthouse">
+          {/* Light Beams & Glow emitting directly from lantern */}
+          <div className="auth-lamp-glow" />
+          <div className="auth-beam auth-beam-1" />
+          <div className="auth-beam auth-beam-2" />
+          <div className="auth-beam auth-beam-3" />
+
           <div className="auth-spire" />
           <div className="auth-dome" />
           <div className="auth-lantern">
@@ -265,6 +256,7 @@ const AuthPage: React.FC = () => {
         </div>
       </div>
     </div>
+    </SiteShell>
   );
 };
 

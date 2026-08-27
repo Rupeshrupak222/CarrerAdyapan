@@ -393,7 +393,18 @@ export const PublicJobs: React.FC = () => {
 
       const matchesQuery = !q || term.includes(q);
       const matchesLocation =
-        !locationFilter || location.toLowerCase().includes(locationFilter.toLowerCase().trim());
+        !locationFilter ||
+        location.toLowerCase().includes(locationFilter.toLowerCase().trim()) ||
+        (locationFilter.toLowerCase() === 'india' && (
+          location.toLowerCase().includes('hyderabad') ||
+          location.toLowerCase().includes('bangalore') ||
+          location.toLowerCase().includes('bengaluru') ||
+          location.toLowerCase().includes('delhi') ||
+          location.toLowerCase().includes('mumbai') ||
+          location.toLowerCase().includes('pune') ||
+          location.toLowerCase().includes('india') ||
+          location.toLowerCase().includes('remote')
+        ));
 
       const matchesExpDrop =
         !experienceDropdown || matchExp(experienceDropdown, j.experience, j.rawExperience);
@@ -486,61 +497,64 @@ export const PublicJobs: React.FC = () => {
                   Discover high-impact roles across tech, sales, growth, operations, and leadership. Experience instant AI ATS resume screening, direct founder access, uncapped incentives, and fast-track promotions.
                 </p>
 
-                {/* ── LARGE SEARCH BAR (ROUNDED CONTAINER WITH DROPDOWNS) ── */}
-                <div className="bg-white dark:bg-stone-900 p-2.5 sm:p-3 rounded-3xl border border-stone-200/90 dark:border-stone-800 shadow-2xl space-y-2">
-                  <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2">
+                {/* ── SLEEK & COMPACT SEARCH BAR ── */}
+                <div className="bg-white dark:bg-stone-900 p-2 sm:p-2.5 rounded-2xl border border-stone-200/90 dark:border-stone-800 shadow-xl space-y-2 max-w-xl">
+                  {/* Tier 1: Compact Search Input */}
+                  <div className="flex items-center gap-2.5 px-3.5 py-2 bg-stone-50 dark:bg-stone-800/90 border border-stone-200 dark:border-stone-700 rounded-xl focus-within:border-amber-500 focus-within:bg-white dark:focus-within:bg-stone-800 focus-within:ring-2 focus-within:ring-amber-500/20 transition-all shadow-xs">
+                    <Search size={17} className="text-amber-500 flex-shrink-0" />
+                    <input
+                      type="text"
+                      value={query}
+                      onChange={(e) => {
+                        setQuery(e.target.value);
+                        setCurrentPage(1);
+                      }}
+                      placeholder="Search job title, skills, keywords..."
+                      className="w-full min-w-0 flex-1 bg-transparent text-xs sm:text-sm font-semibold text-stone-950 dark:text-white placeholder:text-stone-400 dark:placeholder:text-stone-400 focus:outline-none caret-amber-500"
+                    />
+                    {query && (
+                      <button
+                        type="button"
+                        onClick={() => setQuery('')}
+                        className="text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 p-0.5 cursor-pointer flex-shrink-0"
+                        title="Clear search"
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
+                  </div>
 
-                    {/* Search Input */}
-                    <div className="flex items-center gap-3 px-4 py-2.5 flex-1 bg-stone-100 dark:bg-stone-800 border border-stone-200/60 dark:border-stone-700 rounded-2xl">
-                      <Search size={19} className="text-amber-500 flex-shrink-0" />
-                      <input
-                        type="text"
-                        value={query}
-                        onChange={(e) => {
-                          setQuery(e.target.value);
-                          setCurrentPage(1);
-                        }}
-                        placeholder="Search job title, skills or company..."
-                        className="w-full bg-transparent text-xs sm:text-sm font-semibold text-stone-900 dark:text-white outline-none placeholder:text-stone-400 dark:placeholder:text-stone-400"
-                      />
-                      {query && (
-                        <button
-                          onClick={() => setQuery('')}
-                          className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 p-1 cursor-pointer"
-                        >
-                          <X size={15} />
-                        </button>
-                      )}
-                    </div>
-
+                  {/* Tier 2: Compact Filters & Search Action Button */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                     {/* Location Dropdown */}
-                    <div className="flex items-center gap-2 px-3.5 py-2.5 bg-stone-100 dark:bg-stone-800 border border-stone-200/60 dark:border-stone-700 rounded-2xl">
-                      <MapPin size={16} className="text-amber-500 flex-shrink-0" />
+                    <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg">
+                      <MapPin size={13} className="text-amber-500 flex-shrink-0" />
                       <select
                         value={locationFilter}
                         onChange={(e) => {
                           setLocationFilter(e.target.value);
                           setCurrentPage(1);
                         }}
-                        className="bg-transparent text-xs font-bold text-stone-800 dark:text-stone-100 outline-none cursor-pointer pr-2"
+                        className="w-full bg-transparent text-xs font-semibold text-stone-800 dark:text-stone-100 outline-none cursor-pointer"
                       >
                         <option value="" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Location</option>
                         <option value="Hyderabad" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Hyderabad</option>
                         <option value="Bangalore" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Bangalore</option>
+                        <option value="India" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">India</option>
                         <option value="Remote" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Remote</option>
                       </select>
                     </div>
 
                     {/* Experience Dropdown */}
-                    <div className="hidden sm:flex items-center gap-2 px-3.5 py-2.5 bg-stone-100 dark:bg-stone-800 border border-stone-200/60 dark:border-stone-700 rounded-2xl">
-                      <Briefcase size={16} className="text-amber-500 flex-shrink-0" />
+                    <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg">
+                      <Briefcase size={13} className="text-amber-500 flex-shrink-0" />
                       <select
                         value={experienceDropdown}
                         onChange={(e) => {
                           setExperienceDropdown(e.target.value);
                           setCurrentPage(1);
                         }}
-                        className="bg-transparent text-xs font-bold text-stone-800 dark:text-stone-100 outline-none cursor-pointer pr-2"
+                        className="w-full bg-transparent text-xs font-semibold text-stone-800 dark:text-stone-100 outline-none cursor-pointer"
                       >
                         <option value="" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Experience</option>
                         <option value="Fresher" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Fresher</option>
@@ -552,15 +566,15 @@ export const PublicJobs: React.FC = () => {
                     </div>
 
                     {/* Job Type Dropdown */}
-                    <div className="hidden md:flex items-center gap-2 px-3.5 py-2.5 bg-stone-100 dark:bg-stone-800 border border-stone-200/60 dark:border-stone-700 rounded-2xl">
-                      <Clock3 size={16} className="text-amber-500 flex-shrink-0" />
+                    <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg">
+                      <Clock3 size={13} className="text-amber-500 flex-shrink-0" />
                       <select
                         value={typeDropdown}
                         onChange={(e) => {
                           setTypeDropdown(e.target.value);
                           setCurrentPage(1);
                         }}
-                        className="bg-transparent text-xs font-bold text-stone-800 dark:text-stone-100 outline-none cursor-pointer pr-2"
+                        className="w-full bg-transparent text-xs font-semibold text-stone-800 dark:text-stone-100 outline-none cursor-pointer"
                       >
                         <option value="" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Job Type</option>
                         <option value="Full Time" className="bg-white dark:bg-stone-900 text-stone-900 dark:text-white">Full Time</option>
@@ -572,11 +586,12 @@ export const PublicJobs: React.FC = () => {
 
                     {/* Search CTA Button */}
                     <button
+                      type="button"
                       onClick={() => setCurrentPage(1)}
-                      className="px-7 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs sm:text-sm shadow-xl shadow-amber-500/25 hover:scale-105 transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs shadow-sm hover:scale-[1.02] transition-all flex items-center justify-center gap-1 cursor-pointer"
                     >
-                      <span>Search Jobs</span>
-                      <ArrowRight size={15} />
+                      <span>Search</span>
+                      <ArrowRight size={13} />
                     </button>
                   </div>
                 </div>
@@ -669,12 +684,12 @@ export const PublicJobs: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
               {/* ── LEFT COLUMN: 280PX FILTER SIDEBAR (4 Cols / 280px) ── */}
-              <div className="lg:col-span-4 xl:col-span-3 space-y-4">
+              <div className="lg:col-span-4 xl:col-span-3">
 
                 {/* Mobile Filter Toggle Trigger */}
                 <button
                   onClick={() => setShowMobileFilters(!showMobileFilters)}
-                  className="lg:hidden w-full py-3 px-4 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200/90 dark:border-stone-800 font-bold text-xs flex items-center justify-between shadow-md text-stone-900 dark:text-white cursor-pointer"
+                  className="lg:hidden w-full mb-4 py-3 px-4 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200/90 dark:border-stone-800 font-bold text-xs flex items-center justify-between shadow-md text-stone-900 dark:text-white cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
                     <SlidersHorizontal size={16} className="text-amber-500" />
@@ -683,8 +698,9 @@ export const PublicJobs: React.FC = () => {
                   <span className="text-amber-500 text-xs font-extrabold">{showMobileFilters ? 'Hide ▲' : 'Show ▼'}</span>
                 </button>
 
-                {/* Filter Control Box */}
-                <div className={`bg-white dark:bg-stone-900 p-6 rounded-3xl border border-stone-200/80 dark:border-stone-800 shadow-lg space-y-6 ${showMobileFilters ? 'block' : 'hidden lg:block'}`}>
+                <div className="space-y-4">
+                  {/* Filter Control Box */}
+                  <div className={`bg-white dark:bg-stone-900 p-6 rounded-3xl border border-stone-200/80 dark:border-stone-800 shadow-sm space-y-6 ${showMobileFilters ? 'block' : 'hidden lg:block'}`}>
                   <div className="flex items-center justify-between pb-4 border-b border-stone-100 dark:border-stone-800">
                     <span className="font-bold text-base text-stone-900 dark:text-white flex items-center gap-2">
                       <SlidersHorizontal size={18} className="text-amber-500" />
@@ -839,6 +855,7 @@ export const PublicJobs: React.FC = () => {
                   </div>
                 </div>
 
+                </div>
               </div>
 
               {/* ── RIGHT COLUMN: JOB RESULTS HEADER & DYNAMIC CARDS (8-9 Cols) ── */}

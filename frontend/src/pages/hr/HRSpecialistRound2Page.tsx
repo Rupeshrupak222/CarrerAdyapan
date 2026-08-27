@@ -117,6 +117,13 @@ export const HRSpecialistRound2Page: React.FC = () => {
   // Open Evaluation Modal (Locks if already completed)
   const handleOpenEvaluation = (app: any) => {
     const round2Interview = app.interviews?.find((i: any) => i.roundNumber === 2);
+    
+    // Block evaluation if interview is not scheduled yet
+    if (!round2Interview || (!round2Interview.scheduledAt && round2Interview.status !== 'COMPLETED' && round2Interview.status !== 'SCHEDULED')) {
+      toast.error('Interview is not scheduled yet. Please schedule Round 2 first before evaluating.');
+      return;
+    }
+
     const isAlreadyEvaluated = app.status === 'ROUND_2_SELECTED' || app.status === 'ROUND_2_REJECTED' || app.status === 'FINAL_SELECTED' || app.status === 'FINAL_ROUND' || app.status === 'OFFER_SENT' || app.status === 'JOINED' || round2Interview?.status === 'COMPLETED';
 
     setSelectedApp(app);
@@ -345,16 +352,24 @@ export const HRSpecialistRound2Page: React.FC = () => {
                             {isPassed || isRejected || round2Iv?.status === 'COMPLETED' ? (
                               <button
                                 onClick={() => handleOpenEvaluation(app)}
-                                className="px-3 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-extrabold text-xs border border-emerald-300 shadow-2xs inline-flex items-center gap-1"
+                                className="px-3 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-extrabold text-xs border border-emerald-300 shadow-2xs inline-flex items-center gap-1 cursor-pointer"
                                 title="Evaluation completed - Click to view scorecard"
                               >
                                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                                 <span>Evaluated</span>
                               </button>
-                            ) : (
+                            ) : (round2Iv && (round2Iv.scheduledAt || round2Iv.status === 'SCHEDULED')) ? (
                               <button
                                 onClick={() => handleOpenEvaluation(app)}
-                                className="px-3.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs shadow-xs"
+                                className="px-3.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs shadow-xs cursor-pointer"
+                              >
+                                Evaluate
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => toast.error('Interview is not scheduled yet. Please schedule Round 2 first before evaluating.')}
+                                className="px-3.5 py-1 rounded-lg bg-slate-100 text-slate-400 font-bold text-xs border border-slate-200 cursor-not-allowed"
+                                title="Interview not scheduled yet - Please schedule Round 2 first"
                               >
                                 Evaluate
                               </button>

@@ -61,8 +61,9 @@ export const getAllApplications = async (req, res) => {
 
     const where: any = {};
 
-    // RBAC: HR can ONLY see their assigned candidates!
-    if (user && user.role === 'HR') {
+    // RBAC: HR can ONLY see their assigned candidates (unless Veena who has special Screening & Workload permissions)
+    const isVeena = user?.email?.toLowerCase()?.includes('veena') || user?.name?.toLowerCase()?.includes('veena');
+    if (user && user.role === 'HR' && !isVeena) {
       where.assignedHrId = user.id;
     } else if (assignedHrId && assignedHrId !== 'ALL') {
       where.assignedHrId = String(assignedHrId);
@@ -1202,21 +1203,27 @@ export const sendOfficialOffer = async (req, res) => {
     const finalJobTitle = customJobTitle || app.job?.title || 'COMMUNITY DEVELOPMENT INTERN';
     const finalJoiningDate = trainingStartDate || joiningDate || new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0];
 
+    const existingOfferDetails: any = (typeof app.offer?.offerDetails === 'object' && app.offer?.offerDetails !== null)
+      ? app.offer.offerDetails
+      : {};
+
+    const resolvedOlNo = olNo || existingOfferDetails.olNo || app.candidateCode || 'ADP0428';
+
     const offerDetailsPayload = {
-      olNo: olNo || 'ADP0428',
-      offerDate: offerDate || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-'),
+      olNo: resolvedOlNo,
+      offerDate: offerDate || existingOfferDetails.offerDate || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-'),
       candidateName: candName,
       jobTitle: finalJobTitle,
-      duration: duration || '6 MONTHS',
-      trainingStartDate: finalJoiningDate,
-      trainingEndDate: trainingEndDate || '06-Jun-2026',
-      ojtStartDate: ojtStartDate || '07-Jun-2026',
-      ojtEndDate: ojtEndDate || '07-Dec-2026',
-      location: location || 'HYDERABAD',
-      stipend: stipend || 'INR 20000/-PerMonth',
-      incentives: incentives || 'Up to 10,000/- INCENTIVES.',
-      postProbationCtc: postProbationCtc || '₹8 LPA ( 6 Fixed + 2 Variable )',
-      reportingDate: reportingDate || finalJoiningDate,
+      duration: duration || existingOfferDetails.duration || '6 MONTHS',
+      trainingStartDate: trainingStartDate || existingOfferDetails.trainingStartDate || finalJoiningDate,
+      trainingEndDate: trainingEndDate || existingOfferDetails.trainingEndDate || '15-Sep-2026',
+      ojtStartDate: ojtStartDate || existingOfferDetails.ojtStartDate || '16-Sep-2026',
+      ojtEndDate: ojtEndDate || existingOfferDetails.ojtEndDate || '16-Mar-2027',
+      location: location || existingOfferDetails.location || 'HYDERABAD',
+      stipend: stipend || existingOfferDetails.stipend || 'INR 20000/-PerMonth',
+      incentives: incentives || existingOfferDetails.incentives || 'Up to 10,000/- INCENTIVES.',
+      postProbationCtc: postProbationCtc || existingOfferDetails.postProbationCtc || '₹8 LPA ( 6 Fixed + 2 Variable )',
+      reportingDate: reportingDate || existingOfferDetails.reportingDate || finalJoiningDate,
       customTerms,
       message,
     };
@@ -1288,12 +1295,558 @@ export const sendOfficialOffer = async (req, res) => {
 
     return res.json({
       success: true,
-      message: `Official Offer Letter successfully released and emailed to ${candName} (${candEmail}) with 4-Page PDF attachment!`,
+      message: `Official Offer Letter (${offerDetailsPayload.olNo}) successfully released and emailed to ${candName} (${candEmail}) with 4-Page PDF attachment!`,
       offer,
     });
   } catch (error: any) {
     console.error('Send Official Offer Error:', error);
     return res.status(500).json({ success: false, message: 'Failed to release official offer: ' + error.message });
+  }
+};
+
+/**
+ * Save Offer Details / Draft without releasing / sending email
+ */
+export const saveOfficialOfferDraft = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { 
+      olNo,
+      offerDate,
+      candidateName: customCandidateName,
+      jobTitle: customJobTitle,
+      duration,
+      trainingStartDate,
+      trainingEndDate,
+      ojtStartDate,
+      ojtEndDate,
+      location,
+      stipend,
+      incentives,
+      postProbationCtc,
+      reportingDate,
+      joiningDate,
+      customTerms,
+      message 
+    } = req.body;
+    const user = req.user;
+
+    const app = await prisma.application.findUnique({
+      where: { id },
+      include: { candidate: true, job: true, offer: true },
+    });
+
+    if (!app) {
+      return res.status(404).json({ success: false, message: 'Application not found' });
+    }
+
+    const candName = customCandidateName || `${app.candidate?.firstName || ''} ${app.candidate?.lastName || ''}`.trim() || 'Candidate';
+    const candEmail = app.candidate?.email;
+    const finalJobTitle = customJobTitle || app.job?.title || 'COMMUNITY DEVELOPMENT INTERN';
+    const finalJoiningDate = trainingStartDate || joiningDate || new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0];
+
+    const existingOfferDetails: any = (typeof app.offer?.offerDetails === 'object' && app.offer?.offerDetails !== null)
+      ? app.offer.offerDetails
+      : {};
+
+    const resolvedOlNo = olNo || existingOfferDetails.olNo || app.candidateCode || 'ADP0428';
+
+    const offerDetailsPayload = {
+      olNo: resolvedOlNo,
+      offerDate: offerDate || existingOfferDetails.offerDate || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-'),
+      candidateName: candName,
+      jobTitle: finalJobTitle,
+      duration: duration || existingOfferDetails.duration || '6 MONTHS',
+      trainingStartDate: trainingStartDate || existingOfferDetails.trainingStartDate || finalJoiningDate,
+      trainingEndDate: trainingEndDate || existingOfferDetails.trainingEndDate || '15-Sep-2026',
+      ojtStartDate: ojtStartDate || existingOfferDetails.ojtStartDate || '16-Sep-2026',
+      ojtEndDate: ojtEndDate || existingOfferDetails.ojtEndDate || '16-Mar-2027',
+      location: location || existingOfferDetails.location || 'HYDERABAD',
+      stipend: stipend || existingOfferDetails.stipend || 'INR 20000/-PerMonth',
+      incentives: incentives || existingOfferDetails.incentives || 'Up to 10,000/- INCENTIVES.',
+      postProbationCtc: postProbationCtc || existingOfferDetails.postProbationCtc || '₹8 LPA ( 6 Fixed + 2 Variable )',
+      reportingDate: reportingDate || existingOfferDetails.reportingDate || finalJoiningDate,
+      customTerms,
+      message,
+    };
+
+    const numericSalary = parseFloat(String(stipend).replace(/[^0-9.]/g, '')) || 20000;
+    const existingStatus = app.offer?.status || 'DRAFT';
+
+    // Create / Update Offer Record in Database
+    const offer = await prisma.offer.upsert({
+      where: { applicationId: id },
+      update: {
+        candidateName: candName,
+        jobTitle: finalJobTitle,
+        salary: numericSalary,
+        joiningDate: new Date(finalJoiningDate),
+        status: existingStatus,
+        managerApproved: true,
+        approvedBy: user?.name || user?.id,
+        approvedAt: new Date(),
+        customTerms: customTerms || message || `Stipend: ${stipend}, Location: ${location}`,
+        offerDetails: offerDetailsPayload,
+      },
+      create: {
+        applicationId: id,
+        candidateId: app.candidateId,
+        candidateName: candName,
+        candidateEmail: candEmail,
+        jobTitle: finalJobTitle,
+        salary: numericSalary,
+        joiningDate: new Date(finalJoiningDate),
+        status: 'DRAFT',
+        managerApproved: true,
+        approvedBy: user?.name || user?.id,
+        approvedAt: new Date(),
+        customTerms: customTerms || message || `Stipend: ${stipend}, Location: ${location}`,
+        offerDetails: offerDetailsPayload,
+      },
+    });
+
+    await auditService.log({
+      userId: user?.id,
+      userRole: user?.role,
+      userName: user?.name,
+      action: 'OFFER_DRAFT_SAVED',
+      entity: 'Application',
+      entityId: id,
+      newValue: {
+        candidateName: candName,
+        jobTitle: finalJobTitle,
+        olNo: offerDetailsPayload.olNo,
+      },
+    });
+
+    return res.json({
+      success: true,
+      message: `Offer details saved successfully in database for ${candName}!`,
+      offer,
+    });
+  } catch (error: any) {
+    console.error('Save Offer Draft Error:', error);
+    return res.status(500).json({ success: false, message: 'Failed to save offer details: ' + error.message });
+  }
+};
+
+/**
+ * Helper to parse and generate candidate code / ID list from a range
+ */
+const parseIdRange = (fromId: string, toId: string) => {
+  const f = (fromId || '').trim();
+  const t = (toId || '').trim();
+
+  const startMatch = f.match(/^(.*?)(\d+)$/);
+  const endMatch = t.match(/^(.*?)(\d+)$/);
+
+  if (startMatch && endMatch) {
+    const prefix = startMatch[1];
+    const padLen = startMatch[2].length;
+    let startNum = parseInt(startMatch[2], 10);
+    let endNum = parseInt(endMatch[2], 10);
+
+    if (startNum > endNum) {
+      const temp = startNum;
+      startNum = endNum;
+      endNum = temp;
+    }
+
+    // Limit range to max 200 per batch for safety
+    if (endNum - startNum > 200) {
+      endNum = startNum + 200;
+    }
+
+    const codes = new Set<string>();
+    for (let i = startNum; i <= endNum; i++) {
+      // Add padded version: e.g. CAND-001 or CAND-000001
+      codes.add(`${prefix}${String(i).padStart(padLen, '0')}`);
+      // Add standard 3-digit padded version if different
+      codes.add(`${prefix}${String(i).padStart(3, '0')}`);
+      // Add standard 6-digit padded version if different
+      codes.add(`${prefix}${String(i).padStart(6, '0')}`);
+      // Add non-padded version
+      codes.add(`${prefix}${i}`);
+    }
+
+    return {
+      prefix,
+      startNum,
+      endNum,
+      totalExpected: endNum - startNum + 1,
+      targetCodes: Array.from(codes),
+    };
+  }
+
+  return {
+    prefix: '',
+    startNum: 0,
+    endNum: 0,
+    totalExpected: f ? 1 : 0,
+    targetCodes: [f, t].filter(Boolean),
+  };
+};
+
+/**
+ * Preview Bulk Offer Eligibility by ID Range
+ */
+export const getBulkOfferRangePreview = async (req, res) => {
+  try {
+    const { fromId, toId } = req.body;
+
+    if (!fromId || !toId) {
+      return res.status(400).json({ success: false, message: 'Please provide both From ID and To ID range.' });
+    }
+
+    const { targetCodes, totalExpected } = parseIdRange(fromId, toId);
+
+    // Fetch all matching applications
+    const applications = await prisma.application.findMany({
+      where: {
+        OR: [
+          { candidateCode: { in: targetCodes } },
+          { id: { in: targetCodes } },
+          { candidate: { candidateCode: { in: targetCodes } } },
+        ],
+      },
+      include: {
+        candidate: true,
+        job: true,
+        offer: true,
+        assignedHr: { select: { id: true, name: true, email: true } },
+      },
+      orderBy: { candidateCode: 'asc' },
+    });
+
+    const candidateList = applications.map((app) => {
+      const cand = app.candidate || {};
+      const candName = `${cand.firstName || ''} ${cand.lastName || ''}`.trim() || 'Candidate';
+      const code = app.candidateCode || cand.candidateCode || app.id?.slice(0, 10) || 'APP-2026';
+
+      const isAlreadyOffered = 
+        app.status === 'OFFER_SENT' || 
+        app.status === 'OFFER_ACCEPTED' || 
+        app.status === 'OFFER_RELEASED' || 
+        app.offer?.status === 'SENT' || 
+        app.offer?.status === 'ACCEPTED';
+
+      const isRejectedOrWithdrawn = 
+        ['REJECTED', 'ROUND_1_REJECTED', 'ROUND_2_REJECTED', 'WITHDRAWN'].includes(app.status);
+
+      const isFinalRoundCleared = 
+        app.finalSelected === true || 
+        app.managerApproved === true || 
+        ['FINAL_ROUND', 'ROUND_2_SELECTED', 'FINAL_SELECTED'].includes(app.status) || 
+        app.currentRound >= 2;
+
+      const hasValidEmail = Boolean(cand.email && cand.email.includes('@') && !cand.email.includes('example.com'));
+
+      let offerStatus: 'READY' | 'ALREADY_OFFERED' | 'INELIGIBLE' = 'INELIGIBLE';
+      let reason = '';
+
+      if (isAlreadyOffered) {
+        offerStatus = 'ALREADY_OFFERED';
+        reason = 'Offer already released / active';
+      } else if (isRejectedOrWithdrawn) {
+        offerStatus = 'INELIGIBLE';
+        reason = `Candidate status is ${app.status}`;
+      } else if (!hasValidEmail) {
+        offerStatus = 'INELIGIBLE';
+        reason = 'Missing or invalid candidate email address';
+      } else if (isFinalRoundCleared) {
+        offerStatus = 'READY';
+        reason = 'Final round cleared & ready for offer';
+      } else {
+        offerStatus = 'INELIGIBLE';
+        reason = 'Candidate has not cleared final round selection yet';
+      }
+
+      return {
+        id: app.id,
+        candidateId: app.candidateId,
+        candidateCode: code,
+        candidateName: candName,
+        email: cand.email || 'N/A',
+        jobTitle: app.job?.title || 'Open Position',
+        currentStatus: app.status,
+        offerStatus,
+        reason,
+      };
+    });
+
+    const eligibleCount = candidateList.filter((c) => c.offerStatus === 'READY').length;
+    const alreadyOfferedCount = candidateList.filter((c) => c.offerStatus === 'ALREADY_OFFERED').length;
+    const ineligibleCount = candidateList.filter((c) => c.offerStatus === 'INELIGIBLE').length;
+
+    return res.json({
+      success: true,
+      fromId,
+      toId,
+      totalExpected,
+      totalFound: applications.length,
+      eligibleCount,
+      alreadyOfferedCount,
+      ineligibleCount,
+      candidates: candidateList,
+    });
+  } catch (error: any) {
+    console.error('Bulk Offer Preview Error:', error);
+    return res.status(500).json({ success: false, message: 'Failed to generate bulk offer preview: ' + error.message });
+  }
+};
+
+/**
+ * Execute Bulk Offer Send by ID Range
+ */
+export const executeBulkOfferSend = async (req, res) => {
+  try {
+    const { fromId, toId, commonOfferData = {}, candidateIdsToProcess = [] } = req.body;
+    const user = req.user;
+
+    const { targetCodes } = parseIdRange(fromId || '', toId || '');
+
+    const whereQuery: any = {};
+    if (candidateIdsToProcess && Array.isArray(candidateIdsToProcess) && candidateIdsToProcess.length > 0) {
+      whereQuery.id = { in: candidateIdsToProcess };
+    } else {
+      whereQuery.OR = [
+        { id: { in: targetCodes } },
+        { candidateCode: { in: targetCodes } },
+        { candidate: { candidateCode: { in: targetCodes } } },
+      ];
+    }
+
+    // Query candidates in range or by selected IDs
+    const applications = await prisma.application.findMany({
+      where: whereQuery,
+      include: {
+        candidate: true,
+        job: true,
+        offer: true,
+      },
+      orderBy: { candidateCode: 'asc' },
+    });
+
+    if (applications.length === 0) {
+      return res.status(404).json({ success: false, message: 'No candidates found in the specified ID range.' });
+    }
+
+    const {
+      offerDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-'),
+      jobTitle: commonJobTitle,
+      duration = '6 MONTHS',
+      joiningDate = '01-Sep-2026',
+      trainingStartDate = '01-Sep-2026',
+      trainingEndDate = '15-Sep-2026',
+      ojtStartDate = '16-Sep-2026',
+      ojtEndDate = '16-Mar-2027',
+      location = 'HYDERABAD',
+      stipend = 'INR 20000/-PerMonth',
+      incentives = 'Up to 10,000/- INCENTIVES.',
+      postProbationCtc = '₹8 LPA ( 6 Fixed + 2 Variable )',
+      reportingDate = '01-Sep-2026',
+      customTerms = '',
+      hrManagerName = user?.name || 'HR MANAGER',
+      hrEmail = 'hr@adyapan.com',
+      hrPhone = '8179124566',
+      companyWebsite = 'www.adyapan.com',
+    } = commonOfferData;
+
+    // Count existing offers in DB to generate unique sequential offer numbers
+    const existingOfferCount = await prisma.offer.count();
+    const currentYear = new Date().getFullYear();
+
+    const results: any[] = [];
+    let successCount = 0;
+    let failedCount = 0;
+
+    const { sendOfferLetterEmail } = await import('../services/emailService.js');
+
+    for (let index = 0; index < applications.length; index++) {
+      const app = applications[index];
+      const cand = app.candidate || {};
+      const candName = `${cand.firstName || ''} ${cand.lastName || ''}`.trim() || 'Candidate';
+      const candCode = app.candidateCode || cand.candidateCode || `CAND-${index + 1}`;
+      const candEmail = cand.email;
+
+      // 1. Backend Duplicate & Eligibility Protection
+      const isAlreadyOffered = 
+        app.status === 'OFFER_SENT' || 
+        app.status === 'OFFER_ACCEPTED' || 
+        app.status === 'OFFER_RELEASED' || 
+        app.offer?.status === 'SENT' || 
+        app.offer?.status === 'ACCEPTED';
+
+      const isRejected = ['REJECTED', 'ROUND_1_REJECTED', 'ROUND_2_REJECTED', 'WITHDRAWN'].includes(app.status);
+
+      if (isAlreadyOffered) {
+        results.push({
+          id: app.id,
+          candidateCode: candCode,
+          candidateName: candName,
+          email: candEmail || 'N/A',
+          status: 'SKIPPED',
+          reason: 'Candidate already has an active offer released (duplicate protection).',
+        });
+        continue;
+      }
+
+      if (isRejected) {
+        results.push({
+          id: app.id,
+          candidateCode: candCode,
+          candidateName: candName,
+          email: candEmail || 'N/A',
+          status: 'FAILED',
+          reason: `Candidate status is ${app.status} (ineligible).`,
+        });
+        failedCount++;
+        continue;
+      }
+
+      if (!candEmail || !candEmail.includes('@') || candEmail.includes('example.com')) {
+        results.push({
+          id: app.id,
+          candidateCode: candCode,
+          candidateName: candName,
+          email: candEmail || 'N/A',
+          status: 'FAILED',
+          reason: 'Candidate has no valid email address to dispatch offer.',
+        });
+        failedCount++;
+        continue;
+      }
+
+      // Preserve candidate's saved olNo if available, otherwise generate sequential offer number
+      const existingOfferDetails: any = (typeof app.offer?.offerDetails === 'object' && app.offer?.offerDetails !== null)
+        ? app.offer.offerDetails
+        : {};
+      const uniqueSeq = String(existingOfferCount + index + 1).padStart(4, '0');
+      const uniqueOlNo = existingOfferDetails.olNo || app.candidateCode || `ADP-${currentYear}-${uniqueSeq}`;
+      const finalJobTitle = commonJobTitle || app.job?.title || 'COMMUNITY DEVELOPMENT INTERN';
+      const finalJoining = joiningDate || trainingStartDate;
+
+      const candidateOfferPayload = {
+        olNo: uniqueOlNo,
+        offerDate: offerDate || existingOfferDetails.offerDate,
+        candidateName: candName,
+        jobTitle: finalJobTitle,
+        duration: duration || existingOfferDetails.duration || '6 MONTHS',
+        trainingStartDate: finalJoining,
+        trainingEndDate: trainingEndDate || existingOfferDetails.trainingEndDate,
+        ojtStartDate: ojtStartDate || existingOfferDetails.ojtStartDate,
+        ojtEndDate: ojtEndDate || existingOfferDetails.ojtEndDate,
+        location: location || existingOfferDetails.location || 'HYDERABAD',
+        stipend: stipend || existingOfferDetails.stipend || 'INR 20000/-PerMonth',
+        incentives: incentives || existingOfferDetails.incentives || 'Up to 10,000/- INCENTIVES.',
+        postProbationCtc: postProbationCtc || existingOfferDetails.postProbationCtc || '₹8 LPA ( 6 Fixed + 2 Variable )',
+        reportingDate: reportingDate || existingOfferDetails.reportingDate || finalJoining,
+        customTerms: customTerms || existingOfferDetails.customTerms,
+        hrManagerName,
+        hrEmail,
+        hrPhone,
+        companyWebsite,
+      };
+
+      try {
+        // Create or update offer record in DB
+        const numericSalary = parseFloat(String(stipend).replace(/[^0-9.]/g, '')) || 20000;
+        await prisma.offer.upsert({
+          where: { applicationId: app.id },
+          update: {
+            candidateName: candName,
+            jobTitle: finalJobTitle,
+            salary: numericSalary,
+            joiningDate: new Date(finalJoining),
+            status: 'SENT',
+            managerApproved: true,
+            approvedBy: user?.name || user?.id,
+            approvedAt: new Date(),
+            customTerms: customTerms || `Stipend: ${stipend}, Location: ${location}`,
+            offerDetails: candidateOfferPayload,
+          },
+          create: {
+            applicationId: app.id,
+            candidateId: app.candidateId,
+            candidateName: candName,
+            candidateEmail: candEmail,
+            jobTitle: finalJobTitle,
+            salary: numericSalary,
+            joiningDate: new Date(finalJoining),
+            status: 'SENT',
+            managerApproved: true,
+            approvedBy: user?.name || user?.id,
+            approvedAt: new Date(),
+            customTerms: customTerms || `Stipend: ${stipend}, Location: ${location}`,
+            offerDetails: candidateOfferPayload,
+          },
+        });
+
+        // Update application status
+        await prisma.application.update({
+          where: { id: app.id },
+          data: {
+            status: 'OFFER_SENT',
+            overallStatus: 'OFFER_SENT',
+          },
+        });
+
+        // Dispatch individual personalized offer email with candidate's individual PDF
+        await sendOfferLetterEmail({
+          ...candidateOfferPayload,
+          candidateEmail: candEmail,
+          applicationId: app.id,
+        });
+
+        await auditService.log({
+          userId: user?.id,
+          userRole: user?.role,
+          userName: user?.name,
+          action: 'BULK_OFFER_RELEASED',
+          entity: 'Application',
+          entityId: app.id,
+          newValue: {
+            candidateCode: candCode,
+            candidateName: candName,
+            olNo: uniqueOlNo,
+            jobTitle: finalJobTitle,
+          },
+        });
+
+        results.push({
+          id: app.id,
+          candidateCode: candCode,
+          candidateName: candName,
+          email: candEmail,
+          olNo: uniqueOlNo,
+          status: 'SUCCESS',
+        });
+        successCount++;
+      } catch (sendErr: any) {
+        console.error(`Bulk Offer failed for candidate ${candName} (${candCode}):`, sendErr);
+        results.push({
+          id: app.id,
+          candidateCode: candCode,
+          candidateName: candName,
+          email: candEmail,
+          olNo: uniqueOlNo,
+          status: 'FAILED',
+          reason: sendErr?.message || 'Email delivery or PDF generation failed',
+        });
+        failedCount++;
+      }
+    }
+
+    return res.json({
+      success: true,
+      totalProcessed: applications.length,
+      successCount,
+      failedCount,
+      results,
+    });
+  } catch (error: any) {
+    console.error('Execute Bulk Offer Send Error:', error);
+    return res.status(500).json({ success: false, message: 'Failed to execute bulk offer rollout: ' + error.message });
   }
 };
 

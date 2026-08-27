@@ -156,6 +156,8 @@ const AppRoutes = () => {
       {/* ===== HR SPECIALIST DEDICATED WORKFLOW ROUTES ===== */}
       <Route path="/hr/dashboard" element={<ProtectedRoute><HRDashboard /></ProtectedRoute>} />
       <Route path="/hr/candidates" element={<ProtectedRoute><HRSpecialistCandidatesPage /></ProtectedRoute>} />
+      <Route path="/hr/screening" element={<ProtectedRoute><ScreeningApprovalsPage /></ProtectedRoute>} />
+      <Route path="/hr/workload" element={<ProtectedRoute><WorkloadDistributionPage /></ProtectedRoute>} />
       <Route path="/hr/round-1" element={<ProtectedRoute><HRSpecialistRound1Page /></ProtectedRoute>} />
       <Route path="/hr/round-2" element={<ProtectedRoute><HRSpecialistRound2Page /></ProtectedRoute>} />
       <Route path="/hr/evaluations" element={<ProtectedRoute><HRSpecialistEvaluationsPage /></ProtectedRoute>} />

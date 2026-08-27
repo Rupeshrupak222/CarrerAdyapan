@@ -21,6 +21,9 @@ import {
   getManagerStats,
   getFinalRoundSelected,
   sendOfficialOffer,
+  saveOfficialOfferDraft,
+  getBulkOfferRangePreview,
+  executeBulkOfferSend,
   getCommunicationHistory,
   getHiringReports,
 } from '../controllers/applicationController.js';
@@ -51,6 +54,9 @@ router.get('/workload/stats', getWorkloadStats);
 
 // Final Round Selected & Offer Release
 router.get('/final-selected/list', getFinalRoundSelected);
+router.post('/final-selected/bulk-preview', getBulkOfferRangePreview);
+router.post('/final-selected/bulk-send', executeBulkOfferSend);
+router.post('/:id/save-offer', saveOfficialOfferDraft);
 router.post('/:id/send-offer', sendOfficialOffer);
 router.post('/:id/approve-offer', approveSelectionForOffer);
 

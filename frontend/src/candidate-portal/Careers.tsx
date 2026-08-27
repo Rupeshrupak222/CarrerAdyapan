@@ -113,27 +113,27 @@ const testimonials = [
   {
     featured: true,
     quote:
-      "Started as an Inside Sales Specialist Intern with ₹18K stipend. Within 5 months, the direct mentorship from leadership and the transparent target culture helped me bag a full-time PPO of ₹10 LPA. If you are hungry to perform and grow fast in sales & edtech, Adyapan is the best launchpad.",
-    name: 'Dinesh Kumar Sharma',
+      "Started as an Inside Sales Specialist Intern, and within months, direct mentorship from senior leadership and a merit-driven culture empowered me to secure a full-time career transition. If you are driven to perform, build expertise, and lead in EdTech, Adyapan offers the ideal growth trajectory.",
+    name: 'Renuka Reddy',
     role: 'Inside Sales Specialist (PPO Converted)',
-    growth: 'Intern to Full-Time · ₹10 LPA',
+    growth: 'Intern to Full-Time Transition',
     company: 'Adyapan Edutech Hyderabad Hub',
   },
   {
     featured: false,
     quote:
-      'The work environment at the Hyderabad office is super supportive and energetic. Management genuinely values freshers, providing 1-on-1 counseling training with zero toxic pressure and high uncapped weekly incentives.',
+      'The collaborative environment at the Hyderabad office is energetic, supportive, and growth-oriented. Management genuinely invests in continuous learning, structured mentorship, and cross-functional leadership opportunities.',
     name: 'Gaurav Kumar',
     role: 'Senior Academic Counselor',
-    growth: '₹45K+ Monthly Incentives',
+    growth: 'Promoted to Senior Counselor',
   },
   {
     featured: false,
     quote:
-      'Hands-on learning with direct access to founders. Every target achieved is celebrated with Friday team games, cricket matches, and instant rewards. Best culture for anyone wanting fast corporate sales and leadership exposure.',
+      'Direct access to leadership, transparent goals, and hands-on strategic exposure make working here truly rewarding. Every milestone is recognized, making it the best launchpad for building long-term career leadership.',
     name: 'Harry',
     role: 'Business Development Specialist',
-    growth: 'Top Performer Award',
+    growth: 'Top Performer Recognition',
   },
 ];
 
@@ -1031,7 +1031,7 @@ const Careers: React.FC = () => {
                     </div>
                     <div>
                       <h4 className="font-extrabold text-sm text-stone-900 dark:text-white">Performance Culture</h4>
-                      <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Weekly uncapped cash rewards for winners.</p>
+                      <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Merit-based rewards and fast-track growth for top performers.</p>
                     </div>
                   </div>
                 </div>
@@ -1390,7 +1390,7 @@ const Careers: React.FC = () => {
                       </span>
                       <h3 className="text-xl sm:text-2xl font-bold text-white">Rupesh Kumar Rupak</h3>
                       <p className="text-amber-400 text-sm sm:text-base font-bold tracking-wide mt-1">
-                        Head of Technology
+                        Head of  IT & Technology
                       </p>
                     </div>
                   </div>
@@ -1428,7 +1428,7 @@ const Careers: React.FC = () => {
                   <div className="pt-3 border-t border-amber-200/60 dark:border-stone-800 flex items-center justify-between gap-3">
                     <div>
                       <h4 className="text-sm font-bold text-stone-900 dark:text-white">Rupesh Kumar Rupak</h4>
-                      <p className="text-xs font-bold text-amber-600 dark:text-amber-400">Head of Technology, Adyapan</p>
+                      <p className="text-xs font-bold text-amber-600 dark:text-amber-400">Head of IT & Technology, Adyapan</p>
                     </div>
                   </div>
                 </div>

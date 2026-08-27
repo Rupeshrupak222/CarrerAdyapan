@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  Menu, 
-  User, 
-  LogOut, 
+import {
+  Menu,
+  User,
+  LogOut,
   ChevronDown,
   Video,
   Sparkles,
@@ -102,7 +102,7 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
           {isAdmin && (
             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 text-orange-950 text-xs font-extrabold shadow-2xs">
               <Shield className="w-3.5 h-3.5 text-orange-600" />
-              <span>Admin Super Console</span>
+              <span>Admin Console</span>
             </div>
           )}
           {isManager && (
@@ -118,10 +118,10 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
             </div>
           )}
 
-          <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 text-slate-600 text-[11px] font-semibold border border-slate-200/60">
+          {/* <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 text-slate-600 text-[11px] font-semibold border border-slate-200/60">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <span>ATS Live</span>
-          </div>
+          </div> */}
         </div>
 
         {/* Global Candidate / Job Search */}
@@ -156,11 +156,10 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
         <div className="relative" ref={notifRef}>
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className={`relative p-2 rounded-xl transition-all border ${
-              showNotifications
-                ? 'bg-orange-50 border-orange-300 text-orange-700'
-                : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-600'
-            }`}
+            className={`relative p-2 rounded-xl transition-all border ${showNotifications
+              ? 'bg-orange-50 border-orange-300 text-orange-700'
+              : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-600'
+              }`}
             title="Notifications"
           >
             <Bell className="w-4 h-4" />
@@ -209,11 +208,10 @@ const Navbar = ({ toggleMobileSidebar }: { toggleMobileSidebar?: () => void }) =
                   notifications.map((notif) => (
                     <div
                       key={notif.id}
-                      className={`p-2.5 rounded-xl text-xs transition-colors border ${
-                        notif.isRead
-                          ? 'bg-white border-slate-100 text-slate-600'
-                          : 'bg-orange-50/60 border-orange-200/80 text-slate-900 font-semibold'
-                      }`}
+                      className={`p-2.5 rounded-xl text-xs transition-colors border ${notif.isRead
+                        ? 'bg-white border-slate-100 text-slate-600'
+                        : 'bg-orange-50/60 border-orange-200/80 text-slate-900 font-semibold'
+                        }`}
                     >
                       <p className="text-xs font-bold leading-tight text-slate-900">{notif.title}</p>
                       <p className="text-[11px] text-slate-600 mt-0.5">{notif.message}</p>

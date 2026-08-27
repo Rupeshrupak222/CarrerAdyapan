@@ -4,13 +4,13 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import applicationService from '../../services/applicationService';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
-import { 
-  Users, 
-  UserCheck, 
-  Award, 
-  Briefcase, 
-  RotateCw, 
-  CheckCircle2, 
+import {
+  Users,
+  UserCheck,
+  Award,
+  Briefcase,
+  RotateCw,
+  CheckCircle2,
   ArrowRight,
   Sparkles,
   Zap,
@@ -154,7 +154,7 @@ const Dashboard: React.FC = () => {
           <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-1">
             <span className="text-[10px] font-extrabold text-indigo-600 uppercase tracking-wider block">Round 2</span>
             <div className="text-2xl font-black text-indigo-600">{metrics.round2}</div>
-            <div className="text-[10px] text-slate-500 font-semibold">Technical / Domain</div>
+            <div className="text-[10px] text-slate-500 font-semibold">Secon Round / Domain</div>
           </div>
 
           {/* 9. Final Round Selected */}

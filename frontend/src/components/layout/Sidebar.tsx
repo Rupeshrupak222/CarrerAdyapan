@@ -60,10 +60,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       ];
     }
 
-    // 3. HR SPECIALIST SIDEBAR (Exact Specification)
+    // 3. HR SPECIALIST SIDEBAR (Exact Specification + Veena Special Permissions)
+    const isVeena = user?.email?.toLowerCase().includes('veena') || user?.name?.toLowerCase().includes('veena');
+
     return [
       { path: '/hr/dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
-      { path: '/hr/candidates', label: 'My Candidates', icon: <Users className="w-4 h-4" /> },
+      { path: '/hr/candidates', label: 'My Candidates', icon: <Users className="w-4 h-4 text-orange-600" /> },
+      ...(isVeena ? [
+        { path: '/hr/screening', label: 'Screening & Approvals', icon: <Target className="w-4 h-4" /> },
+        { path: '/hr/workload', label: 'Workload Distribution', icon: <Users className="w-4 h-4" /> },
+      ] : []),
       { path: '/hr/round-1', label: 'Round 1', icon: <CircleDot className="w-4 h-4 text-amber-500" /> },
       { path: '/hr/round-2', label: 'Round 2', icon: <CircleDot className="w-4 h-4 text-blue-500" /> },
       { path: '/hr/evaluations', label: 'Interview Evaluations', icon: <FileCheck className="w-4 h-4" /> },

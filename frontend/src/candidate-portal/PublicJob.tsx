@@ -164,20 +164,81 @@ export const PublicJob: React.FC = () => {
     } catch { }
   };
 
+  const generateJobShareText = () => {
+    const publicUrl = window.location.href;
+    const cleanSalary = job?.salary ? String(job.salary).replace(/^₹\s*/, '₹') : 'Best in Industry';
+    const cleanLocation = job?.location || 'Bangalore / Hyderabad (On-site)';
+    const cleanExp = job?.experienceLevel || '0-2 Years';
+    const cleanDept = job?.department || 'Sales & Growth';
+    const cleanType = job?.type || 'Full Time';
+
+    let text = `🚀 WE ARE HIRING AT ADYAPAN EDUTECH PVT. LTD.! 🎓\n\n`;
+    text += `📌 Position: ${job?.title || 'Job Opening'}\n`;
+    text += `🏢 Company: ${job?.company || 'Adyapan Edutech Pvt. Ltd.'}\n`;
+    text += `📂 Department: ${cleanDept}\n`;
+    text += `💼 Job Type: ${cleanType}\n`;
+    text += `📍 Location: ${cleanLocation}\n`;
+    text += `🎯 Experience Required: ${cleanExp}\n`;
+    text += `💰 Compensation: ${cleanSalary}\n\n`;
+
+    if (job?.description) {
+      const shortDesc = job.description.replace(/\s+/g, ' ').trim();
+      text += `📖 Role Overview:\n${shortDesc.slice(0, 260)}${shortDesc.length > 260 ? '...' : ''}\n\n`;
+    }
+
+    if (Array.isArray(job?.responsibilities) && job.responsibilities.length > 0) {
+      text += `🔑 Key Responsibilities:\n`;
+      job.responsibilities.slice(0, 4).forEach((r: string) => {
+        text += `• ${r}\n`;
+      });
+      text += `\n`;
+    }
+
+    if (Array.isArray(job?.requirements) && job.requirements.length > 0) {
+      text += `🎓 Key Requirements:\n`;
+      job.requirements.slice(0, 3).forEach((req: string) => {
+        text += `• ${req}\n`;
+      });
+      text += `\n`;
+    }
+
+    text += `⚡ DIRECT APPLICATION LINK (100% Free Application • Zero Fees):\n`;
+    text += `👉 Apply Here: ${publicUrl}\n\n`;
+    text += `#Hiring #JobOpening #AdyapanEdutech #Careers #Jobs #SalesJobs #EdTechJobs`;
+
+    return text;
+  };
+
   const copyShareLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    toast.success('Direct job link copied to clipboard!');
+    const text = generateJobShareText();
+    navigator.clipboard.writeText(text);
+    toast.success('Complete Job Description & Direct Application Link copied!');
   };
 
   const shareLinkedIn = () => {
-    const url = encodeURIComponent(window.location.href);
-    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
+    const text = generateJobShareText();
+    
+    // Auto copy formatted text to clipboard so it's always ready to paste
+    try {
+      navigator.clipboard.writeText(text);
+      toast.success('Complete Job Post copied! Opening LinkedIn...');
+    } catch {
+      toast.success('Opening LinkedIn...');
+    }
+
+    const linkedInUrl = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(text)}`;
+    window.open(linkedInUrl, '_blank');
+  };
+
+  const shareWhatsApp = () => {
+    const text = generateJobShareText();
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
 
   const shareTwitter = () => {
-    const text = encodeURIComponent(`We are hiring: ${job.title} at Adyapan Edutech! Apply here:`);
-    const url = encodeURIComponent(window.location.href);
-    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+    const publicUrl = window.location.href;
+    const tweet = `🚀 We are hiring for ${job.title} at Adyapan Edutech!\n\n📍 ${job.location || 'Bangalore / On-site'} | 💰 ${job.salary || 'Competitive'}\n\n👉 Apply directly here: ${publicUrl}\n\n#Hiring #JobOpening #AdyapanEdutech`;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweet)}`, '_blank');
   };
 
   const applyUrl = `/careers/${job.slug || job.id || slug}/apply`;
@@ -452,22 +513,28 @@ export const PublicJob: React.FC = () => {
                 <span className="font-extrabold text-stone-900 dark:text-white block">
                   Share this opening
                 </span>
-                <div className="flex items-center gap-2.5">
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={shareLinkedIn}
-                    className="flex-1 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-sky-500 hover:text-white text-stone-700 dark:text-stone-300 font-bold transition-all text-center"
+                    className="py-2.5 px-3 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-[#0077b5] hover:text-white text-stone-700 dark:text-stone-300 font-bold transition-all text-center cursor-pointer"
                   >
                     LinkedIn
                   </button>
                   <button
+                    onClick={shareWhatsApp}
+                    className="py-2.5 px-3 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-[#25D366] hover:text-white text-stone-700 dark:text-stone-300 font-bold transition-all text-center cursor-pointer"
+                  >
+                    WhatsApp
+                  </button>
+                  <button
                     onClick={shareTwitter}
-                    className="flex-1 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-950 hover:text-white text-stone-700 dark:text-stone-300 font-bold transition-all text-center"
+                    className="py-2.5 px-3 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-950 hover:text-white text-stone-700 dark:text-stone-300 font-bold transition-all text-center cursor-pointer"
                   >
                     X / Twitter
                   </button>
                   <button
                     onClick={copyShareLink}
-                    className="flex-1 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-amber-500 hover:text-white text-stone-700 dark:text-stone-300 font-bold transition-all text-center"
+                    className="py-2.5 px-3 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-amber-500 hover:text-white text-stone-700 dark:text-stone-300 font-bold transition-all text-center cursor-pointer"
                   >
                     Copy Link
                   </button>
