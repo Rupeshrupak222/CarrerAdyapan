@@ -614,7 +614,21 @@ export const updateInterviewFeedback = async (req, res) => {
       where: { id: req.params.id },
     });
 
-    if (existingInterview && existingInterview.status === 'COMPLETED' && req.user?.role === 'HR') {
+    if (!existingInterview) {
+      return res.status(404).json({
+        success: false,
+        message: 'No scheduled interview record found. Please schedule the interview first before evaluating.',
+      });
+    }
+
+    if (!existingInterview.scheduledAt && existingInterview.status !== 'SCHEDULED' && existingInterview.status !== 'COMPLETED') {
+      return res.status(400).json({
+        success: false,
+        message: 'Interview has not been scheduled yet. Please schedule the interview first before submitting an evaluation.',
+      });
+    }
+
+    if (existingInterview.status === 'COMPLETED' && req.user?.role === 'HR') {
       return res.status(400).json({
         success: false,
         message: 'Evaluation has already been recorded and locked for this interview round.',

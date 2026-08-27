@@ -147,7 +147,7 @@ const LifeAtAdyapan: React.FC = () => {
   return (
     <SiteShell>
       <main className="life-page overflow-x-hidden bg-white dark:bg-[#0d0d0b] text-stone-900 dark:text-white transition-colors duration-300">
-        
+
         {/* ══════════════════════════════════════════════════════════
             1. HERO SECTION (ORBIT ANIMATION & OFFICE BACKGROUND)
            ══════════════════════════════════════════════════════════ */}
@@ -170,7 +170,7 @@ const LifeAtAdyapan: React.FC = () => {
             <div className="life-page-hero-orbit" aria-hidden="true">
               <div className="life-page-hero-orbit-center">
                 <img
-                  src="/adyapan-logo.jpeg"
+                  src="/adyapan-logo.png"
                   alt="Adyapan Logo"
                   className="w-full h-full object-cover scale-[1.18] rounded-full"
                 />

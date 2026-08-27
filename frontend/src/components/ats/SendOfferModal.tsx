@@ -1,24 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { 
-  X, 
-  Send, 
-  Award, 
-  DollarSign, 
-  CheckCircle2, 
-  Eye, 
-  Edit3, 
+import {
+  X,
+  Send,
+  Save,
+  Award,
+  DollarSign,
+  CheckCircle2,
+  Eye,
+  Edit3,
   RotateCw,
   Download
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
+import { applicationService } from '../../services/applicationService';
 
 interface SendOfferModalProps {
   isOpen: boolean;
   onClose: () => void;
   application: any;
   onSendOffer: (appId: string, offerData: any) => Promise<void>;
+  onSaveDraft?: (appId: string, offerData: any) => Promise<void>;
 }
 
 export const SendOfferModal: React.FC<SendOfferModalProps> = ({
@@ -26,10 +29,12 @@ export const SendOfferModal: React.FC<SendOfferModalProps> = ({
   onClose,
   application,
   onSendOffer,
+  onSaveDraft,
 }) => {
   const [activeTab, setActiveTab] = useState<'EDIT' | 'PREVIEW'>('EDIT');
   const [previewPage, setPreviewPage] = useState<number>(1);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
 
   // Editable Fields per User Specification
@@ -53,25 +58,36 @@ export const SendOfferModal: React.FC<SendOfferModalProps> = ({
     if (application) {
       const cand = application.candidate || {};
       const fullName = `${cand.firstName || ''} ${cand.lastName || ''}`.trim() || 'Candidate';
-      const existingOffer = application.offer?.offerDetails || {};
+      let existingOffer: any = {};
+      if (application.offer?.offerDetails) {
+        if (typeof application.offer.offerDetails === 'object') {
+          existingOffer = application.offer.offerDetails;
+        } else if (typeof application.offer.offerDetails === 'string') {
+          try {
+            existingOffer = JSON.parse(application.offer.offerDetails);
+          } catch (e) {
+            existingOffer = {};
+          }
+        }
+      }
 
       setCandidateName(existingOffer.candidateName || fullName);
       setOfferDate(
-        existingOffer.offerDate || 
+        existingOffer.offerDate ||
         new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')
       );
       setOlNo(existingOffer.olNo || application.candidateCode || 'ADP0428');
       setJobTitle(existingOffer.jobTitle || application.job?.title || 'COMMUNITY DEVELOPMENT INTERN');
       setDuration(existingOffer.duration || '6 MONTHS');
-      setTrainingStartDate(existingOffer.trainingStartDate || '25-May-2026');
-      setTrainingEndDate(existingOffer.trainingEndDate || '06-Jun-2026');
-      setOjtStartDate(existingOffer.ojtStartDate || '07-Jun-2026');
-      setOjtEndDate(existingOffer.ojtEndDate || '07-Dec-2026');
+      setTrainingStartDate(existingOffer.trainingStartDate || '01-Sep-2026');
+      setTrainingEndDate(existingOffer.trainingEndDate || '15-Sep-2026');
+      setOjtStartDate(existingOffer.ojtStartDate || '16-Sep-2026');
+      setOjtEndDate(existingOffer.ojtEndDate || '16-Mar-2027');
       setLocation(existingOffer.location || 'HYDERABAD');
       setStipend(existingOffer.stipend || 'INR 20000/-PerMonth');
       setIncentives(existingOffer.incentives || 'Up to 10,000/- INCENTIVES.');
       setPostProbationCtc(existingOffer.postProbationCtc || '₹8 LPA ( 6 Fixed + 2 Variable )');
-      setReportingDate(existingOffer.reportingDate || existingOffer.trainingStartDate || '25-May-2026');
+      setReportingDate(existingOffer.reportingDate || existingOffer.trainingStartDate || '01-Sep-2026');
 
       setActiveTab('EDIT');
       setPreviewPage(1);
@@ -111,6 +127,23 @@ export const SendOfferModal: React.FC<SendOfferModalProps> = ({
     }
   };
 
+  const handleSaveDraft = async () => {
+    setSaving(true);
+    const toastId = toast.loading('Saving offer details in database...');
+    try {
+      if (onSaveDraft) {
+        await onSaveDraft(application.id, offerPayload);
+      } else {
+        const res = await applicationService.saveOfferDraft(application.id, offerPayload);
+        toast.success(res.message || 'Offer details saved successfully in database!', { id: toastId });
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || err.message || 'Failed to save offer details', { id: toastId });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleDownloadPdf = async () => {
     setDownloadingPdf(true);
     const toastId = toast.loading('Generating 4-Page Adyapan Offer Letter PDF...');
@@ -136,27 +169,33 @@ export const SendOfferModal: React.FC<SendOfferModalProps> = ({
   };
 
   const renderPreviewHeader = () => (
-    <div className="border-b border-slate-300 pb-2.5 mb-5">
-      <div className="flex items-center gap-2.5">
+    <div className="w-full pb-1 mb-5">
+      {/* Row 1: Centered Large Logo + Big Bold Company Title in Single Line */}
+      <div className="flex items-center justify-center gap-5 sm:gap-6 flex-nowrap">
         <img
-          src="/adyapan-logo.jpeg"
+          src="/adyapan-logo.png"
           alt="Adyapan Logo"
-          className="w-8 h-8 rounded-full object-cover shadow-xs shrink-0 border border-amber-500/40"
+          className="w-16 h-16 sm:w-20 sm:h-20 object-contain shrink-0"
         />
-        <div>
-          <h2 className="text-[#ED9415] font-black text-sm sm:text-base tracking-wide uppercase leading-tight">
-            SR'S ADYAPAN EDUTECH PRIVATE LIMITED
-          </h2>
-          <h4 className="text-[#B81E1E] font-black text-[10px] sm:text-xs tracking-[0.25em] uppercase leading-tight mt-0.5">
-            A D Y A P A N &nbsp; S C H O O L .
-          </h4>
-        </div>
+        <h2 className="text-[#ED9415] font-black text-xl sm:text-2xl md:text-3xl tracking-tight sm:tracking-normal uppercase leading-none whitespace-nowrap shrink-0">
+          SR'S ADYAPAN EDUTECH PRIVATE LIMITED
+        </h2>
       </div>
+
+      {/* Row 2: Centered Subtitle with increased spacing */}
+      <div className="text-center mt-4 sm:mt-5">
+        <h4 className="text-[#B81E1E] font-black text-sm sm:text-base md:text-lg tracking-[0.38em] uppercase leading-none whitespace-nowrap">
+          A D Y A P A N &nbsp; S C H O O L .
+        </h4>
+      </div>
+
+      {/* Row 3: Full-width Bold Divider Line */}
+      <div className="w-full border-b-2 border-slate-500/80 mt-5"></div>
     </div>
   );
 
   const renderPreviewFooter = () => (
-    <div className="mt-8 pt-2.5 pb-2 px-4 bg-[#ED9415] text-slate-950 font-black text-[10px] flex items-center justify-center gap-3 rounded-b-lg tracking-wide">
+    <div className="mt-8 pt-2.5 pb-2 px-4 bg-[#ED9415] text-slate-950 font-black text-[11px] flex items-center justify-center gap-3 rounded-b-lg tracking-wide">
       <span>hr@adyapan.com</span>
       <span>|</span>
       <span>www.adyapanschool.com</span>
@@ -166,20 +205,21 @@ export const SendOfferModal: React.FC<SendOfferModalProps> = ({
   );
 
   const renderWatermark = () => (
-    <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.12] select-none z-0">
-      <div className="w-80 h-80 rounded-full border-[14px] border-[#ED9415] flex flex-col items-center justify-center">
-        <span className="text-7xl font-black text-[#ED9415] font-serif">ady.</span>
-        <span className="text-base font-black text-[#ED9415] tracking-[0.3em] uppercase mt-1">A D Y A P A N</span>
-      </div>
+    <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.08] select-none z-0">
+      <img
+        src="/adyapan-logo.png"
+        alt="Watermark"
+        className="w-72 h-72 object-contain"
+      />
     </div>
   );
 
   const modalContent = (
-    <div 
+    <div
       className="fixed inset-0 z-[99999] overflow-y-auto bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 min-h-screen animate-fadeIn"
       onClick={onClose}
     >
-      <div 
+      <div
         className="w-full max-w-4xl bg-white border border-slate-200 rounded-3xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden my-auto animate-scaleUp relative"
         onClick={(e) => e.stopPropagation()}
       >
@@ -200,18 +240,16 @@ export const SendOfferModal: React.FC<SendOfferModalProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveTab('EDIT')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all ${
-                  activeTab === 'EDIT' ? 'bg-white text-orange-600 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
-                }`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all ${activeTab === 'EDIT' ? 'bg-white text-orange-600 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                  }`}
               >
                 <Edit3 className="w-3.5 h-3.5" /> Edit Details
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab('PREVIEW')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all ${
-                  activeTab === 'PREVIEW' ? 'bg-white text-orange-600 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
-                }`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all ${activeTab === 'PREVIEW' ? 'bg-white text-orange-600 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                  }`}
               >
                 <Eye className="w-3.5 h-3.5" /> Letter Preview (4 Pages)
               </button>
@@ -324,82 +362,88 @@ export const SendOfferModal: React.FC<SendOfferModalProps> = ({
                 </button>
               </div>
 
-              <div className="bg-white border border-slate-300 rounded-2xl p-8 sm:p-10 shadow-lg min-h-[720px] relative overflow-hidden text-slate-900 text-[12px] leading-relaxed font-sans">
+              <div className="bg-white border border-slate-300 rounded-2xl p-8 sm:p-10 shadow-lg min-h-[720px] relative overflow-hidden text-slate-900 text-[13.5px] leading-relaxed font-sans">
                 {renderWatermark()}
                 {renderPreviewHeader()}
                 {/* PAGE 1 CONTENT */}
                 {previewPage === 1 && (
-                  <div className="space-y-4 relative z-10 animate-fadeIn text-[11.5px] leading-relaxed">
-                    <div className="flex items-center justify-between font-bold text-[12.5px] pt-1">
-                      <span>{offerDate}</span>
-                      <span>OL No: {olNo}</span>
+                  <div className="space-y-5 relative z-10 animate-fadeIn flex flex-col justify-between min-h-[620px] text-[13.5px] leading-relaxed">
+                    <div className="space-y-4 pt-2">
+                      <div className="flex items-center justify-between font-bold text-[14px]">
+                        <span>{offerDate}</span>
+                        <span>OL No: {olNo}</span>
+                      </div>
+
+                      <p className="font-bold text-[15px] pt-3 text-slate-900">
+                        Dear {candidateName},
+                      </p>
+
+                      <p className="text-justify text-slate-800 leading-relaxed">
+                        We congratulate you for being selected for a <strong>{duration}</strong> Training with adyapan. “At will basis” which can be extended. Please find the confirmation of your Training terms and details below:
+                      </p>
+
+                      <div className="grid grid-cols-[180px_1fr] gap-y-3 pt-3 text-[13.5px]">
+                        <div><strong>Job Title:</strong></div>
+                        <div><strong className="uppercase">{jobTitle}</strong></div>
+
+                        <div><strong>Training Start Date:</strong></div>
+                        <div><span>{trainingStartDate}</span></div>
+
+                        <div><strong>Training End Date:</strong></div>
+                        <div><span>{trainingEndDate}</span></div>
+
+                        <div><strong>OJT Start Date:</strong></div>
+                        <div><span>{ojtStartDate}</span></div>
+
+                        <div><strong>OJT End Date:</strong></div>
+                        <div><span>{ojtEndDate}</span></div>
+
+                        <div><strong>Location:</strong></div>
+                        <div><strong className="uppercase">{location}</strong></div>
+
+                        <div><strong>Stipend:</strong></div>
+                        <div><strong>{stipend}</strong></div>
+
+                        <div className="col-span-2"><strong>{incentives}</strong></div>
+
+                        <div><strong>Post-Probation CTC:</strong></div>
+                        <div><strong>{postProbationCtc}</strong></div>
+                      </div>
+
+                      <div className="pt-8 text-slate-800 leading-relaxed text-[12.5px]">
+                        The first <strong>12 days</strong> of training are <strong>unpaid</strong>. Once these 12 days are successfully completed, the trainee will start receiving the stipend <strong>from the 13th day</strong>, subject to regular attendance and satisfactory performance.
+                      </div>
                     </div>
 
-                    <p className="font-bold text-sm pt-2 text-slate-900">
-                      Dear {candidateName} ,
-                    </p>
-
-                    <p className="text-justify text-slate-800">
-                      We congratulate you for being selected for a <strong>{duration}</strong> Training with adyapan. “At will basis” which can be extended. Please find the following confirmation of your Training :
-                    </p>
-
-                    <div className="space-y-1.5 pt-2 text-[12px]">
-                      <div>
-                        <strong>Job Title:</strong> <strong className="uppercase">{jobTitle}</strong>
-                      </div>
-                      <div>
-                        <strong>Training Start Date:</strong> <span>{trainingStartDate}</span>
-                      </div>
-                      <div>
-                        <strong>Training End Date:</strong> <span>{trainingEndDate}</span>
-                      </div>
-                      <div className="pt-1">
-                        <strong>OJT Start Date:</strong> <span>{ojtStartDate}</span>
-                      </div>
-                      <div>
-                        <strong>OJT End Date:</strong> <span>{ojtEndDate}</span>
-                      </div>
-                      <div className="pt-1">
-                        <strong>Location :</strong> <strong className="uppercase">{location}</strong>
-                      </div>
-                      <div className="pt-2">
-                        <strong>Stipend:</strong> <strong>{stipend}</strong>
-                      </div>
-                      <div>
-                        <strong>{incentives}</strong>
-                      </div>
-                      <div>
-                        <strong>Post-Probation CTC:</strong> <strong>{postProbationCtc}</strong>
-                      </div>
-                    </div>
-
-                    <div className="pt-8 text-slate-800 leading-relaxed text-[11px]">
-                      The first <strong>12 days</strong> of training are <strong>unpaid</strong>. Once these 12 days are successfully completed, the trainee will start receiving the stipend <strong>from the 13th day</strong>, subject to regular attendance and satisfactory performance.
-                    </div>
+                    {renderPreviewFooter()}
                   </div>
                 )}
 
                 {/* PAGE 2 CONTENT */}
                 {previewPage === 2 && (
-                  <div className="space-y-6 relative z-10 animate-fadeIn flex flex-col justify-between min-h-[540px] text-[11.5px] leading-relaxed">
-                    <div className="space-y-5">
+                  <div className="space-y-6 relative z-10 animate-fadeIn flex flex-col justify-between min-h-[620px] text-[13.5px] leading-relaxed">
+                    <div className="space-y-6 pt-3">
                       <p className="leading-relaxed text-slate-800 text-justify">
-                        Please indicate your acceptance, by signing in the letter and mail the signed and scanned soft copy of the training Offer Letter and the documents as mentioned below to the <strong>hr@adyapan.com</strong> within <strong>2 working days</strong> from the receipt of this mail. The offer shall stand automatically withdrawn without further action on the part of adyapan if we do not receive your acceptance as per the mentioned timeline.
+                        Please indicate your acceptance by signing this letter and emailing the signed, scanned soft copy of the training Offer Letter and the required documents to <strong>hr@adyapan.com</strong> within <strong>2 working days</strong> from the receipt of this mail. The offer shall stand automatically withdrawn without further action on the part of adyapan if we do not receive your acceptance as per the mentioned timeline.
                       </p>
 
-                      <div className="pt-12 text-center text-slate-800 leading-relaxed">
-                        I have read and understood the above terms and conditions and I accept this offer, as set forth above, with adyapan, and will report on or before <strong>{reportingDate}</strong>.
+                      <div className="pt-10 text-center text-slate-800 leading-relaxed max-w-xl mx-auto">
+                        I have read and understood the above terms and conditions and I accept this offer, as set forth above, with adyapan, and will report on or before <strong>{reportingDate || trainingStartDate}</strong>.
                       </div>
+                    </div>
 
-                      <div className="pt-12 space-y-4">
-                        <div className="flex items-center gap-2">
-                          <strong>SIGNATURE:</strong>
-                          <span className="text-slate-500 italic text-[11px]">(Candidate’s Signature)</span>
-                        </div>
-                        <div>
-                          <strong>DATE:</strong>
-                          <span className="inline-block w-48 border-b border-slate-400 ml-2"></span>
-                        </div>
+                    <div className="mt-auto pb-6 space-y-6">
+                      <div className="flex items-center gap-2">
+                        <strong className="w-56">CANDIDATE SIGNATURE:</strong>
+                        <span className="inline-block w-64 border-b border-slate-400"></span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <strong className="w-56">CANDIDATE NAME:</strong>
+                        <span className="font-bold text-slate-900">{candidateName}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <strong className="w-56">DATE:</strong>
+                        <span className="inline-block w-64 border-b border-slate-400"></span>
                       </div>
                     </div>
 
@@ -409,74 +453,70 @@ export const SendOfferModal: React.FC<SendOfferModalProps> = ({
 
                 {/* PAGE 3 CONTENT */}
                 {previewPage === 3 && (
-                  <div className="space-y-4 relative z-10 animate-fadeIn flex flex-col justify-between min-h-[540px]">
-                    <div className="space-y-2 text-[10.5px] text-slate-800 leading-normal">
-                      <div className="flex items-start gap-2">
-                        <span className="text-slate-900 font-bold">▪</span>
+                  <div className="space-y-6 relative z-10 animate-fadeIn flex flex-col justify-between min-h-[620px]">
+                    <div className="space-y-3.5 pt-2 text-[13px] text-slate-800 leading-relaxed">
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-slate-900 font-bold text-sm">▪</span>
                         <span>By accepting this training offer you agree to perform all responsibilities assigned to you with due care and diligence and in compliance with the management norms.</span>
                       </div>
 
-                      <div className="flex items-start gap-2">
-                        <span className="text-slate-900 font-bold">▪</span>
-                        <span>You are also required to substantially use all of your time and effort to perform these tasks during business hours and such reasonable additional time as may be necessary.</span>
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-slate-900 font-bold text-sm">▪</span>
+                        <span>You are required to substantially use your time and effort to perform assigned tasks during business hours and such reasonable additional time as may be necessary.</span>
                       </div>
 
-                      <div className="pl-4 py-1 space-y-0.5 text-[11px]">
-                        <div><u className="font-bold">Working Hours:</u> 9 Hours a day (Inc. Lunch Break).</div>
-                        <div><u className="font-bold">Work Timing:</u> 11AM - 8 PM.</div>
-                        <div><u className="font-bold">Job Type:</u> Full Time Training</div>
-                        <div><u className="font-bold">Location:</u> {location}</div>
+                      <div className="pl-5 py-2.5 space-y-1.5 text-[13px] bg-slate-50/80 rounded-xl border border-slate-200/60 my-2">
+                        <div><strong className="underline">Working Hours:</strong> 9 Hours a day (Inc. Lunch Break).</div>
+                        <div><strong className="underline">Work Timing:</strong> 11 AM - 8 PM.</div>
+                        <div><strong className="underline">Job Type:</strong> Full Time Training</div>
+                        <div><strong className="underline">Location:</strong> {location}</div>
                       </div>
 
-                      <div className="flex items-start gap-2">
-                        <span className="text-slate-900 font-bold">▪</span>
-                        <span>As a Trainee you will not receive any of the employee benefits that regular employees receive.</span>
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-slate-900 font-bold text-sm">▪</span>
+                        <span>As a Trainee you will not receive employee benefits that regular employees receive.</span>
                       </div>
 
-                      <div className="flex items-start gap-2">
-                        <span className="text-slate-900 font-bold">▪</span>
-                        <span>During the Training period, the company will have all the rights to terminate your services without offering any reason and you are required to give 15 Days notice should you wish to terminate your training before the end of your tenure.</span>
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-slate-900 font-bold text-sm">▪</span>
+                        <span>During Training, the company reserves rights to terminate services without offering reason and you are required to give 15 Days notice should you wish to terminate early.</span>
                       </div>
 
-                      <div className="flex items-start gap-2">
-                        <span className="text-slate-900 font-bold">▪</span>
-                        <span>At any time if you wish to discontinue the training due to personal reasons , you will have to pay a compensation equal to 1 month stipend or you will have to serve 1 month notice period.</span>
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-slate-900 font-bold text-sm">▪</span>
+                        <span>If you discontinue training for personal reasons, you will have to pay compensation equal to 1 month stipend or serve 1 month notice period.</span>
                       </div>
 
-                      <div className="flex items-start gap-2">
-                        <span className="text-slate-900 font-bold">▪</span>
-                        <span>All the information acquired during the course shall be strictly confidential and you shall refrain from using it for your own purpose or from disclosing it to anyone outside of the Company.</span>
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-slate-900 font-bold text-sm">▪</span>
+                        <span>All information acquired during tenure is strictly confidential and shall not be disclosed.</span>
                       </div>
 
-                      <div className="flex items-start gap-2">
-                        <span className="text-slate-900 font-bold">▪</span>
-                        <span>Upon conclusion of your tenure, you will immediately return to the Company all of its property, equipment and documents including electronically stored information.</span>
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-slate-900 font-bold text-sm">▪</span>
+                        <span>Upon tenure conclusion, immediately return all Company equipment, data and property.</span>
                       </div>
 
-                      <div className="flex items-start gap-2">
-                        <span className="text-slate-900 font-bold">▪</span>
-                        <span>You will observe all policies and practices governing the conduct of our business and employees.</span>
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-slate-900 font-bold text-sm">▪</span>
+                        <span>Official communication must be routed strictly through the company email of your manager.</span>
                       </div>
 
-                      <div className="flex items-start gap-2">
-                        <span className="text-slate-900 font-bold">▪</span>
-                        <span>Official communication either within the company or outside the company should be through the company Email of your manager only.</span>
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-slate-900 font-bold text-sm">▪</span>
+                        <span>Post successful completion, candidate is eligible for performance-based pre-placement offer.</span>
                       </div>
+                    </div>
 
-                      <div className="flex items-start gap-2">
-                        <span className="text-slate-900 font-bold">▪</span>
-                        <span>Post successful completion of the tenure, the candidate will be prone to performance based pre-placement offers by the company.</span>
+                    <div className="mt-auto pb-4 space-y-5">
+                      <div className="flex items-center gap-2">
+                        <strong>SIGNATURE:</strong>
+                        <span className="inline-block w-64 border-b border-slate-400 ml-2"></span>
+                        <span className="text-slate-500 italic text-[12.5px] ml-2">(Candidate's Signature)</span>
                       </div>
-
-                      <div className="pt-4 space-y-2">
-                        <div className="flex items-center gap-2">
-                          <strong>SIGNATURE:</strong>
-                          <span className="text-slate-500 italic text-[11px]">(Candidate’s Signature)</span>
-                        </div>
-                        <div>
-                          <strong>DATE:</strong>
-                          <span className="inline-block w-48 border-b border-slate-400 ml-2"></span>
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <strong>DATE:</strong>
+                        <span className="inline-block w-64 border-b border-slate-400 ml-2"></span>
                       </div>
                     </div>
 
@@ -486,49 +526,49 @@ export const SendOfferModal: React.FC<SendOfferModalProps> = ({
 
                 {/* PAGE 4 CONTENT */}
                 {previewPage === 4 && (
-                  <div className="space-y-4 relative z-10 animate-fadeIn flex flex-col justify-between min-h-[540px]">
-                    <div className="space-y-4">
-                      <h3 className="text-center font-bold text-xs tracking-wider uppercase">ANNEXURE</h3>
+                  <div className="space-y-4 relative z-10 animate-fadeIn flex flex-col justify-between min-h-[620px]">
+                    <div className="space-y-4 pt-2">
+                      <h3 className="text-center font-bold text-sm tracking-wider uppercase">ANNEXURE</h3>
 
-                      <table className="w-full border-collapse border border-slate-900 text-xs">
+                      <table className="w-full border-collapse border border-slate-900 text-[12.5px]">
                         <thead>
                           <tr className="border-b border-slate-900 font-bold">
-                            <th className="p-2 border-r border-slate-900 w-16 text-center">Sl. No</th>
-                            <th className="p-2 text-left">Particulars</th>
+                            <th className="p-2.5 border-r border-slate-900 w-16 text-center">Sl. No</th>
+                            <th className="p-2.5 text-left">Particulars</th>
                           </tr>
                         </thead>
                         <tbody>
                           <tr className="border-b border-slate-900">
-                            <td className="p-2 border-r border-slate-900 text-center font-bold align-top">1.</td>
-                            <td className="p-2 space-y-1 text-[11px]">
+                            <td className="p-2.5 border-r border-slate-900 text-center font-bold align-top">1.</td>
+                            <td className="p-2.5 space-y-1 text-[12px]">
                               <p className="font-semibold">Professional / Educational Certificates and Mark Sheets towards:</p>
-                              <p>• 10th standard or equivalent examination (Original MS for Verification)</p>
-                              <p>• 12th standard or equivalent examination (Original MS for Verification)</p>
-                              <p>• Graduation</p>
-                              <p>• Post-graduation / Doctorate</p>
-                              <p>Other relevant educational or skill certifications</p>
+                              <p>• 10th standard or equivalent examination (Original for Verification)</p>
+                              <p>• 12th standard or equivalent examination (Original for Verification)</p>
+                              <p>• Graduation Degree & Semester Mark Sheets</p>
+                              <p>• Post-graduation / Master's (if applicable)</p>
+                              <p>• Other relevant educational or skill certifications</p>
                             </td>
                           </tr>
                           <tr className="border-b border-slate-900">
-                            <td className="p-2 border-r border-slate-900 text-center font-bold">2.</td>
-                            <td className="p-2 font-bold uppercase text-[11px]">COLOR SCANNED COPY OF YOUR PHOTOGRAPHS</td>
+                            <td className="p-2.5 border-r border-slate-900 text-center font-bold">2.</td>
+                            <td className="p-2.5 font-bold uppercase text-[12px]">COLOR SCANNED COPY OF PASSPORT PHOTOGRAPHS</td>
                           </tr>
                           <tr>
-                            <td className="p-2 border-r border-slate-900 text-center font-bold">3.</td>
-                            <td className="p-2 text-[11px]">PAN Card, Voter ID or Driving Licence Scanned Copy.</td>
+                            <td className="p-2.5 border-r border-slate-900 text-center font-bold">3.</td>
+                            <td className="p-2.5 text-[12px]">Aadhaar Card, PAN Card, Voter ID or Passport Scanned Copy.</td>
                           </tr>
                         </tbody>
                       </table>
 
-                      <div className="pt-2 text-[11px] font-bold leading-relaxed">
-                        4. Bank Account Details: Bank Name, Your Name as per Bank records, Account Number, IFSC Code.
+                      <div className="pt-3 text-[12.5px] font-bold leading-relaxed">
+                        4. Bank Account Details: Bank Name, Name as per Bank, Account Number, IFSC Code.
                       </div>
+                    </div>
 
-                      <div className="pt-8 space-y-1">
-                        <div className="font-bold">SIGNATURE:</div>
-                        <div className="font-bold pt-4 text-xs">HR MANAGER</div>
-                        <div className="font-bold text-xs">ADYAPAN</div>
-                      </div>
+                    <div className="mt-auto pb-4 space-y-1">
+                      <div className="font-bold">SIGNATURE:</div>
+                      <div className="font-bold pt-3 text-xs uppercase">HR MANAGER</div>
+                      <div className="font-bold text-xs uppercase">ADYAPAN EDUTECH PRIVATE LIMITED</div>
                     </div>
 
                     {renderPreviewFooter()}
@@ -540,13 +580,60 @@ export const SendOfferModal: React.FC<SendOfferModalProps> = ({
         </div>
 
         <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
-          <button type="button" onClick={handleDownloadPdf} disabled={downloadingPdf} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-300 shadow-2xs transition-all disabled:opacity-50">
+          <button 
+            type="button" 
+            onClick={handleDownloadPdf} 
+            disabled={downloadingPdf} 
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-300 shadow-2xs transition-all disabled:opacity-50 cursor-pointer"
+          >
             <Download className="w-3.5 h-3.5 text-orange-600" /> {downloadingPdf ? 'Downloading...' : 'Download PDF'}
           </button>
+          
           <div className="flex items-center gap-2.5">
-            <button type="button" onClick={onClose} className="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-300 shadow-2xs transition-all">Cancel</button>
-            <button type="submit" form="send-offer-form" disabled={loading} onClick={activeTab === 'PREVIEW' ? handleSubmit : undefined} className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 via-amber-600 to-orange-600 hover:from-orange-700 hover:to-orange-700 text-white font-extrabold text-xs shadow-md transition-all disabled:opacity-50">
-              {loading ? <><RotateCw className="w-3.5 h-3.5 animate-spin" /> Dispatching...</> : <><Send className="w-3.5 h-3.5" /> Confirm & Release</>}
+            <button 
+              type="button" 
+              onClick={onClose} 
+              className="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-300 shadow-2xs transition-all cursor-pointer"
+            >
+              Cancel
+            </button>
+
+            {/* Save Offer Details to Database */}
+            <button
+              type="button"
+              disabled={saving || loading}
+              onClick={handleSaveDraft}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+              title="Save offer configuration directly to database"
+            >
+              {saving ? (
+                <>
+                  <RotateCw className="w-3.5 h-3.5 animate-spin" /> Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="w-3.5 h-3.5 text-emerald-400" /> Save Details
+                </>
+              )}
+            </button>
+
+            {/* Confirm & Release Offer Letter */}
+            <button 
+              type="submit" 
+              form="send-offer-form" 
+              disabled={loading || saving} 
+              onClick={activeTab === 'PREVIEW' ? handleSubmit : undefined} 
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 via-amber-600 to-orange-600 hover:from-orange-700 hover:to-orange-700 text-white font-extrabold text-xs shadow-md transition-all disabled:opacity-50 cursor-pointer"
+            >
+              {loading ? (
+                <>
+                  <RotateCw className="w-3.5 h-3.5 animate-spin" /> Dispatching...
+                </>
+              ) : (
+                <>
+                  <Send className="w-3.5 h-3.5" /> Confirm & Release
+                </>
+              )}
             </button>
           </div>
         </div>

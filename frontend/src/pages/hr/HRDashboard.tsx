@@ -10,7 +10,8 @@ import {
   RotateCw, 
   ArrowRight,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Target
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import applicationService from '../../services/applicationService';
@@ -21,6 +22,7 @@ import CandidatePreviewModal from '../../components/ats/CandidatePreviewModal';
 
 const HRDashboard: React.FC = () => {
   const { user } = useAuth();
+  const isVeena = user?.email?.toLowerCase().includes('veena') || user?.name?.toLowerCase().includes('veena');
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,6 +39,13 @@ const HRDashboard: React.FC = () => {
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [selectedAppForPreview, setSelectedAppForPreview] = useState<any>(null);
 
+  // Executive Intake & Screening Metrics for Veena HR
+  const [managerMetrics, setManagerMetrics] = useState({
+    total: 0,
+    newApps: 0,
+    shortlisted: 0,
+  });
+
   useEffect(() => {
     fetchMyCandidates();
   }, [user]);
@@ -48,9 +57,20 @@ const HRDashboard: React.FC = () => {
       if (user?.role === 'HR' && user?.id) {
         queryParams.assignedHrId = user.id;
       }
-      const res = await applicationService.getAllApplications(queryParams);
+      const [res, statsRes] = await Promise.all([
+        applicationService.getAllApplications(queryParams),
+        applicationService.getManagerStats().catch(() => null),
+      ]);
+
       if (res?.applications) {
         setApplications(res.applications);
+      }
+      if (statsRes?.metrics) {
+        setManagerMetrics({
+          total: statsRes.metrics.total || 0,
+          newApps: statsRes.metrics.newApps || 0,
+          shortlisted: statsRes.metrics.shortlisted || 0,
+        });
       }
     } catch (err: any) {
       toast.error('Failed to load candidate applications');
@@ -152,6 +172,88 @@ const HRDashboard: React.FC = () => {
             </button>
           </div>
         </div>
+
+        {/* Veena HR Privileged Access Banner */}
+        {isVeena && (
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-orange-500/10 border border-orange-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center shadow-sm shrink-0">
+                <Target className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-sm text-slate-900">Lead HR Privileges Enabled</h3>
+                <p className="text-xs text-slate-600">You have access to <strong>Screening & Approvals</strong> and <strong>Workload Distribution</strong> modules.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <Link
+                to="/hr/screening"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs font-bold shadow-sm transition-all"
+              >
+                <Target className="w-3.5 h-3.5" /> Screening & Approvals
+              </Link>
+              <Link
+                to="/hr/workload"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 text-xs font-bold shadow-xs transition-all"
+              >
+                <Users className="w-3.5 h-3.5 text-orange-600" /> Workload Distribution
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Veena HR Executive Intake & Screening Overview (3 Exact Cards: Total Applications, New Applications, Shortlisted) */}
+        {isVeena && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-fadeIn">
+            {/* 1. Total Applications */}
+            <Link
+              to="/hr/screening"
+              className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs hover:border-orange-300 hover:shadow-md transition-all group block space-y-1.5"
+            >
+              <span className="text-xs font-black text-slate-500 uppercase tracking-wider block">
+                TOTAL APPLICATIONS
+              </span>
+              <div className="text-3xl font-black text-slate-900 group-hover:text-orange-600 transition-colors">
+                {managerMetrics.total}
+              </div>
+              <div className="text-xs text-slate-500 font-semibold">
+                Total Intake
+              </div>
+            </Link>
+
+            {/* 2. New Applications */}
+            <Link
+              to="/hr/screening"
+              className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs hover:border-orange-300 hover:shadow-md transition-all group block space-y-1.5"
+            >
+              <span className="text-xs font-black text-orange-600 uppercase tracking-wider block">
+                NEW APPLICATIONS
+              </span>
+              <div className="text-3xl font-black text-orange-600">
+                {managerMetrics.newApps}
+              </div>
+              <div className="text-xs text-slate-500 font-semibold">
+                Awaiting Initial Review
+              </div>
+            </Link>
+
+            {/* 3. Shortlisted */}
+            <Link
+              to="/hr/workload"
+              className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs hover:border-emerald-300 hover:shadow-md transition-all group block space-y-1.5"
+            >
+              <span className="text-xs font-black text-emerald-700 uppercase tracking-wider block">
+                SHORTLISTED
+              </span>
+              <div className="text-3xl font-black text-emerald-600">
+                {managerMetrics.shortlisted}
+              </div>
+              <div className="text-xs text-slate-500 font-semibold">
+                Screened Positive
+              </div>
+            </Link>
+          </div>
+        )}
 
         {/* 8 Granular Real-Time Funnel Metric Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">

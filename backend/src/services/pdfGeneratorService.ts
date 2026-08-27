@@ -158,10 +158,15 @@ export const generateOfferLetterPdfBuffer = async (rawOfferData: any = {}) => {
     const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontOblique = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
 
-    // Embed real adyapan-logo.jpeg image
+    // Embed real adyapan logo image (supports png and jpeg)
     let embeddedLogoImage: any = null;
     try {
       const logoPaths = [
+        path.join(__dirname, '../assets/adyapan-logo.png'),
+        path.join(process.cwd(), 'src/assets/adyapan-logo.png'),
+        path.join(process.cwd(), 'backend/src/assets/adyapan-logo.png'),
+        path.join(process.cwd(), '../frontend/public/adyapan-logo.png'),
+        path.join(process.cwd(), 'frontend/public/adyapan-logo.png'),
         path.join(__dirname, '../assets/adyapan-logo.jpeg'),
         path.join(process.cwd(), 'src/assets/adyapan-logo.jpeg'),
         path.join(process.cwd(), 'backend/src/assets/adyapan-logo.jpeg'),
@@ -171,12 +176,16 @@ export const generateOfferLetterPdfBuffer = async (rawOfferData: any = {}) => {
       for (const lp of logoPaths) {
         if (fs.existsSync(lp)) {
           const imgBytes = fs.readFileSync(lp);
-          embeddedLogoImage = await pdfDoc.embedJpg(imgBytes);
+          if (lp.endsWith('.png')) {
+            embeddedLogoImage = await pdfDoc.embedPng(imgBytes);
+          } else {
+            embeddedLogoImage = await pdfDoc.embedJpg(imgBytes);
+          }
           break;
         }
       }
     } catch (imgErr: any) {
-      logger.warn('Failed to embed adyapan-logo.jpeg:', imgErr?.message || imgErr);
+      logger.warn('Failed to embed adyapan logo image:', imgErr?.message || imgErr);
     }
 
     // Color definitions matching exact Adyapan branding
@@ -185,100 +194,114 @@ export const generateOfferLetterPdfBuffer = async (rawOfferData: any = {}) => {
     const textDark = rgb(0.08, 0.11, 0.16);         // #141C29
     const textMuted = rgb(0.35, 0.40, 0.48);        // #59667A
     const footerGoldColor = rgb(0.92, 0.58, 0.18);   // Warm Golden Footer Bar
-    const watermarkBorderColor = rgb(0.95, 0.82, 0.55); // faint gold
 
-    // Helper: Draw Header on page
+    // Helper: Draw Header on page - Exactly matching screenshot layout across every page (Large & Bold)
     const drawPageHeader = (page: any) => {
-      const { height } = page.getSize();
-      
-      // Top Left Official Adyapan Logo Image (Proportional 28x28 height aligned with 2-row text)
+      const { width, height } = page.getSize();
+
+      const titleText = "SR'S ADYAPAN EDUTECH PRIVATE LIMITED";
+      const titleSize = 19;
+      const titleWidth = fontBold.widthOfTextAtSize(titleText, titleSize);
+
+      const subText = "A D Y A P A N   S C H O O L .";
+      const subSize = 13;
+      const subWidth = fontBold.widthOfTextAtSize(subText, subSize);
+
+      const logoWidth = 58;
+      const logoHeight = 58;
+      const gap = 18;
+
+      // Row 1: Combined width of logo + title
+      const row1Width = logoWidth + gap + titleWidth;
+      const row1StartX = (width - row1Width) / 2;
+
+      // Draw Logo (without any border)
       if (embeddedLogoImage) {
         page.drawImage(embeddedLogoImage, {
-          x: 44,
-          y: height - 68,
-          width: 28,
-          height: 28,
+          x: row1StartX,
+          y: height - 76,
+          width: logoWidth,
+          height: logoHeight,
         });
       } else {
         page.drawCircle({
-          x: 58,
-          y: height - 54,
-          size: 14,
+          x: row1StartX + 29,
+          y: height - 47,
+          size: 29,
           color: rgb(0.94, 0.65, 0.20),
-          borderColor: rgb(0.88, 0.55, 0.10),
-          borderWidth: 1,
         });
-        page.drawText('ady.', { x: 49, y: height - 55, size: 9, font: fontBold, color: textDark });
+        page.drawText('ady.', { x: row1StartX + 14, y: height - 49, size: 14, font: fontBold, color: textDark });
       }
 
-      // Header Text
-      page.drawText("SR'S ADYAPAN EDUTECH PRIVATE LIMITED", {
-        x: 82,
-        y: height - 49,
-        size: 14.5,
+      // Row 1: Title Text (vertically aligned with logo)
+      const titleStartX = row1StartX + logoWidth + gap;
+      page.drawText(titleText, {
+        x: titleStartX,
+        y: height - 51,
+        size: titleSize,
         font: fontBold,
         color: orangeHeaderColor,
       });
 
-      page.drawText("A D Y A P A N   S C H O O L .", {
-        x: 160,
-        y: height - 64,
-        size: 10,
+      // Row 2: Subtitle Text (centered horizontally on the page with increased gap)
+      const subStartX = (width - subWidth) / 2;
+      page.drawText(subText, {
+        x: subStartX,
+        y: height - 82,
+        size: subSize,
         font: fontBold,
         color: crimsonSchoolColor,
       });
 
-      // Header Underline
+      // Row 3: Full-width Header Divider Line
       page.drawLine({
-        start: { x: 40, y: height - 74 },
-        end: { x: 555, y: height - 74 },
-        thickness: 1.2,
-        color: rgb(0.75, 0.75, 0.75),
+        start: { x: 40, y: height - 98 },
+        end: { x: 555, y: height - 98 },
+        thickness: 1.5,
+        color: rgb(0.55, 0.55, 0.55),
       });
     };
 
-    // Helper: Draw Background Watermark
+    // Helper: Draw Background Watermark using SAME official logo
     const drawWatermark = (page: any) => {
       const { width, height } = page.getSize();
       const centerX = width / 2;
-      const centerY = height / 2 - 10;
+      const centerY = height / 2 - 15;
 
-      // Outer faint circle ring
-      page.drawCircle({
-        x: centerX,
-        y: centerY,
-        size: 175,
-        color: rgb(0.99, 0.96, 0.88),
-        borderColor: watermarkBorderColor,
-        borderWidth: 14,
-        opacity: 0.35,
-      });
-
-      // Faint 'ady.' watermark text
-      page.drawText('ady.', {
-        x: centerX - 85,
-        y: centerY - 25,
-        size: 90,
-        font: fontBold,
-        color: rgb(0.85, 0.50, 0.10),
-        opacity: 0.15,
-      });
-
-      // Faint 'A D Y A P A N' watermark subtext
-      page.drawText('A D Y A P A N', {
-        x: centerX - 90,
-        y: centerY - 65,
-        size: 19,
-        font: fontBold,
-        color: rgb(0.70, 0.40, 0.10),
-        opacity: 0.14,
-      });
+      if (embeddedLogoImage) {
+        // Draw exact official adyapan logo as subtle watermark
+        page.drawImage(embeddedLogoImage, {
+          x: centerX - 100,
+          y: centerY - 100,
+          width: 200,
+          height: 200,
+          opacity: 0.08,
+        });
+      } else {
+        // Faint fallback watermark text
+        page.drawText('ady.', {
+          x: centerX - 85,
+          y: centerY - 25,
+          size: 90,
+          font: fontBold,
+          color: rgb(0.85, 0.50, 0.10),
+          opacity: 0.08,
+        });
+        page.drawText('A D Y A P A N', {
+          x: centerX - 90,
+          y: centerY - 65,
+          size: 19,
+          font: fontBold,
+          color: rgb(0.70, 0.40, 0.10),
+          opacity: 0.08,
+        });
+      }
     };
 
     // Helper: Draw Footer Bar on page
     const drawPageFooter = (page: any) => {
       const { width } = page.getSize();
-      
+
       // Orange/Golden bar at bottom
       page.drawRectangle({
         x: 0,
@@ -290,9 +313,9 @@ export const generateOfferLetterPdfBuffer = async (rawOfferData: any = {}) => {
 
       const footerText = `${hrEmail}   |   ${companyWebsite}   |   ${hrPhone}`;
       page.drawText(footerText, {
-        x: 120,
-        y: 8.5,
-        size: 9.5,
+        x: 110,
+        y: 8,
+        size: 10.5,
         font: fontBold,
         color: textDark,
       });
@@ -305,72 +328,71 @@ export const generateOfferLetterPdfBuffer = async (rawOfferData: any = {}) => {
     drawWatermark(page1);
     drawPageHeader(page1);
 
-    let y1 = 735;
+    // Start Date & OL No lower down at y1 = 675 so content does not bunch up at top and fills bottom
+    let y1 = 675;
 
     // Date & OL No
-    page1.drawText(offerDate, { x: 45, y: y1, size: 10.5, font: fontBold, color: textDark });
-    page1.drawText(`OL No: ${olNo}`, { x: 435, y: y1, size: 10.5, font: fontBold, color: textDark });
+    page1.drawText(cleanText(offerDate), { x: 45, y: y1, size: 12.5, font: fontBold, color: textDark });
+    page1.drawText(`OL No: ${cleanText(olNo)}`, { x: 410, y: y1, size: 12.5, font: fontBold, color: textDark });
 
-    y1 -= 35;
-    page1.drawText(`Dear ${candidateName} ,`, { x: 45, y: y1, size: 11, font: fontBold, color: textDark });
+    y1 -= 38;
+    page1.drawText(`Dear ${cleanText(candidateName)},`, { x: 45, y: y1, size: 13, font: fontBold, color: textDark });
 
-    y1 -= 30;
-    page1.drawText(`We congratulate you for being selected for a `, { x: 140, y: y1, size: 9.5, font: fontRegular, color: textDark });
-    page1.drawText(`${duration}`, { x: 345, y: y1, size: 9.5, font: fontBold, color: textDark });
-    page1.drawText(` Training with`, { x: 405, y: y1, size: 9.5, font: fontRegular, color: textDark });
-    
-    y1 -= 15;
-    page1.drawText(`adyapan. "At will basis" which can be extended. Please find the following confirmation of your`, { x: 45, y: y1, size: 9.5, font: fontRegular, color: textDark });
-    
-    y1 -= 15;
-    page1.drawText(`Training`, { x: 45, y: y1, size: 9.5, font: fontRegular, color: textDark });
-
-    y1 -= 12;
-    page1.drawText(`:`, { x: 45, y: y1, size: 9.5, font: fontBold, color: textDark });
+    y1 -= 28;
+    page1.drawText(`We congratulate you for being selected for a `, { x: 45, y: y1, size: 12.5, font: fontRegular, color: textDark });
+    page1.drawText(`${cleanText(duration)}`, { x: 295, y: y1, size: 12.5, font: fontBold, color: textDark });
+    page1.drawText(` Training with`, { x: 375, y: y1, size: 12.5, font: fontRegular, color: textDark });
 
     y1 -= 22;
-    page1.drawText(`Job Title:`, { x: 45, y: y1, size: 10, font: fontBold, color: textDark });
-    page1.drawText(cleanText(jobTitle).toUpperCase(), { x: 100, y: y1, size: 10, font: fontBold, color: textDark });
-
-    y1 -= 26;
-    page1.drawText(`Training Start Date:`, { x: 45, y: y1, size: 9.5, font: fontBold, color: textDark });
-    page1.drawText(cleanText(trainingStartDate), { x: 160, y: y1, size: 9.5, font: fontRegular, color: textDark });
-
-    y1 -= 26;
-    page1.drawText(`Training End Date:`, { x: 45, y: y1, size: 9.5, font: fontBold, color: textDark });
-    page1.drawText(cleanText(trainingEndDate), { x: 160, y: y1, size: 9.5, font: fontRegular, color: textDark });
-
-    y1 -= 30;
-    page1.drawText(`OJT Start Date:`, { x: 45, y: y1, size: 9.5, font: fontBold, color: textDark });
-    page1.drawText(cleanText(ojtStartDate), { x: 160, y: y1, size: 9.5, font: fontRegular, color: textDark });
-
-    y1 -= 26;
-    page1.drawText(`OJT End Date:`, { x: 45, y: y1, size: 9.5, font: fontBold, color: textDark });
-    page1.drawText(cleanText(ojtEndDate), { x: 160, y: y1, size: 9.5, font: fontRegular, color: textDark });
-
-    y1 -= 30;
-    page1.drawText(`Location :`, { x: 45, y: y1, size: 9.5, font: fontBold, color: textDark });
-    page1.drawText(cleanText(location).toUpperCase(), { x: 110, y: y1, size: 9.5, font: fontBold, color: textDark });
-
-    y1 -= 35;
-    page1.drawText(`Stipend:`, { x: 45, y: y1, size: 10, font: fontBold, color: textDark });
-    page1.drawText(cleanText(stipend), { x: 100, y: y1, size: 10, font: fontBold, color: textDark });
-
-    y1 -= 18;
-    page1.drawText(cleanText(incentives), { x: 45, y: y1, size: 9.5, font: fontBold, color: textDark });
+    page1.drawText(`adyapan. "At will basis" which can be extended. Please find the confirmation of your`, { x: 45, y: y1, size: 12.5, font: fontRegular, color: textDark });
 
     y1 -= 22;
-    page1.drawText(`Post-Probation CTC:`, { x: 45, y: y1, size: 9.5, font: fontBold, color: textDark });
-    page1.drawText(cleanText(postProbationCtc), { x: 165, y: y1, size: 9.5, font: fontBold, color: textDark });
+    page1.drawText(`Training terms and details below:`, { x: 45, y: y1, size: 12.5, font: fontRegular, color: textDark });
 
-    y1 -= 60;
-    page1.drawText(`The first ${unpaidDays} days of training are unpaid. Once these ${unpaidDays} days are successfully completed, the`, { x: 45, y: y1, size: 9.5, font: fontRegular, color: textDark });
-    y1 -= 15;
-    page1.drawText(`trainee will start receiving the stipend from the ${stipendStartDay}, subject to regular attendance and`, { x: 45, y: y1, size: 9.5, font: fontRegular, color: textDark });
-    y1 -= 15;
-    page1.drawText(`satisfactory performance.`, { x: 45, y: y1, size: 9.5, font: fontRegular, color: textDark });
+    // Terms Details (with generous vertical row gap)
+    y1 -= 32;
+    page1.drawText(`Job Title:`, { x: 45, y: y1, size: 12.5, font: fontBold, color: textDark });
+    page1.drawText(cleanText(jobTitle).toUpperCase(), { x: 185, y: y1, size: 12.5, font: fontBold, color: textDark });
 
-    // Note: Page 1 in original PDF does not have the bottom orange footer bar.
+    y1 -= 28;
+    page1.drawText(`Training Start Date:`, { x: 45, y: y1, size: 12.5, font: fontBold, color: textDark });
+    page1.drawText(cleanText(trainingStartDate), { x: 185, y: y1, size: 12.5, font: fontRegular, color: textDark });
+
+    y1 -= 28;
+    page1.drawText(`Training End Date:`, { x: 45, y: y1, size: 12.5, font: fontBold, color: textDark });
+    page1.drawText(cleanText(trainingEndDate), { x: 185, y: y1, size: 12.5, font: fontRegular, color: textDark });
+
+    y1 -= 28;
+    page1.drawText(`OJT Start Date:`, { x: 45, y: y1, size: 12.5, font: fontBold, color: textDark });
+    page1.drawText(cleanText(ojtStartDate), { x: 185, y: y1, size: 12.5, font: fontRegular, color: textDark });
+
+    y1 -= 28;
+    page1.drawText(`OJT End Date:`, { x: 45, y: y1, size: 12.5, font: fontBold, color: textDark });
+    page1.drawText(cleanText(ojtEndDate), { x: 185, y: y1, size: 12.5, font: fontRegular, color: textDark });
+
+    y1 -= 28;
+    page1.drawText(`Location:`, { x: 45, y: y1, size: 12.5, font: fontBold, color: textDark });
+    page1.drawText(cleanText(location).toUpperCase(), { x: 185, y: y1, size: 12.5, font: fontBold, color: textDark });
+
+    y1 -= 30;
+    page1.drawText(`Stipend:`, { x: 45, y: y1, size: 12.5, font: fontBold, color: textDark });
+    page1.drawText(cleanText(stipend), { x: 185, y: y1, size: 12.5, font: fontBold, color: textDark });
+
+    y1 -= 26;
+    page1.drawText(cleanText(incentives), { x: 45, y: y1, size: 12.5, font: fontBold, color: textDark });
+
+    y1 -= 28;
+    page1.drawText(`Post-Probation CTC:`, { x: 45, y: y1, size: 12.5, font: fontBold, color: textDark });
+    page1.drawText(cleanText(postProbationCtc), { x: 185, y: y1, size: 12.5, font: fontBold, color: textDark });
+
+    y1 -= 46;
+    page1.drawText(`The first ${unpaidDays} days of training are unpaid. Once these ${unpaidDays} days are successfully completed, the`, { x: 45, y: y1, size: 12, font: fontRegular, color: textDark });
+    y1 -= 20;
+    page1.drawText(`trainee will start receiving the stipend from the ${stipendStartDay}, subject to regular attendance and`, { x: 45, y: y1, size: 12, font: fontRegular, color: textDark });
+    y1 -= 20;
+    page1.drawText(`satisfactory performance.`, { x: 45, y: y1, size: 12, font: fontRegular, color: textDark });
+
+    drawPageFooter(page1);
 
     // ==========================================
     // PAGE 2: ACCEPTANCE & TIMELINE
@@ -379,124 +401,109 @@ export const generateOfferLetterPdfBuffer = async (rawOfferData: any = {}) => {
     drawWatermark(page2);
     drawPageHeader(page2);
 
-    let y2 = 725;
-    page2.drawText(`Please indicate your acceptance, by signing in the letter and mail the signed and scanned soft`, { x: 45, y: y2, size: 9.5, font: fontRegular, color: textDark });
-    y2 -= 15;
-    page2.drawText(`copy of the training Offer Letter and the documents as mentioned below to the`, { x: 45, y: y2, size: 9.5, font: fontRegular, color: textDark });
-    y2 -= 15;
-    page2.drawText(`${cleanText(hrEmail)} within 2 working days from the receipt of this mail. The offer shall stand`, { x: 45, y: y2, size: 9.5, font: fontBold, color: textDark });
-    y2 -= 15;
-    page2.drawText(`automatically withdrawn without further action on the part of adyapan if we do not receive`, { x: 45, y: y2, size: 9.5, font: fontBold, color: textDark });
-    y2 -= 15;
-    page2.drawText(`your acceptance as per the mentioned timeline.`, { x: 45, y: y2, size: 9.5, font: fontBold, color: textDark });
+    let y2 = 665;
+    page2.drawText(`Please indicate your acceptance by signing this letter and emailing the signed, scanned soft`, { x: 45, y: y2, size: 12.5, font: fontRegular, color: textDark });
+    y2 -= 24;
+    page2.drawText(`copy of the training Offer Letter and the required documents to:`, { x: 45, y: y2, size: 12.5, font: fontRegular, color: textDark });
+    y2 -= 24;
+    page2.drawText(`${cleanText(hrEmail)} within 2 working days from the receipt of this mail. The offer shall stand`, { x: 45, y: y2, size: 12.5, font: fontBold, color: textDark });
+    y2 -= 24;
+    page2.drawText(`automatically withdrawn without further action on the part of adyapan if we do not receive`, { x: 45, y: y2, size: 12.5, font: fontBold, color: textDark });
+    y2 -= 24;
+    page2.drawText(`your acceptance as per the mentioned timeline.`, { x: 45, y: y2, size: 12.5, font: fontBold, color: textDark });
 
-    y2 -= 100;
-    page2.drawText(`I have read and understood the above terms and conditions and I accept`, { x: 120, y: y2, size: 9.5, font: fontRegular, color: textDark });
-    y2 -= 16;
-    page2.drawText(`this offer, as set forth above, with adyapan, and will report on or before ${cleanText(reportingDate || trainingStartDate)}.`, { x: 45, y: y2, size: 9.5, font: fontRegular, color: textDark });
+    y2 -= 55;
+    page2.drawText(`I have read and understood the above terms and conditions and I accept this offer, as set`, { x: 45, y: y2, size: 12.5, font: fontRegular, color: textDark });
+    y2 -= 24;
+    page2.drawText(`forth above, with adyapan, and will report on or before ${cleanText(reportingDate || trainingStartDate)}.`, { x: 45, y: y2, size: 12.5, font: fontRegular, color: textDark });
 
-    y2 -= 70;
-    page2.drawText(`SIGNATURE:`, { x: 45, y: y2, size: 10, font: fontBold, color: textDark });
-    page2.drawText(`(Candidate's Signature)`, { x: 130, y: y2, size: 9.5, font: fontRegular, color: textDark });
+    // Signature Block Grounded at Bottom
+    y2 = 230;
+    page2.drawText(`CANDIDATE SIGNATURE:`, { x: 45, y: y2, size: 12.5, font: fontBold, color: textDark });
+    page2.drawText(`____________________________________`, { x: 215, y: y2, size: 12.5, font: fontRegular, color: textDark });
 
-    y2 -= 25;
-    page2.drawText(`DATE:`, { x: 45, y: y2, size: 10, font: fontBold, color: textDark });
+    y2 = 170;
+    page2.drawText(`CANDIDATE NAME:`, { x: 45, y: y2, size: 12.5, font: fontBold, color: textDark });
+    page2.drawText(cleanText(candidateName), { x: 215, y: y2, size: 12.5, font: fontBold, color: textDark });
+
+    y2 = 110;
+    page2.drawText(`DATE:`, { x: 45, y: y2, size: 12.5, font: fontBold, color: textDark });
+    page2.drawText(`____________________________________`, { x: 215, y: y2, size: 12.5, font: fontRegular, color: textDark });
 
     drawPageFooter(page2);
 
     // ==========================================
-    // PAGE 3: MANAGEMENT POLICIES & CODE OF CONDUCT
+    // PAGE 3: MANAGEMENT POLICIES & CODE OF CONDUCT (Evenly Distributed)
     // ==========================================
     const page3 = pdfDoc.addPage([595, 842]);
     drawWatermark(page3);
     drawPageHeader(page3);
 
-    let y3 = 730;
-    
+    let y3 = 680;
+
     const drawSquareBullet = (page: any, text: string, y: number, isBold: boolean = false) => {
-      page.drawRectangle({ x: 45, y: y + 2, width: 3.5, height: 3.5, color: textDark });
-      page.drawText(cleanText(text), { x: 58, y, size: 9, font: isBold ? fontBold : fontRegular, color: textDark });
+      page.drawRectangle({ x: 45, y: y + 2.5, width: 4.5, height: 4.5, color: textDark });
+      page.drawText(cleanText(text), { x: 58, y, size: 12, font: isBold ? fontBold : fontRegular, color: textDark });
     };
 
     drawSquareBullet(page3, "By accepting this training offer you agree to perform all responsibilities assigned to you", y3);
-    y3 -= 14;
-    page3.drawText("with due care and diligence and in compliance with the management norms.", { x: 58, y: y3, size: 9, font: fontRegular, color: textDark });
-
-    y3 -= 24;
-    drawSquareBullet(page3, "You are also required to substantially use all of your time and effort to perform these", y3);
-    y3 -= 14;
-    page3.drawText("tasks during business hours and such reasonable additional time as may be necessary.", { x: 58, y: y3, size: 9, font: fontRegular, color: textDark });
+    y3 -= 18;
+    page3.drawText("with due care and diligence and in compliance with the management norms.", { x: 58, y: y3, size: 12, font: fontRegular, color: textDark });
 
     y3 -= 28;
-    page3.drawText(`Working Hours:`, { x: 80, y: y3, size: 9, font: fontBold, color: textDark });
-    page3.drawLine({ start: { x: 80, y: y3 - 1 }, end: { x: 155, y: y3 - 1 }, thickness: 0.8, color: textDark });
-    page3.drawText(` 9 Hours a day (Inc. Lunch Break).`, { x: 155, y: y3, size: 9, font: fontRegular, color: textDark });
-
+    drawSquareBullet(page3, "You are required to substantially use your time and effort to perform assigned tasks during", y3);
     y3 -= 18;
-    page3.drawText(`Work Timing:`, { x: 80, y: y3, size: 9, font: fontBold, color: textDark });
-    page3.drawLine({ start: { x: 80, y: y3 - 1 }, end: { x: 145, y: y3 - 1 }, thickness: 0.8, color: textDark });
-    page3.drawText(` 11AM - 8 PM.`, { x: 145, y: y3, size: 9, font: fontRegular, color: textDark });
-
-    y3 -= 18;
-    page3.drawText(`Job Type:`, { x: 80, y: y3, size: 9, font: fontBold, color: textDark });
-    page3.drawLine({ start: { x: 80, y: y3 - 1 }, end: { x: 130, y: y3 - 1 }, thickness: 0.8, color: textDark });
-    page3.drawText(` Full Time Training`, { x: 130, y: y3, size: 9, font: fontRegular, color: textDark });
-
-    y3 -= 18;
-    page3.drawText(`Location:`, { x: 80, y: y3, size: 9, font: fontBold, color: textDark });
-    page3.drawLine({ start: { x: 80, y: y3 - 1 }, end: { x: 128, y: y3 - 1 }, thickness: 0.8, color: textDark });
-    page3.drawText(` ${location}`, { x: 128, y: y3, size: 9, font: fontRegular, color: textDark });
+    page3.drawText("business hours and such reasonable additional time as may be necessary.", { x: 58, y: y3, size: 12, font: fontRegular, color: textDark });
 
     y3 -= 26;
-    drawSquareBullet(page3, "As a Trainee you will not receive any of the employee benefits that regular employees receive.", y3);
+    page3.drawText(`Working Hours:`, { x: 75, y: y3, size: 12, font: fontBold, color: textDark });
+    page3.drawText(` 9 Hours a day (Inc. Lunch Break).`, { x: 185, y: y3, size: 12, font: fontRegular, color: textDark });
 
-    y3 -= 24;
-    drawSquareBullet(page3, "During the Training period, the company will have all the rights to terminate your", y3);
-    y3 -= 14;
-    page3.drawText("services without offering any reason and you are required to give 15 Days notice should you", { x: 58, y: y3, size: 9, font: fontRegular, color: textDark });
-    y3 -= 14;
-    page3.drawText("wish to terminate your training before the end of your tenure.", { x: 58, y: y3, size: 9, font: fontRegular, color: textDark });
+    y3 -= 20;
+    page3.drawText(`Work Timing:`, { x: 75, y: y3, size: 12, font: fontBold, color: textDark });
+    page3.drawText(` 11 AM - 8 PM.`, { x: 185, y: y3, size: 12, font: fontRegular, color: textDark });
 
-    y3 -= 24;
-    drawSquareBullet(page3, "At any time if you wish to discontinue the training due to personal reasons , you will", y3);
-    y3 -= 14;
-    page3.drawText("have to pay a compensation equal to 1 month stipend or you will have to serve 1 month notice", { x: 58, y: y3, size: 9, font: fontRegular, color: textDark });
-    y3 -= 14;
-    page3.drawText("period.", { x: 58, y: y3, size: 9, font: fontRegular, color: textDark });
+    y3 -= 20;
+    page3.drawText(`Job Type:`, { x: 75, y: y3, size: 12, font: fontBold, color: textDark });
+    page3.drawText(` Full Time Training`, { x: 185, y: y3, size: 12, font: fontRegular, color: textDark });
 
-    y3 -= 24;
-    drawSquareBullet(page3, "All the information acquired during the course shall be strictly confidential and you shall", y3);
-    y3 -= 14;
-    page3.drawText("refrain from using it for your own purpose or from disclosing it to anyone outside of the", { x: 58, y: y3, size: 9, font: fontRegular, color: textDark });
-    y3 -= 14;
-    page3.drawText("Company.", { x: 58, y: y3, size: 9, font: fontRegular, color: textDark });
+    y3 -= 20;
+    page3.drawText(`Location:`, { x: 75, y: y3, size: 12, font: fontBold, color: textDark });
+    page3.drawText(` ${cleanText(location)}`, { x: 185, y: y3, size: 12, font: fontRegular, color: textDark });
 
-    y3 -= 24;
-    drawSquareBullet(page3, "Upon conclusion of your tenure, you will immediately return to the Company all of its", y3);
-    y3 -= 14;
-    page3.drawText("property, equipment and documents including electronically stored information.", { x: 58, y: y3, size: 9, font: fontRegular, color: textDark });
+    y3 -= 28;
+    drawSquareBullet(page3, "As a Trainee you will not receive employee benefits that regular employees receive.", y3);
 
-    y3 -= 24;
-    drawSquareBullet(page3, "You will observe all policies and practices governing the conduct of our business and", y3);
-    y3 -= 14;
-    page3.drawText("employees.", { x: 58, y: y3, size: 9, font: fontRegular, color: textDark });
+    y3 -= 28;
+    drawSquareBullet(page3, "During Training, the company reserves rights to terminate services without offering reason", y3);
+    y3 -= 18;
+    page3.drawText("and you are required to give 15 Days notice should you wish to terminate early.", { x: 58, y: y3, size: 12, font: fontRegular, color: textDark });
 
-    y3 -= 24;
-    drawSquareBullet(page3, "Official communication either within the company or outside the company should be", y3);
-    y3 -= 14;
-    page3.drawText("through the company Email of your manager only.", { x: 58, y: y3, size: 9, font: fontRegular, color: textDark });
+    y3 -= 28;
+    drawSquareBullet(page3, "If you discontinue training for personal reasons, you will have to pay compensation equal to", y3);
+    y3 -= 18;
+    page3.drawText("1 month stipend or serve 1 month notice period.", { x: 58, y: y3, size: 12, font: fontRegular, color: textDark });
 
-    y3 -= 24;
-    drawSquareBullet(page3, "Post successful completion of the tenure, the candidate will be prone to performance", y3);
-    y3 -= 14;
-    page3.drawText("based pre-placement offers by the company.", { x: 58, y: y3, size: 9, font: fontRegular, color: textDark });
+    y3 -= 28;
+    drawSquareBullet(page3, "All information acquired during tenure is strictly confidential and shall not be disclosed.", y3);
 
-    y3 -= 50;
-    page3.drawText(`SIGNATURE:`, { x: 45, y: y3, size: 10, font: fontBold, color: textDark });
-    page3.drawText(`(Candidate's Signature)`, { x: 130, y: y3, size: 9.5, font: fontRegular, color: textDark });
+    y3 -= 28;
+    drawSquareBullet(page3, "Upon tenure conclusion, immediately return all Company equipment, data and property.", y3);
 
-    y3 -= 25;
-    page3.drawText(`DATE:`, { x: 45, y: y3, size: 10, font: fontBold, color: textDark });
+    y3 -= 28;
+    drawSquareBullet(page3, "Official communication must be routed strictly through the company email of your manager.", y3);
+
+    y3 -= 28;
+    drawSquareBullet(page3, "Post successful completion, candidate is eligible for performance-based pre-placement offer.", y3);
+
+    // Signature Block grounded at bottom
+    y3 = 135;
+    page3.drawText(`SIGNATURE:`, { x: 45, y: y3, size: 12.5, font: fontBold, color: textDark });
+    page3.drawText(`________________________ (Candidate's Signature)`, { x: 135, y: y3, size: 12, font: fontRegular, color: textDark });
+
+    y3 = 85;
+    page3.drawText(`DATE:`, { x: 45, y: y3, size: 12.5, font: fontBold, color: textDark });
+    page3.drawText(`________________________`, { x: 135, y: y3, size: 12, font: fontRegular, color: textDark });
 
     drawPageFooter(page3);
 
@@ -507,16 +514,16 @@ export const generateOfferLetterPdfBuffer = async (rawOfferData: any = {}) => {
     drawWatermark(page4);
     drawPageHeader(page4);
 
-    let y4 = 725;
-    page4.drawText("ANNEXURE", { x: 250, y: y4, size: 11, font: fontBold, color: textDark });
+    let y4 = 680;
+    page4.drawText("ANNEXURE", { x: 245, y: y4, size: 14, font: fontBold, color: textDark });
 
-    y4 -= 25;
+    y4 -= 24;
     // Annexure Table Box
     const tableTop = y4;
-    const tableBottom = y4 - 180;
+    const tableBottom = y4 - 215;
     const tableLeft = 45;
     const tableRight = 550;
-    const colSplit = 95;
+    const colSplit = 100;
 
     // Outer Rectangle
     page4.drawRectangle({
@@ -532,47 +539,45 @@ export const generateOfferLetterPdfBuffer = async (rawOfferData: any = {}) => {
     page4.drawLine({ start: { x: colSplit, y: tableTop }, end: { x: colSplit, y: tableBottom }, thickness: 1, color: textDark });
 
     // Header Row
-    page4.drawLine({ start: { x: tableLeft, y: tableTop - 25 }, end: { x: tableRight, y: tableTop - 25 }, thickness: 1, color: textDark });
-    page4.drawText("Sl. No", { x: 52, y: tableTop - 17, size: 9.5, font: fontBold, color: textDark });
-    page4.drawText("Particulars", { x: 110, y: tableTop - 17, size: 9.5, font: fontBold, color: textDark });
+    page4.drawLine({ start: { x: tableLeft, y: tableTop - 28 }, end: { x: tableRight, y: tableTop - 28 }, thickness: 1, color: textDark });
+    page4.drawText("Sl. No", { x: 55, y: tableTop - 19, size: 12, font: fontBold, color: textDark });
+    page4.drawText("Particulars", { x: 115, y: tableTop - 19, size: 12, font: fontBold, color: textDark });
 
     // Row 1
-    let rowY = tableTop - 40;
-    page4.drawText("1.", { x: 65, y: rowY, size: 9.5, font: fontBold, color: textDark });
-    page4.drawText("Professional / Educational Certificates and Mark Sheets towards:", { x: 110, y: rowY, size: 9, font: fontRegular, color: textDark });
-    rowY -= 14;
-    page4.drawText("• 10th standard or equivalent examination (Original MS for Verification)", { x: 115, y: rowY, size: 8.5, font: fontRegular, color: textDark });
-    rowY -= 13;
-    page4.drawText("• 12th standard or equivalent examination (Original MS for Verification)", { x: 115, y: rowY, size: 8.5, font: fontRegular, color: textDark });
-    rowY -= 13;
-    page4.drawText("• Graduation", { x: 115, y: rowY, size: 8.5, font: fontRegular, color: textDark });
-    rowY -= 13;
-    page4.drawText("• Post-graduation / Doctorate", { x: 115, y: rowY, size: 8.5, font: fontRegular, color: textDark });
-    rowY -= 13;
-    page4.drawText("Other relevant educational or skill certifications", { x: 115, y: rowY, size: 8.5, font: fontRegular, color: textDark });
+    let rowY = tableTop - 46;
+    page4.drawText("1.", { x: 68, y: rowY, size: 12, font: fontBold, color: textDark });
+    page4.drawText("Professional / Educational Certificates and Mark Sheets towards:", { x: 115, y: rowY, size: 11.5, font: fontRegular, color: textDark });
+    rowY -= 17;
+    page4.drawText("• 10th standard or equivalent examination (Original for Verification)", { x: 120, y: rowY, size: 11, font: fontRegular, color: textDark });
+    rowY -= 16;
+    page4.drawText("• 12th standard or equivalent examination (Original for Verification)", { x: 120, y: rowY, size: 11, font: fontRegular, color: textDark });
+    rowY -= 16;
+    page4.drawText("• Graduation Degree & Semester Mark Sheets", { x: 120, y: rowY, size: 11, font: fontRegular, color: textDark });
+    rowY -= 16;
+    page4.drawText("• Post-graduation / Master's (if applicable)", { x: 120, y: rowY, size: 11, font: fontRegular, color: textDark });
+    rowY -= 16;
+    page4.drawText("• Other relevant educational or skill certifications", { x: 120, y: rowY, size: 11, font: fontRegular, color: textDark });
 
     // Row 2 Divider
-    page4.drawLine({ start: { x: tableLeft, y: tableTop - 125 }, end: { x: tableRight, y: tableTop - 125 }, thickness: 1, color: textDark });
-    page4.drawText("2.", { x: 65, y: tableTop - 145, size: 9.5, font: fontBold, color: textDark });
-    page4.drawText("COLOR SCANNED COPY OF YOUR PHOTOGRAPHS", { x: 110, y: tableTop - 145, size: 9, font: fontRegular, color: textDark });
+    page4.drawLine({ start: { x: tableLeft, y: tableTop - 146 }, end: { x: tableRight, y: tableTop - 146 }, thickness: 1, color: textDark });
+    page4.drawText("2.", { x: 68, y: tableTop - 168, size: 12, font: fontBold, color: textDark });
+    page4.drawText("COLOR SCANNED COPY OF PASSPORT PHOTOGRAPHS", { x: 115, y: tableTop - 168, size: 11.5, font: fontRegular, color: textDark });
 
     // Row 3 Divider
-    page4.drawLine({ start: { x: tableLeft, y: tableTop - 155 }, end: { x: tableRight, y: tableTop - 155 }, thickness: 1, color: textDark });
-    page4.drawText("3.", { x: 65, y: tableTop - 172, size: 9.5, font: fontBold, color: textDark });
-    page4.drawText("PAN Card, Voter ID or Driving Licence Scanned Copy.", { x: 110, y: tableTop - 172, size: 9, font: fontRegular, color: textDark });
+    page4.drawLine({ start: { x: tableLeft, y: tableTop - 180 }, end: { x: tableRight, y: tableTop - 180 }, thickness: 1, color: textDark });
+    page4.drawText("3.", { x: 68, y: tableTop - 202, size: 12, font: fontBold, color: textDark });
+    page4.drawText("Aadhaar Card, PAN Card, Voter ID or Passport Scanned Copy.", { x: 115, y: tableTop - 202, size: 11.5, font: fontRegular, color: textDark });
 
     // Item 4 below table
     let y4Below = tableBottom - 35;
-    page4.drawText("4. Bank Account Details: Bank Name, Your Name as per Bank records, Account", { x: 45, y: y4Below, size: 9.5, font: fontBold, color: textDark });
-    y4Below -= 14;
-    page4.drawText("Number, IFSC Code.", { x: 62, y: y4Below, size: 9.5, font: fontBold, color: textDark });
+    page4.drawText("4. Bank Account Details: Bank Name, Name as per Bank, Account Number, IFSC Code.", { x: 45, y: y4Below, size: 12, font: fontBold, color: textDark });
 
-    y4Below -= 110;
-    page4.drawText("SIGNATURE:", { x: 45, y: y4Below, size: 10, font: fontBold, color: textDark });
-    y4Below -= 28;
-    page4.drawText("HR MANAGER", { x: 45, y: y4Below, size: 9.5, font: fontBold, color: textDark });
-    y4Below -= 14;
-    page4.drawText("ADYAPAN", { x: 45, y: y4Below, size: 9.5, font: fontBold, color: textDark });
+    y4Below = 180;
+    page4.drawText("SIGNATURE:", { x: 45, y: y4Below, size: 12.5, font: fontBold, color: textDark });
+    y4Below = 145;
+    page4.drawText(cleanText(hrManagerName || "HR MANAGER"), { x: 45, y: y4Below, size: 12, font: fontBold, color: textDark });
+    y4Below = 120;
+    page4.drawText("ADYAPAN EDUTECH PRIVATE LIMITED", { x: 45, y: y4Below, size: 12, font: fontBold, color: textDark });
 
     drawPageFooter(page4);
 

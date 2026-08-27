@@ -1,5 +1,5 @@
 import React from 'react';
-import logoImg from '../../assets/adyapan-logo.jpeg';
+import logoImg from '../../assets/adyapan-logo.png';
 
 const AdyapanLogo = ({ size = 'normal', variant = 'dark', showText = true }) => {
   const isDark = variant === 'dark';
@@ -27,14 +27,12 @@ const AdyapanLogo = ({ size = 'normal', variant = 'dark', showText = true }) => 
 
       {showText && (
         <div className="flex flex-col">
-          <span className={`font-extrabold tracking-tight ${
-            textSizes[size] || textSizes.normal
-          } ${isDark ? 'text-white' : 'text-slate-900'}`}>
+          <span className={`font-extrabold tracking-tight ${textSizes[size] || textSizes.normal
+            } ${isDark ? 'text-white' : 'text-slate-900'}`}>
             ADYAPAN
           </span>
-          <span className={`text-[9px] font-bold tracking-widest uppercase -mt-0.5 ${
-            isDark ? 'text-amber-400/90' : 'text-amber-600'
-          }`}>
+          <span className={`text-[9px] font-bold tracking-widest uppercase -mt-0.5 ${isDark ? 'text-amber-400/90' : 'text-amber-600'
+            }`}>
             Careers
           </span>
         </div>

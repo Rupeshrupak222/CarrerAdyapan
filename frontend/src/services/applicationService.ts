@@ -56,6 +56,26 @@ export const applicationService = {
     return response.data;
   },
 
+  getBulkOfferRangePreview: async (fromId: string, toId: string) => {
+    const response = await api.post('/applications/final-selected/bulk-preview', { fromId, toId });
+    return response.data;
+  },
+
+  executeBulkOfferSend: async (payload: {
+    fromId: string;
+    toId: string;
+    commonOfferData: any;
+    candidateIdsToProcess?: string[];
+  }) => {
+    const response = await api.post('/applications/final-selected/bulk-send', payload);
+    return response.data;
+  },
+
+  saveOfferDraft: async (id: string, offerData: any) => {
+    const response = await api.post(`/applications/${id}/save-offer`, offerData);
+    return response.data;
+  },
+
   sendOfficialOffer: async (id: string, offerData: any) => {
     const response = await api.post(`/applications/${id}/send-offer`, offerData);
     return response.data;

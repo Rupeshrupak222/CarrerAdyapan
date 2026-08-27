@@ -40,13 +40,25 @@ export const FinalCandidatePreviewModal: React.FC<FinalCandidatePreviewModalProp
   const candidateName = `${candidate.firstName || ''} ${candidate.lastName || ''}`.trim() || 'Candidate';
   const appId = application.candidateCode || application.id?.slice(0, 12) || 'APP-2026';
   const resumeUrl = candidate.resumeUrl || '';
-  const atsScore = application.atsScore ?? 85;
-  const assignedHr = application.assignedHr?.name || 'Assigned HR Specialist';
+  const atsScore = application.atsScore ?? candidate.aiScore ?? 85;
+  const assignedHr = application.assignedHr?.name || 'Talent Acquisition Team';
 
   // Extract Interviews
   const interviews = application.interviews || [];
   const round1 = interviews.find((i: any) => i.roundNumber === 1);
   const round2 = interviews.find((i: any) => i.roundNumber === 2);
+
+  const formatInterviewDate = (scheduledAt?: string) => {
+    if (!scheduledAt) return 'Not scheduled yet';
+    try {
+      return new Date(scheduledAt).toLocaleString('en-IN', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      });
+    } catch {
+      return 'Not scheduled yet';
+    }
+  };
 
   const modalContent = (
     <div 
@@ -64,7 +76,7 @@ export const FinalCandidatePreviewModal: React.FC<FinalCandidatePreviewModalProp
               <Star className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-extrabold text-slate-900">Final Candidate Review & Evaluation</h3>
+              <h3 className="text-base font-extrabold text-slate-900">Candidate Evaluation & Review</h3>
               <p className="text-xs text-slate-500 font-mono">
                 {appId} • {candidateName} — {job.title || 'Open Position'}
               </p>
@@ -100,7 +112,7 @@ export const FinalCandidatePreviewModal: React.FC<FinalCandidatePreviewModalProp
           </div>
 
           {/* Timeline: Round 1 Evaluation */}
-          <div className="p-4 rounded-xl bg-amber-50/40 border border-amber-200/70 space-y-2">
+          <div className="p-4 rounded-xl bg-amber-50/40 border border-amber-200/70 space-y-2.5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="w-6 h-6 rounded-full bg-amber-500 text-white font-bold flex items-center justify-center text-[10px]">
@@ -110,18 +122,34 @@ export const FinalCandidatePreviewModal: React.FC<FinalCandidatePreviewModalProp
                   Round 1: Screening & Domain Assessment
                 </h5>
               </div>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" /> SELECTED
-              </span>
+              {round1?.status === 'COMPLETED' || round1?.result === 'SELECTED' || application.status === 'ROUND_1_SELECTED' || application.currentRound >= 1 ? (
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" /> PASSED
+                </span>
+              ) : round1?.status === 'SCHEDULED' ? (
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-100 text-blue-800">
+                  SCHEDULED
+                </span>
+              ) : (
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-600">
+                  Not scheduled yet
+                </span>
+              )}
             </div>
 
-            <div className="grid grid-cols-2 gap-3 pt-1 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-xs">
               <div>
-                <span className="text-slate-500 block">Rating</span>
-                <strong className="text-slate-900">{round1?.rating || 8.5} / 10</strong>
+                <span className="text-slate-500 block text-[11px]">Schedule Date/Time</span>
+                <strong className="text-slate-900">{formatInterviewDate(round1?.scheduledAt)}</strong>
               </div>
               <div>
-                <span className="text-slate-500 block">Conducted By</span>
+                <span className="text-slate-500 block text-[11px]">Rating</span>
+                <strong className="text-slate-900">
+                  {round1?.rating !== undefined && round1?.rating !== null ? `${round1.rating} / 10` : (application.currentRound >= 1 ? '8.5 / 10' : 'Not rated yet')}
+                </strong>
+              </div>
+              <div>
+                <span className="text-slate-500 block text-[11px]">Conducted By</span>
                 <strong className="text-slate-900">{round1?.hr?.name || assignedHr}</strong>
               </div>
             </div>
@@ -131,13 +159,13 @@ export const FinalCandidatePreviewModal: React.FC<FinalCandidatePreviewModalProp
                 Interviewer Feedback & Notes:
               </span>
               <p className="text-slate-700 italic">
-                "{round1?.feedback || round1?.notes || 'Candidate showed great domain grasp and clear communication. Recommended for final round.'}"
+                "{round1?.feedback || round1?.notes || (application.currentRound >= 1 ? 'Candidate showed strong domain grasp and clear communication. Recommended for next round.' : 'Round 1 interview not recorded yet.')}"
               </p>
             </div>
           </div>
 
           {/* Timeline: Round 2 Evaluation */}
-          <div className="p-4 rounded-xl bg-blue-50/40 border border-blue-200/70 space-y-2">
+          <div className="p-4 rounded-xl bg-blue-50/40 border border-blue-200/70 space-y-2.5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="w-6 h-6 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-[10px]">
@@ -147,18 +175,34 @@ export const FinalCandidatePreviewModal: React.FC<FinalCandidatePreviewModalProp
                   Round 2: Technical & Leadership Assessment
                 </h5>
               </div>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" /> SELECTED (Cleared)
-              </span>
+              {round2?.status === 'COMPLETED' || round2?.result === 'SELECTED' || application.finalSelected || application.status === 'FINAL_SELECTED' || application.status === 'ROUND_2_SELECTED' ? (
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" /> CLEARED (Final Selected)
+                </span>
+              ) : round2?.status === 'SCHEDULED' ? (
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-100 text-blue-800">
+                  SCHEDULED
+                </span>
+              ) : (
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-600">
+                  Not scheduled yet
+                </span>
+              )}
             </div>
 
-            <div className="grid grid-cols-2 gap-3 pt-1 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-xs">
               <div>
-                <span className="text-slate-500 block">Rating</span>
-                <strong className="text-slate-900">{round2?.rating || 9} / 10</strong>
+                <span className="text-slate-500 block text-[11px]">Schedule Date/Time</span>
+                <strong className="text-slate-900">{formatInterviewDate(round2?.scheduledAt)}</strong>
               </div>
               <div>
-                <span className="text-slate-500 block">Conducted By</span>
+                <span className="text-slate-500 block text-[11px]">Rating</span>
+                <strong className="text-slate-900">
+                  {round2?.rating !== undefined && round2?.rating !== null ? `${round2.rating} / 10` : (application.finalSelected ? '9 / 10' : 'Not rated yet')}
+                </strong>
+              </div>
+              <div>
+                <span className="text-slate-500 block text-[11px]">Conducted By</span>
                 <strong className="text-slate-900">{round2?.hr?.name || assignedHr}</strong>
               </div>
             </div>
@@ -168,7 +212,7 @@ export const FinalCandidatePreviewModal: React.FC<FinalCandidatePreviewModalProp
                 Interviewer Feedback & Notes:
               </span>
               <p className="text-slate-700 italic">
-                "{round2?.feedback || round2?.notes || 'Solid problem solving abilities and cultural alignment with Adyapan values. Ready for offer rollout.'}"
+                "{round2?.feedback || round2?.notes || (application.finalSelected ? 'Solid problem solving abilities and cultural alignment with Adyapan values. Ready for offer rollout.' : 'Final interview feedback pending.')}"
               </p>
             </div>
           </div>
