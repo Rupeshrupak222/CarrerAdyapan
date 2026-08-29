@@ -7,6 +7,7 @@ const getAuthToken = () => {
 export interface StreamQueryOptions {
   message: string;
   history?: any[];
+  signal?: AbortSignal;
   onChunk?: (chunk: string) => void;
   onError?: (error: string) => void;
   onComplete?: () => void;
@@ -16,7 +17,7 @@ export const aiService = {
   /**
    * Stream Copilot response using Server-Sent Events (SSE)
    */
-  async streamQuery({ message, history = [], onChunk, onError, onComplete }: StreamQueryOptions) {
+  async streamQuery({ message, history = [], signal, onChunk, onError, onComplete }: StreamQueryOptions) {
     const token = getAuthToken();
 
     try {
@@ -26,7 +27,8 @@ export const aiService = {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ query: message, history })
+        body: JSON.stringify({ query: message, history }),
+        signal
       });
 
       if (!response.ok) {
@@ -35,7 +37,7 @@ export const aiService = {
       }
 
       if (!response.body) {
-        throw new Error('Response body is null');
+        throw new Error('Response stream is unavailable');
       }
 
       const reader = response.body.getReader();
@@ -67,7 +69,7 @@ export const aiService = {
                 return;
               }
             } catch (parseErr) {
-              console.warn('SSE Parse error:', parseErr);
+              console.warn('SSE chunk parse error:', parseErr);
             }
           }
         }
@@ -75,6 +77,10 @@ export const aiService = {
 
       onComplete?.();
     } catch (err: any) {
+      if (err.name === 'AbortError') {
+        console.log('Stream aborted by user');
+        return;
+      }
       console.error('aiService streamQuery error:', err);
       onError?.(err.message || 'Failed to stream response from AI Copilot');
     }
@@ -98,11 +104,12 @@ export const aiService = {
     if (!response.ok || !data.success) {
       throw new Error(data.message || 'Failed to send query to AI Copilot');
     }
-    return data.response;
+
+    return data;
   },
 
   /**
-   * Clear user conversation history
+   * Clear conversation history
    */
   async clearHistory() {
     const token = getAuthToken();
@@ -113,7 +120,6 @@ export const aiService = {
       }
     });
 
-    const data = await response.json();
-    return data;
+    return await response.json().catch(() => ({ success: true }));
   }
 };

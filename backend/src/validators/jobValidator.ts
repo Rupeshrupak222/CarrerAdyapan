@@ -12,9 +12,11 @@ export const createJobSchema = Joi.object({
   salaryMax: Joi.number().optional().allow(null),
   location: Joi.string().required(),
   status: Joi.string().valid('DRAFT', 'PUBLISHED', 'CLOSED', 'ARCHIVED').default('DRAFT'),
+  interviewRounds: Joi.array().optional().allow(null),
+  totalRounds: Joi.number().optional().allow(null),
 });
 
 export const updateJobSchema = createJobSchema.fork(
-  ['title', 'department', 'description', 'requirements', 'experienceLevel', 'location'],
+  ['title', 'department', 'description', 'requirements', 'experienceLevel', 'location', 'status', 'type', 'responsibilities', 'salaryMin', 'salaryMax', 'interviewRounds', 'totalRounds'],
   (schema) => schema.optional()
 );
