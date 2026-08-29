@@ -1,10 +1,10 @@
 import prisma from '../config/db.js';
 import { logger } from '../utils/logger.js';
-import { queryGeminiCopilot } from '../services/geminiService.js';
+import { streamGeminiCopilot, queryGeminiCopilot } from '../services/geminiService.js';
 import { parseResumeText, calculateAtsScore } from '../services/atsScoringEngine.js';
 
 // AI Score Candidate
-export const scoreCandidate = async (req, res) => {
+export const scoreCandidate = async (req: any, res: any) => {
   try {
     const { applicationId } = req.body;
 
@@ -61,7 +61,7 @@ export const scoreCandidate = async (req, res) => {
 };
 
 // Generate Interview Questions
-export const generateQuestions = async (req, res) => {
+export const generateQuestions = async (req: any, res: any) => {
   try {
     const { applicationId } = req.body;
 
@@ -135,9 +135,9 @@ export const generateQuestions = async (req, res) => {
 };
 
 /**
- * Standard Non-Streaming AI Recruitment Assistant (Gemini API + Database Tools)
+ * Standard Non-Streaming AI Recruitment Assistant
  */
-export const getHiringAssistant = async (req, res) => {
+export const getHiringAssistant = async (req: any, res: any) => {
   try {
     const { query, history = [] } = req.body;
 
@@ -150,7 +150,7 @@ export const getHiringAssistant = async (req, res) => {
       history
     });
 
-    // Save conversation to DB
+    // Save conversation to DB asynchronously
     try {
       await prisma.aIConversation.create({
         data: {
@@ -173,19 +173,19 @@ export const getHiringAssistant = async (req, res) => {
         text: reply
       }
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('AI Assistant Error:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to get response from Gemini AI Assistant'
+      message: 'Failed to get response from AI Assistant. Please try again.'
     });
   }
 };
 
 /**
- * Server-Sent Events (SSE) Streaming AI Recruitment Assistant
+ * Server-Sent Events (SSE) True Native Streaming AI Recruitment Assistant
  */
-export const streamHiringAssistant = async (req, res) => {
+export const streamHiringAssistant = async (req: any, res: any) => {
   try {
     const { query, history = [] } = req.body;
 
@@ -197,48 +197,47 @@ export const streamHiringAssistant = async (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache, no-transform');
     res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no'); // Disable proxy buffering
     res.flushHeaders?.();
 
-    const sendEvent = (data) => {
+    const sendEvent = (data: any) => {
       res.write(`data: ${JSON.stringify(data)}\n\n`);
     };
 
-    const { reply } = await queryGeminiCopilot({
+    // Native token streaming directly from Gemini
+    const fullReply = await streamGeminiCopilot({
       message: query.trim(),
-      history
+      history,
+      onChunk: (chunk: string) => {
+        sendEvent({ chunk, done: false });
+      }
     });
-
-    // Stream out chunks for smooth typing animation
-    const chunkSize = 15;
-    for (let i = 0; i < reply.length; i += chunkSize) {
-      const textChunk = reply.slice(i, i + chunkSize);
-      sendEvent({ chunk: textChunk, done: false });
-      await new Promise(r => setTimeout(r, 20));
-    }
 
     sendEvent({ chunk: '', done: true });
     res.end();
 
-    // Save conversation to database
-    try {
-      await prisma.aIConversation.create({
-        data: {
-          userId: req.user.id,
-          messages: [
-            { role: 'user', content: query },
-            { role: 'assistant', content: reply }
-          ]
-        }
-      });
-    } catch (saveErr) {
-      logger.warn('Failed to save streamed conversation:', saveErr);
+    // Persist conversation to database in background
+    if (req.user?.id && fullReply) {
+      try {
+        await prisma.aIConversation.create({
+          data: {
+            userId: req.user.id,
+            messages: [
+              { role: 'user', content: query },
+              { role: 'assistant', content: fullReply }
+            ]
+          }
+        });
+      } catch (saveErr) {
+        logger.warn('Failed to save streamed conversation:', saveErr);
+      }
     }
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Stream AI Assistant Error:', error);
     if (!res.headersSent) {
-      res.status(500).json({ success: false, message: error.message || 'Failed to stream response' });
+      res.status(500).json({ success: false, message: 'Unable to stream response from AI Assistant' });
     } else {
-      res.write(`data: ${JSON.stringify({ error: error.message || 'Streaming failed', done: true })}\n\n`);
+      res.write(`data: ${JSON.stringify({ error: 'Communication error with AI service. Please try again.', done: true })}\n\n`);
       res.end();
     }
   }
@@ -247,7 +246,7 @@ export const streamHiringAssistant = async (req, res) => {
 /**
  * Clear conversation memory
  */
-export const clearConversation = async (req, res) => {
+export const clearConversation = async (req: any, res: any) => {
   try {
     await prisma.aIConversation.deleteMany({
       where: { userId: req.user.id }

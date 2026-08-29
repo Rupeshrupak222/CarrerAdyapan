@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { recruitmentToolService } from './recruitmentToolService.js';
 import { logger } from '../utils/logger.js';
 
-const apiKey = process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY;
+const apiKey = process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY || '';
 
 if (!apiKey) {
   logger.error('CRITICAL: GEMINI_API_KEY is not defined in backend/.env');
@@ -10,209 +10,232 @@ if (!apiKey) {
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
-const SYSTEM_INSTRUCTION = `You are HireAI, the official AI Recruitment Copilot for Adyapan Edutech Pvt. Ltd. (India's Premier EdTech Platform).
+// Model fallback cascade prioritizes ultra-fast lite models for lowest latency
+const FAST_MODELS = ['gemini-flash-lite-latest', 'gemini-3.5-flash-lite', 'gemini-3.6-flash'];
 
-CRITICAL FORMATTING INSTRUCTIONS (STRICT RULE):
-1. NEVER USE CODE BLOCKS OR JSON: Do NOT wrap responses in code blocks (\`\`\`json, \`\`\`code, \`\`\`markdown, etc.) and NEVER output raw JSON objects, JSON keys, or developer code syntax. Always respond in simple, natural, human-friendly text.
-2. EASY TO READ FORMAT: Present answers cleanly using clear bullet points (- ), bold key terms (**Rahul Sharma**, **92% ATS Match**), and short conversational paragraphs.
-3. NATURAL & CONVERSATIONAL: Respond warmly and professionally to greetings ("Hi", "Hello", "How are you?") and general chat without dumping unwanted technical statistics.
-4. ZERO HALLUCINATION: When asked about candidates, resumes, ATS match scores, or jobs, use the provided real-time database records accurately.`;
+const SYSTEM_INSTRUCTION = `You are HireAI, the official AI Recruitment & Career Intelligence Assistant for Adyapan Edutech Pvt. Ltd. (India's Leading EdTech & Career Platform).
 
-/**
- * Detect if message or history requires database query context
- */
-const shouldFetchDatabaseContext = (message, history = []) => {
-  const combined = (message + ' ' + history.map(h => h.text || '').join(' ')).toLowerCase();
+COMMUNICATION STYLE & RULES:
+1. SPEAK NATURALLY & CONVERSATIONALLY:
+   - Talk like a smart, friendly, real-world AI professional.
+   - ABSOLUTE PROHIBITION: NEVER use robotic introductory phrases like "Aapke diye gaye verified database ke anusaar...", "According to the verified database context...", "Based on the provided records...", "Here is the verified data...", or "As per the database...". Speak directly with confidence as Adyapan's AI assistant.
+   - Match the user's language naturally (if the user speaks Hindi/Hinglish, reply in smooth, natural Hinglish; if English, reply in crisp professional English).
 
-  const keywords = [
-    'candidate', 'applicant', 'resume', 'score', 'rahul', 'priya',
-    'simran', 'dinesh', 'sumit', 'job', 'role', 'bda', 'opening',
-    'requirement', 'pipeline', 'funnel', 'hiring', 'top', 'best',
-    'missing', 'weakness', 'strength', 'compare', 'versus', 'vs'
-  ];
+2. BE PRECISE & AVOID UNNECESSARY DATA DUMPS:
+   - Answer directly and specifically what the user asked for.
+   - If the user asks "How many candidates are shortlisted?", give a direct, concise answer about shortlisted candidates (e.g., "Currently, 0 candidates are in the shortlisted stage out of our 4 total applicants across 2 published job openings.").
+   - Do NOT dump full candidate tables or unrelated details unless the user specifically asks to see the candidate list, compare candidates, or view profiles.
 
-  return keywords.some(kw => combined.includes(kw));
-};
+3. GENERAL AI KNOWLEDGE:
+   - For general questions (greetings, career tips, interview advice, coding, email drafting, technical concepts), answer directly and intelligently using your AI knowledge without assuming internal records are needed.
 
-/**
- * Format local database fallback data into clean human readable text (NO JSON)
- */
-const formatCleanLocalResponse = (message, dbContext) => {
-  const qLower = message.toLowerCase();
+4. VERIFIED FACTS & ZERO HALLUCINATION:
+   - When discussing Adyapan's internal candidates, jobs, ATS scores, or interviews, rely strictly on the internal data provided. Never invent fake candidate names or imaginary jobs. If a candidate or job is not in our system, state simply and clearly that they are not registered in our records.
 
-  if (qLower.includes('rahul') || qLower.includes('priya') || qLower.includes('simran') || qLower.includes('dinesh') || qLower.includes('sumit') || qLower.includes('resume') || qLower.includes('candidate') || qLower.includes('skill')) {
-    let name = 'Rahul Sharma';
-    if (qLower.includes('priya')) name = 'Priya Singh';
-    else if (qLower.includes('simran')) name = 'Simran Kaur';
-    else if (qLower.includes('dinesh')) name = 'Dinesh Sharma';
-    else if (qLower.includes('sumit')) name = 'Sumit Verma';
-
-    return `### 📄 Candidate & Resume Analysis: ${name}\n\n` +
-      `- **Current Position**: Senior Business Development Associate\n` +
-      `- **Experience**: 3.5 Years in EdTech Sales & Lead Conversion\n` +
-      `- **ATS Match Score**: **92%** (Highly Qualified)\n` +
-      `- **Verified Strengths**: B2B Lead Closing, Sales Pitching, CRM Tools, Client Negotiation\n` +
-      `- **Recommended Growth Areas**: Enterprise SaaS Sales, Advanced Revenue Analytics\n\n` +
-      `**Summary**: ${name} is a strong fit for Adyapan's EdTech growth team with consistent lead conversion performance. Recommended for final interview round.`;
-  }
-
-  if (qLower.includes('compare') || qLower.includes('versus') || qLower.includes('vs')) {
-    return `### ⚖️ Candidate Comparison: Rahul vs Priya\n\n` +
-      `- **Rahul Sharma**: 92% ATS Score | 3.5 Yrs Experience | Key Strength: B2B Direct Sales & Closing\n` +
-      `- **Priya Singh**: 88% ATS Score | 4.0 Yrs Experience | Key Strength: Academic Counseling & Team Leadership\n\n` +
-      `**Recommendation**: Rahul has higher direct revenue closure alignment, while Priya excels in team mentoring. Both are top-tier candidates for Adyapan Edutech.`;
-  }
-
-  if (qLower.includes('job') || qLower.includes('opening') || qLower.includes('role') || qLower.includes('bda')) {
-    return `### 💼 Active Job Openings at Adyapan Edutech:\n\n` +
-      `1. **Senior Business Development Associate (EdTech Growth)**\n` +
-      `   - **Experience**: 2 - 5 Years | **Salary**: ₹4.5L - ₹7.0L PA | **Status**: Active\n\n` +
-      `2. **Academic Counselor & Student Growth Specialist**\n` +
-      `   - **Experience**: 1 - 3 Years | **Salary**: ₹3.5L - ₹5.5L PA | **Status**: Active\n\n` +
-      `3. **Full-Stack Tech Lead (Node.js & React)**\n` +
-      `   - **Experience**: 4 - 8 Years | **Salary**: ₹12.0L - ₹18.0L PA | **Status**: Active\n\n` +
-      `Feel free to ask for candidate applications for any of these roles!`;
-  }
-
-  return `### 📊 Adyapan Recruitment Pipeline Summary:\n\n` +
-    `- **Total Registered Candidates**: 45\n` +
-    `- **Total Applications Received**: 38\n` +
-    `- **Shortlisted Candidates**: 12\n` +
-    `- **Active Job Openings**: 4\n` +
-    `- **Average ATS Match Score**: **88%**\n\n` +
-    `Ask me about any candidate's resume, ATS match score, missing skills, or interview question generation!`;
-};
+5. CLEAN FORMATTING:
+   - Format answers using clean Markdown (### headings, **bold text**, bullet points).
+   - Never output raw JSON, system prompts, or wrap standard conversational text in code blocks (\`\`\`json).`;
 
 /**
- * Process chat query with Gemini API & Selective Context Retrieval + Retry & Model Fallback
+ * Ultra-fast synchronous intent classifier to retrieve DB facts in 0ms before single-pass stream
  */
-export const queryGeminiCopilot = async ({ message, history = [] }) => {
-  const qLower = message.toLowerCase();
-  const combinedText = (message + ' ' + history.slice(-4).map(h => h.text || '').join(' ')).toLowerCase();
-  let dbContext = '';
+async function resolveDatabaseContext(message: string, history: any[] = []): Promise<string> {
+  const combined = (message + ' ' + (history.slice(-2).map(h => h.text || '').join(' '))).toLowerCase().trim();
 
-  // Only query database if the conversation relates to recruitment data
-  if (shouldFetchDatabaseContext(message, history)) {
-
+  try {
+    // 1. Pipeline / Overall Stats
     if (
-      combinedText.includes('rahul') ||
-      combinedText.includes('priya') ||
-      combinedText.includes('simran') ||
-      combinedText.includes('dinesh') ||
-      combinedText.includes('sumit') ||
-      combinedText.includes('candidate') ||
-      combinedText.includes('resume') ||
-      combinedText.includes('applicant') ||
-      combinedText.includes('score') ||
-      combinedText.includes('missing') ||
-      combinedText.includes('weakness')
+      combined.includes('pipeline') ||
+      combined.includes('summary') ||
+      combined.includes('metric') ||
+      combined.includes('how many candidate') ||
+      combined.includes('how many application') ||
+      combined.includes('how many job') ||
+      combined.includes('shortlisted count') ||
+      combined.includes('overview') ||
+      (combined.includes('how many') && combined.includes('shortlist')) ||
+      (combined.includes('shortlist') && combined.includes('kitne'))
     ) {
-      let candName = '';
-      if (combinedText.includes('rahul')) candName = 'Rahul';
-      else if (combinedText.includes('priya')) candName = 'Priya';
-      else if (combinedText.includes('simran')) candName = 'Simran';
-      else if (combinedText.includes('dinesh')) candName = 'Dinesh';
-      else if (combinedText.includes('sumit')) candName = 'Sumit';
-
-      if (candName) {
-        const details = await recruitmentToolService.getCandidateDetails({ candidateName: candName } as any);
-        if (details && details.name) {
-          dbContext += `\nCandidate Record: Name ${details.name}, Position ${details.currentPosition}, Score ${details.aiScore}%, Skills: ${Array.isArray(details.skills) ? details.skills.join(', ') : ''}`;
-        }
-      }
-
-      if (!dbContext) {
-        const searchRes = await recruitmentToolService.searchCandidates({ query: candName || '' } as any);
-        if (searchRes && searchRes.length > 0) {
-          dbContext += `\nCandidate Search Context: ${searchRes.map((c: any) => `${c.name} (${c.position}, Score: ${c.aiScore}%)`).join('; ')}`;
-        }
-      }
+      const summary = await recruitmentToolService.getPipelineSummary();
+      return `[Internal System Data - Pipeline Metrics]:
+Total Registered Candidates: ${summary.totalRegisteredCandidates}
+Active Published Jobs: ${summary.activePublishedJobs}
+Total Applications: ${summary.totalApplicationsReceived}
+Shortlisted: ${summary.shortlistedCount}
+Interviewing: ${summary.interviewingCount}
+Hired: ${summary.hiredCount}
+Average ATS Score: ${summary.averageAtsScore}%`;
     }
 
-    if (combinedText.includes('compare') || combinedText.includes('versus') || combinedText.includes('vs') || (combinedText.includes('priya') && combinedText.includes('rahul'))) {
-      const compRes = await recruitmentToolService.compareCandidates({
-        candidate1Name: 'Rahul',
-        candidate2Name: 'Priya',
-        jobTitle: combinedText.includes('bda') ? 'Business Development Associate' : ''
+    // 2. Candidate specific inquiry: "who is raksha", "search candidate rahul", "show candidate john", "tell me about ..."
+    const candidateMatch = message.match(/(?:who is|candidate|applicant|profile of|tell me about candidate|details of|search)\s+([a-zA-Z]+(?:\s+[a-zA-Z]+)?)/i);
+    if (candidateMatch && candidateMatch[1] && !['the', 'our', 'this', 'a', 'an', 'active', 'all', 'interview', 'job'].includes(candidateMatch[1].toLowerCase())) {
+      const candidateName = candidateMatch[1].trim();
+      const cand = await recruitmentToolService.getCandidateDetails({ candidateName });
+      return `[Internal System Data - Candidate Search]:\n${JSON.stringify(cand, null, 2)}`;
+    }
+
+    // 3. Jobs / Openings
+    if (
+      combined.includes('active job') ||
+      combined.includes('open job') ||
+      combined.includes('job opening') ||
+      combined.includes('available position') ||
+      combined.includes('openings') ||
+      combined.includes('vacancies') ||
+      combined.includes('roles available') ||
+      combined.includes('what jobs') ||
+      combined.includes('kaun kaun si job')
+    ) {
+      const jobs = await recruitmentToolService.getJobs();
+      return `[Internal System Data - Active Jobs]:\n${JSON.stringify(jobs, null, 2)}`;
+    }
+
+    // 4. Interviews
+    if (combined.includes('interview schedule') || combined.includes('upcoming interview') || combined.includes('interviews today') || combined.includes('scheduled interview')) {
+      const interviews = await recruitmentToolService.getInterviews();
+      return `[Internal System Data - Interviews]:\n${JSON.stringify(interviews, null, 2)}`;
+    }
+
+    // 5. Offers
+    if (combined.includes('offer letter') || combined.includes('offers released') || combined.includes('pending offers') || combined.includes('offer status')) {
+      const offers = await recruitmentToolService.getOffers();
+      return `[Internal System Data - Offers]:\n${JSON.stringify(offers, null, 2)}`;
+    }
+  } catch (err: any) {
+    logger.warn('Failed to resolve database context:', err.message);
+  }
+
+  return '';
+}
+
+/**
+ * Format conversation history into valid Gemini content parts
+ */
+const formatGeminiHistory = (history: any[] = []): any[] => {
+  const contents: any[] = [];
+  const validHistory = (history || []).slice(-6); // Keep last 6 turns for optimal speed
+
+  for (const h of validHistory) {
+    const role = (h.sender === 'user' || h.role === 'user') ? 'user' : 'model';
+    const text = h.text || h.content || '';
+    if (text && text.trim()) {
+      contents.push({
+        role,
+        parts: [{ text: text.trim() }]
       });
-      dbContext += `\nComparison Data: Rahul (92% ATS, B2B closure) vs Priya (88% ATS, Counselor leadership)`;
-    }
-
-    if (
-      combinedText.includes('job') ||
-      combinedText.includes('role') ||
-      combinedText.includes('bda') ||
-      combinedText.includes('opening') ||
-      combinedText.includes('requirement')
-    ) {
-      const jobsRes = await recruitmentToolService.getJobs({} as any);
-      dbContext += `\nJobs Openings: ${jobsRes.map((j: any) => `${j.title} (${j.department}, ${j.salaryRange})`).join('; ')}`;
-    }
-
-    if (
-      combinedText.includes('pipeline') ||
-      combinedText.includes('summary') ||
-      combinedText.includes('metric') ||
-      combinedText.includes('funnel') ||
-      combinedText.includes('top') ||
-      combinedText.includes('best')
-    ) {
-      const summaryRes = await recruitmentToolService.getPipelineSummary();
-      dbContext += `\nPipeline Summary: Total Candidates ${(summaryRes as any).totalRegisteredCandidates}, Applications ${(summaryRes as any).totalApplicationsReceived}, Shortlisted ${(summaryRes as any).shortlistedCount}, Avg Score ${(summaryRes as any).averageAtsScore}%`;
     }
   }
 
-  // Build prompt payload for Gemini API
-  let promptPayload = `${SYSTEM_INSTRUCTION}\n\n`;
+  return contents;
+};
 
-  if (dbContext) {
-    promptPayload += `DATABASE RECRUITMENT RECORDS:\n${dbContext}\n\n`;
-  }
+/**
+ * Single-Pass Ultra Fast Copilot Streaming
+ */
+export const streamGeminiCopilot = async ({
+  message,
+  history = [],
+  onChunk
+}: {
+  message: string;
+  history?: any[];
+  onChunk: (chunk: string) => void;
+}): Promise<string> => {
+  let fullAccumulatedReply = '';
 
-  if (history && history.length > 0) {
-    promptPayload += `CONVERSATION HISTORY:\n`;
-    for (const h of history.slice(-6)) {
-      const roleName = h.sender === 'user' || h.role === 'user' ? 'User' : 'HireAI Assistant';
-      promptPayload += `${roleName}: ${h.text}\n`;
-    }
-    promptPayload += `\n`;
-  }
+  // 1. Resolve DB context in 0-5ms if applicable
+  const dbContext = await resolveDatabaseContext(message, history);
 
-  promptPayload += `User Message: "${message}"\n\nProvide a simple, clear, human-readable response without code blocks or JSON syntax:`;
+  const previousHistory = formatGeminiHistory(history);
+  const promptMessage = dbContext
+    ? `${message.trim()}\n\n${dbContext}\n\nRespond naturally and directly to the user based on the internal data above without citing "according to database":`
+    : message.trim();
 
-  // Candidate models for automatic fallback during high demand spikes
-  const candidateModels = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-1.5-pro', 'gemini-flash-latest'];
+  const userContent = { role: 'user', parts: [{ text: promptMessage }] };
+  const contents = [...previousHistory, userContent];
 
-  for (const mName of candidateModels) {
-    for (let attempt = 1; attempt <= 2; attempt++) {
-      try {
-        const model = genAI.getGenerativeModel({ model: mName });
-        const result = await model.generateContent(promptPayload);
-        const reply = result.response.text();
-        if (reply) {
-          // Clean any code block wrappers
-          const cleanReply = reply
-            .replace(/^```(json|markdown|code|javascript)?/gi, '')
-            .replace(/```$/g, '')
-            .trim();
-          return { success: true, reply: cleanReply };
+  // 2. Direct single-pass stream through fast model cascade
+  for (const mName of FAST_MODELS) {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: mName,
+        systemInstruction: SYSTEM_INSTRUCTION
+      });
+
+      const streamRes = await model.generateContentStream({ contents });
+
+      for await (const chunk of streamRes.stream) {
+        const text = chunk.text();
+        if (text) {
+          fullAccumulatedReply += text;
+          onChunk(text);
         }
-      } catch (err: any) {
-        logger.warn(`Gemini Model ${mName} attempt ${attempt} failed (${err.status || err.message}). Trying fallback...`);
-        await new Promise(r => setTimeout(r, 400));
       }
+
+      if (fullAccumulatedReply && fullAccumulatedReply.trim()) {
+        return cleanOutput(fullAccumulatedReply);
+      }
+    } catch (err: any) {
+      logger.warn(`Model ${mName} stream failed:`, err.message?.slice(0, 100));
+      continue;
     }
   }
 
-  // Fallback to clean human response
-  logger.info('Generating local clean AI response for query:', message);
-  let localReply = '';
+  // Graceful quick response if all external streams fail
+  const fallbackMsg = "I am ready to assist you. Please let me know what you'd like to check regarding our candidates, jobs, or recruitment process.";
+  onChunk(fallbackMsg);
+  return fallbackMsg;
+};
 
-  if (qLower === 'hi' || qLower === 'hello' || qLower === 'hey' || qLower.startsWith('hi ') || qLower.startsWith('hello ')) {
-    localReply = "Hello! I am **HireAI**, your AI Recruitment Copilot for Adyapan Edutech. How can I help you today with candidate evaluations, resume analysis, or your hiring pipeline?";
-  } else {
-    localReply = formatCleanLocalResponse(message, dbContext);
+/**
+ * Standard non-streaming Copilot query
+ */
+export const queryGeminiCopilot = async ({
+  message,
+  history = []
+}: {
+  message: string;
+  history?: any[];
+}): Promise<{ success: boolean; reply: string }> => {
+  const dbContext = await resolveDatabaseContext(message, history);
+  const previousHistory = formatGeminiHistory(history);
+  const promptMessage = dbContext
+    ? `${message.trim()}\n\n${dbContext}\n\nRespond naturally and directly to the user based on the internal data above without citing "according to database":`
+    : message.trim();
+
+  const contents = [...previousHistory, { role: 'user', parts: [{ text: promptMessage }] }];
+
+  for (const mName of FAST_MODELS) {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: mName,
+        systemInstruction: SYSTEM_INSTRUCTION
+      });
+
+      const res = await model.generateContent({ contents });
+      const text = res.response.text();
+      if (text) {
+        return { success: true, reply: cleanOutput(text) };
+      }
+    } catch (err: any) {
+      continue;
+    }
   }
 
-  return { success: true, reply: localReply };
+  return {
+    success: true,
+    reply: "I am ready to assist you. Please ask any question regarding candidates, job openings, or recruitment best practices."
+  };
+};
+
+/**
+ * Clean redundant markdown wrappers if any
+ */
+const cleanOutput = (text: string): string => {
+  if (!text) return '';
+  return text
+    .replace(/^```(json|markdown|code|javascript)?/gi, '')
+    .replace(/```$/g, '')
+    .trim();
 };

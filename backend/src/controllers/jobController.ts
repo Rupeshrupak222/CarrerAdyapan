@@ -181,8 +181,14 @@ export const getAllJobs = async (req, res) => {
 
 export const getJobById = async (req, res) => {
   try {
-    const job = await prisma.job.findUnique({
-      where: { id: req.params.id },
+    const { id } = req.params;
+    const job = await prisma.job.findFirst({
+      where: {
+        OR: [
+          { id },
+          { slug: id }
+        ]
+      },
       include: {
         applications: {
           include: {
@@ -211,17 +217,74 @@ export const getJobById = async (req, res) => {
 
 export const updateJob = async (req, res) => {
   try {
-    const job = await prisma.job.update({
-      where: { id: req.params.id },
-      data: req.body
+    const { id } = req.params;
+    const target = await prisma.job.findFirst({
+      where: {
+        OR: [
+          { id },
+          { slug: id }
+        ]
+      }
+    });
+
+    if (!target) {
+      return res.status(404).json({
+        success: false,
+        message: 'Job not found in database'
+      });
+    }
+
+    const {
+      title,
+      slug,
+      department,
+      description,
+      requirements,
+      responsibilities,
+      type,
+      experienceLevel,
+      salaryMin,
+      salaryMax,
+      location,
+      status,
+      interviewRounds,
+      totalRounds
+    } = req.body;
+
+    const data: any = {};
+    if (title !== undefined) data.title = title;
+    if (slug !== undefined) data.slug = slug;
+    if (department !== undefined) data.department = department;
+    if (description !== undefined) data.description = description;
+    if (requirements !== undefined) data.requirements = requirements;
+    if (responsibilities !== undefined) data.responsibilities = responsibilities;
+    if (type !== undefined) data.type = type;
+    if (experienceLevel !== undefined) data.experienceLevel = experienceLevel;
+    if (salaryMin !== undefined) data.salaryMin = salaryMin !== '' && salaryMin !== null ? parseFloat(salaryMin) : null;
+    if (salaryMax !== undefined) data.salaryMax = salaryMax !== '' && salaryMax !== null ? parseFloat(salaryMax) : null;
+    if (location !== undefined) data.location = location;
+    if (status !== undefined) data.status = status;
+    if (interviewRounds !== undefined) data.interviewRounds = interviewRounds;
+    if (totalRounds !== undefined) data.totalRounds = parseInt(totalRounds) || (Array.isArray(interviewRounds) ? interviewRounds.length : 3);
+
+    const updatedJob = await prisma.job.update({
+      where: { id: target.id },
+      data,
+      include: {
+        applications: {
+          include: {
+            candidate: true
+          }
+        }
+      }
     });
     
-    res.json({ success: true, job });
-  } catch (error) {
+    res.json({ success: true, job: updatedJob });
+  } catch (error: any) {
     console.error('Update Job Error:', error);
     res.status(500).json({ 
       success: false, 
-      message: 'Failed to update job' 
+      message: error?.message || 'Failed to update job in database' 
     });
   }
 };
