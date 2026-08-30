@@ -5,6 +5,7 @@ import { AuthProvider } from './context/AuthContext';
 import { CandidateAuthProvider } from './context/CandidateAuthContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import AppRoutes from './routes/AppRoutes';
+import ScrollToTop from './components/common/ScrollToTop';
 
 const ThemeAwareToaster: React.FC = () => {
   const { theme } = useTheme();
@@ -47,6 +48,7 @@ const ThemeAwareToaster: React.FC = () => {
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <ThemeProvider>
         <AuthProvider>
           <CandidateAuthProvider>

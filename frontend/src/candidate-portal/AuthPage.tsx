@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowRight, AlertCircle } from 'lucide-react';
+import { ArrowRight, Lock, Mail, User, Phone, CheckCircle2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import logo from '../assets/adyapan-logo.png';
 import api from '../services/api';
 import toast from 'react-hot-toast';
+import { useCandidateAuth } from '../context/CandidateAuthContext';
+import { useAuth } from '../context/AuthContext';
 
 const AuthPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
+  const isSignup = params.get('mode') === 'signup';
   const redirectUrl = params.get('redirect') || '';
+
+  const { register: registerCandidate, login: loginCandidate } = useCandidateAuth();
+  const { login: loginAdmin } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [reveal, setReveal] = useState(false);
@@ -19,19 +25,17 @@ const AuthPage: React.FC = () => {
 
   // Form State
   const [formData, setFormData] = useState({
+    fullName: '',
     email: '',
+    phone: '',
     password: '',
+    agreeTerms: true,
   });
 
   useEffect(() => {
-    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
-    const timer = window.setTimeout(() => setReveal(true), isMobile ? 350 : 1500);
+    const timer = window.setTimeout(() => setReveal(true), 2850);
     return () => window.clearTimeout(timer);
   }, []);
-
-  const handleSceneClick = () => {
-    if (!reveal) setReveal(true);
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -56,6 +60,50 @@ const AuthPage: React.FC = () => {
     if (!emailTrimmed || !formData.password.trim()) {
       setError('Please enter your email and password.');
       setLoading(false);
+      return;
+    }
+
+    if (isSignup) {
+      if (!formData.fullName.trim()) {
+        setError('Please enter your full name.');
+        setLoading(false);
+        return;
+      }
+      if (formData.password.length < 6) {
+        setError('Password must be at least 6 characters.');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const nameParts = formData.fullName.trim().split(' ');
+        const firstName = nameParts[0];
+        const lastName = nameParts.slice(1).join(' ') || '';
+
+        const res = await registerCandidate({
+          firstName,
+          lastName,
+          email: emailTrimmed,
+          password: formData.password,
+          phone: formData.phone.trim(),
+        });
+
+        if (res.success) {
+          toast.success('Account created successfully!');
+          if (redirectUrl) {
+            navigate(redirectUrl);
+          } else {
+            navigate('/my-applications');
+          }
+        } else {
+          setError(res.error || 'Failed to create account. Please try again.');
+        }
+      } catch (err: any) {
+        const msg = err.response?.data?.message || 'Failed to create account. Please try again.';
+        setError(msg);
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 
@@ -85,16 +133,6 @@ const AuthPage: React.FC = () => {
           } else {
             window.location.href = '/my-applications';
           }
-        } else if (role === 'HR') {
-          localStorage.setItem('token', data.token);
-          localStorage.setItem('user', JSON.stringify(data.user));
-          toast.success(`Welcome back, ${data.user?.name || 'HR Specialist'}!`);
-          window.location.href = '/hr/dashboard';
-        } else if (role === 'HR_MANAGER') {
-          localStorage.setItem('token', data.token);
-          localStorage.setItem('user', JSON.stringify(data.user));
-          toast.success(`Welcome back, ${data.user?.name || 'HR Manager'}!`);
-          window.location.href = '/hr-manager/dashboard';
         } else {
           // Admin / Recruiter
           localStorage.setItem('token', data.token);
@@ -125,10 +163,7 @@ const AuthPage: React.FC = () => {
   };
 
   return (
-    <div
-      className={`auth-scene auth-signin ${reveal ? 'auth-revealed' : ''}`}
-      onClick={handleSceneClick}
-    >
+    <div className={`auth-scene ${isSignup ? 'auth-signup' : 'auth-signin'} ${reveal ? 'auth-revealed' : ''}`}>
       <div className="auth-stars" aria-hidden="true" />
       <div className="auth-haze" aria-hidden="true" />
 
@@ -189,7 +224,7 @@ const AuthPage: React.FC = () => {
         <div className="auth-card-glow" />
         <div className="auth-card">
           <div className="auth-card-top">
-            <span className="auth-mini-label">MEMBER ACCESS</span>
+            <span className="auth-mini-label">{isSignup ? 'CREATE PROFILE' : 'MEMBER ACCESS'}</span>
             <button type="button" className="auth-close" onClick={goBack} aria-label="Go back">
               ×
             </button>
@@ -197,11 +232,25 @@ const AuthPage: React.FC = () => {
 
           <div className="auth-card-heading">
             <h2>
-              Welcome
-              <br />
-              <span>back.</span>
+              {isSignup ? (
+                <>
+                  Create your
+                  <br />
+                  <span>Adyapan account.</span>
+                </>
+              ) : (
+                <>
+                  Welcome
+                  <br />
+                  <span>back.</span>
+                </>
+              )}
             </h2>
-            <p>Sign in to continue your journey.</p>
+            <p>
+              {isSignup
+                ? 'Your next opportunity is closer than you think.'
+                : 'Sign in to continue your journey.'}
+            </p>
           </div>
 
           {error && (
@@ -212,6 +261,20 @@ const AuthPage: React.FC = () => {
           )}
 
           <form onSubmit={handleSubmit}>
+            {isSignup && (
+              <label>
+                FULL NAME
+                <input
+                  required
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  placeholder="Your full name"
+                  disabled={loading}
+                />
+              </label>
+            )}
+
             <label>
               EMAIL ADDRESS
               <input
@@ -224,6 +287,20 @@ const AuthPage: React.FC = () => {
                 disabled={loading}
               />
             </label>
+
+            {isSignup && (
+              <label>
+                PHONE NUMBER
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder="+91 98765 43210 (Optional)"
+                  disabled={loading}
+                />
+              </label>
+            )}
 
             <label>
               PASSWORD
@@ -243,25 +320,57 @@ const AuthPage: React.FC = () => {
               </div>
             </label>
 
-            <div className="auth-form-row">
+            {!isSignup && (
+              <div className="auth-form-row">
+                <label className="auth-check">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                  />
+                  <span>Remember me</span>
+                </label>
+                <a href="mailto:support@adyapan.com?subject=Password%20Reset%20Request" className="auth-forgot">
+                  Forgot password?
+                </a>
+              </div>
+            )}
+
+            {isSignup && (
               <label className="auth-check">
                 <input
                   type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
+                  required
+                  checked={formData.agreeTerms}
+                  onChange={(e) => setFormData({ ...formData, agreeTerms: e.target.checked })}
                 />
-                <span>Remember me</span>
+                <span>I agree to the terms and privacy policy.</span>
               </label>
-              <a href="mailto:support@adyapan.com?subject=Password%20Reset%20Request" className="auth-forgot">
-                Forgot password?
-              </a>
-            </div>
+            )}
 
             <button className="auth-submit" type="submit" disabled={loading}>
-              <span>{loading ? 'Signing in...' : 'Sign in'}</span>
+              <span>{loading ? 'Processing...' : isSignup ? 'Create account' : 'Sign in'}</span>
               <ArrowRight size={17} />
             </button>
           </form>
+
+          <div className="auth-switch-dark">
+            {isSignup ? (
+              <>
+                Already have an account?{' '}
+                <Link to={redirectUrl ? `/auth?mode=signin&redirect=${encodeURIComponent(redirectUrl)}` : '/auth?mode=signin'}>
+                  Sign in
+                </Link>
+              </>
+            ) : (
+              <>
+                New here?{' '}
+                <Link to={redirectUrl ? `/auth?mode=signup&redirect=${encodeURIComponent(redirectUrl)}` : '/auth?mode=signup'}>
+                  Create an account
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

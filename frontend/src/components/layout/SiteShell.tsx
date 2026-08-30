@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
+  ArrowRight,
   Briefcase,
   Home,
   Info,
+  LogOut,
   Menu,
   Moon,
   Phone,
   Sparkles,
   Sun,
+  User,
   X,
 } from 'lucide-react';
 import logo from '../../assets/adyapan-logo.png';
 import { useTheme } from '../../context/ThemeContext';
+import { useCandidateAuth } from '../../context/CandidateAuthContext';
 import Footer from './Footer';
 
 interface SiteShellProps {
@@ -31,11 +35,12 @@ export const SiteShell: React.FC<SiteShellProps> = ({ children }) => {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const { candidate, logout } = useCandidateAuth();
   const location = useLocation();
 
   const isDark = theme === 'dark';
 
-  // Handle scroll detection for sticky navbar background & shadow elevation
+  // Handle scroll detection for sticky navbar background & subtle shadow
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 15) {
@@ -55,9 +60,13 @@ export const SiteShell: React.FC<SiteShellProps> = ({ children }) => {
 
   return (
     <div className={`h-app ${isDark ? 'theme-dark' : ''}`}>
-      {/* ── CLEAN EXECUTIVE SOLID STICKY NAVBAR (ALWAYS OPAQUE BLACK ON SCROLL) ── */}
+      {/* ── CLEAN EXECUTIVE FIXED NAVBAR (SLIGHTLY BLACK / OBSIDIAN) ── */}
       <header
-        className="sticky top-0 z-[100] w-full bg-[#181716] dark:bg-[#121110] border-b border-stone-800 shadow-md py-3.5 transition-all duration-300"
+        className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+          scrolled
+            ? 'bg-[#181716]/95 dark:bg-[#121110]/95 backdrop-blur-md shadow-md border-b border-stone-800/90 py-3.5'
+            : 'bg-[#181716]/90 dark:bg-[#121110]/90 backdrop-blur-sm border-b border-stone-800/70 py-4'
+        }`}
       >
         <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           {/* Brand Logo & Name */}
@@ -103,7 +112,7 @@ export const SiteShell: React.FC<SiteShellProps> = ({ children }) => {
 
           {/* Right Action Buttons */}
           <div className="flex items-center gap-3">
-            {/* Theme Toggle Button with "Apply Theme" Label */}
+            {/* Theme Toggle Button */}
             <button
               onClick={toggleTheme}
               className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold text-stone-200 bg-stone-800/90 hover:bg-stone-700/90 hover:text-amber-400 border border-stone-700/70 hover:border-amber-500/40 transition-all cursor-pointer shadow-xs active:scale-95"
@@ -111,8 +120,32 @@ export const SiteShell: React.FC<SiteShellProps> = ({ children }) => {
               title={isDark ? 'Light Mode' : 'Dark Mode'}
             >
               {isDark ? <Sun size={15} className="text-amber-400" /> : <Moon size={15} className="text-amber-400" />}
-              <span>Apply Theme</span>
+              <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
             </button>
+
+            {/* Candidate Logged-In Badge (Only if already authenticated) */}
+            {candidate && (
+              <div className="hidden sm:flex items-center gap-2">
+                <Link
+                  to="/my-applications"
+                  className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25 transition-all flex items-center gap-1.5"
+                  title="View My Applications"
+                >
+                  <User size={14} className="text-amber-400" />
+                  <span className="truncate max-w-[120px] text-stone-200">
+                    {candidate.firstName || 'Candidate'}
+                  </span>
+                </Link>
+                <button
+                  onClick={logout}
+                  className="p-2 text-stone-400 hover:text-rose-400 transition-colors"
+                  title="Logout"
+                  aria-label="Logout"
+                >
+                  <LogOut size={16} />
+                </button>
+              </div>
+            )}
 
             {/* Mobile Menu Button */}
             <button
@@ -127,7 +160,7 @@ export const SiteShell: React.FC<SiteShellProps> = ({ children }) => {
 
         {/* ── MOBILE SLIDE-DOWN DRAWER ── */}
         {open && (
-          <div className="md:hidden border-t border-stone-800 bg-[#181716] dark:bg-[#121110] px-4 py-5 animate-fadeIn">
+          <div className="md:hidden border-t border-stone-800 bg-[#181716]/98 dark:bg-[#121110]/98 backdrop-blur-xl px-4 py-5 animate-fadeIn">
             <div className="flex flex-col space-y-1">
               {navItems.map(({ path, label, icon: Icon }) => {
                 const isActive =
@@ -154,24 +187,46 @@ export const SiteShell: React.FC<SiteShellProps> = ({ children }) => {
               })}
             </div>
 
-            {/* Mobile Theme Toggle */}
-            <div className="mt-4 pt-4 border-t border-stone-800 flex items-center justify-between">
-              <button
-                onClick={toggleTheme}
-                className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold text-stone-200 bg-stone-800 border border-stone-700/60 hover:text-amber-400"
-              >
-                {isDark ? <Sun size={16} className="text-amber-400" /> : <Moon size={16} className="text-amber-400" />}
-                <span>Apply Theme</span>
-              </button>
-            </div>
+            {/* Mobile Theme Toggle & Authenticated Candidate Actions */}
+            <div className="mt-4 pt-4 border-t border-stone-800 space-y-3">
+              {candidate && (
+                <div className="space-y-2">
+                  <Link
+                    to="/my-applications"
+                    onClick={() => setOpen(false)}
+                    className="w-full py-2.5 px-4 rounded-xl text-xs font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center justify-center gap-2"
+                  >
+                    <User size={15} />
+                    <span>My Applications ({candidate.firstName})</span>
+                  </Link>
+                  <button
+                    onClick={() => {
+                    logout();
+                    setOpen(false);
+                  }}
+                  className="w-full py-2 text-xs font-bold text-rose-400 hover:bg-rose-500/10 rounded-xl"
+                >
+                  Log Out
+                </button>
+              </div>
+            )}
+
+            <button
+              onClick={toggleTheme}
+              className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold text-stone-200 bg-stone-800 border border-stone-700/60 hover:text-amber-400"
+            >
+              {isDark ? <Sun size={16} className="text-amber-400" /> : <Moon size={16} className="text-amber-400" />}
+              <span>{isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}</span>
+            </button>
           </div>
-        )}
+        </div>
+      )}
       </header>
 
       {/* ── MAIN CONTENT ── */}
       {children}
 
-      {/* ── FOOTER ── */}
+      {/* ── FOOTER (EXACT HARSHITHA DESIGN) ── */}
       <Footer />
     </div>
   );

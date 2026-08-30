@@ -123,7 +123,7 @@ const testimonials = [
     featured: false,
     quote:
       'The work environment at the Hyderabad office is super supportive and energetic. Management genuinely values freshers, providing 1-on-1 counseling training with zero toxic pressure and high uncapped weekly incentives.',
-    name: 'Gaurav Kumar',
+    name: 'Ritesh',
     role: 'Senior Academic Counselor',
     growth: '₹45K+ Monthly Incentives',
   },
@@ -131,7 +131,7 @@ const testimonials = [
     featured: false,
     quote:
       'Hands-on learning with direct access to founders. Every target achieved is celebrated with Friday team games, cricket matches, and instant rewards. Best culture for anyone wanting fast corporate sales and leadership exposure.',
-    name: 'Harry',
+    name: 'Rishu',
     role: 'Business Development Specialist',
     growth: 'Top Performer Award',
   },
@@ -194,6 +194,537 @@ const PHOTO_STORIES = [
   },
 ];
 
+// ─── 3D TILT CARD COMPONENT ───────────────────────────────────────────────
+const TiltCard: React.FC<{
+  children: React.ReactNode;
+  className?: string;
+  maxTilt?: number;
+  glowColor?: string;
+}> = ({ children, className = '', maxTilt = 8, glowColor = 'rgba(245, 158, 11, 0.22)' }) => {
+  const [rotX, setRotX] = useState(0);
+  const [rotY, setRotY] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rX = ((y - centerY) / centerY) * -maxTilt;
+    const rY = ((x - centerX) / centerX) * maxTilt;
+
+    setRotX(rX);
+    setRotY(rY);
+  };
+
+  const handleMouseEnter = () => setIsHovered(true);
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setRotX(0);
+    setRotY(0);
+  };
+
+  return (
+    <div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className={`transition-all duration-200 ease-out ${className}`}
+      style={{
+        transform: isHovered
+          ? `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.02, 1.02, 1.02)`
+          : 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
+        transformStyle: 'preserve-3d',
+        boxShadow: isHovered ? `0 20px 40px -15px ${glowColor}` : undefined,
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+
+// ─── 3D SPATIAL KINETIC BACKGROUND CANVAS (HOME PAGE) ─────────────────────
+// Features: 3D Cyber Grid, Real 3D Wireframe Polyhedra, Particle Constellations, Laser Filaments & Mouse Parallax
+const HomeSpatial3DBackground: React.FC = () => {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animId: number;
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
+    const handleResize = () => {
+      if (!canvas) return;
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', handleResize);
+
+    // Mouse coordinates & smooth interpolation
+    let mouse = { x: width / 2, y: height / 2, active: false, targetX: width / 2, targetY: height / 2 };
+    const handleMouseMove = (e: MouseEvent) => {
+      mouse.targetX = e.clientX;
+      mouse.targetY = e.clientY;
+      mouse.active = true;
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+
+    // Click wave energy bursts
+    interface BurstParticle {
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      life: number;
+      maxLife: number;
+      size: number;
+      hue: number;
+    }
+    const burstParticles: BurstParticle[] = [];
+
+    const handleClick = (e: MouseEvent) => {
+      for (let i = 0; i < 28; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 2.0 + Math.random() * 5.0;
+        burstParticles.push({
+          x: e.clientX,
+          y: e.clientY,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: 0,
+          maxLife: 45 + Math.random() * 30,
+          size: 2.5 + Math.random() * 3.5,
+          hue: 35 + Math.random() * 30,
+        });
+      }
+    };
+    window.addEventListener('click', handleClick);
+
+    // 3D Particles in XYZ space
+    const particleCount = 85;
+    const particles = Array.from({ length: particleCount }, () => ({
+      x: (Math.random() - 0.5) * width * 1.5,
+      y: (Math.random() - 0.5) * height * 1.5,
+      z: -350 + Math.random() * 700,
+      vx: (Math.random() - 0.5) * 0.7,
+      vy: (Math.random() - 0.5) * 0.7,
+      vz: (Math.random() - 0.5) * 0.9,
+      baseRadius: 2.5 + Math.random() * 2.5,
+      hue: 35 + Math.random() * 30,
+    }));
+
+    // 6 Floating 3D Geometric Polyhedra
+    interface Polyhedron3D {
+      x: number;
+      y: number;
+      z: number;
+      size: number;
+      rotX: number;
+      rotY: number;
+      rotZ: number;
+      speedRotX: number;
+      speedRotY: number;
+      speedRotZ: number;
+      type: 'octahedron' | 'icosahedron' | 'cube' | 'gimbal' | 'dodecahedron';
+      color: string;
+    }
+
+    const polyhedra: Polyhedron3D[] = [
+      {
+        x: width * 0.12,
+        y: height * 0.22,
+        z: 0,
+        size: 58,
+        rotX: 0,
+        rotY: 0,
+        rotZ: 0,
+        speedRotX: 0.009,
+        speedRotY: 0.014,
+        speedRotZ: 0.006,
+        type: 'octahedron',
+        color: '#f59e0b',
+      },
+      {
+        x: width * 0.88,
+        y: height * 0.28,
+        z: 50,
+        size: 68,
+        rotX: 0.5,
+        rotY: 0.2,
+        rotZ: 0,
+        speedRotX: 0.007,
+        speedRotY: -0.012,
+        speedRotZ: 0.008,
+        type: 'gimbal',
+        color: '#ea580c',
+      },
+      {
+        x: width * 0.16,
+        y: height * 0.75,
+        z: -40,
+        size: 52,
+        rotX: 1,
+        rotY: 0.8,
+        rotZ: 0,
+        speedRotX: -0.01,
+        speedRotY: 0.008,
+        speedRotZ: 0.005,
+        type: 'cube',
+        color: '#fbbf24',
+      },
+      {
+        x: width * 0.82,
+        y: height * 0.78,
+        z: -20,
+        size: 60,
+        rotX: 0.2,
+        rotY: 1.2,
+        rotZ: 0.4,
+        speedRotX: 0.008,
+        speedRotY: 0.01,
+        speedRotZ: -0.007,
+        type: 'icosahedron',
+        color: '#f97316',
+      },
+      {
+        x: width * 0.5,
+        y: height * 0.15,
+        z: -80,
+        size: 45,
+        rotX: 0.4,
+        rotY: 0.4,
+        rotZ: 0.1,
+        speedRotX: 0.006,
+        speedRotY: 0.009,
+        speedRotZ: 0.011,
+        type: 'octahedron',
+        color: '#eab308',
+      },
+    ];
+
+    // Helper: 3D point rotation in XYZ
+    const rotate3D = (
+      x: number,
+      y: number,
+      z: number,
+      rx: number,
+      ry: number,
+      rz: number
+    ): [number, number, number] => {
+      let y1 = y * Math.cos(rx) - z * Math.sin(rx);
+      let z1 = y * Math.sin(rx) + z * Math.cos(rx);
+      let x1 = x;
+
+      let x2 = x1 * Math.cos(ry) + z1 * Math.sin(ry);
+      let z2 = -x1 * Math.sin(ry) + z1 * Math.cos(ry);
+      let y2 = y1;
+
+      let x3 = x2 * Math.cos(rz) - y2 * Math.sin(rz);
+      let y3 = x2 * Math.sin(rz) + y2 * Math.cos(rz);
+      let z3 = z2;
+
+      return [x3, y3, z3];
+    };
+
+    // Helper: Project 3D to 2D
+    const fov = 420;
+    const project = (
+      x: number,
+      y: number,
+      z: number,
+      centerX: number,
+      centerY: number
+    ): [number, number, number] => {
+      const scale = fov / (fov + z);
+      return [x * scale + centerX, y * scale + centerY, scale];
+    };
+
+    // Polyhedron Models (Normalized vertices)
+    const octahedronVertices = [
+      [0, -1, 0], [1, 0, 0], [0, 0, 1], [-1, 0, 0], [0, 0, -1], [0, 1, 0],
+    ];
+    const octahedronEdges = [
+      [0, 1], [0, 2], [0, 3], [0, 4],
+      [5, 1], [5, 2], [5, 3], [5, 4],
+      [1, 2], [2, 3], [3, 4], [4, 1],
+    ];
+
+    const cubeVertices = [
+      [-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],
+      [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1],
+    ];
+    const cubeEdges = [
+      [0, 1], [1, 2], [2, 3], [3, 0],
+      [4, 5], [5, 6], [6, 7], [7, 4],
+      [0, 4], [1, 5], [2, 6], [3, 7],
+    ];
+
+    const phi = (1 + Math.sqrt(5)) / 2;
+    const icosahedronVertices = [
+      [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
+      [0, -1, phi], [0, 1, phi], [0, -1, -phi], [0, 1, -phi],
+      [phi, 0, -1], [phi, 0, 1], [-phi, 0, -1], [-phi, 0, 1],
+    ].map(([x, y, z]) => [x / phi, y / phi, z / phi]);
+
+    const icosahedronEdges = [
+      [0, 11], [0, 5], [0, 1], [0, 7], [0, 10],
+      [1, 5], [5, 11], [11, 10], [10, 7], [7, 1],
+      [3, 9], [3, 4], [3, 2], [3, 6], [3, 8],
+      [9, 4], [4, 2], [2, 6], [6, 8], [8, 9],
+      [4, 5], [5, 9], [9, 1], [1, 8], [8, 7],
+      [7, 6], [6, 10], [10, 2], [2, 11], [11, 4],
+    ];
+
+    // Main animation loop
+    let tick = 0;
+    const render = () => {
+      ctx.clearRect(0, 0, width, height);
+      tick++;
+
+      // Smooth mouse follow
+      mouse.x += (mouse.targetX - mouse.x) * 0.05;
+      mouse.y += (mouse.targetY - mouse.y) * 0.05;
+
+      const isDark = document.documentElement.classList.contains('dark');
+      const centerX = width / 2;
+      const centerY = height / 2;
+
+      // ── 1. RENDER 3D CYBER PERSPECTIVE GRID AT HORIZON ──
+      const gridZStart = 80;
+      const gridZEnd = 450;
+      const gridStep = 45;
+      const gridTime = (tick * 0.8) % gridStep;
+
+      ctx.lineWidth = 1.0;
+      // Longitudinal grid lines
+      for (let x = -width * 0.7; x <= width * 0.7; x += 90) {
+        const [x1, y1] = project(x, height * 0.38, gridZStart, centerX, centerY);
+        const [x2, y2] = project(x, height * 0.38, gridZEnd, centerX, centerY);
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = isDark ? 'rgba(245, 158, 11, 0.12)' : 'rgba(217, 119, 6, 0.18)';
+        ctx.stroke();
+      }
+
+      // Latitudinal grid lines (moving toward screen)
+      for (let z = gridZStart; z <= gridZEnd; z += gridStep) {
+        const currentZ = z - gridTime;
+        if (currentZ < gridZStart) continue;
+        const [x1, y1] = project(-width * 0.7, height * 0.38, currentZ, centerX, centerY);
+        const [x2, y2] = project(width * 0.7, height * 0.38, currentZ, centerX, centerY);
+        const alpha = Math.max(0, (1 - (currentZ - gridZStart) / (gridZEnd - gridZStart)) * (isDark ? 0.15 : 0.22));
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = `rgba(245, 158, 11, ${alpha})`;
+        ctx.stroke();
+      }
+
+      // ── 2. RENDER 3D FLOATING POLYHEDRA ──
+      polyhedra.forEach((p) => {
+        p.rotX += p.speedRotX;
+        p.rotY += p.speedRotY;
+        p.rotZ += p.speedRotZ;
+
+        // Subtle floating bob
+        const currentY = p.y + Math.sin(tick * 0.025 + p.x) * 15;
+
+        if (p.type === 'gimbal') {
+          const rings = [
+            { r: p.size, rx: p.rotX, ry: p.rotY, rz: 0, color: p.color },
+            { r: p.size * 0.75, rx: 0, ry: p.rotY * 1.5, rz: p.rotZ, color: '#f59e0b' },
+            { r: p.size * 0.5, rx: p.rotX * 1.8, ry: 0, rz: p.rotZ * 1.2, color: '#fbbf24' },
+          ];
+
+          rings.forEach((ring) => {
+            ctx.beginPath();
+            const segments = 28;
+            for (let i = 0; i <= segments; i++) {
+              const theta = (i / segments) * Math.PI * 2;
+              const [rx, ry, rz] = rotate3D(
+                Math.cos(theta) * ring.r,
+                Math.sin(theta) * ring.r,
+                0,
+                ring.rx,
+                ring.ry,
+                ring.rz
+              );
+              const [px, py] = project(rx, ry, rz + p.z, p.x, currentY);
+              if (i === 0) ctx.moveTo(px, py);
+              else ctx.lineTo(px, py);
+            }
+            ctx.strokeStyle = ring.color;
+            ctx.globalAlpha = isDark ? 0.45 : 0.6;
+            ctx.lineWidth = 1.8;
+            ctx.stroke();
+          });
+        } else {
+          let vertices = octahedronVertices;
+          let edges = octahedronEdges;
+
+          if (p.type === 'cube') {
+            vertices = cubeVertices;
+            edges = cubeEdges;
+          } else if (p.type === 'icosahedron') {
+            vertices = icosahedronVertices;
+            edges = icosahedronEdges;
+          }
+
+          const projected = vertices.map((v) => {
+            const [rx, ry, rz] = rotate3D(
+              v[0] * p.size,
+              v[1] * p.size,
+              v[2] * p.size,
+              p.rotX,
+              p.rotY,
+              p.rotZ
+            );
+            return project(rx, ry, rz + p.z, p.x, currentY);
+          });
+
+          ctx.beginPath();
+          edges.forEach(([i1, i2]) => {
+            const p1 = projected[i1];
+            const p2 = projected[i2];
+            ctx.moveTo(p1[0], p1[1]);
+            ctx.lineTo(p2[0], p2[1]);
+          });
+          ctx.strokeStyle = p.color;
+          ctx.globalAlpha = isDark ? 0.5 : 0.7;
+          ctx.lineWidth = 1.6;
+          ctx.stroke();
+
+          projected.forEach(([px, py, scale]) => {
+            ctx.beginPath();
+            ctx.arc(px, py, Math.max(1.5, 3 * scale), 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = isDark ? 0.75 : 0.95;
+            ctx.fill();
+          });
+        }
+      });
+
+      // ── 3. RENDER 3D PARTICLE CONSTELLATION & LASER FILAMENTS ──
+      const projectedParticles = particles.map((pt) => {
+        pt.x += pt.vx;
+        pt.y += pt.vy;
+        pt.z += pt.vz;
+
+        if (pt.x < -width * 0.75) pt.x = width * 0.75;
+        if (pt.x > width * 0.75) pt.x = -width * 0.75;
+        if (pt.y < -height * 0.75) pt.y = height * 0.75;
+        if (pt.y > height * 0.75) pt.y = -height * 0.75;
+        if (pt.z < -350) pt.z = 350;
+        if (pt.z > 350) pt.z = -350;
+
+        if (mouse.active) {
+          const dx = mouse.x - (pt.x + centerX);
+          const dy = mouse.y - (pt.y + centerY);
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 200 && dist > 1) {
+            const force = ((200 - dist) / 200) * 0.5;
+            pt.x += (dx / dist) * force;
+            pt.y += (dy / dist) * force;
+          }
+        }
+
+        const [projX, projY, scale] = project(pt.x, pt.y, pt.z, centerX, centerY);
+        return { ...pt, projX, projY, scale };
+      });
+
+      // Draw Laser Filaments
+      for (let i = 0; i < projectedParticles.length; i++) {
+        for (let j = i + 1; j < projectedParticles.length; j++) {
+          const p1 = projectedParticles[i];
+          const p2 = projectedParticles[j];
+
+          const dx = p1.projX - p2.projX;
+          const dy = p1.projY - p2.projY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 120) {
+            const alpha = (1 - dist / 120) * 0.35 * (p1.scale * p2.scale);
+            ctx.beginPath();
+            ctx.moveTo(p1.projX, p1.projY);
+            ctx.lineTo(p2.projX, p2.projY);
+            ctx.strokeStyle = `hsla(${p1.hue}, 95%, 55%, ${alpha})`;
+            ctx.lineWidth = 1.0;
+            ctx.stroke();
+          }
+        }
+      }
+
+      projectedParticles.forEach((p) => {
+        const radius = Math.max(1.2, p.baseRadius * p.scale);
+        const alpha = Math.min(1, Math.max(0.2, ((p.z + 350) / 700) * 0.95));
+
+        ctx.beginPath();
+        ctx.arc(p.projX, p.projY, radius, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${p.hue}, 95%, 55%, ${alpha})`;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = `hsla(${p.hue}, 95%, 55%, 0.85)`;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+
+      // ── 4. RENDER CLICK BURST ENERGY PARTICLES ──
+      for (let i = burstParticles.length - 1; i >= 0; i--) {
+        const b = burstParticles[i];
+        b.x += b.vx;
+        b.y += b.vy;
+        b.vx *= 0.96;
+        b.vy *= 0.96;
+        b.life++;
+
+        const progress = b.life / b.maxLife;
+        if (progress >= 1) {
+          burstParticles.splice(i, 1);
+          continue;
+        }
+
+        const alpha = 1 - progress;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.size * (1 - progress * 0.5), 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${b.hue}, 100%, 60%, ${alpha})`;
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = `hsla(${b.hue}, 100%, 60%, 0.95)`;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      animId = requestAnimationFrame(render);
+    };
+
+    animId = requestAnimationFrame(render);
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('click', handleClick);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 pointer-events-none z-0 w-full h-full opacity-85 dark:opacity-65"
+      style={{ mixBlendMode: 'normal' }}
+    />
+  );
+};
+
 const Careers: React.FC = () => {
   const [faqOpen, setFaqOpen] = useState<number | null>(0);
   const [activeJourneyStep, setActiveJourneyStep] = useState<number>(0);
@@ -204,12 +735,15 @@ const Careers: React.FC = () => {
 
   return (
     <SiteShell>
-      <main className="overflow-x-hidden text-stone-900 dark:text-stone-100 selection:bg-amber-500 selection:text-white">
+      {/* 3D Spatial Kinetic Canvas Background */}
+      <HomeSpatial3DBackground />
+
+      <main className="relative z-10 overflow-x-hidden text-stone-900 dark:text-stone-100 selection:bg-amber-500 selection:text-white">
 
         {/* ══════════════════════════════════════════════════════════
             SECTION 01 — HERO (PROMINENT WORKPLACE BACKGROUND)
            ══════════════════════════════════════════════════════════ */}
-        <section className="relative pt-10 pb-20 md:pt-16 md:pb-28 overflow-hidden bg-[#fdfbf7] dark:bg-[#141312] border-b border-stone-200/70 dark:border-stone-800">
+        <section className="relative pt-10 pb-20 md:pt-16 md:pb-28 overflow-hidden bg-[#fdfbf7]/80 dark:bg-[#141312]/80 backdrop-blur-[1px] border-b border-stone-200/70 dark:border-stone-800">
 
           {/* Full-Cover Prominently Visible Background Image (Darker & High Contrast) */}
           <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none">
@@ -225,11 +759,11 @@ const Careers: React.FC = () => {
           </div>
 
           {/* Ambient Glowing Orbs */}
-          <div className="glow-orb top-[-100px] right-[-100px] w-[500px] h-[500px] bg-amber-500/20 dark:bg-amber-500/10 pointer-events-none" />
-          <div className="glow-orb bottom-[-80px] left-[-80px] w-[420px] h-[420px] bg-orange-500/15 dark:bg-orange-500/5 pointer-events-none" />
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-amber-500/20 dark:bg-amber-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
+          <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-orange-500/15 dark:bg-orange-500/5 rounded-full blur-3xl pointer-events-none -z-10" />
 
           {/* Large Watermark Typography */}
-          <div className="absolute right-4 top-1/3 watermark-text text-stone-900 dark:text-white pointer-events-none select-none opacity-20">
+          <div className="absolute right-4 top-1/3 text-stone-900/5 dark:text-white/5 font-black text-8xl md:text-9xl pointer-events-none select-none tracking-widest -z-10">
             CAREER
           </div>
 
@@ -375,65 +909,65 @@ const Careers: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             SECTION 02 — TRUST / STATS STRIP (FAST HIRING & FAST REPLY)
            ══════════════════════════════════════════════════════════ */}
-        <section className="relative z-20 -mt-6 sm:-mt-8 px-3 sm:px-6 lg:px-8 max-w-[1380px] mx-auto">
-          <div className="bg-white dark:bg-[#181715] rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 lg:p-8 border border-stone-200/80 dark:border-stone-800 shadow-2xl">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-0 lg:divide-x divide-stone-200/80 dark:divide-stone-800">
+        <section className="relative z-20 -mt-6 sm:-mt-8 px-4 sm:px-6 lg:px-8 max-w-[1380px] mx-auto">
+          <div className="bg-white dark:bg-[#181715] rounded-3xl p-6 sm:p-8 border border-stone-200/80 dark:border-stone-800 shadow-2xl">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-0 lg:divide-x divide-stone-200/80 dark:divide-stone-800">
 
               {/* Stat 1: 24h Fast Recruiter Reply */}
-              <div className="flex items-center gap-2.5 sm:gap-4 px-1.5 sm:px-4 lg:px-6 min-w-0">
-                <div className="w-9 h-9 sm:w-11 sm:h-11 lg:w-12 lg:h-12 rounded-xl sm:rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 shadow-xs">
-                  <Zap className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
+              <div className="flex items-center gap-4 px-2 sm:px-6">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
+                  <Zap size={22} />
                 </div>
-                <div className="min-w-0 flex-1">
-                  <b className="text-base sm:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-stone-900 dark:text-white block tracking-tight leading-none sm:leading-tight">
+                <div>
+                  <b className="text-2xl sm:text-4xl font-bold text-stone-900 dark:text-white block tracking-tight">
                     <AnimatedCounter end={24} suffix="h" />
                   </b>
-                  <span className="text-[10px] sm:text-[11px] lg:text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider block leading-tight mt-1 break-words">
+                  <span className="text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider">
                     Fast Recruiter Reply
                   </span>
                 </div>
               </div>
 
               {/* Stat 2: 48-72h Direct Interview */}
-              <div className="flex items-center gap-2.5 sm:gap-4 px-1.5 sm:px-4 lg:px-6 min-w-0">
-                <div className="w-9 h-9 sm:w-11 sm:h-11 lg:w-12 lg:h-12 rounded-xl sm:rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-xs">
-                  <Flame className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
+              <div className="flex items-center gap-4 px-2 sm:px-6">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
+                  <Flame size={22} />
                 </div>
-                <div className="min-w-0 flex-1">
-                  <b className="text-base sm:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-stone-900 dark:text-white block tracking-tight leading-none sm:leading-tight">
+                <div>
+                  <b className="text-2xl sm:text-4xl font-bold text-stone-900 dark:text-white block tracking-tight">
                     <AnimatedCounter end={48} suffix="-72h" />
                   </b>
-                  <span className="text-[10px] sm:text-[11px] lg:text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider block leading-tight mt-1 break-words">
+                  <span className="text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider">
                     Direct Interview Call
                   </span>
                 </div>
               </div>
 
               {/* Stat 3: 100% Transparent CTC */}
-              <div className="flex items-center gap-2.5 sm:gap-4 px-1.5 sm:px-4 lg:px-6 min-w-0">
-                <div className="w-9 h-9 sm:w-11 sm:h-11 lg:w-12 lg:h-12 rounded-xl sm:rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 shadow-xs">
-                  <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
+              <div className="flex items-center gap-4 px-2 sm:px-6">
+                <div className="w-12 h-12 rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center flex-shrink-0">
+                  <ShieldCheck size={22} />
                 </div>
-                <div className="min-w-0 flex-1">
-                  <b className="text-base sm:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-stone-900 dark:text-white block tracking-tight leading-none sm:leading-tight">
+                <div>
+                  <b className="text-2xl sm:text-4xl font-bold text-stone-900 dark:text-white block tracking-tight">
                     <AnimatedCounter end={100} suffix="%" />
                   </b>
-                  <span className="text-[10px] sm:text-[11px] lg:text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider block leading-tight mt-1 break-words">
+                  <span className="text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider">
                     Transparent CTC
                   </span>
                 </div>
               </div>
 
               {/* Stat 4: Zero Application Fee */}
-              <div className="flex items-center gap-2.5 sm:gap-4 px-1.5 sm:px-4 lg:px-6 min-w-0">
-                <div className="w-9 h-9 sm:w-11 sm:h-11 lg:w-12 lg:h-12 rounded-xl sm:rounded-2xl bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 shadow-xs">
-                  <IndianRupee className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
+              <div className="flex items-center gap-4 px-2 sm:px-6">
+                <div className="w-12 h-12 rounded-2xl bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center flex-shrink-0">
+                  <IndianRupee size={22} />
                 </div>
-                <div className="min-w-0 flex-1">
-                  <b className="text-base sm:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-stone-900 dark:text-white block tracking-tight leading-none sm:leading-tight">
+                <div>
+                  <b className="text-2xl sm:text-4xl font-bold text-stone-900 dark:text-white block tracking-tight">
                     ₹0 Fee
                   </b>
-                  <span className="text-[10px] sm:text-[11px] lg:text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider block leading-tight mt-1 break-words">
+                  <span className="text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider">
                     Zero Application Fee
                   </span>
                 </div>
@@ -446,9 +980,9 @@ const Careers: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             SECTION 03 — LIFE AT ADYAPAN / CULTURE (LAYERED COLLAGE)
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-24 bg-[#f7f3ec] dark:bg-[#121110] border-b border-stone-200/60 dark:border-stone-800 relative pattern-dots-subtle" id="culture">
+        <section className="py-24 bg-[#f7f3ec]/80 dark:bg-[#121110]/80 backdrop-blur-[1px] border-b border-stone-200/60 dark:border-stone-800 relative overflow-hidden" id="culture">
           {/* Watermark text */}
-          <div className="absolute left-6 top-1/4 watermark-text text-stone-900 dark:text-white">
+          <div className="absolute left-6 top-1/4 text-stone-900/5 dark:text-white/5 font-black text-8xl md:text-9xl pointer-events-none select-none tracking-widest -z-10">
             CULTURE
           </div>
 
@@ -598,8 +1132,8 @@ const Careers: React.FC = () => {
            ══════════════════════════════════════════════════════════ */}
         <section className="py-20 bg-[#121110] text-white relative overflow-hidden" id="team-fun">
           {/* Ambient colorful neon blobs */}
-          <div className="glow-orb top-0 left-1/4 w-[400px] h-[400px] bg-amber-500/10" />
-          <div className="glow-orb bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-500/10" />
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
 
           <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
@@ -675,8 +1209,8 @@ const Careers: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             SECTION 05 — CAREER GROWTH (TRUE BENTO GRID)
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-24 bg-[#faf6f0] dark:bg-[#141312] border-b border-stone-200/60 dark:border-stone-800 relative pattern-dots" id="growth">
-          <div className="absolute right-8 top-1/4 watermark-text text-stone-900 dark:text-white">
+        <section className="py-24 bg-[#faf6f0]/80 dark:bg-[#141312]/80 backdrop-blur-[1px] border-b border-stone-200/60 dark:border-stone-800 relative overflow-hidden" id="growth">
+          <div className="absolute right-8 top-1/4 text-stone-900/5 dark:text-white/5 font-black text-8xl md:text-9xl pointer-events-none select-none tracking-widest -z-10">
             GROWTH
           </div>
 
@@ -972,7 +1506,7 @@ const Careers: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             SECTION 06 — FLEXIBLE WORKING (FREEDOM & WELLBEING)
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-24 bg-white dark:bg-[#181715] border-b border-stone-200/60 dark:border-stone-800 relative" id="why-join">
+        <section className="py-24 bg-white/80 dark:bg-[#181715]/80 backdrop-blur-[1px] border-b border-stone-200/60 dark:border-stone-800 relative" id="why-join">
           <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
 
@@ -1066,8 +1600,8 @@ const Careers: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             SECTION 07 — DREAM JOB / OPPORTUNITY ECOSYSTEM
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-24 bg-[#faf6f0] dark:bg-[#121110] border-b border-stone-200/60 dark:border-stone-800 relative" id="dream-job">
-          <div className="absolute left-6 top-1/4 watermark-text text-stone-900 dark:text-white">
+        <section className="py-24 bg-[#faf6f0]/80 dark:bg-[#121110]/80 backdrop-blur-[1px] border-b border-stone-200/60 dark:border-stone-800 relative overflow-hidden" id="dream-job">
+          <div className="absolute left-6 top-1/4 text-stone-900/5 dark:text-white/5 font-black text-8xl md:text-9xl pointer-events-none select-none tracking-widest -z-10">
             OPPORTUNITY
           </div>
 
@@ -1164,8 +1698,8 @@ const Careers: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             SECTION 08 — CAREER JOURNEY (INTERACTIVE ANIMATED TIMELINE)
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-24 bg-white dark:bg-[#181715] border-b border-stone-200/60 dark:border-stone-800 relative" id="hiring-process">
-          <div className="absolute right-8 top-1/4 watermark-text text-stone-900 dark:text-white">
+        <section className="py-24 bg-white/80 dark:bg-[#181715]/80 backdrop-blur-[1px] border-b border-stone-200/60 dark:border-stone-800 relative overflow-hidden" id="hiring-process">
+          <div className="absolute right-8 top-1/4 text-stone-900/5 dark:text-white/5 font-black text-8xl md:text-9xl pointer-events-none select-none tracking-widest -z-10">
             JOURNEY
           </div>
 
@@ -1271,7 +1805,7 @@ const Careers: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             SECTION 09 — REAL PEOPLE / TESTIMONIALS (EDITORIAL PHYSICAL CARDS)
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-24 bg-[#f5f0e6] dark:bg-[#141312] border-b border-stone-200/60 dark:border-stone-800 relative" id="stories">
+        <section className="py-24 bg-[#f5f0e6]/80 dark:bg-[#141312]/80 backdrop-blur-[1px] border-b border-stone-200/60 dark:border-stone-800 relative" id="stories">
           <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
 
             <div className="mb-14" data-reveal="left">
@@ -1356,7 +1890,7 @@ const Careers: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             SECTION 09B — LEADERSHIP SPOTLIGHT & VISION (FOUNDER'S NOTE)
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-24 bg-white dark:bg-[#181715] border-b border-stone-200/60 dark:border-stone-800 relative overflow-hidden" id="leadership-vision">
+        <section className="py-24 bg-white/80 dark:bg-[#181715]/80 backdrop-blur-[1px] border-b border-stone-200/60 dark:border-stone-800 relative overflow-hidden" id="leadership-vision">
           {/* Subtle Ambient Glows */}
           <div className="absolute top-1/2 left-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none -translate-y-1/2" />
           <div className="absolute top-1/3 right-0 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -1489,7 +2023,7 @@ const Careers: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             SECTION 10 — LIFE AT ADYAPAN PHOTO STORY (EXPANDING ACCORDION)
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-24 bg-[#faf6f0] dark:bg-[#181715] border-b border-stone-200/60 dark:border-stone-800 overflow-hidden">
+        <section className="py-24 bg-[#faf6f0]/80 dark:bg-[#181715]/80 backdrop-blur-[1px] border-b border-stone-200/60 dark:border-stone-800 overflow-hidden">
           <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
 
             <div className="text-center max-w-2xl mx-auto mb-14" data-reveal="up">
@@ -1651,7 +2185,7 @@ const Careers: React.FC = () => {
         {/* ══════════════════════════════════════════════════════════
             SECTION 12 — FAQ (WIDE ACCORDION & CONTACT CARD)
            ══════════════════════════════════════════════════════════ */}
-        <section className="py-24 bg-[#faf7f2] dark:bg-[#121110] border-b border-stone-200/60 dark:border-stone-800" id="faq">
+        <section className="py-24 bg-[#faf7f2]/80 dark:bg-[#121110]/80 backdrop-blur-[1px] border-b border-stone-200/60 dark:border-stone-800" id="faq">
           <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
 
