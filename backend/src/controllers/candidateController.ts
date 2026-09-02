@@ -7,6 +7,7 @@ import { logger } from '../utils/logger.js';
 import { sendApplicationConfirmationEmail, sendRejectionEmail } from '../services/emailService.js';
 import { extractTextFromBuffer, parseResumeText, calculateAtsScore } from '../services/atsScoringEngine.js';
 import { notificationService } from '../services/notificationService.js';
+import { uploadToCloudinaryOrDisk } from '../middleware/uploadMiddleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -93,14 +94,12 @@ export const publicApplyCandidate = async (req, res) => {
     if (req.file) {
       // File uploaded via Multer - extract text and upload to Cloudinary/disk
       try {
-        const { extractTextFromBuffer } = await import('../services/atsScoringEngine.js');
         const fileBuffer = fs.readFileSync(req.file.path);
         extractedResumeText = await extractTextFromBuffer(fileBuffer, req.file.mimetype, req.file.originalname);
       } catch (err: any) {
         logger.warn('Text extraction from uploaded file warning:', err?.message || err);
       }
 
-      const { uploadToCloudinaryOrDisk } = await import('../middleware/uploadMiddleware.js');
       savedFileUrl = await uploadToCloudinaryOrDisk(req.file.path, req.file.filename);
     } else if (resumeDataUrl && typeof resumeDataUrl === 'string' && resumeDataUrl.startsWith('data:')) {
       // Base64 string - save to temp disk then upload to Cloudinary
@@ -120,13 +119,11 @@ export const publicApplyCandidate = async (req, res) => {
         fs.writeFileSync(filePath, fileBuffer);
 
         try {
-          const { extractTextFromBuffer } = await import('../services/atsScoringEngine.js');
           extractedResumeText = await extractTextFromBuffer(fileBuffer, 'application/pdf', originalName);
         } catch (err: any) {
           logger.warn('Text extraction from base64 resume warning:', err?.message || err);
         }
 
-        const { uploadToCloudinaryOrDisk } = await import('../middleware/uploadMiddleware.js');
         savedFileUrl = await uploadToCloudinaryOrDisk(filePath, filename);
       } catch (e) {
         logger.error('Resume upload error:', e);
@@ -302,30 +299,26 @@ export const publicApplyCandidate = async (req, res) => {
       }
     }
 
-    // Trigger Transactional Email Notification via Gmail SMTP
-    try {
-      await sendApplicationConfirmationEmail({
-        candidateName: `${candidate.firstName} ${candidate.lastName}`,
-        candidateEmail: candidate.email,
-        jobTitle: targetJob?.title || jobTitle || 'Business Development Associate',
-        aiScore: calculatedAiScore,
-      });
-    } catch (emailErr: any) {
+    // Non-blocking Transactional Email Notification via Brevo / Gmail (Runs in background)
+    sendApplicationConfirmationEmail({
+      candidateName: `${candidate.firstName} ${candidate.lastName}`,
+      candidateEmail: candidate.email,
+      jobTitle: targetJob?.title || jobTitle || 'Business Development Associate',
+      aiScore: calculatedAiScore,
+    }).catch((emailErr: any) => {
       logger.error('Application Confirmation Email Error:', emailErr?.message || emailErr);
-    }
+    });
 
-    // Save Real Notification in Database Activity Table
-    try {
-      await notificationService.createNotification({
-        type: 'NEW_CANDIDATE_APPLICATION',
-        title: 'New Applicant Received',
-        message: `${candidate.firstName} ${candidate.lastName} applied for ${targetJob?.title || jobTitle || 'Job Opening'} (AI Score: ${Math.round(calculatedAiScore)}%)`,
-        link: `/candidates/${candidate.id}`,
-        relatedJobId: targetJob?.id,
-      });
-    } catch (notifErr: any) {
+    // Non-blocking Activity Notification in Database (Runs in background)
+    notificationService.createNotification({
+      type: 'NEW_CANDIDATE_APPLICATION',
+      title: 'New Applicant Received',
+      message: `${candidate.firstName} ${candidate.lastName} applied for ${targetJob?.title || jobTitle || 'Job Opening'} (AI Score: ${Math.round(calculatedAiScore)}%)`,
+      link: `/candidates/${candidate.id}`,
+      relatedJobId: targetJob?.id,
+    }).catch((notifErr: any) => {
       logger.warn('Failed to record new applicant notification:', notifErr?.message || notifErr);
-    }
+    });
 
     // Generate candidate authentication token for instant dashboard access
     const candidateToken = jwt.sign(
