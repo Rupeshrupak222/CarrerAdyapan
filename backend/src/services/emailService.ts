@@ -123,9 +123,9 @@ const createTransporter = (method: 'gmail_service' | 'port_465' | 'port_587' = '
     return nodemailer.createTransport({
       service: 'gmail',
       auth: { user, pass },
-      connectionTimeout: 30000,
-      greetingTimeout: 30000,
-      socketTimeout: 45000,
+      connectionTimeout: 5000,
+      greetingTimeout: 5000,
+      socketTimeout: 8000,
     } as any);
   }
 
@@ -136,9 +136,9 @@ const createTransporter = (method: 'gmail_service' | 'port_465' | 'port_587' = '
       secure: true,
       auth: { user, pass },
       family: 4,
-      connectionTimeout: 30000,
-      greetingTimeout: 30000,
-      socketTimeout: 45000,
+      connectionTimeout: 5000,
+      greetingTimeout: 5000,
+      socketTimeout: 8000,
       tls: { rejectUnauthorized: false },
     } as any);
   }
@@ -150,9 +150,9 @@ const createTransporter = (method: 'gmail_service' | 'port_465' | 'port_587' = '
     requireTLS: true,
     auth: { user, pass },
     family: 4,
-    connectionTimeout: 30000,
-    greetingTimeout: 30000,
-    socketTimeout: 45000,
+    connectionTimeout: 5000,
+    greetingTimeout: 5000,
+    socketTimeout: 8000,
     tls: { rejectUnauthorized: false },
   } as any);
 };
@@ -180,6 +180,7 @@ const sendViaHttpsPort443 = async ({ to, subject, html, attachments = [] }: { to
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
+      signal: AbortSignal.timeout(5000),
       body: JSON.stringify({
         sender: { name: senderName, email: senderEmail },
         to: [{ email: to }],

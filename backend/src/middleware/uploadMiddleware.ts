@@ -77,13 +77,16 @@ export const upload = multer({
  * Upload Buffer or File to Cloudinary CDN (with local URL fallback)
  */
 export const uploadToCloudinaryOrDisk = async (filePath: string, filename: string): Promise<string> => {
+  const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
+  const localUrl = `/uploads/resumes/${filename}`;
   const cld = getCloudinaryClient();
+
   if (cld && fs.existsSync(filePath)) {
     try {
       const sanitizedPublicId = filename.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_');
       const isPdf = filename.toLowerCase().endsWith('.pdf');
       
-      const result = await cld.uploader.upload(filePath, {
+      const uploadPromise = cld.uploader.upload(filePath, {
         folder: 'adyapan_resumes',
         resource_type: isPdf ? 'auto' : 'auto',
         public_id: sanitizedPublicId,
@@ -91,15 +94,17 @@ export const uploadToCloudinaryOrDisk = async (filePath: string, filename: strin
         use_filename: true,
       });
 
+      const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 2500));
+      const result: any = await Promise.race([uploadPromise, timeoutPromise]);
+
       if (result && result.secure_url) {
         console.log(`[Cloudinary] Successfully uploaded ${filename} -> ${result.secure_url}`);
         return result.secure_url;
       }
     } catch (err: any) {
-      console.warn('[Cloudinary] Upload failed, falling back to local disk URL:', err?.message || err);
+      console.warn('[Cloudinary] Upload failed or timed out, falling back to local disk URL:', err?.message || err);
     }
   }
 
-  const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
-  return `${backendUrl}/uploads/resumes/${filename}`;
+  return localUrl;
 };

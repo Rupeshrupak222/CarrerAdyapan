@@ -360,7 +360,7 @@ export const ApplyJob: React.FC = () => {
     const aiAnalysis = calculateRealAIScore(formData.skills, submissionData.experience, jobTitle);
 
     try {
-      setTimeout(() => setSubmitStage(2), 700);
+      setTimeout(() => setSubmitStage(2), 250);
 
       saveCandidateApplication(submissionData, jobTitle);
 
@@ -391,7 +391,7 @@ export const ApplyJob: React.FC = () => {
       formPayload.append('aiScore', String(aiAnalysis.score));
       formPayload.append('matchReason', aiAnalysis.reason);
 
-      setTimeout(() => setSubmitStage(3), 1400);
+      setTimeout(() => setSubmitStage(3), 500);
 
       await candidateService.publicApply(formPayload);
 
